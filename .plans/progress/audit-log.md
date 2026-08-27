@@ -2,6 +2,14 @@
 
 This file records meaningful changes to the plan, implementation, testing, and documentation. Add new entries at the top of the log.
 
+## 2026-08-27 — Course pages, weekly content, and GitHub checkpoint
+
+- **Area:** Faculty and Student course pages, learning content, regression evidence, repository
+- **Changed:** Added full-width subject rows, collapsible weeks and cells, realistic lessons, external links, downloadable attachments, cell availability rules, prerequisites, complete week editing, and three-dot Edit/Remove menus. Members and Logs now use compact tables and subtabs. Exam editing now includes eligible sections and a Questions shortcut.
+- **Repository:** Initialized Git on `main`, included `.env` as requested, committed the full local project, and pushed commit `e4c0f0d` to `https://github.com/riellealia/hci-online-examination`.
+- **Verification:** Focused workspace and related suites pass. The full-suite audit is not green: `t_publish.js` has one stale assertion, `t_relationship_rules.js` has three stale assertions, and `t_m3.js` crashes after ten passing checks because it expects the previous always-visible reorder controls.
+- **Result:** Feature work is complete; regression-test reconciliation remains open. Earlier all-passing totals are superseded by this audit.
+
 ## 2026-08-26 — Removed redundant Next pills
 
 - **Area:** Student overview upcoming examinations

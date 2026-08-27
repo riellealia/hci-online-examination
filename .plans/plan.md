@@ -175,13 +175,13 @@ These are documentation and presentation deliverables, not additional website pa
 
 ## Final deliverables checklist
 
-- [ ] Requirements analysis for all four modules
-- [ ] Main and module-level flowcharts
-- [ ] ERD covering all implemented relationships
-- [ ] Admin, Faculty, and Student storyboards
-- [ ] Interface and control designs
-- [ ] Forms, validation states, and dialog-box designs
-- [ ] Module test cases and usability findings
+- [x] Requirements analysis for all four modules
+- [x] Main and module-level flowcharts
+- [x] ERD covering all implemented relationships
+- [x] Admin, Faculty, and Student storyboards
+- [x] Interface and control designs
+- [x] Forms, validation states, and dialog-box designs
+- [~] Module test cases and usability findings — test cases exist; representative usability sessions remain
 - [ ] Screenshots or prototype evidence for every completion criterion
 - [ ] Final project report
 
@@ -197,17 +197,20 @@ Already present:
 - CSV preview/import flows
 - Student exam access, submission, automatic MCQ scoring, and pending written-answer results
 
-Incomplete or requiring verification:
+Recently completed:
 
-- Correct HTML paths to the shared CSS, authentication script, logo, and background.
-- Replace page-level styling with shared components and role accent variables.
-- Apply the muted blue, teal, and green accents consistently.
-- Implement or verify question reordering and exam preview.
-- Add explicit exam targeting if it remains in scope.
-- Add answer review/navigation and duplicate-submission protection.
-- Verify access-window enforcement at exact start and end times.
-- Add consistent validation, empty, error, success, and confirmation states.
-- Complete the HCI diagrams, storyboards, designs, test evidence, and report.
+- Shared paths, authentication, assets, role accents, and reusable UI components
+- Question reordering, exam preview, section eligibility, answer review, and duplicate-submission protection
+- Exact access-window enforcement and separate attempt-duration timing
+- Validation, empty, saving, success, error, and designed confirmation states
+- Course pages with weekly content, links, attachments, locking, scheduling, and prerequisites
+- GitHub repository initialized and pushed to `origin/main`
+
+Still requiring verification or coursework:
+
+- Reconcile the five stale checks from the 2026-08-27 regression audit.
+- Conduct representative usability sessions and record findings.
+- Capture final screenshots and assemble the final report.
 
 ## Implementation rules
 

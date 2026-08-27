@@ -1,6 +1,6 @@
 # Completion Rate Dashboard
 
-Last reviewed: 2026-08-25 (rev. 39)
+Last reviewed: 2026-08-27 (rev. 40)
 
 ## Scoring method
 
@@ -10,10 +10,10 @@ Only the required project scope is included in the headline rate. Optional and f
 - Partial or unverified item: 0.5 point
 - Not started item: 0 points
 
-Implementation figures are now evidence-based rather than estimated: every item
-counted complete is exercised by the automated test suite recorded in
-`audit-log.md` (772 assertions, all passing, stored in `tests/`). Documentation and visual-design
-items remain judgement-based and are not claimed on automated evidence.
+Implementation figures use focused tests plus direct interface review. The former
+claim that 772 assertions were all passing is no longer current. The 2026-08-27
+audit found four stale assertions and one legacy suite crash following deliberate
+navigation, table, seed-data, and action-menu changes.
 
 ## Current completion
 
@@ -39,7 +39,9 @@ items remain judgement-based and are not claimed on automated evidence.
 Calculation: 68 complete points + 7 partial items at 0.5 point each = 71.5 weighted
 points out of 79 required checklist points, rounded to 91%.
 
-Previous review: 90%. The small-screen pass was the last outstanding code item in the required scope.
+The percentage is unchanged because recent work expands optional course-page
+behavior rather than adding a missing graded module. Verification confidence is
+temporarily partial until the five stale checks are reconciled.
 
 ## If the optional scope is included
 
@@ -71,7 +73,7 @@ graded.
 
 ## Supporting views
 
-- **Core implementation only:** 100% — 37 of 37 points. Every must-demonstrate behaviour across the four modules is implemented and verified by automated tests.
+- **Core implementation only:** 100% by feature checklist. Focused suites pass, but the complete regression suite currently needs maintenance in five checks.
 - **HCI documentation and final deliverables:** 76% — requirements, ERD, flowcharts, storyboards, interface/dialog designs, documented test cases, and a 772-assertion automated suite now exist. What remains genuinely cannot be produced from the code: usability findings from real participants, screenshots, and the assembled report.
 - **Shared visual/HCI polish:** 100% — one navigation model across all three roles, every save confirms itself, WCAG AA contrast throughout, and a completed small-screen pass.
 
@@ -87,7 +89,17 @@ What remains cannot be generated from the code:
 2. **Screenshots** (1 point) — capture each page from a browser. `docs/storyboards.md` names every frame worth capturing, in order.
 3. **The final report** (1 point) — the documents in `docs/` are its raw material; assembling and writing it is the remaining authorship.
 4. **Per-module report sections** (4 half-points) — narrative around the evidence already gathered.
-**There is no code left in the required scope.** Everything outstanding is coursework you must produce.
+The required feature scope is implemented. Remaining work includes coursework
+deliverables and regression-test reconciliation.
+
+## Latest verification status
+
+- Focused Faculty workspace, authoring, navigation, timing, grading, Student, UI,
+  and course-page suites pass.
+- `t_publish.js`: one outdated action-location assertion.
+- `t_relationship_rules.js`: three outdated Faculty-roster/tab assertions.
+- `t_m3.js`: crashes after ten passing reorder checks because it expects the old
+  always-visible reorder buttons.
 
 ## Update procedure
 

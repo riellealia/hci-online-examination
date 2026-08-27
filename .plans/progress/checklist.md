@@ -1,13 +1,13 @@
 # Project Completion Checklist
 
-Last reviewed: 2026-08-25
+Last reviewed: 2026-08-27
 
 Status key: `[x]` complete, `[~]` partial or needs verification, `[ ]` not started.
 
-Implementation items marked `[x]` below are backed by the automated browser-level
-test suite described in `audit-log.md` (302 assertions, all passing — see `tests/`). Items that
-depend on human judgement — visual design, usability findings, documentation —
-are not claimed complete on the basis of automated tests.
+Implementation items marked `[x]` are backed by focused browser-level tests and
+direct interface review. The 2026-08-27 complete-suite audit found four stale
+assertions and one legacy-suite crash after recent UI restructuring; see
+`audit-log.md`. Human usability findings are still not claimed from automation.
 
 ## Foundation and authentication
 
@@ -107,8 +107,8 @@ are not claimed complete on the basis of automated tests.
 - [x] CSV import preview flows
 - [x] Manual grading and remarks
 - [x] Grade and score history
-- [ ] Search, filtering, and sorting
-- [ ] Upcoming-work calendar and due-today reminders
+- [x] Search, filtering, sorting, grouping, direction controls, and continuous scrolling
+- [x] Upcoming-work list, grouped exam dates, live countdowns, and monthly calendar
 - [x] Exam-details screen with passing grade, item count, attempts, timing, and review rules
 - [x] Faculty-configurable one-question or all-questions layout
 - [~] Responsive Faculty authoring navigation: editor actions and mobile bottom bar implemented; wider general-exam side rail remains
@@ -130,10 +130,10 @@ are not claimed complete on the basis of automated tests.
 - [~] Faculty question-list search/type filtering, deep-copy duplication, and continuous totals complete; bulk and validation-state actions remain
 - [x] Publish review with draft-only Student hiding, question/grading/media validation, Student preview, impact summary, cancellation, and explicit confirmation
 - [~] Student resume prompt implemented; notification center and exam filters remain
-- [ ] Report-management and optional grading inspectors
+- [~] Question-report management is complete; the optional dedicated grading inspector remains
 - [ ] Results release, retake, reset, regrade, and export impact previews
 - [ ] Exam and question snapshots with version history
-- [~] Cross-role application audit log: global Admin view and scoped Faculty view — successful logins, Admin record changes, Faculty exam creation/updates, Student submissions, and took/did-not-take participation are in the Admin view; scoped Faculty view and further event coverage remain
+- [~] Cross-role application audit log: global Admin and subject-scoped Faculty table views are complete; retention and export policy remain
 - [ ] Personal Student attempt/activity history without administrative events
 - [ ] Audit filters, controlled event names, reasons, outcomes, retention, and export permissions
 - [ ] Extract inline page behavior into feature-based JavaScript modules
@@ -146,6 +146,24 @@ are not claimed complete on the basis of automated tests.
 - [ ] Document module responsibilities and dependency direction
 - [ ] Advanced analytics and exports
 - [ ] Full XLSX, DOCX, and PDF import
+
+## Course pages and weekly content
+
+- [x] Clickable Faculty and Student subject/course pages
+- [x] Full-width rows for professor, rules, schedule, weekly content, and exams
+- [x] Collapsible weeks and individual content cells
+- [x] Week editor for title, description, and contained learning cells
+- [x] Text/Markdown, heading, external-link, and downloadable-attachment cells
+- [x] Indefinite lock, scheduled opening, duration, and previous-cell prerequisite
+- [x] Locked Student cells expose only their title and lock state
+- [x] Three-dot week menu with labelled Edit and Remove actions
+- [x] Members and activity use compact tables and subtabs
+
+## Repository and verification
+
+- [x] Git repository initialized and complete project snapshot pushed to `origin/main`
+- [x] `.env` included as requested
+- [~] Reconcile the five stale automated checks identified on 2026-08-27
 
 ## Final deliverables
 

@@ -74,7 +74,7 @@ Keep these concepts separate:
 - [x] Show one question per page by default.
 - [x] Let Faculty choose **one question per page** or **all questions on one page**.
 - [x] Keep title, progress, save state, and timer visible.
-- [~] Provide **Previous**, **Next**, **Flag**, **Report**, and **Review/Submit** controls — question reporting is not implemented.
+- [x] Provide **Previous**, **Next**, **Flag**, **Report**, and **Review/Submit** controls.
 - [x] Preserve answers when navigating.
 - [x] Explain controls disabled by Faculty policy.
 
