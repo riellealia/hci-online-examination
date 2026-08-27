@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Online Examination System</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/shared-ui.css" />
+  <script src="../js/storage.js"></script>
+  <script src="../js/audit-service.js"></script>
+  <script src="../js/demo-data.js"></script>
+  <script src="../js/ui.js"></script>
+</head>
+
+<body class="login-bg">
+  <div class="overlay"></div>
+  
+  <div class="container login-container">
+    <div class="header">
+      <img src="../assets/logo.PNG" alt="NEU Logo" class="logo" />
+      <div>
+        <h1>NEW ERA UNIVERSITY</h1>
+        <h3>COLLEGE OF INFORMATION AND COMPUTER STUDIES</h3>
+      </div>
+    </div>
+    
+    <p id="loginRole" class="subtitle">Online Examination Login</p>
+    
+    <form id="loginForm">
+      <input id="username" type="text" placeholder="USERNAME / ID" required />
+      <input id="password" type="password" placeholder="PASSWORD" required />
+      <a id="roleLink" href="index.html" class="small-text">Not an admin? Click here</a>
+      <button type="submit" id="loginBtn" class="btn">LOG IN</button>
+    </form>
+
+    <!-- Announced to screen readers the moment it is filled in -->
+    <div id="authError" class="auth-error" role="alert" aria-live="assertive"></div>
+
+  </div>
+
+  <script>
+  // Seed sample data if empty
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let faculty = JSON.parse(localStorage.getItem("faculty")) || [];
+  let students = JSON.parse(localStorage.getItem("students")) || [];
+  let subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+  let subjectAssignments = JSON.parse(localStorage.getItem("subjectAssignments")) || [];
+  let allotments = JSON.parse(localStorage.getItem("allotments")) || [];
+  let exams = JSON.parse(localStorage.getItem("exams")) || [];
+  let questions = JSON.parse(localStorage.getItem("questions")) || [];
+  let sections = JSON.parse(localStorage.getItem("sections")) || [];
+  let sectionSubjects = JSON.parse(localStorage.getItem("sectionSubjects")) || [];
+  let studentEnrollments = JSON.parse(localStorage.getItem("studentEnrollments")) || [];
+
+  // Install the canonical dataset before any legacy empty-state fallback runs.
+  // This keeps IDs, sections, subjects, and relationships in one format.
+  if (typeof DemoData !== 'undefined') {
+    DemoData.install();
+    users = DB.read('users', users);
+    faculty = DB.read('faculty', faculty);
+    students = DB.read('students', students);
+    subjects = DB.read('subjects', subjects);
+    subjectAssignments = DB.read('subjectAssignments', subjectAssignments);
+    allotments = DB.read('allotments', allotments);
+    exams = DB.read('exams', exams);
+    questions = DB.read('questions', questions);
+    sections = DB.read('sections', sections);
+    sectionSubjects = DB.read('sectionSubjects', sectionSubjects);
+    studentEnrollments = DB.read('studentEnrollments', studentEnrollments);
+  }
+
+  if (!users.find(u => u.username === "admin")) {
+    users.push({ username: "admin", password: "admin123", role: "admin" });
+  }
+
+  // Seed sample faculty if none
+  if (faculty.length === 0) {
+    faculty = [
+      { id: "12-34567-890", last: "Reyes", first: "Maria" },
+      { id: "20-76543-210", last: "Santos", first: "Jose" },
+      { id: "17-67890-123", last: "Cruz", first: "Angela" },
+      { id: "15-89012-345", last: "Garcia", first: "Luis" },
+      { id: "23-45678-901", last: "Flores", first: "Elena" }
+    ];
+    localStorage.setItem("faculty", JSON.stringify(faculty));
+    faculty.forEach(f => {
+      const p = f.last.toLowerCase().replace(/\s+/g, '') + '0';
+      if (!users.find(u => u.username === f.id)) {
+        users.push({ username: f.id, password: p, role: "faculty" });
+      }
+    });
+  }
+
+  // Seed sample students if none
+  if (students.length === 0) {
+    students = [
+      { id: "2024-00001", last: "Dela Cruz", first: "Juan", sections: ["BSCS-3A","BSCS-3B"] },
+      { id: "2024-00002", last: "Santos", first: "Maria", sections: ["BSCS-3A"] },
+      { id: "2024-00003", last: "Reyes", first: "Pedro", sections: ["BSCS-3B"] },
+      { id: "2024-00004", last: "Mendoza", first: "Sofia", sections: ["BSCS-2A"] },
+      { id: "2024-00005", last: "Navarro", first: "Miguel", sections: ["BSCS-2B","BSCS-3A"] },
+      { id: "2024-00006", last: "Villanueva", first: "Camille", sections: ["BSIT-3A"] },
+      { id: "2024-00007", last: "Aquino", first: "Daniel", sections: ["BSCS-2A","BSCS-2B"] },
+      { id: "2024-00008", last: "Castillo", first: "Bianca", sections: ["BSIT-3A","BSCS-3B"] }
+    ];
+    localStorage.setItem("students", JSON.stringify(students));
+    students.forEach(s => {
+      const sectionYear=(s.sections[0].match(/^(\d)/)||s.sections[0].match(/-(\d)/)||[])[1]||'0';
+      const p = s.last.toLowerCase().replace(/\s+/g, '') + sectionYear;
+      if (!users.find(u => u.username === s.id)) {
+        users.push({ username: s.id, password: p, role: "student" });
+      }
+    });
+  }
+
+  // Seed sample subjects if none
+  if (subjects.length === 0) {
+    subjects = [
+      { code: "CCS313-18", name: "Human Computer Interaction" },
+      { code: "CSL313-18", name: "Human Computer Interaction (Lab)" },
+      { code: "CCS311-18", name: "Software Engineering 1" },
+      { code: "CCS312-18", name: "Computer Architecture and Organization" },
+      { code: "CCS314-18", name: "Theory of Programming Languages" },
+      { code: "CCS315-18", name: "Database Systems" },
+      { code: "CCS316-18", name: "Operating Systems" },
+      { code: "CCS317-18", name: "Web Application Development" }
+    ];
+    localStorage.setItem("subjects", JSON.stringify(subjects));
+  }
+
+  if (sections.length === 0) {
+    sections=[{id:"BSCS-2A",name:"BS Computer Science 2A"},{id:"BSCS-2B",name:"BS Computer Science 2B"},{id:"BSCS-3A",name:"BS Computer Science 3A"},{id:"BSCS-3B",name:"BS Computer Science 3B"},{id:"BSIT-3A",name:"BS Information Technology 3A"}];
+    localStorage.setItem("sections",JSON.stringify(sections));
+  }
+  if (sectionSubjects.length === 0) {
+    sectionSubjects=[
+      {sectionId:"BSCS-2A",assignments:[{id:"OFR-001",subjectCode:"CCS311-18",facultyId:"20-76543-210"},{id:"OFR-002",subjectCode:"CCS312-18",facultyId:"17-67890-123"},{id:"OFR-003",subjectCode:"CCS315-18",facultyId:"15-89012-345"}]},
+      {sectionId:"BSCS-2B",assignments:[{id:"OFR-004",subjectCode:"CCS311-18",facultyId:"20-76543-210"},{id:"OFR-005",subjectCode:"CCS312-18",facultyId:"17-67890-123"},{id:"OFR-006",subjectCode:"CCS316-18",facultyId:"23-45678-901"}]},
+      {sectionId:"BSCS-3A",assignments:[{id:"OFR-007",subjectCode:"CCS313-18",facultyId:"12-34567-890"},{id:"OFR-008",subjectCode:"CSL313-18",facultyId:"12-34567-890"},{id:"OFR-009",subjectCode:"CCS314-18",facultyId:"15-89012-345"},{id:"OFR-010",subjectCode:"CCS317-18",facultyId:"23-45678-901"}]},
+      {sectionId:"BSCS-3B",assignments:[{id:"OFR-011",subjectCode:"CCS313-18",facultyId:"20-76543-210"},{id:"OFR-012",subjectCode:"CSL313-18",facultyId:"20-76543-210"},{id:"OFR-013",subjectCode:"CCS314-18",facultyId:"15-89012-345"},{id:"OFR-014",subjectCode:"CCS317-18",facultyId:"23-45678-901"}]},
+      {sectionId:"BSIT-3A",assignments:[{id:"OFR-015",subjectCode:"CCS313-18",facultyId:"17-67890-123"},{id:"OFR-016",subjectCode:"CCS315-18",facultyId:"15-89012-345"},{id:"OFR-017",subjectCode:"CCS316-18",facultyId:"23-45678-901"}]}
+    ]; localStorage.setItem("sectionSubjects",JSON.stringify(sectionSubjects));
+  }
+  if (studentEnrollments.length === 0) {
+    const picks={"2024-00001":["OFR-007","OFR-008","OFR-011","OFR-013"],"2024-00002":["OFR-007","OFR-008","OFR-009","OFR-010"],"2024-00003":["OFR-011","OFR-012","OFR-013","OFR-014"],"2024-00004":["OFR-001","OFR-002","OFR-003"],"2024-00005":["OFR-004","OFR-005","OFR-007","OFR-009","OFR-010"],"2024-00006":["OFR-015","OFR-016","OFR-017"],"2024-00007":["OFR-001","OFR-003","OFR-004","OFR-006"],"2024-00008":["OFR-012","OFR-014","OFR-015","OFR-016","OFR-017"]};
+    const offers=sectionSubjects.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId})));
+    studentEnrollments=Object.entries(picks).flatMap(([studentId,ids])=>ids.map((id,index)=>{const offer=offers.find(item=>item.id===id);return{id:`ENR-${studentId.slice(-3)}-${index+1}`,studentId,subjectCode:offer.subjectCode,sectionId:offer.sectionId,offeringId:id};})); localStorage.setItem("studentEnrollments",JSON.stringify(studentEnrollments));
+  }
+
+  // Seed faculty-subject assignments
+  if (subjectAssignments.length === 0) {
+    subjectAssignments = [
+      { subjectCode: "CCS311-18", facultyIds: ["20-76543-210"] },
+      { subjectCode: "CCS312-18", facultyIds: ["17-67890-123"] },
+      { subjectCode: "CCS313-18", facultyIds: ["12-34567-890","20-76543-210","17-67890-123"] },
+      { subjectCode: "CSL313-18", facultyIds: ["12-34567-890","20-76543-210"] },
+      { subjectCode: "CCS314-18", facultyIds: ["15-89012-345"] },
+      { subjectCode: "CCS315-18", facultyIds: ["15-89012-345"] },
+      { subjectCode: "CCS316-18", facultyIds: ["23-45678-901"] },
+      { subjectCode: "CCS317-18", facultyIds: ["23-45678-901"] }
+    ];
+    localStorage.setItem("subjectAssignments", JSON.stringify(subjectAssignments));
+  }
+
+  // Seed student allotments
+  if (allotments.length === 0) {
+    allotments = [
+      { studentId: "2024-00001", subjectCode: "CCS313-18", facultyId: "12-34567-890" },
+      { studentId: "2024-00002", subjectCode: "CCS313-18", facultyId: "12-34567-890" },
+      { studentId: "2024-00001", subjectCode: "CCS311-18", facultyId: "20-76543-210" }
+    ];
+    localStorage.setItem("allotments", JSON.stringify(allotments));
+  }
+
+  // Seed sample exams
+  if (exams.length === 0) {
+    const today = new Date().toISOString().split('T')[0];
+    exams = [
+      {
+        id: "exam_101",
+        facultyId: "12-34567-890",
+        subjectCode: "CCS313-18",
+        title: "Midterm Exam - HCI Fundamentals & UI Design",
+        desc: "Covers Usability Heuristics, Interaction Styles, and Wireframing.",
+        date: today,
+        start: "08:00",
+        end: "12:00",
+        datetime: `${today}T08:00:00`
+      }
+    ];
+    localStorage.setItem("exams", JSON.stringify(exams));
+
+    questions = [
+      {
+        id: "q_1",
+        examId: "exam_101",
+        type: "mcq",
+        text: "What does HCI stand for in computer science?",
+        points: 5,
+        options: [
+          { text: "Human Computer Interaction", isCorrect: true },
+          { text: "High Capacity Interface", isCorrect: false },
+          { text: "Host Computing Integration", isCorrect: false },
+          { text: "Hardware Control Instruction", isCorrect: false }
+        ]
+      },
+      {
+        id: "q_2",
+        examId: "exam_101",
+        type: "mcq",
+        text: "Which of the following is one of Jakob Nielsen's 10 Usability Heuristics?",
+        points: 5,
+        options: [
+          { text: "Visibility of system status", isCorrect: true },
+          { text: "Maximum database normalization", isCorrect: false },
+          { text: "Encapsulation and polymorphism", isCorrect: false },
+          { text: "Highest GPU rendering speed", isCorrect: false }
+        ]
+      },
+      {
+        id: "q_3",
+        examId: "exam_101",
+        type: "mcq",
+        text: "What is Fitts's Law primarily concerned with in user interface design?",
+        points: 5,
+        options: [
+          { text: "The time required to move to a target area based on distance and size", isCorrect: true },
+          { text: "The color contrast ratio for accessibility", isCorrect: false },
+          { text: "The compression ratio of PNG image files", isCorrect: false },
+          { text: "The query speed of SQL databases", isCorrect: false }
+        ]
+      }
+    ];
+    localStorage.setItem("questions", JSON.stringify(questions));
+  }
+
+  localStorage.setItem("users", JSON.stringify(users));
+  if (typeof DemoData !== 'undefined') DemoData.install();
+
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role") || "admin";
+  
+  const loginRole = document.getElementById("loginRole");
+  const btn = document.getElementById("loginBtn");
+  const link = document.getElementById("roleLink");
+  const loginForm = document.getElementById("loginForm");
+  
+  const roleStyles = {
+    admin: { class: "admin", label: "Admin" },
+    faculty: { class: "faculty", label: "Faculty" },
+    student: { class: "student", label: "Student" }
+  };
+  
+  function grammarArticle(word) {
+    const firstLetter = word.charAt(0).toLowerCase();
+    return ["a", "e", "i", "o", "u"].includes(firstLetter) ? "an" : "a";
+  }
+  
+  if (role && roleStyles[role]) {
+    const rConfig = roleStyles[role];
+    const label = rConfig.label;
+    
+    loginRole.textContent = `${label} Login`;
+    btn.classList.add(rConfig.class);
+    
+    const article = grammarArticle(label.toLowerCase());
+    link.textContent = `Not ${article} ${label.toLowerCase()}? Click here`;
+    link.href = "index.html";
+
+    // Credentials are deliberately not pre-filled — the form must be typed.
+    document.getElementById("username").focus();
+  }
+  
+  function validateLogin(username, password, role) {
+    const currentUsers = JSON.parse(localStorage.getItem("users")) || [];
+    return currentUsers.find(u => u.username === username && u.password === password && u.role === role);
+  }
+  
+  const authError = document.getElementById("authError");
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  // Demonstration mode: one valid account is ready for a one-click login.
+  const preferredDemo={student:'2025-00002',faculty:'23-32534-345',admin:'admin'}[role];
+  const roleAccounts=(JSON.parse(localStorage.getItem('users'))||[]).filter(user=>user.role===role);
+  const demoAccount=roleAccounts.find(user=>user.username===preferredDemo)||roleAccounts[0];
+  if(demoAccount){usernameInput.value=demoAccount.username;passwordInput.value=demoAccount.password;btn.title=`Log in as ${demoAccount.username}`;}
+
+  function showAuthError(message) {
+    authError.textContent = message;
+    authError.classList.add("show");
+    usernameInput.setAttribute("aria-invalid", "true");
+    passwordInput.setAttribute("aria-invalid", "true");
+  }
+
+  function clearAuthError() {
+    authError.textContent = "";
+    authError.classList.remove("show");
+    usernameInput.removeAttribute("aria-invalid");
+    passwordInput.removeAttribute("aria-invalid");
+  }
+
+  // Clear the error as soon as the person starts correcting it.
+  [usernameInput, passwordInput].forEach(el =>
+    el.addEventListener("input", clearAuthError));
+
+  loginForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    clearAuthError();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (!username || !password) {
+      showAuthError("Please enter both your username and password.");
+      (!username ? usernameInput : passwordInput).focus();
+      return;
+    }
+
+    const user = validateLogin(username, password, role);
+
+    if (user) {
+      // Store only what identifies the session. The dashboards read the
+      // identity from here, not from the URL.
+      localStorage.setItem("currentUser", JSON.stringify({
+        username: user.username,
+        role: user.role
+      }));
+      AuditLog.record('login','session',user.username,{role:user.role},{username:user.username,role:user.role});
+      window.location.href = `${role}.html`;
+    } else {
+      const label = roleStyles[role] ? roleStyles[role].label.toLowerCase() : role;
+      showAuthError(
+        `Those details do not match a ${label} account. `
+        + `Check your username and password, or use the link above if you are not ${grammarArticle(label)} ${label}.`
+      );
+      passwordInput.focus();
+      passwordInput.select();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+
+console.log('=== QUESTION CATALOGUE. Totals, filtering, and duplication ===');
+const s=SEED();
+const r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
+r.w.manageQuestions('e1');
+const total=r.d.getElementById('questionCatalogueTotal');
+ok(/2.*question/.test(total.textContent) && /20.*point/.test(total.textContent),'continuous total shows question count and points');
+ok(!!r.d.getElementById('questionSearch') && !!r.d.getElementById('questionTypeFilter'),'search and type controls are present');
+const search=r.d.getElementById('questionSearch');
+search.value='Essay'; r.w.filterQuestionCatalogue();
+ok([...r.d.querySelectorAll('.question-item')].filter(item=>!item.hidden).length===1,'search filters question text');
+ok(/1 shown of 2/.test(total.textContent) && /20.*total point/.test(total.textContent),'filter reports visible count without hiding full point total');
+search.value='';
+const type=r.d.getElementById('questionTypeFilter');
+type.value='mcq'; r.w.filterQuestionCatalogue();
+ok([...r.d.querySelectorAll('.question-item')].filter(item=>!item.hidden).length===1,'type filter isolates matching type');
+const original=r.read('questions').find(q=>q.id==='q1');
+ok(r.w.duplicateQuestion('q1')===true,'duplicate action reports success');
+const after=r.read('questions').filter(q=>q.examId==='e1');
+ok(after.length===3 && after[1].text==='Q1 (Copy)','copy is inserted beside its source');
+ok(after[1].id!==original.id,'copy receives a new identifier');
+after[1].options[0].text='Changed copy';
+ok(original.options[0].text==='A','nested answer options are deep-copied');
+r.w.close();
+process.exit(0);

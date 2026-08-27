@@ -1,0 +1,117 @@
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+const today=new Date().toLocaleDateString('en-CA');
+
+function base(){
+  const s=SEED();
+  s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Mixed Exam',desc:'',date:today,start:'00:01',end:'23:59',showSubmittedAnswers:true,answerRelease:'immediate'}];
+  return s;
+}
+console.log('=== HH. Student submits a mixed exam ===');
+let s=base();
+let st=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+st.w.startExam('e1');
+st.d.querySelector('input[name="q_q1"]').checked=true;          // correct MCQ, 10 pts
+st.d.querySelector('input[name="q_q1"]').dispatchEvent(new st.w.Event('change',{bubbles:true}));
+st.w.goToQuestion(1);
+ok(st.d.querySelector('textarea.essay-response-input')?.rows===7,'essay answers retain a larger paragraph field');
+st.d.querySelector('.short-ans-input[data-qid="q2"]').value='My essay about HCI';
+st.d.querySelector('.short-ans-input[data-qid="q2"]').dispatchEvent(new st.w.Event('input',{bubbles:true}));
+st.w.reviewAnswers();
+st.w.submitExamAnswers();
+let subs=st.read('studentSubmissions');
+ok(subs.length===1,'submission recorded');
+ok(subs[0].score===10,'MCQ auto-marked 10');
+const immediateReview=st.d.querySelector('#examResultSection .answer-key-review');
+ok(immediateReview?.querySelectorAll('.review-question-card').length===2,'immediate answer review uses one card per question');
+ok(immediateReview.querySelector('.review-question-card.is-correct')&&immediateReview.querySelector('.review-question-card.is-pending'),'answer cards visually distinguish correct and pending responses');
+st.w.close();
+
+console.log('\n=== II. Faculty results view ===');
+s=base(); s.studentSubmissions=subs;
+let fa=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
+fa.w.viewResults('e1');
+let view=fa.d.getElementById('examsView').textContent;
+ok(/S1/.test(view),'submitting student listed');
+ok(/10.*\/.*20/s.test(view),'partial score shown');
+ok(/1 to mark/.test(view),'pending count shown');
+ok(/1 submitted/.test(view),'submitted tally shown');
+
+console.log('\n=== JJ. Grading a written answer ===');
+fa.w.openGrading(subs[0].id);
+ok(fa.d.getElementById('gradingModal').classList.contains('active'),'grading modal opens');
+const gb=fa.d.getElementById('gradingBody').textContent;
+ok(/My essay about HCI/.test(gb),"student's written answer visible to grader");
+ok(/Auto-marked: 10 \/ 10/.test(gb),'MCQ shown as already marked');
+ok(fa.d.querySelectorAll('.grade-mark').length===1,'only the written answer is markable');
+
+console.log('\n--- rejects an out-of-range mark ---');
+let mark=fa.d.querySelector('.grade-mark');
+mark.value='99';
+fa.w.saveGrading();
+ok(/between 0 and 10/.test(fa.rec.alerts.join('|')),'over-max mark rejected');
+ok(fa.read('studentSubmissions')[0].answers[1].awarded===null,'nothing written on invalid input');
+
+console.log('\n--- accepts a valid mark ---');
+mark.value='7';
+fa.d.querySelector('.grade-remark').value='Good structure, weak examples.';
+fa.d.getElementById('overallRemark').value='Solid work overall.';
+fa.w.saveGrading();
+let graded=fa.read('studentSubmissions')[0];
+console.log('    score:',graded.score,'/',graded.total,'status:',graded.status);
+ok(graded.answers[1].awarded===7,'written mark saved');
+ok(graded.score===17,'final score = 10 auto + 7 manual');
+ok(graded.status==='graded','marked as fully graded');
+ok(!!graded.gradedAt,'graded timestamp set');
+ok(graded.remarks==='Solid work overall.','overall remark saved');
+ok(graded.answers[1].remark==='Good structure, weak examples.','per-question remark saved');
+fa.w.viewResults('e1');
+ok(/✓ Graded/.test(fa.d.getElementById('examsView').textContent),'results view now shows Graded');
+fa.w.close();
+
+console.log('\n=== KK. Student sees the graded result and feedback ===');
+s=base(); s.studentSubmissions=[graded];
+st=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+const feedbackExamRow=st.d.querySelector('#examSubjectCards .exam-list-row');
+ok(feedbackExamRow.classList.contains('has-feedback')&&/Remark/.test(feedbackExamRow.textContent),'completed exam is highlighted when professor feedback is available');
+st.w.markFeedbackViewed('e1');
+ok(!feedbackExamRow.classList.contains('has-feedback')&&!/Remark/.test(feedbackExamRow.textContent),'viewed feedback returns the exam row to its normal style');
+const rt=st.d.querySelector('#resultsTable tbody').textContent;
+console.log('    row:',rt.replace(/\s+/g,' ').trim());
+ok(/Mixed Exam/.test(rt),'exam listed in history');
+ok(/17/.test(rt)&&/20/.test(rt),'final score shown');
+ok(/Final/.test(rt),'status shows Final');
+ok(st.d.querySelectorAll('#resultSubjectCards .subject-card').length===1,'results are grouped into one card per subject');
+ok(/1\.50/.test(st.d.querySelector('#resultSubjectCards .subject-summary').textContent),'rating is shown once at subject level');
+ok(st.d.querySelectorAll('#resultSubjectCards .result-exam-row .grade-chip').length===0,'individual exams do not repeat the subject rating');
+const resultSubject=st.d.querySelector('#resultSubjectCards details.subject-card');
+resultSubject.querySelector(':scope > summary').click();
+ok(!resultSubject.open,'subject result card can collapse');
+resultSubject.open=true;
+const examResult=resultSubject.querySelector('details.result-exam-disclosure'); examResult.open=true;
+ok(/Schedule/.test(examResult.textContent)&&/Passing grade/.test(examResult.textContent),'clickable exam result expands to exam details');
+const reviewButton=examResult.querySelector('.result-review-btn'); reviewButton.click();
+ok(st.d.getElementById('review-detail-panel').style.display==='block','Review button opens a dedicated review page');
+ok(!st.d.querySelector('#sidebar [data-panel="review-detail-panel"]'),'review page is not added to the sidebar');
+ok(/Your answer/.test(st.d.getElementById('studentReviewContent').textContent)&&/Correct answer/.test(st.d.getElementById('studentReviewContent').textContent),'review page shows choices, student answer, and correct answer');
+ok(!/Take Exam|Take Quiz/.test(resultSubject.textContent),'completed result uses Review instead of Take Quiz');
+st.w.openExamDetails('e1');
+const completedActions=st.d.getElementById('examModalActions').textContent;
+ok(/Review this exam/.test(completedActions)&&!/Start Exam/.test(completedActions),'submitted exam briefing replaces Start Exam with Review this exam');
+st.d.querySelector('#examModalActions .btn-take-exam').click();
+ok(st.d.getElementById('review-detail-panel').style.display==='block','Review this exam opens the dedicated completed-answer page');
+ok(/Your answer/.test(st.d.getElementById('studentReviewContent').textContent),'completed-answer page contains the saved review');
+const rem=st.d.getElementById('resultsRemarks').textContent;
+ok(/Solid work overall/.test(rem),'overall feedback shown to student');
+ok(/Good structure/.test(rem),'per-question feedback shown to student');
+st.w.close();
+
+console.log('\n=== LL. Ungraded submission stays visibly pending ===');
+const pend=JSON.parse(JSON.stringify(graded));
+pend.answers[1].awarded=null; pend.status='pending'; pend.score=10;
+s=base(); s.studentSubmissions=[pend];
+st=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+const rt2=st.d.querySelector('#resultsTable tbody').textContent;
+ok(/awaiting marking/.test(rt2),'pending state shown, not a false final score');
+ok(/so far/.test(rt2),'partial score labelled "so far"');
+st.w.close(); process.exit(0);

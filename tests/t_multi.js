@@ -1,0 +1,15 @@
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+console.log('=== SS. A subject accepts exactly one professor ===');
+let r=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
+r.w.openFacultySubjectModal();
+const fsF=r.d.getElementById('fsFaculty');
+ok(fsF.multiple===false,'faculty select allows only one professor');
+r.d.getElementById('fsSubject').value='SUB2';
+fsF.value='F1';
+r.w.saveFacultySubject();
+const sa=r.read('subjectAssignments').find(x=>x.subjectCode==='SUB2');
+ok(sa.facultyIds.length===1,'only one professor is saved');
+ok(sa.facultyIds[0]==='F1','selected professor is retained');
+ok(/F1/.test(r.d.getElementById('facultySubjectTable').textContent),'professor is shown in the table');
+r.w.close(); process.exit(0);

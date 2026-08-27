@@ -1,0 +1,3262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faculty Dashboard</title>
+<script src="../js/storage.js"></script>
+<script src="../js/section-service.js"></script>
+<script src="../js/audit-service.js"></script>
+<script src="../js/admin-table-tools.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/demo-data.js"></script>
+<script src="../js/question-draft.js"></script>
+<script src="../js/question-media.js"></script>
+<script src="../js/question-types.js"></script>
+<script src="../js/question-catalog.js"></script>
+<script src="../js/question-reports.js"></script>
+<script src="../js/result-visibility.js"></script>
+<script src="../js/exam-publish.js"></script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', Arial, sans-serif;
+        background: #f2f2f5;
+        color: #333;
+    }
+
+    /* Top Header */
+    .topbar {
+        background: white;
+        padding: 15px 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .topbar img {
+        height: 40px;
+    }
+
+    .topbar-title {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .logout-btn {
+        background: #6A6E6B;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    /* Page Wrapper */
+    .page {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .page h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #eee;
+    }
+
+    .tab-btn {
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        color: #666;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Subject Cards Grid */
+    .subjects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .sub-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 6px solid var(--accent);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        cursor: pointer;
+    }
+
+    .sub-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .sub-card:focus-visible {
+        outline: 3px solid var(--accent-line);
+        outline-offset: 3px;
+        transform: translateY(-2px);
+    }
+
+    .sub-code {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: var(--accent);
+    }
+
+    .sub-name {
+        font-size: 15px;
+        opacity: 0.8;
+        margin-bottom: 0;
+    }
+
+    .sub-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .sub-actions button {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .student-section-tabs { display:flex; gap:7px; margin:16px 0; padding-bottom:8px; overflow-x:auto; border-bottom:1px solid var(--line); }
+    .student-section-tab { flex:0 0 auto; width:auto; min-height:40px; padding:9px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink-soft); font-weight:750; cursor:pointer; }
+    .student-section-tab.active { border-color:var(--accent-line); background:var(--accent-soft); color:var(--accent); }
+    .student-section-count { margin-left:6px; padding:2px 7px; border-radius:999px; background:var(--surface-soft); font-size:11px; }
+    .student-roster-shell { overflow:hidden; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:var(--sh-sm); }
+    .student-roster-table { width:100%; min-width:660px; border-collapse:collapse; }
+    .student-roster-table th { padding:13px 16px; background:var(--surface-soft); color:var(--ink-soft); font-size:11px; letter-spacing:.06em; text-align:left; text-transform:uppercase; }
+    .student-roster-table td { padding:14px 16px; border-top:1px solid var(--line); color:var(--ink); vertical-align:middle; }
+    .student-roster-table tbody tr:hover { background:var(--surface-soft); }
+    .roster-name { display:block; font-weight:750; }
+    .roster-subjects { display:flex; flex-wrap:wrap; gap:6px; }
+    .roster-subject-chip { display:inline-flex; padding:5px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-size:11px; font-weight:750; }
+
+    /* Secondary: tinted, so the primary action on the card stays obvious */
+    .view-exams-btn {
+        background: var(--accent-soft);
+        color: var(--accent);
+        box-shadow: inset 0 0 0 1px var(--accent-line);
+    }
+
+    .view-exams-btn:hover {
+        background: var(--accent-line);
+    }
+
+    /* Primary */
+    .create-exam-btn {
+        background: var(--accent);
+        color: white;
+    }
+
+    .create-exam-btn:hover {
+        background: var(--accent-dark);
+    }
+
+    /* Exams List */
+    .exams-section {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .exams-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .exams-header h3 {
+        font-size: 20px;
+    }
+
+    .add-exam-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .add-exam-btn:hover {
+        background: var(--accent);
+    }
+
+    .exam-item {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border-left: 4px solid var(--accent);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .exam-item-info h4 {
+        margin-bottom: 5px;
+        color: var(--accent);
+    }
+
+    .exam-item-info p {
+        font-size: 14px;
+        color: #666;
+        margin: 3px 0;
+    }
+
+    .exam-item-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .exam-item-actions button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .exam-item-actions .exam-icon-btn,.add-exam-btn.exam-icon-btn {
+        display:inline-grid; place-items:center; width:42px; min-width:42px; height:42px; min-height:42px;
+        flex:0 0 42px; padding:0; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--accent);
+    }
+    .exam-icon-btn svg { width:19px; height:19px; fill:currentColor; pointer-events:none; }
+    .exam-item-actions .exam-icon-btn:hover,.add-exam-btn.exam-icon-btn:hover { background:var(--accent-soft); border-color:var(--accent-line); }
+    .exam-item-actions .exam-icon-btn.questions { color:var(--warn-ink); }
+    .exam-item-actions .exam-icon-btn.results { color:var(--accent); }
+    .exam-item-actions .exam-icon-btn.delete { color:var(--danger); }
+    .result-action-icon { display:inline-grid; place-items:center; width:38px; min-width:38px; height:38px; min-height:38px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--accent); cursor:pointer; }
+    .result-action-icon:hover { border-color:var(--accent-line); background:var(--accent-soft); }
+    .result-action-icon svg { width:18px; height:18px; fill:currentColor; pointer-events:none; }
+    .results-summary { display:flex; align-items:center; justify-content:flex-end; flex-wrap:nowrap; gap:7px; white-space:nowrap; }
+    .results-summary-pill { display:inline-flex; align-items:center; min-height:30px; padding:5px 10px; border-radius:999px; background:var(--surface-soft); color:var(--ink-soft); font-size:12px; font-weight:750; }
+    .results-summary-pill.primary { background:var(--accent-soft); color:var(--accent); }
+    .results-summary-pill.pending { background:color-mix(in srgb,var(--warn) 11%,var(--surface)); color:var(--warn-ink); }
+
+    .edit-btn {
+        background: var(--action);
+        color: white;
+    }
+
+    .edit-btn:hover {
+        background: var(--action);
+    }
+
+    .delete-btn {
+        background: var(--danger);
+        color: white;
+    }
+
+    .delete-btn:hover {
+        background: var(--danger);
+    }
+
+    .no-exams {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+
+    /* Modal */
+    .modal-bg {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.5);
+        z-index: 120;
+    }
+
+    .modal-bg.active {
+        display: flex;
+    }
+
+    .modal {
+        background: white;
+        padding: 25px;
+        width: 500px;
+        border-radius: 10px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: var(--accent);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .modal-buttons button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .save-btn {
+        background: var(--accent);
+        color: white;
+    }
+
+    .save-btn:hover {
+        background: var(--accent);
+    }
+
+    .cancel-btn {
+        background: #999;
+        color: white;
+    }
+
+    .cancel-btn:hover {
+        background: #777;
+    }
+
+    .back-btn {
+        background: var(--action);
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .back-btn:hover {
+        background: var(--action);
+    }
+    .back-btn.icon-only { display:grid; place-items:center; width:42px; min-width:42px; height:42px; min-height:42px; padding:0; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--accent); }
+    .back-btn.icon-only:hover { border-color:var(--accent-line); background:var(--accent-soft); }
+    .back-btn.icon-only svg { width:20px; height:20px; fill:currentColor; pointer-events:none; }
+
+    /* Questions Management */
+    .questions-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .question-item {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border-left: 4px solid var(--action);
+    }
+
+    .question-text {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--accent);
+    }
+
+    .question-options {
+        margin-left: 15px;
+        margin-top: 8px;
+    }
+
+    .option-item {
+        padding: 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .option-item.correct {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .question-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .question-actions button {
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .edit-q-btn {
+        background: var(--action);
+        color: white;
+    }
+
+    .edit-q-btn:hover {
+        background: var(--action);
+    }
+
+    .delete-q-btn {
+        background: var(--danger);
+        color: white;
+    }
+
+    .delete-q-btn:hover {
+        background: var(--danger);
+    }
+
+    /* Question Modal */
+    .question-modal-bg {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.5);
+        z-index: 130;
+    }
+
+    .question-modal-bg.active {
+        display: flex;
+    }
+
+    .question-modal {
+        background: white;
+        padding: 25px;
+        width: 600px;
+        border-radius: 10px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .question-modal h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: var(--accent);
+    }
+
+    .options-list {
+        margin-top: 15px;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 6px;
+    }
+
+    .option-input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+
+    .option-input-group input[type="text"] {
+        flex: 1;
+    }
+
+    .option-input-group input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .option-input-group label {
+        font-size: 13px;
+        margin-left: 5px;
+        cursor: pointer;
+    }
+
+    .option-input-group button {
+        padding: 6px 10px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .option-input-group button:hover {
+        background: var(--danger);
+    }
+
+    .add-option-btn {
+        background: var(--action);
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .add-option-btn:hover {
+        background: var(--action);
+    }
+
+    /* Question reordering */
+    .move-q-btn {
+        background: #eceff1;
+        color: var(--ink);
+        border: 1px solid #cfd8dc;
+    }
+
+    .move-q-btn:hover:not(:disabled) {
+        background: #cfd8dc;
+    }
+
+    .move-q-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    /* Results and grading */
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .results-table th, .results-table td {
+        border: 1px solid #e9ecef;
+        padding: 10px 12px;
+        text-align: left;
+    }
+
+    .results-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .status-pill {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    .pill-graded  { background: #e8f5e9; color: var(--ok-ink); }
+    .pill-pending { background: #fff3e0; color: #e65100; }
+    .pill-wrong   { background: #ffebee; color: #c62828; }
+
+    .grade-item {
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--warn);
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 12px;
+        background: #fafafa;
+    }
+
+    .grade-item.auto {
+        border-left-color: var(--line-strong);
+    }
+
+    .grade-q {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .grade-ans {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 14px;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .grade-guide {
+        font-size: 13px;
+        color: var(--ok-ink);
+        margin-top: 8px;
+    }
+
+    .grade-auto-note {
+        font-size: 13px;
+        color: #555;
+        margin-top: 6px;
+    }
+
+    .grade-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .grade-controls label {
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .grade-mark {
+        width: 80px;
+        padding: 7px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    .grade-remark {
+        flex: 1;
+        min-width: 200px;
+        padding: 7px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    /* Exam preview */
+    .preview-head {
+        border-bottom: 2px solid #eee;
+        padding-bottom: 14px;
+        margin-bottom: 16px;
+    }
+
+    .preview-head h2 {
+        color: var(--accent);
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+
+    .preview-head p {
+        font-size: 14px;
+        color: #666;
+        margin: 2px 0;
+    }
+
+    .preview-instructions {
+        margin-top: 8px !important;
+        padding: 8px 10px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        color: #444 !important;
+    }
+
+    .preview-q {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 12px;
+        background: #fafafa;
+    }
+
+    .preview-q-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--accent);
+        margin-bottom: 6px;
+    }
+
+    .preview-pts {
+        font-weight: 600;
+        font-size: 12px;
+        color: #555;
+        background: #eceff1;
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    .preview-q-text {
+        font-size: 15px;
+        margin-bottom: 10px;
+        color: #222;
+    }
+
+    .preview-opt {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        margin-bottom: 5px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .preview-opt.is-correct {
+        border-color: var(--accent);
+        background: #f1f8f2;
+    }
+
+    .preview-radio {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #999;
+        border-radius: 50%;
+        flex: none;
+    }
+
+    .preview-key {
+        font-size: 13px;
+        color: var(--ok-ink);
+        margin-left: auto;
+    }
+
+    .preview-written {
+        border: 1px dashed #bbb;
+        border-radius: 6px;
+        padding: 18px;
+        color: #888;
+        font-size: 14px;
+        font-style: italic;
+        background: white;
+    }
+
+    .preview-warn {
+        margin-top: 8px;
+        padding: 8px 10px;
+        background: #fff3e0;
+        border: 1px solid #ffcc80;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #e65100;
+    }
+
+    .question-toggle-list { gap: 0; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+    .question-toggle-list .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 50px; padding: 10px 12px; background: var(--surface); }
+    .question-toggle-list .toggle-row + .toggle-row { border-top: 1px solid var(--line); }
+    .question-toggle-list .toggle-row span { color: var(--ink); font-size: 13px; }
+    .question-toggle-list .toggle-row small { display: block; margin-top: 2px; color: var(--ink-soft); font-weight: 500; }
+    .question-toggle-list input[role="switch"] { appearance: none; width: 40px; min-width: 40px; height: 22px; margin: 0; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface-soft); cursor: pointer; position: relative; }
+    .question-toggle-list input[role="switch"]::after { content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; border-radius: 50%; background: var(--ink-soft); transition: transform .18s ease, background .18s ease; }
+    .question-toggle-list input[role="switch"]:checked { border-color: var(--accent); background: var(--accent-soft); }
+    .question-toggle-list input[role="switch"]:checked::after { transform: translateX(18px); background: var(--accent); }
+    .question-actions :is(.move-q-btn,.edit-q-btn,.delete-q-btn) { width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 0; }
+    .option-input-group button { width: 34px; min-width: 34px; height: 34px; min-height: 34px; padding: 0; font-size: 0; }
+    .option-input-group button::before { content: "×"; font-size: 20px; line-height: 1; }
+    .report-count-btn { position: relative; }
+    .report-count-btn span { position: absolute; top: -6px; right: -6px; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 800; }
+    .question-image-drop { display: grid; place-items: center; gap: 5px; width: 100%; min-height: 116px; padding: 18px; border: 1.5px dashed var(--line-strong); border-radius: 11px; background: var(--surface-soft); color: var(--ink); cursor: pointer; text-align: center; }
+    .question-image-drop:hover, .question-image-drop.is-dragging { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+    .question-image-drop-icon { font-size: 25px; }.question-image-drop small { color: var(--ink-soft); font-size: 11px; }
+    .question-image-preview { position: relative; margin-top: 9px; }
+    .question-image-preview:empty { display: none; }.question-image-preview img { display: block; width: 100%; max-height: 210px; object-fit: contain; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+    .question-image-preview .icon-action { position: absolute; top: 7px; right: 7px; background: var(--surface); color: var(--danger); }
+    .image-link-option { margin-top: 9px; color: var(--ink-soft); font-size: 12px; }.image-link-option summary { cursor: pointer; }.image-link-option input { margin-top: 8px; width: 100%; }
+    .question-type-picker { display:none; max-width:820px; margin:30px auto; padding:28px; }
+    #questionModal.choosing-type .question-type-picker { display:block; }
+    #questionModal.choosing-type :is(.authoring-body,.authoring-head-actions,.authoring-mobile-bar) { display:none; }
+    .type-picker-copy { margin-bottom:20px; text-align:center; }.type-picker-copy>span { color:var(--accent); font-size:10px; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }.type-picker-copy h3 { margin:5px 0; color:var(--ink); font-size:23px; }.type-picker-copy p { margin:0; color:var(--ink-soft); font-size:13px; }
+    .question-type-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .question-type-grid button { display:grid; place-items:center; gap:9px; min-width:0; min-height:112px; padding:14px 8px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); cursor:pointer; }
+    .question-type-grid button:hover { border-color:var(--accent-line); background:var(--accent-soft); color:var(--accent); }.question-type-grid button>span { display:grid; place-items:center; width:38px; height:38px; border-radius:10px; background:var(--surface-soft); color:var(--accent); font-size:17px; }.question-type-grid button strong { font-size:12px; }
+    .answer-configuration>div { margin:16px 0; padding:16px; border:1px solid var(--line); border-radius:11px; background:var(--surface-soft); }.answer-configuration>div[style*="display: none"] { display:none!important; }
+    .question-item { position:relative; padding-right:62px; }
+    .question-more { position:absolute; top:14px; right:14px; z-index:4; }.question-more summary { display:grid; place-items:center; width:38px; height:38px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink-soft); font-size:23px; cursor:pointer; list-style:none; }.question-more summary::-webkit-details-marker { display:none; }.question-more[open] summary { border-color:var(--accent-line); background:var(--accent-soft); color:var(--accent); }
+    .question-more-menu { position:absolute; top:44px; right:0; display:grid; width:180px; padding:6px; border:1px solid var(--line); border-radius:11px; background:var(--surface); box-shadow:var(--sh-md); }.question-more-menu button { display:flex; align-items:center; gap:10px; min-height:38px; padding:8px 10px; border:0; border-radius:7px; background:transparent; color:var(--ink); text-align:left; cursor:pointer; }.question-more-menu button:hover { background:var(--surface-soft); }.question-more-menu button span { width:18px; color:var(--accent); }.question-more-menu button.danger,.question-more-menu button.danger span { color:var(--danger); }.question-more-menu button:disabled { opacity:.4; cursor:not-allowed; }
+    @media(max-width:700px){.question-type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.question-type-picker{padding:18px 12px}.question-item{padding-right:52px}}
+    .exam-settings-menu { position:relative; }.exam-settings-menu>summary { list-style:none; cursor:pointer; }.exam-settings-menu>summary::-webkit-details-marker { display:none; }.exam-settings-menu[open]>summary { border-color:var(--accent-line)!important; background:var(--accent-soft)!important; }
+    .exam-settings-nav { position:absolute; z-index:25; top:48px; right:0; display:grid; width:190px; padding:6px; border:1px solid var(--line); border-radius:11px; background:var(--surface); box-shadow:var(--sh-md); }
+    .exam-settings-nav button { display:flex; align-items:center; gap:11px; width:100%; min-height:40px; padding:8px 10px; border:0; border-radius:8px; background:transparent; color:var(--ink); font-size:13px; font-weight:650; text-align:left; cursor:pointer; }
+    .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
+</style>
+<!-- Loaded after the page styles so the shared tokens win on ties -->
+<link rel="stylesheet" href="../css/shared-ui.css">
+<link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20260827-9">
+<script src="../js/dates.js"></script>
+<script src="../js/exam-timing.js"></script>
+<script src="../js/grading.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/faculty-subject-workspace.js"></script>
+</head>
+<body data-role="faculty">
+
+<!-- HEADER -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="../assets/logo.PNG" alt="Logo">
+        <div class="topbar-title" id="pageTitle">NEW ERA UNIVERSITY</div>
+    </div>
+    <div class="topbar-right" id="topbarRight"></div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="page">
+    <!-- Subjects Tab -->
+    <div id="subjects-tab" class="tab-content active">
+        <div class="subjects-grid" id="subjectList">
+            <!-- subject cards auto inserted here -->
+        </div>
+    </div>
+
+    <div id="subject-workspace-tab" class="tab-content">
+        <div id="facultySubjectWorkspace"></div>
+    </div>
+
+    <!-- Exams Tab -->
+    <div id="exams-tab" class="tab-content">
+        <div id="examsView"></div>
+    </div>
+
+    <!-- Students Tab -->
+    <div id="students-tab" class="tab-content">
+        <div id="studentsView"></div>
+    </div>
+    <div id="reports-tab" class="tab-content">
+        <div id="reportsView"></div>
+    </div>
+</div>
+
+<!-- Exam Creation/Edit Modal -->
+<div id="examModal" class="modal-bg">
+    <div class="modal">
+        <h3 id="examModalTitle">Create New Exam</h3>
+        <div class="form-group">
+            <label>Subject:</label>
+            <select id="examSubject"></select>
+        </div>
+        <fieldset class="inspector-group exam-section-field">
+            <legend>Sections taking this exam</legend>
+            <div id="examSectionChoices" class="exam-section-choices"></div>
+            <small class="field-hint">Only students enrolled in the selected sections can take this exam.</small>
+        </fieldset>
+        <div class="form-group">
+            <label>Exam Title:</label>
+            <input type="text" id="examTitle" placeholder="e.g., Quiz 2 - Chapter 5">
+        </div>
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea id="examDesc" placeholder="Exam description and instructions..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Date (YYYY-MM-DD):</label>
+            <input type="date" id="examDate">
+        </div>
+        <div class="form-group">
+            <label>Start Time:</label>
+            <input type="time" id="examStart">
+        </div>
+        <div class="form-group">
+            <label for="examEnd">End Time:</label>
+            <input type="time" id="examEnd">
+        </div>
+        <div class="form-group">
+            <label for="examDuration">Attempt time limit (minutes):</label>
+            <input type="number" id="examDuration" min="1" placeholder="Leave blank for no limit">
+            <small class="field-hint">
+                Time allowed once a student starts. If this runs past the end time,
+                the end time wins and the attempt is submitted then.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="examPassing">Passing grade (%):</label>
+            <input type="number" id="examPassing" min="1" max="100" value="75">
+        </div>
+        <div class="form-group">
+            <label for="examMaterials">Allowed materials:</label>
+            <input type="text" id="examMaterials" placeholder="e.g. One A4 sheet of notes; no calculators">
+        </div>
+        <div class="form-group">
+            <label for="examQuestionLayout">Question presentation:</label>
+            <select id="examQuestionLayout">
+                <option value="paged">One question per page</option>
+                <option value="all">All questions on one page</option>
+            </select>
+            <small class="field-hint">One question per page is recommended for focus and smaller screens.</small>
+        </div>
+        <div class="form-group">
+            <label for="examNavigationMode">Student navigation:</label>
+            <select id="examNavigationMode">
+                <option value="free">Free navigation</option>
+                <option value="sequential">Sequential with review</option>
+                <option value="forward">Forward-only</option>
+            </select>
+            <small class="field-hint">
+                Free allows any question. Sequential unlocks questions in order but permits review.
+                Forward-only prevents returning to earlier questions.
+            </small>
+        </div>
+        <fieldset class="inspector-group">
+            <legend>After submission</legend>
+            <div class="form-group"><label for="examScoreRelease">Release score and grade:</label><select id="examScoreRelease"><option value="immediate">Immediately</option><option value="after-deadline">After deadline</option><option value="after-grading">After manual grading</option><option value="date">On chosen date</option><option value="never">Never</option></select></div>
+            <div class="form-group"><label for="examAnswerRelease">Release correct answers:</label><select id="examAnswerRelease"><option value="immediate">Immediately</option><option value="after-deadline">After deadline</option><option value="date">On chosen date</option><option value="never" selected>Never</option></select></div>
+            <div class="form-group"><label for="examResultReleaseAt">Chosen release date and time:</label><input type="datetime-local" id="examResultReleaseAt"></div>
+            <div class="checkbox-stack"><label><input type="checkbox" id="examShowSubmittedAnswers"> Show the student's submitted answers</label><label><input type="checkbox" id="examShowFeedback" checked> Show Faculty feedback</label></div>
+        </fieldset>
+        <div class="modal-buttons">
+            <button id="editExamQuestionsBtn" class="cancel-btn" type="button" onclick="openQuestionsFromExamEditor()" hidden aria-label="Edit questions">&#9776; Questions</button>
+            <button class="save-btn" onclick="saveExam()">Save Exam</button>
+            <button class="cancel-btn" onclick="closeExamModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Question Creation/Edit Modal -->
+<div id="questionModal" class="question-modal-bg authoring-bg">
+    <div class="question-modal authoring-workspace">
+        <header class="authoring-head">
+            <button type="button" class="icon-action" onclick="closeQuestionModal()" title="Back to question list" aria-label="Back to question list">&larr;</button>
+            <div class="authoring-title">
+                <h3 id="questionModalTitle">Add Question</h3>
+                <span id="questionDraftState" class="save-state is-saved" aria-live="polite">Draft ready</span>
+            </div>
+            <div class="authoring-head-actions">
+                <button type="button" class="icon-action" onclick="navigateQuestion(-1)" title="Previous question" aria-label="Previous question">&#8592;</button>
+                <button type="button" class="icon-action" onclick="navigateQuestion(1)" title="Next question" aria-label="Next question">&#8594;</button>
+                <button type="button" class="icon-action" onclick="saveQuestion(true)" title="Save and add another question" aria-label="Save and add another question">&#43;</button>
+                <button type="button" class="icon-action" onclick="toggleQuestionInspector()" title="Question settings" aria-label="Open question settings" aria-expanded="false" id="questionSettingsBtn">&#9881;</button>
+                <button type="button" class="save-btn" onclick="saveQuestion()">Save Question</button>
+            </div>
+        </header>
+
+        <section id="questionTypePicker" class="question-type-picker" aria-labelledby="questionTypePickerTitle">
+            <div class="type-picker-copy"><span>Step 1</span><h3 id="questionTypePickerTitle">Choose a question type</h3><p>The editor opens after you choose how students will answer.</p></div>
+            <div class="question-type-grid">
+                <button type="button" onclick="chooseQuestionType('mcq')"><span aria-hidden="true">&#9673;</span><strong>Multiple choice</strong></button>
+                <button type="button" onclick="chooseQuestionType('truefalse')"><span aria-hidden="true">&#10003;</span><strong>True or false</strong></button>
+                <button type="button" onclick="chooseQuestionType('number')"><span aria-hidden="true">#</span><strong>Number</strong></button>
+                <button type="button" onclick="chooseQuestionType('short')"><span aria-hidden="true">Aa</span><strong>Written</strong></button>
+                <button type="button" onclick="chooseQuestionType('essay')"><span aria-hidden="true">&#182;</span><strong>Paragraph</strong></button>
+                <button type="button" onclick="chooseQuestionType('fillblank')"><span aria-hidden="true">___</span><strong>Underline</strong></button>
+                <button type="button" onclick="chooseQuestionType('matching')"><span aria-hidden="true">&#8644;</span><strong>Matching</strong></button>
+                <button type="button" onclick="chooseQuestionType('imagedrag')"><span aria-hidden="true">&#128247;</span><strong>Image placement</strong></button>
+            </div>
+        </section>
+
+        <div class="authoring-body">
+            <main class="question-canvas">
+                <div class="form-group">
+                    <label for="questionText">Question prompt:</label>
+                    <textarea id="questionText" placeholder="Enter your question here..."></textarea>
+                </div>
+
+                <div id="mcqOptions" class="options-list">
+                    <label>Answer choices (select the correct answer):</label>
+                    <div id="optionsContainer"></div>
+                    <button class="icon-action" onclick="addOption()" aria-label="Add answer choice" title="Add answer choice">&#43;</button>
+                </div>
+
+                <div id="answerConfiguration" class="answer-configuration" aria-label="Correct answer configuration"></div>
+
+                <section class="question-inline-preview" aria-labelledby="questionPreviewTitle">
+                    <div class="preview-label" id="questionPreviewTitle">Student preview</div>
+                    <div id="questionInlinePreview" aria-live="polite"></div>
+                </section>
+
+                <div class="canvas-hint">Question settings, points, and marking guidance are available from the settings icon.</div>
+            </main>
+
+            <aside id="questionInspector" class="question-inspector" aria-label="Question settings">
+                <div class="inspector-head">
+                    <strong>Question settings</strong>
+                    <button type="button" class="icon-action" onclick="closeQuestionInspector()" aria-label="Close question settings">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label for="questionType">Question type:</label>
+                    <select id="questionType" onchange="requestQuestionTypeChange(this.value)">
+                        <option value="mcq">Multiple Choice (MCQ)</option>
+                        <option value="truefalse">True or False</option>
+                        <option value="number">Number Selector</option>
+                        <option value="fillblank">Complete the Underline / Fill in the Blank</option>
+                        <option value="matching">Match A to B</option>
+                        <option value="imagedrag">Image Placement / Drag and Drop</option>
+                        <option value="short">Written Answer (One Line)</option>
+                        <option value="essay">Paragraph Answer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="questionPoints">Points:</label>
+                    <input type="number" id="questionPoints" placeholder="e.g., 5" min="1" value="5">
+                </div>
+                <div class="form-group checkbox-stack question-toggle-list">
+                    <label class="toggle-row"><span><strong>Manual checking</strong><small>Professor awards the score after submission.</small></span><input type="checkbox" id="questionManualCheck" role="switch"></label>
+                </div>
+                <div id="shortAnswerSection" style="display: none;">
+                    <div class="form-group">
+                        <label for="expectedAnswer">Expected answer or marking guide:</label>
+                        <textarea id="expectedAnswer" placeholder="Enter the expected answer or marking guide..."></textarea>
+                    </div>
+                </div>
+                <div id="trueFalseSection" style="display: none;">
+                    <div class="form-group">
+                        <label for="trueFalseAnswer">Correct answer:</label>
+                        <select id="trueFalseAnswer">
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="numberAnswerSection" style="display: none;">
+                    <div class="form-group">
+                        <label for="numberAcceptedValue">Accepted value:</label>
+                        <input type="number" id="numberAcceptedValue" step="any" placeholder="e.g., 9.81">
+                    </div>
+                    <div class="form-group">
+                        <label for="numberTolerance">Tolerance (optional):</label>
+                        <input type="number" id="numberTolerance" step="any" min="0" value="0">
+                        <small class="field-hint">A value of 0 requires an exact numeric match.</small>
+                    </div>
+                </div>
+                <div id="textMatchingSection" style="display: none;">
+                    <div class="form-group checkbox-stack question-toggle-list">
+                        <label class="toggle-row"><span>Case sensitive</span><input type="checkbox" id="answerCaseSensitive" role="switch"></label>
+                        <label class="toggle-row"><span>Space sensitive</span><input type="checkbox" id="answerWhitespaceSensitive" role="switch"></label>
+                        <label class="toggle-row"><span>Symbol sensitive</span><input type="checkbox" id="answerSymbolSensitive" role="switch" checked></label>
+                    </div>
+                </div>
+                <div id="matchingSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Matching pairs:</label>
+                        <div id="matchingPairs"></div>
+                        <button type="button" class="icon-action" onclick="addMatchingPair()" aria-label="Add matching pair" title="Add matching pair">&#43;</button>
+                    </div>
+                </div>
+                <fieldset class="inspector-group">
+                    <legend>Supporting media</legend>
+                    <div class="form-group">
+                        <label>Question image:</label>
+                        <button type="button" class="question-image-drop" onclick="document.getElementById('questionImageFile').click()" ondragover="event.preventDefault();this.classList.add('is-dragging')" ondragleave="this.classList.remove('is-dragging')" ondrop="handleQuestionImageDrop(event)">
+                            <span class="question-image-drop-icon" aria-hidden="true">&#128247;</span>
+                            <strong>Choose or drop an image</strong>
+                            <small>PNG, JPG, GIF, WEBP, or AVIF · up to 1.5 MB</small>
+                        </button>
+                        <input type="file" id="questionImageFile" accept="image/png,image/jpeg,image/gif,image/webp,image/avif" hidden onchange="handleQuestionImageFile(this.files?.[0])">
+                        <div id="questionImagePreview" class="question-image-preview"></div>
+                        <details class="image-link-option"><summary>Use an image link instead</summary><input type="url" id="questionImageUrl" placeholder="https://example.com/diagram.png" oninput="renderQuestionImagePickerPreview(); scheduleQuestionDraft()"></details>
+                    </div>
+                    <div class="form-group">
+                        <label for="questionImageAlt">Image alternative text:</label>
+                        <input type="text" id="questionImageAlt" placeholder="Describe the image for students">
+                    </div>
+                    <div class="form-group">
+                        <label for="questionImageCaption">Image caption (optional):</label>
+                        <input type="text" id="questionImageCaption">
+                    </div>
+                    <div class="form-group">
+                        <label for="questionLinkUrl">External resource URL:</label>
+                        <input type="url" id="questionLinkUrl" placeholder="https://example.com/resource">
+                    </div>
+                    <div class="form-group">
+                        <label for="questionLinkText">Descriptive link text:</label>
+                        <input type="text" id="questionLinkText" placeholder="Read the reference article">
+                    </div>
+                </fieldset>
+            </aside>
+        </div>
+
+        <nav class="authoring-mobile-bar" aria-label="Question editor actions">
+            <button type="button" onclick="closeQuestionModal()"><span aria-hidden="true">&larr;</span><span>Back</span></button>
+            <button type="button" onclick="toggleQuestionInspector()"><span aria-hidden="true">&#9881;</span><span>Settings</span></button>
+            <button type="button" onclick="saveQuestion()"><span aria-hidden="true">&#10003;</span><span>Save</span></button>
+        </nav>
+    </div>
+</div>
+
+<!-- Hidden CSV File Input -->
+<input type="file" id="csvQuestionInput" accept=".csv" style="display: none;" onchange="handleQuestionCSV(this)">
+
+<!-- CSV Preview Modal -->
+<div id="csvQuestionPreviewModal" class="question-modal-bg">
+    <div class="question-modal" style="width: 700px;">
+        <h3>Preview CSV Questions</h3>
+        <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Review the questions before importing. Make sure the format is correct.</p>
+        <div id="csvPreviewContent" style="max-height: 400px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 6px;"></div>
+        <div class="modal-buttons" style="margin-top: 15px;">
+            <button class="save-btn" onclick="confirmQuestionCSVUpload()">Import Questions</button>
+            <button class="cancel-btn" onclick="closeCsvQuestionModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Grading Modal -->
+<div id="gradingModal" class="question-modal-bg">
+    <div class="question-modal" style="width: 720px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+            <div>
+                <h3 id="gradingTitle" style="margin:0;">Grade Submission</h3>
+                <p id="gradingMeta" style="color:#666; font-size:13px; margin-top:4px;"></p>
+            </div>
+            <button type="button" onclick="closeGradingModal()"
+                    style="background:none; border:none; font-size:22px; cursor:pointer; color:#888;">✕</button>
+        </div>
+        <p style="color:#666; font-size:14px; margin:12px 0;">
+            Multiple-choice answers are already marked. Enter marks for the written
+            answers below; leaving a mark blank keeps that answer pending.
+        </p>
+        <div id="gradingBody"></div>
+        <div class="form-group" style="margin-top:15px;">
+            <label for="overallRemark">Overall remark for the student:</label>
+            <textarea id="overallRemark" placeholder="Optional feedback on the whole paper..."></textarea>
+        </div>
+        <div class="modal-buttons">
+            <button class="save-btn" onclick="saveGrading()">Save Marks</button>
+            <button class="cancel-btn" onclick="closeGradingModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Exam Preview Modal -->
+<div id="previewModal" class="question-modal-bg">
+    <div class="question-modal" style="width: 720px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0;">Exam Preview</h3>
+            <button type="button" onclick="closePreviewModal()"
+                    style="background:none; border:none; font-size:22px; cursor:pointer; color:#888;">✕</button>
+        </div>
+        <p style="color:#666; font-size:14px; margin-bottom:15px;">
+            This is how the paper is presented to students. Correct answers and marking
+            guides are shown here for checking, and are never visible to students.
+        </p>
+        <div id="previewBody"></div>
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closePreviewModal()">Close Preview</button>
+        </div>
+    </div>
+</div>
+
+<!-- Student Assignment Modal -->
+<div id="studentAssignModal" class="modal-bg">
+    <div class="modal">
+        <h3>Assign Subjects to Student</h3>
+        <div style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; color: #666;">
+            <strong>How it works:</strong> Select a student → Select subjects to enroll them in
+        </div>
+        <div class="form-group">
+            <label>Student:</label>
+            <select id="assignStudent" onchange="loadSubjectsForStudent()">
+                <option value="">-- Select Student --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Available Subjects (for your subjects):</label>
+            <div id="subjectCheckboxList" style="background: #f9f9f9; padding: 12px; border-radius: 6px; max-height: 250px; overflow-y: auto; border: 1px solid #ddd;">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button class="save-btn" onclick="saveSubjectAssignments()">✓ Enroll in Subjects</button>
+            <button class="cancel-btn" onclick="closeStudentAssignModal()">✕ Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ======= LOGIC GATE: FACULTY ONLY =======
+const session = requireRole('faculty');
+if (typeof DemoData !== 'undefined') DemoData.install();
+if (!session) throw new Error('Not authorised — redirecting to login.');
+
+// ======= LOAD LOCALSTORAGE DATA =======
+const faculty = DB.read('faculty', []);
+const subjects = DB.read('subjects', []);
+const allotments = DB.read('allotments', []);
+const sectionSubjects = DB.read('sectionSubjects', []);
+const studentEnrollments = DB.read('studentEnrollments', []);
+let exams = DB.read('exams', []);
+const students = DB.read('students', []);
+
+// Identity comes from the session, never from the URL. Reading ?facultyId=
+// let anyone view and edit another lecturer's subjects, exams and students
+// just by editing the address bar.
+const facultyId = session.username;
+
+const subjectList = document.getElementById("subjectList");
+
+let mySubjects = []; // Will store subjects assigned to this faculty
+
+// ======= INITIALIZATION =======
+{
+    const fac = faculty.find(f => f.id == facultyId);
+
+    if (!fac) {
+        notify('Faculty record not found.','error');
+    } else {
+        mountProfileMenu({
+            name: `${fac.first} ${fac.last}`,
+            role: 'faculty',
+            id: fac.id,
+            container: '#topbarRight'
+        });
+
+
+        // Get allotted subjects from subjectAssignments (Faculty-Subject mapping)
+        const subjectAssignments = DB.read('subjectAssignments', []);
+       
+        const allottedSubjects = subjectAssignments
+            .filter(a => {
+                const facList = Array.isArray(a.facultyIds) ? a.facultyIds : [a.facultyId];
+                return facList.includes(facultyId);
+            })
+            .map(a => a.subjectCode);
+
+        mySubjects = subjects.filter(s => allottedSubjects.includes(s.code));
+        mySubjects.sort((a, b) => a.code.localeCompare(b.code));
+
+        // Display subject cards
+        if (mySubjects.length === 0) {
+            subjectList.innerHTML = "<p>No subjects assigned to you.</p>";
+        } else {
+            subjectList.innerHTML = mySubjects.map(s => `
+                <div class="sub-card" role="button" tabindex="0" aria-label="Open ${s.code} ${s.name}" onclick="FacultySubjectWorkspace.open('${s.code}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();FacultySubjectWorkspace.open('${s.code}')}">
+                    <div class="sub-code">${s.code}</div>
+                    <div class="sub-name">${s.name}</div>
+                </div>
+            `).join("");
+        }
+    }
+}
+
+// ======= SECTION SWITCHING =======
+// Kept as switchTab() so existing call sites still work; navigation is now the
+// shared sidebar rather than a tab bar. btnEl is accepted but unused.
+let facultyNav = null;
+
+function switchTab(tabName, btnEl) {
+    if (facultyNav) { facultyNav.show(tabName); return; }
+    // Fallback if the sidebar has not mounted yet.
+    ['subjects-tab', 'exams-tab', 'students-tab'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === tabName) ? 'block' : 'none';
+    });
+    onFacultySection(tabName);
+}
+
+function onFacultySection(id) {
+    if (id === 'exams-tab') displayAllFacultyExams();
+    if (id === 'students-tab') displayMyStudents();
+    if (id === 'reports-tab') displayQuestionReports();
+}
+
+function displayQuestionReports() {
+    const host = document.getElementById('reportsView');
+    const ownedIds = exams.filter(exam => exam.facultyId === facultyId).map(exam => exam.id);
+    const reports = reportsForExams(ownedIds).sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    host.innerHTML = `<div class="exams-section"><div class="exams-header"><h3>Question Reports</h3><span>${reports.filter(r=>r.status==='open').length} open</span></div>
+      <div class="question-report-filter"><label for="reportStatusFilter">Status</label><select id="reportStatusFilter" onchange="filterQuestionReports()"><option value="all">All statuses</option><option value="open">Open</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></div>
+      ${reports.length ? reports.map(report => {
+        const exam = exams.find(e=>e.id===report.examId); const question = questions.find(q=>q.id===report.questionId);
+        return `<article class="question-report ${report.status}" data-report-status="${report.status}" data-question-id="${report.questionId}"><div class="report-main"><strong>${escapeQuestionMedia(report.category.replace('-', ' '))}</strong>
+          <span class="report-status">${report.status}</span><h4>${escapeQuestionMedia(question?.text || 'Question removed')}</h4>
+          <p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(exam?.title || 'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small>
+          <label class="report-note-label">Resolution note <textarea data-report-note="${report.id}" oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Explain what was checked or changed">${escapeQuestionMedia(report.resolutionNote || '')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label></div>
+          <div class="report-actions"><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','reviewed')">Reviewed</button><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','resolved')">Resolve</button><button type="button" class="delete-btn" onclick="toggleQuestionReport('${report.id}','dismissed')">Dismiss</button><button type="button" class="edit-btn" onclick="notifyReportResolution('${report.id}')">Notify student</button>${report.status !== 'open' ? `<button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','open')">Reopen</button>` : ''}</div></article>`;
+      }).join('') : '<div class="no-exams">No question reports for your exams.</div>'}</div>`;
+}
+
+function openQuestionReports(questionId) {
+    switchTab('reports-tab', document.querySelector('[data-target="reports-tab"]'));
+    displayQuestionReports();
+    document.querySelectorAll('#reportsView .question-report').forEach(item => {
+        item.hidden = item.dataset.questionId !== questionId;
+    });
+    const filter = document.getElementById('reportStatusFilter');
+    if (filter) filter.disabled = true;
+}
+
+const reportNoteTimers = new Map();
+function scheduleReportNote(reportId, note) {
+    const state = document.querySelector(`[data-report-save="${reportId}"]`);
+    if (state) state.textContent = 'Saving…';
+    clearTimeout(reportNoteTimers.get(reportId));
+    reportNoteTimers.set(reportId, setTimeout(() => {
+        const saved = saveQuestionReportNote(reportId, note);
+        if (state) state.textContent = saved ? 'Saved' : 'Not saved';
+    }, 500));
+}
+
+function filterQuestionReports() {
+    const status = document.getElementById('reportStatusFilter')?.value || 'all';
+    document.querySelectorAll('#reportsView .question-report').forEach(item => {
+        item.hidden = status !== 'all' && item.dataset.reportStatus !== status;
+    });
+}
+
+function toggleQuestionReport(reportId, status) {
+    const ownedIds = exams.filter(exam => exam.facultyId === facultyId).map(exam => exam.id);
+    if (!reportsForExams(ownedIds).some(report => report.id === reportId)) { notify('You cannot update that report.', 'error'); return false; }
+    if (!setQuestionReportStatus(reportId, status)) { notify('The report status could not be saved.', 'error'); return false; }
+    displayQuestionReports(); notify(status === 'resolved' ? 'Report resolved.' : 'Report reopened.', 'success'); return true;
+}
+
+async function notifyReportResolution(reportId) {
+    const ownedIds = exams.filter(exam => exam.facultyId === facultyId).map(exam => exam.id);
+    const report = reportsForExams(ownedIds).find(item => item.id === reportId);
+    if (!report) { notify('You cannot notify from that report.', 'error'); return false; }
+    const note = document.querySelector(`[data-report-note="${reportId}"]`)?.value.trim() || report.resolutionNote || '';
+    if (!note) { notify('Add a resolution note before notifying the student.', 'error'); return false; }
+    saveQuestionReportNote(reportId, note);
+    if (!(await confirmDialog({ title:'Notify this student?', message:`The resolution note will be sent to ${report.studentId}.`, confirmLabel:'Send notification' }))) return false;
+    if (!notifyReportStudent(reportId)) { notify('The notification could not be saved.', 'error'); return false; }
+    notify('Student notified.', 'success'); return true;
+}
+
+// ======= EXAM MODAL FUNCTIONS =======
+let currentEditingExamId = null;
+let examFormInitial = '';
+let examFormDirty = false;
+let examFormWired = false;
+
+function examFormSnapshot() {
+    return JSON.stringify(['examSubject','examTitle','examDesc','examDate','examStart','examEnd',
+        'examDuration','examPassing','examMaterials','examQuestionLayout','examNavigationMode','examScoreRelease','examAnswerRelease','examResultReleaseAt','examShowSubmittedAnswers','examShowFeedback']
+        .map(id => document.getElementById(id).type === 'checkbox' ? document.getElementById(id).checked : document.getElementById(id).value)
+        .concat([...document.querySelectorAll('#examSectionChoices input:checked')].map(input => input.value).sort()));
+}
+
+function eligibleExamSections(subjectCode) {
+    return [...new Set(SectionService.offeringsForFaculty(
+        facultyId,
+        DB.read('sectionSubjects', sectionSubjects),
+        DB.read('subjectAssignments', [])
+    ).filter(item => item.subjectCode === subjectCode).map(item => item.sectionId).filter(Boolean))].sort();
+}
+
+function renderExamSectionChoices(subjectCode, selected = null) {
+    const host = document.getElementById('examSectionChoices');
+    const ids = eligibleExamSections(subjectCode);
+    const chosen = new Set(selected == null ? ids : selected);
+    const safe = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    host.innerHTML = ids.length ? ids.map(id => `<label class="exam-section-choice"><input type="checkbox" value="${safe(id)}" ${chosen.has(id) ? 'checked' : ''}><span>${safe(id)}</span></label>`).join('') : '<span class="field-hint">No handled sections are available for this subject.</span>';
+}
+
+function beginExamFormSession() {
+    examFormInitial = examFormSnapshot();
+    examFormDirty = false;
+    if (!examFormWired) {
+        const form = document.querySelector('#examModal .modal');
+        const mark = () => { examFormDirty = examFormSnapshot() !== examFormInitial; };
+        form.addEventListener('input', mark);
+        form.addEventListener('change', mark);
+        examFormWired = true;
+    }
+}
+
+function openExamModal(subjectCode = null) {
+    currentEditingExamId = null;
+    document.getElementById('examModalTitle').textContent = 'Create New Exam';
+   
+    // Clear form
+    document.getElementById('examSubject').value = subjectCode || '';
+    document.getElementById('examTitle').value = '';
+    document.getElementById('examDesc').value = '';
+    document.getElementById('examDate').value = '';
+    document.getElementById('examStart').value = '';
+    document.getElementById('examEnd').value = '';
+    document.getElementById('examDuration').value = '';
+    document.getElementById('examPassing').value = 75;
+    document.getElementById('examMaterials').value = '';
+    document.getElementById('examQuestionLayout').value = 'paged';
+    document.getElementById('examNavigationMode').value = 'free';
+    document.getElementById('examScoreRelease').value = 'immediate';
+    document.getElementById('examAnswerRelease').value = 'never';
+    document.getElementById('examResultReleaseAt').value = '';
+    document.getElementById('examShowSubmittedAnswers').checked = false;
+    document.getElementById('examShowFeedback').checked = true;
+
+    // Populate subject dropdown with faculty's subjects
+    const subjectSelect = document.getElementById('examSubject');
+    subjectSelect.innerHTML = mySubjects.map(s =>
+        `<option value="${s.code}" ${s.code === subjectCode ? 'selected' : ''}>${s.code} - ${s.name}</option>`
+    ).join('');
+    subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
+    renderExamSectionChoices(subjectSelect.value);
+    document.getElementById('editExamQuestionsBtn').hidden = true;
+
+    document.getElementById('examModal').classList.add('active');
+    beginExamFormSession();
+}
+
+function editExam(examId) {
+    const exam = exams.find(e => e.id === examId);
+    if (!required(exam, 'That record no longer exists. The list has been refreshed.')) { displayAllFacultyExams(); return; }
+
+    currentEditingExamId = examId;
+    document.getElementById('examModalTitle').textContent = 'Edit Exam';
+   
+    document.getElementById('examSubject').value = exam.subjectCode;
+    document.getElementById('examTitle').value = exam.title;
+    document.getElementById('examDesc').value = exam.desc;
+    document.getElementById('examDate').value = exam.date;
+    document.getElementById('examStart').value = exam.start;
+    document.getElementById('examEnd').value = exam.end;
+    document.getElementById('examDuration').value = exam.durationMinutes || '';
+    document.getElementById('examPassing').value = exam.passingPercent || 75;
+    document.getElementById('examMaterials').value = exam.materials || '';
+    document.getElementById('examQuestionLayout').value = exam.questionLayout || 'paged';
+    document.getElementById('examNavigationMode').value = exam.navigationMode || 'free';
+    document.getElementById('examScoreRelease').value = exam.scoreRelease || (exam.showScore !== false ? 'immediate' : 'never');
+    document.getElementById('examAnswerRelease').value = exam.answerRelease || (exam.allowAnswerReview ? 'immediate' : 'never');
+    document.getElementById('examResultReleaseAt').value = exam.resultReleaseAt || '';
+    document.getElementById('examShowSubmittedAnswers').checked = exam.showSubmittedAnswers ?? exam.allowAnswerReview === true;
+    document.getElementById('examShowFeedback').checked = exam.showFeedback !== false;
+
+    const subjectSelect = document.getElementById('examSubject');
+    subjectSelect.innerHTML = mySubjects.map(s =>
+        `<option value="${s.code}" ${s.code === exam.subjectCode ? 'selected' : ''}>${s.code} - ${s.name}</option>`
+    ).join('');
+    subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
+    renderExamSectionChoices(exam.subjectCode, Array.isArray(exam.sections) && exam.sections.length ? exam.sections : null);
+    document.getElementById('editExamQuestionsBtn').hidden = false;
+
+    document.getElementById('examModal').classList.add('active');
+    beginExamFormSession();
+}
+
+async function openQuestionsFromExamEditor() {
+    const examId = currentEditingExamId;
+    if (!examId) return;
+    if (examFormDirty && !(await confirmDialog({
+        title: 'Open question editor?',
+        message: 'Save the exam changes first, or they will be discarded.',
+        confirmLabel: 'Discard and open'
+    }))) return;
+    await closeExamModal(true);
+    manageQuestions(examId);
+}
+
+async function closeExamModal(force = false) {
+    if (!force && examFormDirty) {
+        const choice = await saveDiscardDialog({
+            message: 'Save this exam draft, discard the changes, or continue editing.'
+        });
+        if (choice === 'continue') return false;
+        if (choice === 'save') return saveExam();
+    }
+    document.getElementById('examModal').classList.remove('active');
+    currentEditingExamId = null;
+    examFormDirty = false;
+    return true;
+}
+
+async function saveExam() {
+    const editingId = currentEditingExamId;
+    const subjectCode = document.getElementById('examSubject').value;
+    const title = document.getElementById('examTitle').value.trim();
+    const desc = document.getElementById('examDesc').value.trim();
+    const date = document.getElementById('examDate').value;
+    const start = document.getElementById('examStart').value;
+    const end = document.getElementById('examEnd').value;
+    const durationRaw = document.getElementById('examDuration').value.trim();
+    const durationMinutes = durationRaw === '' ? 0 : Number(durationRaw);
+    const passingPercent = Number(document.getElementById('examPassing').value) || 75;
+    const materials = document.getElementById('examMaterials').value.trim();
+    const questionLayout = document.getElementById('examQuestionLayout').value;
+    const navigationMode = document.getElementById('examNavigationMode').value;
+    const scoreRelease = document.getElementById('examScoreRelease').value;
+    const answerRelease = document.getElementById('examAnswerRelease').value;
+    const resultReleaseAt = document.getElementById('examResultReleaseAt').value;
+    const showSubmittedAnswers = document.getElementById('examShowSubmittedAnswers').checked;
+    const showFeedback = document.getElementById('examShowFeedback').checked;
+    const sections = [...document.querySelectorAll('#examSectionChoices input:checked')].map(input => input.value);
+    if ((scoreRelease === 'date' || answerRelease === 'date') && !resultReleaseAt) { notify('Choose a result release date and time.', 'error'); return false; }
+
+    if (!subjectCode || !title || !date || !start || !end) {
+        notify('Please fill all required fields', 'error');
+        return;
+    }
+    if (eligibleExamSections(subjectCode).length && !sections.length) {
+        notify('Select at least one section that can take this exam.', 'error');
+        return false;
+    }
+
+    // Schedule rule: an exam cannot end before (or exactly when) it starts,
+    // which would leave students a window they can never enter.
+    if (end <= start) {
+        notify(`The end time (${end}) must be later than the start time (${start}).`, 'error');
+        return;
+    }
+
+    if (durationRaw !== '' && (!isFinite(durationMinutes) || durationMinutes < 1)) {
+        notify('The attempt time limit must be at least 1 minute, or left blank.', 'error');
+        return;
+    }
+
+    // A duration longer than the window itself is misleading: the deadline
+    // would always win, so no student could ever use the time offered.
+    const windowMins = (parseLocal(date, end) - parseLocal(date, start)) / 60000;
+    if (durationMinutes > 0 && isFinite(windowMins) && durationMinutes > windowMins) {
+        notify(`The ${durationMinutes}-minute limit is longer than the ${Math.round(windowMins)}-minute window, so students could never use it all.`, 'error');
+        return;
+    }
+
+    // The lecturer must be assigned to the subject they are scheduling for.
+    if (!mySubjects.some(s => s.code === subjectCode)) {
+        notify('You are not assigned to that subject.', 'error');
+        return;
+    }
+
+    const existing = editingId ? exams.find(e => e.id === editingId) : null;
+    const impactful = existing && [
+        ['subject', existing.subjectCode, subjectCode], ['date', existing.date, date],
+        ['start time', existing.start, start], ['end time', existing.end, end],
+        ['time limit', Number(existing.durationMinutes || 0), durationMinutes],
+        ['question layout', existing.questionLayout || 'paged', questionLayout],
+        ['navigation policy', existing.navigationMode || 'free', navigationMode],
+        ['score release', existing.scoreRelease || (existing.showScore !== false ? 'immediate' : 'never'), scoreRelease],
+        ['answer release', existing.answerRelease || (existing.allowAnswerReview ? 'immediate' : 'never'), answerRelease],
+        ['submitted answers', existing.showSubmittedAnswers ?? existing.allowAnswerReview === true, showSubmittedAnswers],
+        ['Faculty feedback', existing.showFeedback !== false, showFeedback]
+    ].filter(([, before, after]) => before !== after);
+    const affected = editingId ? submissions.filter(s => s.examId === editingId) : [];
+    if (impactful && impactful.length && affected.length && !(await confirmDialog({
+        title: 'Change an active exam?',
+        message: `${affected.length} existing submission(s) may be affected. Changed: ${impactful.map(c => c[0]).join(', ')}.`,
+        confirmLabel: 'Apply changes',
+        danger: true
+    }))) return false;
+
+    const nextExams = exams.map(e => ({ ...e }));
+    if (editingId) {
+        // Edit existing exam
+        const exam = nextExams.find(e => e.id === editingId);
+        if (exam) {
+            exam.subjectCode = subjectCode;
+            exam.title = title;
+            exam.desc = desc;
+            exam.date = date;
+            exam.start = start;
+            exam.end = end;
+            exam.durationMinutes = durationMinutes;
+            exam.passingPercent = passingPercent;
+            exam.materials = materials;
+            exam.questionLayout = questionLayout;
+            exam.navigationMode = navigationMode;
+            exam.scoreRelease = scoreRelease; exam.answerRelease = answerRelease; exam.resultReleaseAt = resultReleaseAt;
+            exam.showSubmittedAnswers = showSubmittedAnswers; exam.showFeedback = showFeedback;
+            exam.sections = sections;
+        }
+    } else {
+        // Create new exam
+        const newExam = {
+            id: 'exam_' + Date.now(),
+            facultyId: facultyId,
+            subjectCode: subjectCode,
+            title: title,
+            desc: desc,
+            date: date,
+            start: start,
+            end: end,
+            durationMinutes: durationMinutes,
+            passingPercent: passingPercent,
+            materials: materials,
+            questionLayout: questionLayout,
+            navigationMode: navigationMode,
+            status: 'draft',
+            scoreRelease, answerRelease, resultReleaseAt, showSubmittedAnswers, showFeedback, sections
+        };
+        nextExams.push(newExam);
+    }
+
+    if (!DB.write('exams', nextExams)) {
+        notify('The exam could not be saved. Your changes are still in the form.', 'error');
+        return false;
+    }
+    exams = nextExams;
+    AuditLog.record(editingId?'update':'create','exam',editingId||nextExams[nextExams.length-1].id,{title,subjectCode});
+    examFormInitial = examFormSnapshot();
+    examFormDirty = false;
+    await closeExamModal(true);
+    notify(editingId ? `Exam updated: ${title}` : `Exam created: ${title}`, 'success');
+    displayAllFacultyExams();
+    return true;
+}
+
+async function deleteExam(examId) {
+    const exam = exams.find(e => e.id === examId);
+    const qCount = questions.filter(q => q.examId === examId).length;
+    if (!(await confirmDialog({
+        title: 'Delete this exam?',
+        message: `<strong>${exam ? exam.title : 'This exam'}</strong> will be removed, along `
+               + `with its ${qCount} question(s) and any submissions.\n\nThis cannot be undone.`,
+        confirmLabel: 'Delete exam',
+        danger: true
+    }))) return;
+
+    exams = exams.filter(e => e.id !== examId);
+    localStorage.setItem('exams', JSON.stringify(exams));
+    notify('Exam deleted.', 'success');
+    displayAllFacultyExams();
+}
+
+function viewSubjectExams(subjectCode) {
+    // Switch to exams tab and filter by subject
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('exams-tab').classList.add('active');
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+   
+    displayExamsBySubject(subjectCode);
+}
+
+function examActionsMenu(examId) {
+    return `<details class="exam-settings-menu">
+        <summary class="exam-icon-btn" aria-label="Exam settings" title="Exam settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a8 8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a8 8 0 0 0-1.7-1L15 3.3h-4L10.6 6a8 8 0 0 0-1.7 1L6.5 6l-2 3.4L6.6 11a8 8 0 0 0 0 2l-2.1 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.4 2.7h4l.4-2.7a8 8 0 0 0 1.7-1l2.4 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></summary>
+        <nav class="exam-settings-nav" aria-label="Exam actions">
+            <button onclick="editExam('${examId}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>Edit exam</span></button>
+            <button onclick="manageQuestions('${examId}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 6h16v3H4v-3Zm0 6h10v3H4v-3Z"/></svg><span>Questions</span></button>
+            <button onclick="viewResults('${examId}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16v2H2V3h2v16Zm3-2v-5h3v5H7Zm5 0V7h3v10h-3Zm5 0V4h3v13h-3Z"/></svg><span>Results</span></button>
+            <button class="danger" onclick="deleteExam('${examId}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete</span></button>
+        </nav>
+    </details>`;
+}
+
+function displayAllFacultyExams() {
+    const myExams = exams.filter(e => e.facultyId === facultyId);
+    const examsView = document.getElementById('examsView');
+
+    if (myExams.length === 0) {
+        examsView.innerHTML = `
+            <div class="exams-section">
+                <div class="exams-header">
+                    <h3>My Exams</h3>
+                    <button class="add-exam-btn exam-icon-btn" onclick="openExamModal()" aria-label="Create exam" title="Create exam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button>
+                </div>
+                <div class="no-exams">No exams created yet. Click "Create Exam" to get started!</div>
+            </div>
+        `;
+        return;
+    }
+
+    const examsBySubject = {};
+    myExams.forEach(exam => {
+        if (!examsBySubject[exam.subjectCode]) {
+            examsBySubject[exam.subjectCode] = [];
+        }
+        examsBySubject[exam.subjectCode].push(exam);
+    });
+
+    const html = `
+        <div class="exams-section">
+            <div class="exams-header">
+                <h3>My Exams</h3>
+                <button class="add-exam-btn exam-icon-btn" onclick="openExamModal()" aria-label="Create exam" title="Create exam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button>
+            </div>
+            ${Object.entries(examsBySubject).map(([subCode, examsForSub]) => {
+                const subject = subjects.find(s => s.code === subCode);
+                return `
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">${subCode} - ${subject ? subject.name : 'Unknown Subject'}</h4>
+                        ${examsForSub.map(exam => `
+                            <div class="exam-item">
+                                <div class="exam-item-info">
+                                    <h4>${exam.title}</h4>
+                                    <p><strong>Date:</strong> ${exam.date}</p>
+                                    <p><strong>Time:</strong> ${exam.start} - ${exam.end}</p>
+                                    <p><strong>Description:</strong> ${exam.desc || 'N/A'}</p>
+                                </div>
+                                <div class="exam-item-actions">${examActionsMenu(exam.id)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+
+    examsView.innerHTML = html;
+}
+
+function displayExamsBySubject(subjectCode) {
+    const myExams = exams.filter(e => e.facultyId === facultyId && e.subjectCode === subjectCode);
+    const subject = subjects.find(s => s.code === subjectCode);
+    const examsView = document.getElementById('examsView');
+
+    if (myExams.length === 0) {
+        examsView.innerHTML = `
+            <div>
+                <button class="back-btn icon-only" onclick="displayAllFacultyExams(); switchTab('exams-tab', document.querySelectorAll('.tab-btn')[1])" aria-label="Back to all exams" title="Back to all exams"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
+                <div class="exams-section">
+                    <div class="exams-header">
+                        <h3>Exams for ${subject ? subject.name : 'Unknown Subject'}</h3>
+                        <button class="add-exam-btn exam-icon-btn" onclick="openExamModal('${subjectCode}')" aria-label="Create exam" title="Create exam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button>
+                    </div>
+                    <div class="no-exams">No exams for this subject yet.</div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const html = `
+        <div>
+            <button class="back-btn icon-only" onclick="displayAllFacultyExams(); switchTab('exams-tab', document.querySelectorAll('.tab-btn')[1])" aria-label="Back to all exams" title="Back to all exams"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
+            <div class="exams-section">
+                <div class="exams-header">
+                    <h3>Exams for ${subject ? subject.name : 'Unknown Subject'}</h3>
+                    <button class="add-exam-btn exam-icon-btn" onclick="openExamModal('${subjectCode}')" aria-label="Create exam" title="Create exam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button>
+                </div>
+                ${myExams.map(exam => `
+                    <div class="exam-item">
+                        <div class="exam-item-info">
+                            <h4>${exam.title}</h4>
+                            <p><strong>Date:</strong> ${exam.date}</p>
+                            <p><strong>Time:</strong> ${exam.start} - ${exam.end}</p>
+                            <p><strong>Description:</strong> ${exam.desc || 'N/A'}</p>
+                        </div>
+                        <div class="exam-item-actions">${examActionsMenu(exam.id)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    examsView.innerHTML = html;
+}
+
+// logout() comes from auth.js — it clears the session before redirecting.
+
+// ======= QUESTION MANAGEMENT FUNCTIONS =======
+let questions = DB.read('questions', []);
+let currentEditingQuestionId = null;
+let currentEditingExamForQuestions = null;
+let currentOptionIndex = 0;
+let questionDraftTimer = null;
+let questionDraftWired = false;
+let questionCommitted = false;
+
+function manageQuestions(examId) {
+    currentEditingExamForQuestions = examId;
+    const exam = exams.find(e => e.id === examId);
+    if (!required(exam, 'That record no longer exists. The list has been refreshed.')) { displayAllFacultyExams(); return; }
+
+    const examQuestions = questions.filter(q => q.examId === examId);
+    const examReports = reportsForExams([examId]);
+    const totals = questionCatalogueSummary(examQuestions);
+    const examsView = document.getElementById('examsView');
+
+    const html = `
+        <div>
+            <button class="back-btn icon-only" onclick="displayAllFacultyExams(); switchTab('exams-tab', document.querySelectorAll('.tab-btn')[1])" aria-label="Back to all exams" title="Back to all exams"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
+            <div class="exams-section">
+                <div class="exams-header question-catalog-head">
+                    <div class="question-catalog-title"><span>Question bank</span><h3>${exam.title}</h3></div>
+                    <div class="question-catalog-actions">
+                        <button class="catalog-icon-btn" onclick="openQuestionModal()" aria-label="Add question" title="Add question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7V4Z"/></svg></button>
+                        <button class="catalog-icon-btn" onclick="document.getElementById('csvQuestionInput').click()" aria-label="Import questions from CSV" title="Import CSV"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2V8l3 3 1.4-1.4L12 4.2 6.6 9.6 8 11l3-3v7Zm-6 3h14v2H5v-2Z"/></svg></button>
+                        <button class="catalog-icon-btn" onclick="previewExam('${examId}')" aria-label="Preview examination" title="Preview examination"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.2 0 9.3 4.4 10 7-.7 2.6-4.8 7-10 7S2.7 14.6 2 12c.7-2.6 4.8-7 10-7Zm0 2c-3.7 0-6.9 2.9-7.8 5 .9 2.1 4.1 5 7.8 5s6.9-2.9 7.8-5C18.9 9.9 15.7 7 12 7Zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg></button>
+                        ${exam.status === 'draft' ? `<button class="catalog-icon-btn publish" id="publishExamBtn" onclick="reviewAndPublishExam('${examId}')" aria-label="Review and publish examination" title="Review and publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.2 16.2-4.4-4.4-1.4 1.4L9.2 19 21 7.2l-1.4-1.4-10.4 10.4Z"/></svg></button>` : '<span class="publish-state"><span aria-hidden="true">●</span> Published</span>'}
+                    </div>
+                </div>
+                <div class="question-catalog-toolbar">
+                    <div class="question-total" id="questionCatalogueTotal" aria-live="polite"><strong>${totals.count}</strong> question(s) · <strong>${totals.points}</strong> point(s)</div>
+                    <label class="catalog-search"><span>Search questions</span><input type="search" id="questionSearch" placeholder="Search question text" oninput="filterQuestionCatalogue()"></label>
+                    <label class="catalog-type"><span>Question type</span><select id="questionTypeFilter" onchange="filterQuestionCatalogue()">
+                        <option value="all">All types</option>
+                        <option value="mcq">Multiple choice</option><option value="truefalse">True or false</option>
+                        <option value="number">Number selector</option><option value="short">Written answer</option>
+                        <option value="essay">Paragraph answer</option><option value="fillblank">Complete the underline</option>
+                        <option value="matching">Match A to B</option><option value="imagedrag">Image placement</option>
+                    </select></label>
+                </div>
+                ${examQuestions.length === 0 ?
+                    '<div class="no-exams">No questions added yet. Click "Add Question" to get started!</div>' :
+                    `<div>${examQuestions.map((q, qIdx) => `
+                        <div class="question-item" data-question-type="${q.type}">
+                            <div class="question-text">Q${qIdx + 1}: ${q.text}</div>
+                            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                                <strong>Type:</strong> ${questionTypeLabel(q.type)}
+                                ${isChoiceQuestion(q) ? ` | <strong>Options:</strong> ${q.options.length}` : ''}
+                                | <strong>Points:</strong> ${q.points || 5}
+                            </div>
+                            ${isChoiceQuestion(q) ? `
+                                <div class="question-options">
+                                    ${q.options.map((opt, idx) => `
+                                        <div class="option-item ${opt.isCorrect ? 'correct' : ''}">
+                                            ${String.fromCharCode(65 + idx)}. ${opt.text} ${opt.isCorrect ? '✓ (Correct)' : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : q.type === 'number' ? `
+                                <div class="question-options">
+                                    <div class="option-item"><strong>Accepted value:</strong> ${q.acceptedValue} &plusmn; ${q.tolerance || 0}</div>
+                                    <div class="option-item"><strong>Points:</strong> ${q.points || 5}</div>
+                                </div>
+                            ` : `
+                                <div class="question-options">
+                                    <div class="option-item"><strong>Expected Answer:</strong> ${q.expectedAnswer || 'N/A'}</div>
+                                    <div class="option-item"><strong>Points:</strong> ${q.points || 5}</div>
+                                </div>
+                            `}
+                            <details class="question-more">
+                                <summary aria-label="Question actions" title="Question actions">&#8942;</summary>
+                                <div class="question-more-menu">
+                                    <button onclick="editQuestion('${q.id}')"><span aria-hidden="true">&#9998;</span>Edit</button>
+                                    <button onclick="moveQuestion('${q.id}',-1)" ${qIdx === 0 ? 'disabled' : ''}><span aria-hidden="true">&#8593;</span>Move up</button>
+                                    <button onclick="moveQuestion('${q.id}',1)" ${qIdx === examQuestions.length - 1 ? 'disabled' : ''}><span aria-hidden="true">&#8595;</span>Move down</button>
+                                    <button onclick="duplicateQuestion('${q.id}')"><span aria-hidden="true">&#10697;</span>Duplicate</button>
+                                    ${examReports.some(report=>report.questionId===q.id) ? `<button onclick="openQuestionReports('${q.id}')"><span aria-hidden="true">&#9873;</span>Reports (${examReports.filter(report=>report.questionId===q.id).length})</button>` : ''}
+                                    <button class="danger" onclick="deleteQuestion('${q.id}')"><span aria-hidden="true">&#128465;</span>Delete</button>
+                                </div>
+                            </details>
+                        </div>
+                    `).join('')}</div>`
+                }
+            </div>
+        </div>
+    `;
+
+    examsView.innerHTML = html;
+}
+
+function filterQuestionCatalogue() {
+    const query = document.getElementById('questionSearch')?.value || '';
+    const type = document.getElementById('questionTypeFilter')?.value || 'all';
+    const examQuestions = questions.filter(q => q.examId === currentEditingExamForQuestions);
+    let shown = 0;
+    document.querySelectorAll('#examsView .question-item').forEach((item, index) => {
+        const visible = questionMatchesFilter(examQuestions[index], query, type);
+        item.hidden = !visible;
+        if (visible) shown++;
+    });
+    const summary = questionCatalogueSummary(examQuestions);
+    const total = document.getElementById('questionCatalogueTotal');
+    if (total) total.innerHTML = `<strong>${shown}</strong> shown of ${summary.count} question(s) · <strong>${summary.points}</strong> total point(s)`;
+}
+
+function duplicateQuestion(questionId) {
+    const index = questions.findIndex(q => q.id === questionId && q.examId === currentEditingExamForQuestions);
+    if (index === -1) { notify('That question no longer exists.', 'error'); return false; }
+    const copy = duplicateQuestionRecord(questions[index], `question_${Date.now()}_copy`);
+    copy.text = `${copy.text} (Copy)`;
+    const next = questions.slice();
+    next.splice(index + 1, 0, copy);
+    if (!DB.write('questions', next)) { notify('The question could not be duplicated.', 'error'); return false; }
+    questions = next;
+    manageQuestions(currentEditingExamForQuestions);
+    notify('Question duplicated.', 'success');
+    return true;
+}
+
+function openQuestionModal() {
+    currentEditingQuestionId = null;
+    document.getElementById('questionModalTitle').textContent = 'Add Question';
+    document.getElementById('questionText').value = '';
+    document.getElementById('questionType').value = 'mcq';
+    document.getElementById('expectedAnswer').value = '';
+    document.getElementById('questionPoints').value = 5;
+    document.getElementById('trueFalseAnswer').value = 'true';
+    document.getElementById('numberAcceptedValue').value = '';
+    document.getElementById('numberTolerance').value = '0';
+    document.getElementById('questionManualCheck').checked = false;
+    document.getElementById('answerCaseSensitive').checked = false;
+    document.getElementById('answerWhitespaceSensitive').checked = false;
+    document.getElementById('answerSymbolSensitive').checked = true;
+    renderMatchingPairs([{left:'',right:''},{left:'',right:''}]);
+    ['questionImageUrl','questionImageAlt','questionImageCaption','questionLinkUrl','questionLinkText']
+        .forEach(id => { document.getElementById(id).value = ''; });
+   
+    // Create default options
+    document.getElementById('optionsContainer').innerHTML = `
+        <div class="option-input-group">
+            <input type="text" placeholder="Option A">
+            <input type="radio" name="correctOption" value="0">
+            <label>Correct</label>
+            <button type="button" onclick="removeOption(this)">Remove</button>
+        </div>
+        <div class="option-input-group">
+            <input type="text" placeholder="Option B">
+            <input type="radio" name="correctOption" value="1">
+            <label>Correct</label>
+            <button type="button" onclick="removeOption(this)">Remove</button>
+        </div>
+    `;
+    currentOptionIndex = 2;
+    questionCommitted = false;
+    restoreQuestionDraft();
+    lastQuestionType = document.getElementById('questionType').value;
+    updateQuestionType();
+    wireQuestionDraftAutosave();
+    closeQuestionInspector();
+    renderQuestionImagePickerPreview();
+    document.getElementById('questionModal').classList.add('choosing-type');
+    document.getElementById('questionModal').classList.add('active');
+}
+
+function chooseQuestionType(type) {
+    const select = document.getElementById('questionType');
+    select.value = type;
+    lastQuestionType = type;
+    updateQuestionType();
+    document.getElementById('questionModal').classList.remove('choosing-type');
+    document.getElementById('questionText').focus();
+}
+
+function editQuestion(questionId) {
+    const question = questions.find(q => q.id === questionId);
+    if (!required(question, 'That question no longer exists.')) { manageQuestions(currentEditingExamForQuestions); return; }
+
+    currentEditingQuestionId = questionId;
+    document.getElementById('questionModalTitle').textContent = 'Edit Question';
+    document.getElementById('questionText').value = question.text;
+    document.getElementById('questionType').value = question.type;
+    document.getElementById('expectedAnswer').value = question.expectedAnswer || '';
+    document.getElementById('questionPoints').value = question.points || 5;
+    document.getElementById('trueFalseAnswer').value = question.options?.find(o => o.isCorrect)?.text?.toLowerCase() || 'true';
+    document.getElementById('numberAcceptedValue').value = question.acceptedValue ?? '';
+    document.getElementById('numberTolerance').value = question.tolerance ?? 0;
+    document.getElementById('questionManualCheck').checked = !!question.manualCheck;
+    document.getElementById('answerCaseSensitive').checked = !!question.caseSensitive;
+    document.getElementById('answerWhitespaceSensitive').checked = !!question.whitespaceSensitive;
+    document.getElementById('answerSymbolSensitive').checked = question.symbolSensitive !== false;
+    renderMatchingPairs(question.pairs || [{left:'',right:''},{left:'',right:''}]);
+    document.getElementById('questionImageUrl').value = question.imageUrl || '';
+    document.getElementById('questionImageAlt').value = question.imageAlt || '';
+    document.getElementById('questionImageCaption').value = question.imageCaption || '';
+    document.getElementById('questionLinkUrl').value = question.linkUrl || '';
+    document.getElementById('questionLinkText').value = question.linkText || '';
+
+    if (question.type === 'mcq') {
+        const optionsHtml = question.options.map((opt, idx) => `
+            <div class="option-input-group">
+                <input type="text" value="${opt.text}">
+                <input type="radio" name="correctOption" value="${idx}" ${opt.isCorrect ? 'checked' : ''}>
+                <label>Correct</label>
+                <button type="button" onclick="removeOption(this)">Remove</button>
+            </div>
+        `).join('');
+        document.getElementById('optionsContainer').innerHTML = optionsHtml;
+        renumberOptions();
+    } else {
+        // Reset to blank options; otherwise the previously edited MCQ's
+        // options linger and get saved if the type is switched back.
+        document.getElementById('optionsContainer').innerHTML = `
+            <div class="option-input-group">
+                <input type="text" placeholder="Option A">
+                <input type="radio" name="correctOption" value="0">
+                <label>Correct</label>
+                <button type="button" onclick="removeOption(this)">Remove</button>
+            </div>
+            <div class="option-input-group">
+                <input type="text" placeholder="Option B">
+                <input type="radio" name="correctOption" value="1">
+                <label>Correct</label>
+                <button type="button" onclick="removeOption(this)">Remove</button>
+            </div>
+        `;
+        currentOptionIndex = 2;
+    }
+
+    questionCommitted = false;
+    restoreQuestionDraft();
+    lastQuestionType = document.getElementById('questionType').value;
+    updateQuestionType();
+    wireQuestionDraftAutosave();
+    closeQuestionInspector();
+    renderQuestionImagePickerPreview();
+    document.getElementById('questionModal').classList.remove('choosing-type');
+    document.getElementById('questionModal').classList.add('active');
+}
+
+function closeQuestionModal() {
+    if (!questionCommitted) saveQuestionDraftNow();
+    if (questionDraftTimer) clearTimeout(questionDraftTimer);
+    questionDraftTimer = null;
+    document.getElementById('questionModal').classList.remove('active');
+    document.getElementById('questionModal').classList.remove('choosing-type');
+    closeQuestionInspector();
+    currentEditingQuestionId = null;
+}
+
+function toggleQuestionInspector() {
+    const modal = document.getElementById('questionModal');
+    const open = !modal.classList.contains('inspector-open');
+    modal.classList.toggle('inspector-open', open);
+    document.getElementById('questionSettingsBtn').setAttribute('aria-expanded', String(open));
+    if (open) document.getElementById('questionType').focus();
+}
+
+function closeQuestionInspector() {
+    document.getElementById('questionModal').classList.remove('inspector-open');
+    const button = document.getElementById('questionSettingsBtn');
+    if (button) button.setAttribute('aria-expanded', 'false');
+}
+
+function questionDraftFromForm() {
+    return {
+        text: document.getElementById('questionText').value,
+        type: document.getElementById('questionType').value,
+        expectedAnswer: document.getElementById('expectedAnswer').value,
+        points: document.getElementById('questionPoints').value,
+        trueFalseAnswer: document.getElementById('trueFalseAnswer').value,
+        acceptedValue: document.getElementById('numberAcceptedValue').value,
+        tolerance: document.getElementById('numberTolerance').value,
+        manualCheck: document.getElementById('questionManualCheck').checked,
+        caseSensitive: document.getElementById('answerCaseSensitive').checked,
+        whitespaceSensitive: document.getElementById('answerWhitespaceSensitive').checked,
+        symbolSensitive: document.getElementById('answerSymbolSensitive').checked,
+        pairs: matchingPairsFromForm(),
+        imageUrl: document.getElementById('questionImageUrl').value,
+        imageAlt: document.getElementById('questionImageAlt').value,
+        imageCaption: document.getElementById('questionImageCaption').value,
+        linkUrl: document.getElementById('questionLinkUrl').value,
+        linkText: document.getElementById('questionLinkText').value,
+        options: Array.from(document.querySelectorAll('#optionsContainer .option-input-group')).map(group => ({
+            text: group.querySelector('input[type="text"]')?.value || '',
+            isCorrect: !!group.querySelector('input[type="radio"]')?.checked
+        }))
+    };
+}
+
+function setQuestionDraftState(state) {
+    const el = document.getElementById('questionDraftState');
+    el.className = `save-state is-${state}`;
+    el.textContent = state === 'saving' ? 'Saving draft...'
+                   : state === 'saved' ? 'Draft saved'
+                   : 'Draft not saved';
+    el.setAttribute('aria-live', state === 'failed' ? 'assertive' : 'polite');
+}
+
+function scheduleQuestionDraft() {
+    if (!document.getElementById('questionModal').classList.contains('active')) return;
+    setQuestionDraftState('saving');
+    if (questionDraftTimer) clearTimeout(questionDraftTimer);
+    questionDraftTimer = setTimeout(saveQuestionDraftNow, 500);
+}
+
+function saveQuestionDraftNow() {
+    if (!currentEditingExamForQuestions) return false;
+    if (questionDraftTimer) clearTimeout(questionDraftTimer);
+    questionDraftTimer = null;
+    const saved = saveQuestionDraft(currentEditingExamForQuestions, currentEditingQuestionId, questionDraftFromForm());
+    setQuestionDraftState(saved ? 'saved' : 'failed');
+    return saved;
+}
+
+function wireQuestionDraftAutosave() {
+    if (questionDraftWired) return;
+    questionDraftWired = true;
+    const modal = document.getElementById('questionModal');
+    const changed = () => { renderQuestionInlinePreview(); scheduleQuestionDraft(); };
+    modal.addEventListener('input', changed);
+    modal.addEventListener('change', changed);
+}
+
+function restoreQuestionDraft() {
+    const draft = loadQuestionDraft(currentEditingExamForQuestions, currentEditingQuestionId);
+    if (!draft) {
+        setQuestionDraftState('saved');
+        return;
+    }
+    document.getElementById('questionText').value = draft.text || '';
+    document.getElementById('questionType').value = draft.type || 'mcq';
+    document.getElementById('expectedAnswer').value = draft.expectedAnswer || '';
+    document.getElementById('questionPoints').value = draft.points || 5;
+    document.getElementById('trueFalseAnswer').value = draft.trueFalseAnswer || 'true';
+    document.getElementById('numberAcceptedValue').value = draft.acceptedValue ?? '';
+    document.getElementById('numberTolerance').value = draft.tolerance ?? 0;
+    document.getElementById('questionManualCheck').checked = !!draft.manualCheck;
+    document.getElementById('answerCaseSensitive').checked = !!draft.caseSensitive;
+    document.getElementById('answerWhitespaceSensitive').checked = !!draft.whitespaceSensitive;
+    document.getElementById('answerSymbolSensitive').checked = draft.symbolSensitive !== false;
+    renderMatchingPairs(draft.pairs || [{left:'',right:''},{left:'',right:''}]);
+    document.getElementById('questionImageUrl').value = draft.imageUrl || '';
+    document.getElementById('questionImageAlt').value = draft.imageAlt || '';
+    document.getElementById('questionImageCaption').value = draft.imageCaption || '';
+    document.getElementById('questionLinkUrl').value = draft.linkUrl || '';
+    document.getElementById('questionLinkText').value = draft.linkText || '';
+    if (Array.isArray(draft.options) && draft.options.length >= 2) {
+        document.getElementById('optionsContainer').innerHTML = draft.options.map((option, index) => `
+            <div class="option-input-group">
+                <input type="text">
+                <input type="radio" name="correctOption" value="${index}" ${option.isCorrect ? 'checked' : ''}>
+                <label>Correct</label>
+                <button type="button" onclick="removeOption(this)">Remove</button>
+            </div>`).join('');
+        document.querySelectorAll('#optionsContainer .option-input-group input[type="text"]')
+            .forEach((input, index) => { input.value = draft.options[index].text || ''; });
+        renumberOptions();
+    }
+    setQuestionDraftState('saved');
+}
+
+function updateQuestionType() {
+    const type = document.getElementById('questionType').value;
+    const answerHost = document.getElementById('answerConfiguration');
+    ['trueFalseSection','numberAnswerSection','shortAnswerSection','matchingSection'].forEach(id => {
+        const section = document.getElementById(id);
+        if (answerHost && section && section.parentElement !== answerHost) answerHost.appendChild(section);
+    });
+    document.getElementById('mcqOptions').style.display = type === 'mcq' ? 'block' : 'none';
+    document.getElementById('trueFalseSection').style.display = type === 'truefalse' ? 'block' : 'none';
+    document.getElementById('numberAnswerSection').style.display = type === 'number' ? 'block' : 'none';
+    document.getElementById('shortAnswerSection').style.display = ['short','essay','fillblank'].includes(type) ? 'block' : 'none';
+    document.getElementById('textMatchingSection').style.display = type === 'fillblank' ? 'block' : 'none';
+    document.getElementById('matchingSection').style.display = ['matching','imagedrag'].includes(type) ? 'block' : 'none';
+    renderQuestionInlinePreview();
+}
+
+let lastQuestionType = 'mcq';
+
+async function requestQuestionTypeChange(nextType) {
+    const select = document.getElementById('questionType');
+    const previousType = lastQuestionType;
+    if (nextType === previousType) return;
+    const hasMcqWork = previousType === 'mcq' && Array.from(document.querySelectorAll('#optionsContainer .option-input-group'))
+        .some(g => g.querySelector('input[type="text"]')?.value.trim() || g.querySelector('input[type="radio"]')?.checked);
+    const hasWrittenWork = previousType !== 'mcq' && document.getElementById('expectedAnswer').value.trim();
+    select.value = previousType;
+    if ((hasMcqWork || hasWrittenWork) && !(await confirmDialog({
+        title: 'Change question type?',
+        message: 'The current answer settings are incompatible with the new type and will not be included when this question is saved.',
+        confirmLabel: 'Change type',
+        danger: true
+    }))) return;
+    select.value = nextType;
+    lastQuestionType = nextType;
+    updateQuestionType();
+    scheduleQuestionDraft();
+}
+
+function renderQuestionInlinePreview() {
+    const host = document.getElementById('questionInlinePreview');
+    if (!host) return;
+    host.replaceChildren();
+    const data = questionDraftFromForm();
+    const prompt = document.createElement('p');
+    prompt.className = 'preview-prompt';
+    prompt.textContent = data.text.trim() || 'Your question will appear here.';
+    host.appendChild(prompt);
+    const meta = document.createElement('small');
+    meta.textContent = `${questionTypeLabel(data.type)} · ${data.points || 5} point(s)`;
+    host.appendChild(meta);
+    const media = document.createElement('div');
+    media.innerHTML = questionMediaMarkup(data, { faculty: true });
+    host.appendChild(media);
+    bindQuestionMediaFallbacks(media);
+    if (data.type === 'mcq' || data.type === 'truefalse') {
+        const list = document.createElement('ol');
+        const previewOptions = data.type === 'truefalse' ? trueFalseOptions(data.trueFalseAnswer) : data.options;
+        previewOptions.forEach(option => {
+            const item = document.createElement('li');
+            item.textContent = option.text || 'Empty choice';
+            if (option.isCorrect) item.className = 'is-correct';
+            list.appendChild(item);
+        });
+        host.appendChild(list);
+    } else if (data.type === 'number') {
+        const guide = document.createElement('p');
+        guide.className = 'preview-guide';
+        guide.textContent = data.acceptedValue === '' ? 'Accepted value not set.'
+            : `Accepted value: ${data.acceptedValue} (±${data.tolerance || 0})`;
+        host.appendChild(guide);
+    } else if (data.type === 'matching' || data.type === 'imagedrag') {
+        const list = document.createElement('dl');
+        list.className = 'matching-preview';
+        data.pairs.forEach(pair => {
+            const left = document.createElement('dt'); left.textContent = pair.left || 'Empty item';
+            const right = document.createElement('dd'); right.textContent = pair.right || 'Empty match';
+            list.append(left, right);
+        });
+        host.appendChild(list);
+    } else if (data.expectedAnswer.trim()) {
+        const guide = document.createElement('p');
+        guide.className = 'preview-guide';
+        guide.textContent = `Marking guide: ${data.expectedAnswer.trim()}`;
+        host.appendChild(guide);
+    }
+}
+
+function handleQuestionImageDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('is-dragging');
+    handleQuestionImageFile(event.dataTransfer?.files?.[0]);
+}
+
+function handleQuestionImageFile(file) {
+    if (!file) return;
+    const allowed = ['image/png','image/jpeg','image/gif','image/webp','image/avif'];
+    if (!allowed.includes(file.type)) { notify('Choose a PNG, JPG, GIF, WEBP, or AVIF image.', 'error'); return; }
+    if (file.size > 1572864) { notify('Choose an image no larger than 1.5 MB.', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+        document.getElementById('questionImageUrl').value = reader.result;
+        const alt = document.getElementById('questionImageAlt');
+        if (!alt.value.trim()) alt.value = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+        renderQuestionImagePickerPreview();
+        renderQuestionInlinePreview();
+        scheduleQuestionDraft();
+    };
+    reader.onerror = () => notify('The image could not be read.', 'error');
+    reader.readAsDataURL(file);
+}
+
+function renderQuestionImagePickerPreview() {
+    const host = document.getElementById('questionImagePreview');
+    if (!host) return;
+    const checked = safeQuestionUrl(document.getElementById('questionImageUrl').value, 'image');
+    host.innerHTML = checked.value && !checked.error
+        ? `<img src="${escapeQuestionMedia(checked.value)}" alt=""><button type="button" class="icon-action" onclick="clearQuestionImage()" aria-label="Remove image" title="Remove image">&times;</button>`
+        : '';
+}
+
+function clearQuestionImage() {
+    document.getElementById('questionImageUrl').value = '';
+    document.getElementById('questionImageFile').value = '';
+    renderQuestionImagePickerPreview();
+    renderQuestionInlinePreview();
+    scheduleQuestionDraft();
+}
+
+function addOption() {
+    const container = document.getElementById('optionsContainer');
+    const optionHtml = `
+        <div class="option-input-group">
+            <input type="text" placeholder="Option">
+            <input type="radio" name="correctOption">
+            <label>Correct</label>
+            <button type="button" onclick="removeOption(this)">Remove</button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', optionHtml);
+    renumberOptions();
+    scheduleQuestionDraft();
+    renderQuestionInlinePreview();
+}
+
+function removeOption(btnEl) {
+    const groups = document.querySelectorAll('#optionsContainer .option-input-group');
+    if (groups.length <= 2) {
+        notify('You must have at least 2 options', 'error');
+        return;
+    }
+    btnEl.closest('.option-input-group').remove();
+    renumberOptions();
+    scheduleQuestionDraft();
+    renderQuestionInlinePreview();
+}
+
+// Keep placeholders and radio values aligned with actual DOM order, so the
+// option a user marks "Correct" is the option that gets saved as correct.
+function renumberOptions() {
+    const groups = document.querySelectorAll('#optionsContainer .option-input-group');
+    groups.forEach((group, idx) => {
+        const text = group.querySelector('input[type="text"]');
+        const radio = group.querySelector('input[type="radio"]');
+        if (text) text.placeholder = `Option ${String.fromCharCode(65 + idx)}`;
+        if (radio) radio.value = idx;
+    });
+    currentOptionIndex = groups.length;
+}
+
+function matchingPairsFromForm() {
+    return Array.from(document.querySelectorAll('#matchingPairs .matching-pair')).map(row => ({
+        left: row.querySelector('.matching-left').value.trim(),
+        right: row.querySelector('.matching-right').value.trim()
+    }));
+}
+
+function renderMatchingPairs(pairs) {
+    const host = document.getElementById('matchingPairs');
+    host.innerHTML = (pairs || []).map((pair, index) => `
+        <div class="matching-pair">
+            <input type="text" class="matching-left" placeholder="Item ${index + 1}" value="${escapeQuestionMedia(pair.left || '')}">
+            <span aria-hidden="true">→</span>
+            <input type="text" class="matching-right" placeholder="Match ${index + 1}" value="${escapeQuestionMedia(pair.right || '')}">
+            <button type="button" onclick="removeMatchingPair(this)" aria-label="Remove pair ${index + 1}">&times;</button>
+        </div>`).join('');
+}
+
+function addMatchingPair() {
+    const pairs = matchingPairsFromForm();
+    pairs.push({left:'',right:''});
+    renderMatchingPairs(pairs);
+    scheduleQuestionDraft();
+    renderQuestionInlinePreview();
+}
+
+function removeMatchingPair(button) {
+    const pairs = matchingPairsFromForm();
+    if (pairs.length <= 2) { notify('Matching questions require at least two pairs.', 'error'); return; }
+    const index = Array.from(document.querySelectorAll('#matchingPairs .matching-pair')).indexOf(button.closest('.matching-pair'));
+    pairs.splice(index, 1);
+    renderMatchingPairs(pairs);
+    scheduleQuestionDraft();
+    renderQuestionInlinePreview();
+}
+
+function saveQuestion(addAnother = false) {
+    const wasEdit = !!currentEditingQuestionId;
+    const questionText = document.getElementById('questionText').value.trim();
+    const questionType = document.getElementById('questionType').value;
+    const media = questionDraftFromForm();
+    const imageCheck = safeQuestionUrl(media.imageUrl, 'image');
+    const linkCheck = safeQuestionUrl(media.linkUrl, 'link');
+
+    if (!questionText) {
+        notify('Please enter a question', 'error');
+        return;
+    }
+    if (imageCheck.error) { notify(imageCheck.error, 'error'); return; }
+    if (media.imageUrl.trim() && !media.imageAlt.trim()) { notify('Add alternative text for the question image.', 'error'); return; }
+    if (linkCheck.error) { notify(linkCheck.error, 'error'); return; }
+    const applyMedia = question => {
+        question.imageUrl = imageCheck.value;
+        question.imageAlt = media.imageAlt.trim();
+        question.imageCaption = media.imageCaption.trim();
+        question.linkUrl = linkCheck.value;
+        question.linkText = media.linkText.trim();
+    };
+
+    if (questionType === 'mcq') {
+        const groups = Array.from(document.querySelectorAll('#optionsContainer .option-input-group'));
+        // Resolve the correct answer by DOM position, not by the radio's value
+        // attribute, so removing/reordering options can never mis-key the answer.
+        const correctOptionIndex = groups.findIndex(
+            g => g.querySelector('input[type="radio"]')?.checked
+        );
+
+        if (groups.length < 2) {
+            notify('Please add at least 2 options', 'error');
+            return;
+        }
+
+        if (correctOptionIndex === -1) {
+            notify('Please select the correct option', 'error');
+            return;
+        }
+
+        const options = groups.map((g, idx) => ({
+            text: g.querySelector('input[type="text"]').value.trim(),
+            isCorrect: idx === correctOptionIndex
+        }));
+
+        if (options.some(o => !o.text)) {
+            notify('Please fill in every option, or remove the blank ones', 'error');
+            return;
+        }
+
+        const points = parseInt(document.getElementById('questionPoints').value) || 5;
+
+        if (currentEditingQuestionId) {
+            const question = questions.find(q => q.id === currentEditingQuestionId);
+            if (question) {
+                question.text = questionText;
+                // type must be reassigned: switching a question from Essay back
+                // to MCQ previously left the old type in place.
+                question.type = 'mcq';
+                question.options = options;
+                question.points = points;
+                delete question.expectedAnswer;
+                applyMedia(question);
+            }
+        } else {
+            const newQuestion = {
+                id: 'question_' + Date.now(),
+                examId: currentEditingExamForQuestions,
+                type: 'mcq',
+                text: questionText,
+                options: options,
+                points: points
+            };
+            applyMedia(newQuestion);
+            questions.push(newQuestion);
+        }
+    } else if (questionType === 'truefalse') {
+        const points = parseInt(document.getElementById('questionPoints').value) || 5;
+        const options = trueFalseOptions(document.getElementById('trueFalseAnswer').value);
+        let question = currentEditingQuestionId ? questions.find(q => q.id === currentEditingQuestionId) : null;
+        if (!question) {
+            question = { id: 'question_' + Date.now(), examId: currentEditingExamForQuestions };
+            questions.push(question);
+        }
+        question.text = questionText;
+        question.type = 'truefalse';
+        question.options = options;
+        question.points = points;
+        delete question.expectedAnswer;
+        applyMedia(question);
+    } else if (questionType === 'number') {
+        const acceptedRaw = document.getElementById('numberAcceptedValue').value.trim();
+        const toleranceRaw = document.getElementById('numberTolerance').value.trim();
+        const acceptedValue = Number(acceptedRaw);
+        const tolerance = toleranceRaw === '' ? 0 : Number(toleranceRaw);
+        if (acceptedRaw === '' || !Number.isFinite(acceptedValue)) { notify('Enter a valid accepted numeric value.', 'error'); return; }
+        if (!Number.isFinite(tolerance) || tolerance < 0) { notify('Numeric tolerance must be zero or greater.', 'error'); return; }
+        const points = parseInt(document.getElementById('questionPoints').value) || 5;
+        let question = currentEditingQuestionId ? questions.find(q => q.id === currentEditingQuestionId) : null;
+        if (!question) {
+            question = { id: 'question_' + Date.now(), examId: currentEditingExamForQuestions };
+            questions.push(question);
+        }
+        question.text = questionText;
+        question.type = 'number';
+        question.acceptedValue = acceptedValue;
+        question.tolerance = tolerance;
+        question.points = points;
+        delete question.options;
+        delete question.expectedAnswer;
+        applyMedia(question);
+    } else if (questionType === 'matching' || questionType === 'imagedrag') {
+        const pairs = matchingPairsFromForm();
+        if (pairs.length < 2 || pairs.some(pair => !pair.left || !pair.right)) { notify('Enter at least two complete matching pairs.', 'error'); return; }
+        const rightValues = pairs.map(pair => pair.right.toLocaleLowerCase());
+        if (new Set(rightValues).size !== rightValues.length) { notify('Each matching answer must be unique.', 'error'); return; }
+        if (questionType === 'imagedrag' && !media.imageUrl.trim()) { notify('Image drag-and-drop questions require a question image.', 'error'); return; }
+        const points = parseInt(document.getElementById('questionPoints').value) || 5;
+        let question = currentEditingQuestionId ? questions.find(q => q.id === currentEditingQuestionId) : null;
+        if (!question) { question = { id: 'question_' + Date.now(), examId: currentEditingExamForQuestions }; questions.push(question); }
+        question.text = questionText;
+        question.type = questionType;
+        question.pairs = pairs;
+        question.points = points;
+        delete question.options;
+        delete question.expectedAnswer;
+        applyMedia(question);
+    } else {
+        const expectedAnswer = document.getElementById('expectedAnswer').value.trim();
+        const points = parseInt(document.getElementById('questionPoints').value) || 5;
+        if (questionType === 'fillblank' && !questionText.includes('___')) {
+            notify('Add ___ to the prompt where the missing answer belongs.', 'error');
+            return;
+        }
+        if (questionType === 'fillblank' && !expectedAnswer) {
+            notify('Enter the correct answer for the blank.', 'error');
+            return;
+        }
+
+        if (currentEditingQuestionId) {
+            const question = questions.find(q => q.id === currentEditingQuestionId);
+            if (question) {
+                question.text = questionText;
+                question.type = questionType;
+                question.expectedAnswer = expectedAnswer;
+                question.points = points;
+                question.caseSensitive = questionType === 'fillblank' && document.getElementById('answerCaseSensitive').checked;
+                question.whitespaceSensitive = questionType === 'fillblank' && document.getElementById('answerWhitespaceSensitive').checked;
+                question.symbolSensitive = questionType !== 'fillblank' || document.getElementById('answerSymbolSensitive').checked;
+                delete question.options;
+                applyMedia(question);
+            }
+        } else {
+            const newQuestion = {
+                id: 'question_' + Date.now(),
+                examId: currentEditingExamForQuestions,
+                type: questionType,
+                text: questionText,
+                expectedAnswer: expectedAnswer,
+                points: points,
+                caseSensitive: questionType === 'fillblank' && document.getElementById('answerCaseSensitive').checked,
+                whitespaceSensitive: questionType === 'fillblank' && document.getElementById('answerWhitespaceSensitive').checked,
+                symbolSensitive: questionType !== 'fillblank' || document.getElementById('answerSymbolSensitive').checked
+            };
+            applyMedia(newQuestion);
+            questions.push(newQuestion);
+        }
+    }
+
+    const savedQuestion = currentEditingQuestionId
+        ? questions.find(question => question.id === currentEditingQuestionId)
+        : questions.filter(question => question.examId === currentEditingExamForQuestions).at(-1);
+    if (savedQuestion) savedQuestion.manualCheck = document.getElementById('questionManualCheck').checked;
+
+    if (!DB.write('questions', questions)) {
+        notify('The question could not be saved. Your draft is still available.', 'error');
+        saveQuestionDraftNow();
+        return;
+    }
+    clearQuestionDraft(currentEditingExamForQuestions, currentEditingQuestionId);
+    questionCommitted = true;
+    closeQuestionModal();
+    notify(wasEdit ? 'Question updated.' : 'Question added.', 'success');
+    manageQuestions(currentEditingExamForQuestions);
+    if (addAnother) openQuestionModal();
+}
+
+function navigateQuestion(direction) {
+    const examQuestions = questions.filter(question => question.examId === currentEditingExamForQuestions);
+    if (!examQuestions.length) return;
+    const currentIndex = currentEditingQuestionId
+        ? examQuestions.findIndex(question => question.id === currentEditingQuestionId)
+        : -1;
+    const targetIndex = currentIndex === -1
+        ? (direction > 0 ? 0 : examQuestions.length - 1)
+        : Math.min(examQuestions.length - 1, Math.max(0, currentIndex + direction));
+    editQuestion(examQuestions[targetIndex].id);
+}
+
+/* Reorders a question within its exam. Display order is the order of the
+   records themselves, so the two questions swap places in the global array —
+   which keeps the numbering the student sees in step with this list. */
+function moveQuestion(questionId, direction) {
+    const examId = currentEditingExamForQuestions;
+    // Positions of this exam's questions inside the global questions array.
+    const globalIdx = questions
+        .map((q, i) => (q.examId === examId ? i : -1))
+        .filter(i => i !== -1);
+
+    const here = globalIdx.findIndex(i => questions[i].id === questionId);
+    const target = here + direction;
+    if (here === -1 || target < 0 || target >= globalIdx.length) return;
+
+    const a = globalIdx[here], b = globalIdx[target];
+    [questions[a], questions[b]] = [questions[b], questions[a]];
+
+    DB.write('questions', questions);
+    manageQuestions(examId);
+}
+
+/* Shows the exam as a student will encounter it, with the answer key marked
+   so the lecturer can proof-read the paper before it goes live. */
+function previewExam(examId) {
+    const exam = exams.find(e => e.id === examId);
+    if (!required(exam, 'That record no longer exists. The list has been refreshed.')) return;
+
+    const subject = subjects.find(s => s.code === exam.subjectCode);
+    const examQuestions = questions.filter(q => q.examId === examId);
+    const totalPts = examQuestions.reduce((sum, q) => sum + (q.points || 5), 0);
+
+    document.getElementById('previewBody').innerHTML = `
+        <div class="preview-head">
+            <h2>${exam.title}</h2>
+            <p><strong>${exam.subjectCode}</strong> — ${subject ? subject.name : 'Unknown subject'}</p>
+            <p>${exam.date || 'Date TBA'} · ${exam.start || '—'} to ${exam.end || '—'}</p>
+            <p>${examQuestions.length} question(s) · ${totalPts} point(s) total</p>
+            ${exam.desc ? `<p class="preview-instructions"><strong>Instructions:</strong> ${exam.desc}</p>` : ''}
+        </div>
+        ${examQuestions.length === 0
+            ? '<div class="no-exams">This exam has no questions yet, so students would see an empty paper.</div>'
+            : examQuestions.map((q, i) => `
+                <div class="preview-q">
+                    <div class="preview-q-title">
+                        Question ${i + 1}
+                        <span class="preview-pts">${q.points || 5} pt(s)</span>
+                    </div>
+                    <div class="preview-q-text">${q.text}</div>
+                    ${isChoiceQuestion(q) && q.options ? `
+                        <div>${q.options.map((o, oi) => `
+                            <div class="preview-opt ${o.isCorrect ? 'is-correct' : ''}">
+                                <span class="preview-radio"></span>
+                                ${String.fromCharCode(65 + oi)}. ${o.text}
+                                ${o.isCorrect ? '<strong class="preview-key">✓ correct answer</strong>' : ''}
+                            </div>`).join('')}
+                        </div>
+                        ${q.options.some(o => o.isCorrect) ? '' :
+                            '<div class="preview-warn">⚠ No correct answer is marked — this question would score zero for everyone.</div>'}
+                    ` : q.type === 'number' ? `
+                        <div class="preview-key">Accepted value: ${q.acceptedValue} &plusmn; ${q.tolerance || 0}</div>
+                    ` : `
+                        <div class="preview-written">Written answer — the student types a response here.</div>
+                        <div class="preview-key">Marking guide: ${q.expectedAnswer || '(none provided)'}</div>
+                    `}
+                </div>`).join('')}
+    `;
+    document.getElementById('previewModal').classList.add('active');
+}
+
+async function reviewAndPublishExam(examId) {
+    const exam = exams.find(item => item.id === examId && item.facultyId === facultyId);
+    if (!exam) { notify('You cannot publish that exam.', 'error'); return false; }
+    if (exam.status !== 'draft') { notify('This exam is already published.', 'info'); return true; }
+    const review = validateExamForPublish(exam, questions);
+    if (!review.valid) {
+        notify(`Cannot publish: ${review.errors.join(' ')}`, 'error', 10000);
+        return false;
+    }
+    previewExam(examId);
+    const affected = submissions.filter(item => item.examId === examId).length;
+    if (!(await confirmDialog({
+        title:'Publish this exam?',
+        message:`Students will receive ${review.questionCount} question(s) worth ${review.totalPoints} point(s). ${affected ? `${affected} existing submission(s) are linked to this exam.` : 'No submissions exist yet.'}`,
+        confirmLabel:'Publish exam'
+    }))) return false;
+    const next = exams.map(item => item.id === examId ? { ...item, status:'published', publishedAt:new Date().toISOString() } : item);
+    if (!DB.write('exams', next)) { notify('The exam could not be published.', 'error'); return false; }
+    exams = next;
+    closePreviewModal();
+    manageQuestions(examId);
+    notify('Exam published to students.', 'success');
+    return true;
+}
+
+function closePreviewModal() {
+    document.getElementById('previewModal').classList.remove('active');
+}
+
+async function deleteQuestion(questionId) {
+    const q = questions.find(x => x.id === questionId);
+    if (!(await confirmDialog({
+        title: 'Delete this question?',
+        message: q ? `“${q.text}”\n\nThis cannot be undone.` : 'This cannot be undone.',
+        confirmLabel: 'Delete question',
+        danger: true
+    }))) return;
+
+    questions = questions.filter(q => q.id !== questionId);
+    localStorage.setItem('questions', JSON.stringify(questions));
+    notify('Question deleted.', 'success');
+    manageQuestions(currentEditingExamForQuestions);
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('examModal');
+    const qModal = document.getElementById('questionModal');
+    if (e.target === modal) {
+        closeExamModal();
+    }
+    if (e.target === qModal) {
+        closeQuestionModal();
+    }
+});
+
+// ======= RESULTS AND MANUAL GRADING =======
+let submissions = DB.read('studentSubmissions', []);
+let gradingSubmissionId = null;
+
+// Total actually awarded so far: MCQs are auto-marked, written answers count
+// only once a lecturer has entered a mark for them.
+function awardedSoFar(sub) {
+    return (sub.answers || []).reduce((t, a) => t + (a.awarded || 0), 0);
+}
+
+function isFullyGraded(sub) {
+    return (sub.answers || []).every(a => !a.needsManualGrading || a.awarded !== null);
+}
+
+function viewResults(examId) {
+    const exam = exams.find(e => e.id === examId);
+    if (!required(exam, 'That record no longer exists. The list has been refreshed.')) { displayAllFacultyExams(); return; }
+
+    submissions = DB.read('studentSubmissions', []);
+    const allExamSubs = submissions.filter(s => s.examId === examId);
+    const latestByStudent = new Map();
+    allExamSubs.forEach(sub=>{const existing=latestByStudent.get(sub.studentId);if(!existing||new Date(sub.submittedAt)>new Date(existing.submittedAt))latestByStudent.set(sub.studentId,sub);});
+    const examSubs = [...latestByStudent.values()];
+    // Everyone enrolled in this subject under this lecturer is expected to sit it.
+    const expected = allotments
+        .filter(a => a.subjectCode === exam.subjectCode && a.facultyId === facultyId)
+        .map(a => a.studentId);
+
+    const awaiting = examSubs.filter(s => !isFullyGraded(s)).length;
+
+    const rows = examSubs.map(sub => {
+        const st = students.find(s => s.id === sub.studentId);
+        const graded = isFullyGraded(sub);
+        const pending = (sub.answers || []).filter(a => a.needsManualGrading && a.awarded === null).length;
+        const marks = awardedSoFar(sub);
+        // A rating is only meaningful once every written answer is marked.
+        const g = graded ? gradeFor(marks, sub.total) : null;
+        return `
+            <tr>
+                <td>${sub.studentId}</td>
+                <td>${st ? `${st.last}, ${st.first}` : '(deleted student)'}</td>
+                <td>${new Date(sub.submittedAt).toLocaleString()}</td>
+                <td><strong>${marks}</strong> / ${sub.total}</td>
+                <td>
+                    ${g
+                        ? `<span class="grade-chip ${g.passed ? 'grade-pass' : 'grade-fail'}">
+                             <span class="grade-rating">${g.rating}</span>
+                             <span class="grade-sub">${g.percentText}%</span>
+                           </span>`
+                        : '<span class="grade-chip grade-pending">—</span>'}
+                </td>
+                <td>
+                    <span class="status-pill ${graded ? 'pill-graded' : 'pill-pending'}">
+                        ${graded ? '✓ Graded' : `⏳ ${pending} to mark`}
+                    </span>
+                </td>
+                <td>
+                    <button class="result-action-icon" onclick="openGrading('${sub.id}')" aria-label="${graded ? 'Review' : 'Grade'} submission" title="${graded ? 'Review submission' : 'Grade submission'}">
+                        ${graded
+                          ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.2 0 9.3 4.4 10 7-.7 2.6-4.8 7-10 7S2.7 14.6 2 12c.7-2.6 4.8-7 10-7Zm0 2c-3.7 0-6.9 2.9-7.8 5 .9 2.1 4.1 5 7.8 5s6.9-2.9 7.8-5C18.9 9.9 15.7 7 12 7Zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg>'
+                          : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1.4-1.4-4-4-1.4 1.4Z"/></svg>'}
+                    </button>
+                </td>
+            </tr>`;
+    }).join('');
+
+    const notSubmitted = expected.filter(id => !examSubs.some(s => s.studentId === id));
+
+    document.getElementById('examsView').innerHTML = `
+        <div>
+            <button class="back-btn icon-only" onclick="displayAllFacultyExams(); switchTab('exams-tab', document.querySelectorAll('.tab-btn')[1])" aria-label="Back to all exams" title="Back to all exams"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
+            <div class="exams-section">
+                <div class="exams-header">
+                    <h3>Results: ${exam.title}</h3>
+                    <div class="results-summary" aria-label="Submission summary">
+                        ${examSubs.length} submitted · ${notSubmitted.length} not yet ·
+                        ${awaiting} awaiting marking
+                    </div>
+                </div>
+                ${examSubs.length === 0
+                    ? '<div class="no-exams">No submissions yet for this examination.</div>'
+                    : `<div class="role-table-shell"><div class="role-table-tools" id="facultyResultTools"></div><div class="table-scroll"><table class="results-table" id="facultyResultsTable">
+                        <tr><th>Student ID</th><th>Name</th><th>Submitted</th>
+                            <th>Marks</th><th>Grade</th><th>Status</th><th>Action</th></tr>
+                        ${rows}
+                       </table></div></div>`}
+                ${notSubmitted.length > 0 ? `
+                    <div style="margin-top:18px;">
+                        <h4 style="font-size:14px; color:#666; margin-bottom:8px;">
+                            Not yet submitted (${notSubmitted.length})
+                        </h4>
+                        <div style="font-size:14px; color:#888;">
+                            ${notSubmitted.map(id => {
+                                const st = students.find(s => s.id === id);
+                                return st ? `${id} — ${st.last}, ${st.first}` : id;
+                            }).join('<br>')}
+                        </div>
+                    </div>` : ''}
+            </div>
+        </div>
+    `;
+    const resultSummary=document.querySelector('#examsView .results-summary');
+    if(resultSummary)resultSummary.innerHTML=`<span class="results-summary-pill primary">${examSubs.length} submitted</span><span class="results-summary-pill">${notSubmitted.length} not yet</span><span class="results-summary-pill pending">${awaiting} awaiting marking</span>`;
+    AdminTableTools.mount('faculty-results',document.getElementById('facultyResultsTable'),document.getElementById('facultyResultTools'));
+    document.querySelector('#facultyResultTools .table-group-toggle')?.remove();
+    document.querySelector('#facultyResultTools .group-field')?.remove();
+}
+
+function openGrading(submissionId) {
+    submissions = DB.read('studentSubmissions', []);
+    const sub = submissions.find(s => s.id === submissionId);
+    if (!required(sub, 'That submission is no longer available.')) return;
+
+    gradingSubmissionId = submissionId;
+    const st = students.find(s => s.id === sub.studentId);
+    const exam = exams.find(e => e.id === sub.examId);
+
+    const body = (sub.answers || []).map((a, i) => {
+        const q = questions.find(x => x.id === a.questionId);
+        const qText = q ? q.text : '(question deleted)';
+
+        if (!a.needsManualGrading) {
+            return `
+                <div class="grade-item auto">
+                    <div class="grade-q">Q${i + 1}: ${qText}
+                        <span class="status-pill ${a.isCorrect ? 'pill-graded' : 'pill-wrong'}">
+                            ${a.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                        </span>
+                    </div>
+                    <div class="grade-ans">Answer: ${a.selectedText ?? '(no answer given)'}</div>
+                    <div class="grade-auto-note">Auto-marked: ${a.awarded} / ${a.points}</div>
+                </div>`;
+        }
+
+        return `
+            <div class="grade-item">
+                <div class="grade-q">Q${i + 1}: ${qText}
+                    <span class="status-pill pill-pending">Needs marking</span>
+                </div>
+                <div class="grade-ans">${a.response ? a.response : '<em>(no answer given)</em>'}</div>
+                ${q && q.expectedAnswer
+                    ? `<div class="grade-guide"><strong>Marking guide:</strong> ${q.expectedAnswer}</div>` : ''}
+                <div class="grade-controls">
+                    <label>Marks out of ${a.points}:
+                        <input type="number" class="grade-mark" data-qid="${a.questionId}"
+                               min="0" max="${a.points}" step="1"
+                               value="${a.awarded === null ? '' : a.awarded}">
+                    </label>
+                    <input type="text" class="grade-remark" data-qid="${a.questionId}"
+                           placeholder="Remark for this answer (optional)"
+                           value="${(a.remark || '').replace(/"/g, '&quot;')}">
+                </div>
+            </div>`;
+    }).join('');
+
+    document.getElementById('gradingTitle').textContent =
+        `Grade: ${st ? `${st.last}, ${st.first}` : sub.studentId}`;
+    document.getElementById('gradingMeta').textContent =
+        `${exam ? exam.title : ''} · submitted ${new Date(sub.submittedAt).toLocaleString()}`;
+    document.getElementById('gradingBody').innerHTML = body;
+    document.getElementById('overallRemark').value = sub.remarks || '';
+    document.getElementById('gradingModal').classList.add('active');
+}
+
+function saveGrading() {
+    submissions = DB.read('studentSubmissions', []);
+    const sub = submissions.find(s => s.id === gradingSubmissionId);
+    if (!required(sub, 'That submission is no longer available, so no marks were saved.')) return;
+
+    // Validate every mark before writing any of them.
+    const marks = [...document.querySelectorAll('.grade-mark')];
+    for (const input of marks) {
+        const ans = sub.answers.find(a => a.questionId === input.dataset.qid);
+        if (!ans) continue;
+        if (input.value.trim() === '') continue;      // left unmarked on purpose
+        const val = Number(input.value);
+        if (!Number.isFinite(val) || val < 0 || val > ans.points) {
+            notify(`Marks must be between 0 and ${ans.points}.`, 'error');
+            input.focus();
+            return;
+        }
+    }
+
+    marks.forEach(input => {
+        const ans = sub.answers.find(a => a.questionId === input.dataset.qid);
+        if (!ans) return;
+        ans.awarded = input.value.trim() === '' ? null : Number(input.value);
+    });
+    document.querySelectorAll('.grade-remark').forEach(input => {
+        const ans = sub.answers.find(a => a.questionId === input.dataset.qid);
+        if (ans) ans.remark = input.value.trim();
+    });
+
+    sub.remarks = document.getElementById('overallRemark').value.trim();
+    sub.score = awardedSoFar(sub);
+    sub.status = isFullyGraded(sub) ? 'graded' : 'pending';
+    if (sub.status === 'graded') sub.gradedAt = new Date().toISOString();
+
+    DB.write('studentSubmissions', submissions);
+    closeGradingModal();
+    notify(sub.status === 'graded' ? `Marked: ${sub.score} / ${sub.total}.` : 'Marks saved. Some answers are still pending.', 'success');
+    viewResults(sub.examId);
+}
+
+function closeGradingModal() {
+    document.getElementById('gradingModal').classList.remove('active');
+    gradingSubmissionId = null;
+}
+
+// ======= STUDENT MANAGEMENT FUNCTIONS =======
+let activeStudentRosterSection = null;
+let activeStudentRosterSubject = null;
+function selectStudentRosterSubject(subjectCode) {
+    activeStudentRosterSubject = subjectCode;
+    activeStudentRosterSection = null;
+    renderStudentSectionTable();
+}
+function selectStudentRosterSection(sectionId) {
+    activeStudentRosterSection = sectionId;
+    renderStudentSectionTable();
+}
+
+function renderStudentSectionTable() {
+    const studentsView=document.getElementById('studentsView');
+    const freshStudents=DB.read('students',students),freshSubjects=DB.read('subjects',subjects),freshEnrollments=DB.read('studentEnrollments',studentEnrollments),freshSectionSubjects=DB.read('sectionSubjects',sectionSubjects);
+    const myOfferings=SectionService.offeringsForFaculty(facultyId,freshSectionSubjects,DB.read('subjectAssignments',[]));
+    const subjectCodes=[...new Set(myOfferings.map(item=>item.subjectCode).filter(Boolean))].sort();
+    if(!subjectCodes.length){studentsView.innerHTML='<div class="exams-section"><div class="no-exams">No subjects or sections are assigned to you.</div></div>';return;}
+    if(!subjectCodes.includes(activeStudentRosterSubject))activeStudentRosterSubject=subjectCodes[0];
+    const subjectOfferings=myOfferings.filter(item=>item.subjectCode===activeStudentRosterSubject);
+    const sectionIds=[...new Set(subjectOfferings.map(item=>item.sectionId).filter(Boolean))].sort();
+    if(!sectionIds.includes(activeStudentRosterSection))activeStudentRosterSection=sectionIds[0];
+    const studentsForSection=id=>freshStudents.filter(student=>freshEnrollments.some(item=>item.studentId===student.id&&item.sectionId===id&&item.subjectCode===activeStudentRosterSubject)).sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first)||a.id.localeCompare(b.id));
+    const roster=studentsForSection(activeStudentRosterSection);
+    const subjectTabs=subjectCodes.map(code=>{const subject=freshSubjects.find(item=>item.code===code);return `<button type="button" class="student-section-tab ${code===activeStudentRosterSubject?'active':''}" onclick="selectStudentRosterSubject('${code}')" title="${subject?.name||code}">${code}</button>`}).join('');
+    const sectionTabs=sectionIds.map(id=>`<button type="button" class="student-section-tab ${id===activeStudentRosterSection?'active':''}" onclick="selectStudentRosterSection('${id}')">${id}<span class="student-section-count">${studentsForSection(id).length}</span></button>`).join('');
+    const rows=roster.map(student=>`<tr><td><strong>${student.id}</strong></td><td><span class="roster-name">${student.last}, ${student.first}</span></td><td><span class="roster-subject-chip">${activeStudentRosterSection}</span></td></tr>`).join('');
+    studentsView.innerHTML=`<div class="exams-section"><div class="student-section-tabs" role="tablist" aria-label="Subjects">${subjectTabs}</div><div class="student-section-tabs" role="tablist" aria-label="Sections in ${activeStudentRosterSubject}">${sectionTabs}</div><div class="table-scroll student-roster-shell"><table class="student-roster-table"><thead><tr><th>Student ID</th><th>Student</th><th>Section</th></tr></thead><tbody>${rows||'<tr><td colspan="3" class="muted-cell">No students enrolled in this subject and section.</td></tr>'}</tbody></table></div></div>`;
+}
+
+function displayMyStudents() {
+    renderStudentSectionTable();
+    return;
+    const legacyStudentIds = allotments
+        .filter(a => a.facultyId === facultyId)
+        .map(a => a.studentId);
+    const mySubjectCodes = new Set(mySubjects.map(subject => subject.code));
+    const myOfferings=SectionService.offeringsForFaculty(facultyId,sectionSubjects,DB.read('subjectAssignments',[])), offeringIds=new Set(myOfferings.map(item=>item.id));
+    const enrolledStudentIds=new Set(studentEnrollments.filter(item=>offeringIds.has(item.offeringId)||myOfferings.some(offer=>offer.sectionId===item.sectionId&&offer.subjectCode===item.subjectCode)).map(item=>item.studentId));
+    const legacySectionIds=new Set(myOfferings.map(item=>item.sectionId));
+    const myStudents = students.filter(student => legacyStudentIds.includes(student.id) || enrolledStudentIds.has(student.id) || (!studentEnrollments.length&&(student.sections||[]).some(id=>legacySectionIds.has(id))));
+   
+    const studentsView = document.getElementById('studentsView');
+
+    if (myStudents.length === 0) {
+        studentsView.innerHTML = `
+            <div class="exams-section">
+                <div class="exams-header">
+                    <h3>My Students</h3>
+                </div>
+                <div class="no-exams">No students are enrolled in sections carrying your subjects.</div>
+            </div>
+        `;
+        return;
+    }
+
+    // Sort students by ID
+    myStudents.sort((a, b) => a.id.localeCompare(b.id));
+
+    const html = `
+        <div class="exams-section">
+            <div class="exams-header">
+                <h3>My Students (${myStudents.length})</h3>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                ${myStudents.map(student => {
+                    // Get subjects for this student under this faculty
+                    let studentSubjects = studentEnrollments.filter(item=>item.studentId===student.id&&myOfferings.some(offer=>offer.sectionId===item.sectionId&&offer.subjectCode===item.subjectCode)).map(item => { const sub=subjects.find(s=>s.code===item.subjectCode); return {code:item.subjectCode,name:sub?sub.name:'Unknown',sectionId:item.sectionId}; });
+                    if(!studentSubjects.length&&!studentEnrollments.length)studentSubjects=myOfferings.filter(offer=>(student.sections||[]).includes(offer.sectionId)).map(offer=>{const sub=subjects.find(s=>s.code===offer.subjectCode);return{code:offer.subjectCode,name:sub?sub.name:'Unknown',sectionId:offer.sectionId};});
+
+                    return `
+                        <div style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); padding: 18px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(16, 24, 40, 0.18);">
+                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 5px;">${student.id}</div>
+                            <div style="font-size: 14px; margin-bottom: 10px;">${student.last}, ${student.first}</div>
+                            ${student.sections && student.sections.length > 0 ?
+                                `<div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">Sections: ${student.sections.join(', ')}</div>` :
+                                ''}
+                            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; margin-bottom: 5px;">📚 Enrolled in:</div>
+                                ${studentSubjects.length === 0 ?
+                                    '<div style="font-size: 13px; opacity: 0.9;">No subjects assigned</div>' :
+                                    studentSubjects.map(sub => `
+                                        <div style="font-size: 13px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                                             <span>${sub.code} - ${sub.name} · ${sub.sectionId}</span>
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    studentsView.innerHTML = html;
+}
+
+function openStudentAssignModal() {
+    const studentSelect = document.getElementById('assignStudent');
+   
+    // Populate with ALL students
+    studentSelect.innerHTML = '<option value="">-- Select Student --</option>' +
+        students.map(s => `<option value="${s.id}">${s.id} - ${s.last}, ${s.first}</option>`).join('');
+   
+    document.getElementById('subjectCheckboxList').innerHTML = '';
+    document.getElementById('studentAssignModal').classList.add('active');
+}
+
+function loadSubjectsForStudent() {
+    const selectedStudent = document.getElementById('assignStudent').value;
+    const checkboxList = document.getElementById('subjectCheckboxList');
+
+    if (!selectedStudent) {
+        checkboxList.innerHTML = '';
+        return;
+    }
+
+    // Get already assigned subjects for this student+faculty
+    const alreadyAssigned = allotments
+        .filter(a => a.studentId === selectedStudent && a.facultyId === facultyId)
+        .map(a => a.subjectCode);
+
+    let html = '';
+    mySubjects.forEach(subject => {
+        const isChecked = alreadyAssigned.includes(subject.code);
+        html += `
+            <div style="padding: 8px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee;">
+                <input type="checkbox" id="subject_${subject.code}" value="${subject.code}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="subject_${subject.code}" style="cursor: pointer; flex: 1; margin: 0;">
+                    <strong>${subject.code}</strong> - ${subject.name}
+                </label>
+            </div>
+        `;
+    });
+
+    checkboxList.innerHTML = html;
+}
+
+function saveSubjectAssignments() {
+    const selectedStudent = document.getElementById('assignStudent').value;
+
+    if (!selectedStudent) {
+        notify('Please select a student', 'error');
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('#subjectCheckboxList input[type="checkbox"]');
+    const selectedSubjects = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+    if (selectedSubjects.length === 0) {
+        notify('Please select at least one subject', 'error');
+        return;
+    }
+
+    // Remove existing assignments for this student+faculty combination
+    const filteredAllotments = allotments.filter(
+        a => !(a.studentId === selectedStudent && a.facultyId === facultyId)
+    );
+
+    // Add new assignments
+    selectedSubjects.forEach(subjectCode => {
+        filteredAllotments.push({
+            studentId: selectedStudent,
+            subjectCode: subjectCode,
+            facultyId: facultyId
+        });
+    });
+
+    localStorage.setItem('allotments', JSON.stringify(filteredAllotments));
+    allotments.length = 0;
+    allotments.push(...filteredAllotments);
+   
+    closeStudentAssignModal();
+    displayMyStudents();
+    notify(`${selectedStudent} enrolled in ${selectedSubjects.length} subject(s).`, 'success');
+}
+
+function closeStudentAssignModal() {
+    document.getElementById('studentAssignModal').classList.remove('active');
+}
+
+async function removeStudentFromSubject(studentId, subjectCode) {
+    if (!(await confirmDialog({
+        title: 'Remove this subject?',
+        message: `Student <strong>${studentId}</strong> will no longer be enrolled in `
+               + `<strong>${subjectCode}</strong> under you.`,
+        confirmLabel: 'Remove',
+        danger: true
+    }))) return;
+
+    const index = allotments.findIndex(
+        a => a.studentId === studentId && a.subjectCode === subjectCode && a.facultyId === facultyId
+    );
+
+    if (index > -1) {
+        allotments.splice(index, 1);
+        localStorage.setItem('allotments', JSON.stringify(allotments));
+        displayMyStudents();
+    }
+}
+
+function selectStudentForEdit(studentId) {
+    document.getElementById('assignStudent').value = studentId;
+    loadSubjectsForStudent();
+}
+
+// ======= CSV IMPORT FUNCTIONS =======
+let csvQuestionPreview = [];
+
+function handleQuestionCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split('\n').filter(l => l.trim());
+        csvQuestionPreview = [];
+
+        // Parse CSV
+        lines.forEach((line, index) => {
+            if (index === 0) return; // Skip header row
+           
+            const parts = line.split('|').map(p => p.trim());
+           
+            if (parts.length < 2) return;
+
+            const questionText = parts[0];
+            const questionType = parts[1].toLowerCase();
+
+            if (questionType === 'mcq') {
+                // Format: Question|mcq|OptionA|OptionB|OptionC|CorrectIndex
+                const options = [];
+                const correctIndex = parseInt(parts[parts.length - 1]) || 0;
+               
+                for (let i = 2; i < parts.length - 1; i++) {
+                    options.push({
+                        text: parts[i],
+                        isCorrect: (i - 2) === correctIndex
+                    });
+                }
+
+                if (options.length >= 2) {
+                    csvQuestionPreview.push({
+                        type: 'mcq',
+                        text: questionText,
+                        options: options
+                    });
+                }
+            } else if (questionType === 'short' || questionType === 'essay') {
+                // Format: Question|short/essay|ExpectedAnswer|Points
+                const expectedAnswer = parts[2] || '';
+                const points = parseInt(parts[3]) || 5;
+
+                csvQuestionPreview.push({
+                    type: questionType,
+                    text: questionText,
+                    expectedAnswer: expectedAnswer,
+                    points: points
+                });
+            }
+        });
+
+        if (csvQuestionPreview.length === 0) {
+            notify('No valid questions found in CSV. Please check the format.', 'error');
+            return;
+        }
+
+        showCsvQuestionPreview();
+    };
+
+    reader.readAsText(file);
+    input.value = ''; // Reset file input
+}
+
+function showCsvQuestionPreview() {
+    const container = document.getElementById('csvPreviewContent');
+   
+    let html = '<table style="width: 100%; border-collapse: collapse;">';
+    html += '<tr style="background: #e8f4f8; font-weight: 600;">';
+    html += '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Question</th>';
+    html += '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Type</th>';
+    html += '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Details</th>';
+    html += '</tr>';
+
+    csvQuestionPreview.forEach((q, idx) => {
+        let details = '';
+        if (isChoiceQuestion(q)) {
+            details = `${q.options.length} options: ${q.options.map((o, i) => `${o.text}${o.isCorrect ? ' ✓' : ''}`).join(', ')}`;
+        } else {
+            details = `Points: ${q.points}`;
+        }
+
+        html += `<tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">${q.text}</td>
+                    <td style="padding: 8px;"><span style="background: #e3f2fd; padding: 3px 8px; border-radius: 3px; font-size: 13px;">${q.type.toUpperCase()}</span></td>
+                    <td style="padding: 8px; font-size: 13px; color: #666;">${details}</td>
+                </tr>`;
+    });
+
+    html += '</table>';
+    container.innerHTML = html;
+
+    document.getElementById('csvQuestionPreviewModal').classList.add('active');
+}
+
+function closeCsvQuestionModal() {
+    document.getElementById('csvQuestionPreviewModal').classList.remove('active');
+    csvQuestionPreview = [];
+}
+
+function confirmQuestionCSVUpload() {
+    csvQuestionPreview.forEach(q => {
+        const newQuestion = {
+            id: 'question_' + Date.now() + Math.random(),
+            examId: currentEditingExamForQuestions,
+            type: q.type,
+            text: q.text
+        };
+
+        if (isChoiceQuestion(q)) {
+            newQuestion.options = q.options;
+        } else {
+            newQuestion.expectedAnswer = q.expectedAnswer;
+            newQuestion.points = q.points;
+        }
+
+        questions.push(newQuestion);
+    });
+
+    const imported = csvQuestionPreview.length;
+    localStorage.setItem('questions', JSON.stringify(questions));
+    closeCsvQuestionModal();
+    notify(`Imported ${imported} question(s).`, 'success');
+    manageQuestions(currentEditingExamForQuestions);
+}
+
+// ======= NAVIGATION MOUNT =======
+// Placed last: mountSidebar shows the first section immediately, which can call
+// back into page functions, so every declaration must already be initialised.
+facultyNav = mountSidebar({
+    items: [
+        { id: 'subjects-tab', label: 'My Subjects', icon: '📚' },
+        { id: 'exams-tab',    label: 'My Exams',    icon: '📝' },
+        { id: 'students-tab', label: 'My Students', icon: '🎓' }
+        ,{ id: 'reports-tab', label: 'Reports', icon: '⚑' }
+    ],
+    panels: ['subjects-tab', 'exams-tab', 'students-tab', 'reports-tab', 'subject-workspace-tab'],
+    titleEl: null,
+    onSelect: onFacultySection
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+const today=new Date().toLocaleDateString('en-CA');
+
+(async()=>{
+console.log('=== QUESTION REPORTS. Student report to scoped Faculty resolution ===');
+let s=SEED();
+s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59'}];
+let r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+r.w.startExam('e1');
+ok(!!r.d.querySelector('.report-question-btn'),'each rendered question offers Report question');
+ok(!!r.d.querySelector('.q-head .report-question-btn'),'report action is kept in the question toolbar');
+r.w.openQuestionReport('q1');
+ok(r.d.getElementById('questionReportModal').classList.contains('active'),'report dialog opens for selected question');
+r.d.getElementById('questionReportCategory').value='wrong-answer';
+r.d.getElementById('questionReportDetails').value='Both choices appear valid.';
+ok(r.w.submitQuestionReport()===true,'complete report is accepted');
+const report=r.read('questionReports')[0];
+ok(report.studentId==='S1' && report.questionId==='q1' && report.status==='open','report stores actor, target, and open status');
+r.w.openQuestionReport('q1');
+r.d.getElementById('questionReportDetails').value='Duplicate report';
+ok(r.w.submitQuestionReport()===false,'duplicate open report is rejected');
+r.w.close();
+
+s.questionReports=[report,{id:'other',studentId:'S2',examId:'foreign',questionId:'qx',category:'other',details:'Hidden',status:'open'}];
+r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
+r.w.displayQuestionReports();
+const view=r.d.getElementById('reportsView');
+ok(/Both choices appear valid/.test(view.textContent),'Faculty sees report for an owned exam');
+ok(!/Hidden/.test(view.textContent),'Faculty cannot see reports for unowned exams');
+ok(r.w.toggleQuestionReport(report.id,'resolved')===true,'Faculty can resolve an owned report');
+ok(r.read('questionReports').find(item=>item.id===report.id).status==='resolved','resolved status persists');
+ok(r.w.toggleQuestionReport(report.id,'open')===true,'resolved report can be reopened');
+ok(r.w.toggleQuestionReport(report.id,'reviewed')===true,'report can be marked reviewed');
+let filter=r.d.getElementById('reportStatusFilter');
+filter.value='reviewed'; r.w.filterQuestionReports();
+ok(!r.d.querySelector('.question-report').hidden,'reviewed filter retains matching report');
+ok(r.w.toggleQuestionReport(report.id,'dismissed')===true,'report can be dismissed');
+r.w.toggleQuestionReport(report.id,'open');
+const note=r.d.querySelector(`[data-report-note="${report.id}"]`);
+note.value='The answer key was corrected.';
+r.w.scheduleReportNote(report.id,note.value);
+await new Promise(resolve=>setTimeout(resolve,600));
+ok(r.read('questionReports').find(item=>item.id===report.id).resolutionNote===note.value,'resolution note autosaves');
+let notifying=r.w.notifyReportResolution(report.id);
+r.d.getElementById('confirmYes').click();
+ok(await notifying,'confirmed notification is created');
+const notice=r.read('studentNotifications')[0];
+ok(notice.studentId==='S1' && /answer key/.test(notice.message),'notification is scoped to reporter and contains note');
+r.w.close();
+
+r=load('student.html',{...s,studentNotifications:[notice],currentUser:{username:'S1',role:'student'}});
+ok(r.d.getElementById('studentNotificationsCard').style.display==='block','Student sees report-update card');
+ok(/answer key was corrected/.test(r.d.getElementById('studentNotifications').textContent),'Student sees Faculty resolution message');
+r.w.close();
+process.exit(0);
+})();

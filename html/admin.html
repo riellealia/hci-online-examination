@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/shared-ui.css">
+    <link rel="stylesheet" href="../css/admin-modern.css">
+    <script src="../js/storage.js"></script>
+    <script src="../js/demo-data.js"></script>
+    <script src="../js/section-service.js"></script>
+    <script src="../js/grading.js"></script>
+    <script src="../js/student-profile.js"></script>
+    <script src="../js/faculty-profile.js"></script>
+    <script src="../js/audit-service.js"></script>
+    <script src="../js/admin-table-tools.js"></script>
+<script src="../js/auth.js"></script>
+    <script src="../js/ui.js"></script>
+</head>
+
+<body data-role="admin">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="../assets/logo.PNG" alt="NEU Logo" class="logo" />
+      <div class="page-title" id="pageTitle">NEW ERA UNIVERSITY</div>
+    </div>
+    <div class="topbar-right" id="topbarRight"></div>
+  </div>
+
+  <div id="dashboardSection" class="panel">
+    <div class="card-grid">
+      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySection')" onkeydown="activateAdminCard(event,'facultySection')" aria-label="Open Faculty Management">
+        <div class="card-top"><div class="card-icon">👤</div><div class="card-count" id="countFaculty">0</div></div>
+        <div class="card-bottom blue"><div class="card-label">Faculty</div><button class="plus-circle" onclick="event.stopPropagation();openModal('facultyModal')" aria-label="Add faculty" title="Add faculty">＋</button></div>
+      </div>
+      <div class="card beige admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'studentSection')" onkeydown="activateAdminCard(event,'studentSection')" aria-label="Open Student Management">
+        <div class="card-top"><div class="card-icon">👥</div><div class="card-count" id="countStudents">0</div></div>
+        <div class="card-bottom beige"><div class="card-label">Students</div><button class="plus-circle" onclick="event.stopPropagation();openStudentModal()" aria-label="Add student" title="Add student">＋</button></div>
+      </div>
+      <div class="card green admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'subjectSection')" onkeydown="activateAdminCard(event,'subjectSection')" aria-label="Open Subject Management">
+        <div class="card-top"><div class="card-icon">📚</div><div class="card-count" id="countSubjects">0</div></div>
+        <div class="card-bottom green"><div class="card-label">Subjects</div><button class="plus-circle" onclick="event.stopPropagation();openModal('subjectModal')" aria-label="Add subject" title="Add subject">＋</button></div>
+      </div>
+      <div class="card purple admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySubjectSection')" onkeydown="activateAdminCard(event,'facultySubjectSection')" aria-label="Open Faculty–Subject Allotment">
+        <div class="card-top"><div class="card-icon">🎓</div><div class="card-count" id="countFacultySubject">0</div></div>
+        <div class="card-bottom purple"><div class="card-label">Faculty assignments</div><button class="plus-circle" onclick="event.stopPropagation();openFacultySubjectModal()" aria-label="Assign faculty to subject" title="Assign faculty to subject">＋</button></div>
+      </div>
+      <div class="card orange admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'auditSection')" onkeydown="activateAdminCard(event,'auditSection')" aria-label="Open Audit Log">
+        <div class="card-top"><div class="card-icon">◷</div><div class="card-count" id="countAudit">0</div></div>
+        <div class="card-bottom orange"><div class="card-label">Audit events</div><span class="card-arrow" aria-hidden="true">→</span></div>
+      </div>
+      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'sectionSection')" onkeydown="activateAdminCard(event,'sectionSection')" aria-label="Open Section Management">
+        <div class="card-top"><div class="card-icon">▦</div><div class="card-count" id="countSections">0</div></div>
+        <div class="card-bottom blue"><div class="card-label">Sections</div><button class="plus-circle" onclick="event.stopPropagation();openSectionModal()" aria-label="Add section" title="Add section">＋</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="facultySection" class="panel">
+    <div class="management-page-head"><h3>Faculty</h3><p>Manage professor accounts, profiles, and teaching records.</p></div>
+    <div class="management-table-shell">
+    <div class="action-box">
+      <button class="icon-action" onclick="openModal('facultyModal')" aria-label="Add faculty" title="Add faculty"><span aria-hidden="true">＋</span><span class="sr-only">Add faculty</span></button>
+      <label class="icon-action upload-action" aria-label="Import faculty CSV" title="Import faculty CSV"><span aria-hidden="true">⇧</span><span class="sr-only">Import faculty CSV</span><input type="file" accept=".csv" onchange="handleCSV('faculty', this)"></label>
+      <button class="icon-action export-action" onclick="exportTableCsv('facultyTable','faculty.csv')" aria-label="Export faculty CSV" title="Export faculty CSV"><span aria-hidden="true">⇩</span><span class="sr-only">Export faculty CSV</span></button>
+    </div>
+    <div class="table-scroll">
+      <table id="facultyTable"></table>
+    </div>
+    </div>
+    <div class="management-page-head secondary-table-head"><h3>Professors without an assigned subject</h3><p>Faculty who are not assigned to any section-subject offering.</p></div>
+    <div class="management-table-shell">
+      <div class="action-box" id="unassignedFacultyTools"><button class="icon-action export-action" onclick="exportTableCsv('unassignedFacultyTable','unassigned-faculty.csv')" aria-label="Export unassigned faculty CSV" title="Export unassigned faculty CSV"><span aria-hidden="true">⇩</span><span class="sr-only">Export unassigned faculty CSV</span></button></div>
+      <div class="table-scroll"><table id="unassignedFacultyTable"></table></div>
+    </div>
+  </div>
+
+  <div id="studentSection" class="panel">
+    <div class="management-page-head"><h3>Students</h3><p>Manage student identities, profiles, and section membership.</p></div>
+    <div class="management-table-shell">
+    <div class="action-box">
+      <button class="icon-action" onclick="openStudentModal()" aria-label="Add student" title="Add student"><span aria-hidden="true">＋</span><span class="sr-only">Add student</span></button>
+      <label class="icon-action upload-action" aria-label="Import students CSV" title="Import students CSV"><span aria-hidden="true">⇧</span><span class="sr-only">Import students CSV</span><input type="file" accept=".csv" onchange="handleCSV('students', this)"></label>
+      <button class="icon-action export-action" onclick="exportTableCsv('studentTable','students.csv')" aria-label="Export students CSV" title="Export students CSV"><span aria-hidden="true">⇩</span><span class="sr-only">Export students CSV</span></button>
+    </div>
+    <div class="table-scroll">
+      <table id="studentTable"></table>
+    </div>
+    </div>
+  </div>
+
+  <div id="sectionSection" class="panel">
+    <div class="section-management-head">
+      <div><h3>Sections</h3><p class="panel-help">Create sections and manage the subjects available to their students.</p></div>
+    </div>
+    <div class="management-table-shell"><div class="table-corner-actions"><button class="corner-icon-btn" onclick="openSectionModal()" aria-label="Add section" title="Add section"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button><button class="corner-icon-btn export-action" onclick="exportTableCsv('sectionTable','sections.csv')" aria-label="Export sections CSV" title="Export sections CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="sectionTable"></table></div></div>
+  </div>
+
+  <div id="subjectSection" class="panel">
+    <div class="management-page-head"><h3>Subjects</h3><p>Manage subject codes, names, and academic offerings.</p></div>
+    <div class="management-table-shell">
+    <div class="action-box">
+      <button class="icon-action" onclick="openModal('subjectModal')" aria-label="Add subject" title="Add subject"><span aria-hidden="true">＋</span><span class="sr-only">Add subject</span></button>
+      <label class="icon-action upload-action" aria-label="Import subjects CSV" title="Import subjects CSV"><span aria-hidden="true">⇧</span><span class="sr-only">Import subjects CSV</span><input type="file" accept=".csv" onchange="handleCSV('subjects', this)"></label>
+      <button class="icon-action export-action" onclick="exportTableCsv('subjectTable','subjects.csv')" aria-label="Export subjects CSV" title="Export subjects CSV"><span aria-hidden="true">⇩</span><span class="sr-only">Export subjects CSV</span></button>
+    </div>
+    <div class="table-scroll">
+      <table id="subjectTable"></table>
+    </div>
+    </div>
+  </div>
+
+  <div id="facultySubjectSection" class="panel">
+    <div class="management-page-head"><h3>Professor assignments</h3><p>Assign one professor to each subject across its participating sections.</p></div>
+    <div class="management-table-shell">
+    <div class="action-box">
+      <button class="icon-action" onclick="openFacultySubjectModal()" aria-label="Assign professor to subject" title="Assign professor to subject"><span aria-hidden="true">＋</span><span class="sr-only">Assign professor to subject</span></button>
+      <label class="icon-action upload-action" aria-label="Import professor assignments CSV" title="Import professor assignments CSV"><span aria-hidden="true">⇧</span><span class="sr-only">Import professor assignments CSV</span><input type="file" accept=".csv" onchange="handleCSV('subjectAssignments', this)"></label>
+      <button class="icon-action export-action" onclick="exportTableCsv('facultySubjectTable','professor-assignments.csv')" aria-label="Export professor assignments CSV" title="Export professor assignments CSV"><span aria-hidden="true">⇩</span><span class="sr-only">Export professor assignments CSV</span></button>
+    </div>
+    <div class="table-scroll">
+      <table id="facultySubjectTable"></table>
+    </div>
+    </div>
+  </div>
+    
+  <div id="auditSection" class="panel">
+    <h3>Application Audit Log</h3>
+    <p class="panel-help">Sign-in details and changes made by professors or administrators are recorded automatically.</p>
+    <div class="audit-tabs" role="tablist" aria-label="Audit log categories">
+      <button type="button" class="audit-tab active" role="tab" aria-selected="true" data-audit-tab="faculty" onclick="setAuditTab('faculty')">Professors</button>
+      <button type="button" class="audit-tab" role="tab" aria-selected="false" data-audit-tab="admin" onclick="setAuditTab('admin')">Admin</button>
+      <button type="button" class="audit-tab" role="tab" aria-selected="false" data-audit-tab="login" onclick="setAuditTab('login')">Log in</button>
+    </div>
+    <h3 class="audit-events-title">Recorded activity</h3><div class="management-table-shell audit-table-shell"><div class="table-corner-actions" id="auditTableTools"><button class="corner-icon-btn export-action" onclick="exportTableCsv('auditTable','audit-log.csv')" aria-label="Export audit log CSV" title="Export audit log CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="auditTable"></table></div></div>
+  </div>
+
+  <!-- Modals -->
+  <div id="facultyModal" class="modal-bg">
+    <div class="modal">
+      <h3>Add Faculty</h3>
+      <input id="fID" placeholder="Faculty ID">
+      <input id="fLast" placeholder="Last Name">
+      <input id="fFirst" placeholder="First Name">
+      <button onclick="saveItem('faculty')">Save</button>
+      <button class="cancel" onclick="closeModal('facultyModal')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="studentModal" class="modal-bg">
+    <div class="modal">
+      <h3>Add Student</h3>
+      <input id="sID" placeholder="Student ID">
+      <input id="sLast" placeholder="Last Name">
+      <input id="sFirst" placeholder="First Name">
+      <fieldset class="student-section-picker" aria-describedby="studentSectionHelp">
+        <legend>Section</legend>
+        <div id="sSections" class="student-section-options"></div>
+      </fieldset>
+      <small id="studentSectionHelp">Choose every section used by this student's subject enrolments.</small>
+      <button onclick="saveItem('students')">Save</button>
+      <button class="cancel" onclick="closeModal('studentModal')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="sectionModal" class="modal-bg"><div class="modal">
+    <h3>Add Section</h3>
+    <label for="sectionID">Unique section ID</label><input id="sectionID" placeholder="e.g. 3BSCS-1">
+    <label for="sectionYear">Year level</label><select id="sectionYear"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+    <label for="sectionProgram">Curriculum</label><select id="sectionProgram"><option value="BSCS">BSCS</option><option value="BSIT">BSIT</option><option value="BSIS">BSIS</option></select>
+    <label for="sectionName">Section</label><input id="sectionName" type="number" min="1" step="1" placeholder="e.g. 1">
+    <button onclick="saveSection()">Save</button><button class="cancel" onclick="closeModal('sectionModal')">Cancel</button>
+  </div></div>
+
+  <div id="sectionSubjectsModal" class="modal-bg"><div class="modal">
+    <h3 id="sectionSubjectsTitle">Assign subjects</h3><input id="sectionSubjectsID" type="hidden">
+    <fieldset class="section-subject-picker"><legend>Subjects inherited by this section</legend><div id="sectionSubjects" class="section-subject-options"></div></fieldset>
+    <button onclick="saveSectionSubjects()">Save assignments</button><button class="cancel" onclick="closeModal('sectionSubjectsModal')">Cancel</button>
+  </div></div>
+
+  <div id="subjectModal" class="modal-bg">
+    <div class="modal">
+      <h3>Add Subject</h3>
+      <input id="subCode" placeholder="Subject Code">
+      <input id="subName" placeholder="Subject Name">
+      <button onclick="saveItem('subjects')">Save</button>
+      <button class="cancel" onclick="closeModal('subjectModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Faculty–Subject Modal -->
+  <div id="facultySubjectModal" class="modal-bg">
+    <div class="modal">
+      <h3>Assign Faculty to Subject</h3>
+      <label>Subject:</label>
+      <select id="fsSubject"></select>
+      <label for="fsFaculty">Professor:</label>
+      <select id="fsFaculty"></select>
+      <button onclick="saveFacultySubject()">Confirm</button>
+      <button class="cancel" onclick="closeModal('facultySubjectModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Student–Subject–Faculty Allotment Modal -->
+  <div id="allotModal" class="modal-bg">
+    <div class="modal">
+      <h3>Assign Student to Subject</h3>
+      <label>Student:</label>
+      <select id="allotStudent"></select>
+      <label>Subject:</label>
+      <select id="allotSubject"></select>
+      <label>Faculty:</label>
+      <select id="allotFaculty"></select>
+            <button onclick="saveAllotment()">Confirm</button>
+      <button class="cancel" onclick="closeModal('allotModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- CSV Preview Modal -->
+  <div id="csvPreviewModal" class="modal-bg">
+    <div class="modal">
+      <h3>Preview CSV Upload</h3>
+      <div id="csvPreviewContent"></div>
+      <button onclick="confirmUpload()">Confirm Upload</button>
+      <button class="cancel" onclick="closeModal('csvPreviewModal')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="studentProfileModal" class="modal-bg student-profile-bg" role="dialog" aria-modal="true" aria-labelledby="studentProfileName">
+    <div class="student-profile-page">
+      <header class="student-profile-head">
+        <div class="profile-hero-identity"><div class="profile-avatar" id="studentProfileAvatar" aria-hidden="true">ST</div><div><p class="profile-eyebrow">Student profile</p><h2 id="studentProfileName"></h2><p id="studentProfileMeta"></p></div></div>
+        <button class="profile-close" onclick="closeModal('studentProfileModal')" aria-label="Close student profile" title="Close">×</button>
+      </header>
+      <nav class="profile-tabs" aria-label="Student profile sections">
+        <button class="profile-tab active" data-profile-tab="overview" onclick="showStudentProfileTab('overview')">Overview</button>
+        <button class="profile-tab" data-profile-tab="history" onclick="showStudentProfileTab('history')">History</button>
+        <button class="profile-tab" data-profile-tab="grades" onclick="showStudentProfileTab('grades')">Grades</button>
+        <button class="profile-tab" data-profile-tab="activity" onclick="showStudentProfileTab('activity')">Actions</button>
+        <button class="profile-tab" data-profile-tab="login" onclick="showStudentProfileTab('login')">Login details</button>
+      </nav>
+      <main id="studentProfileContent"></main>
+    </div>
+  </div>
+
+  <div id="facultyProfileModal" class="modal-bg student-profile-bg" role="dialog" aria-modal="true" aria-labelledby="facultyProfileName"><div class="student-profile-page">
+    <header class="student-profile-head"><div class="profile-hero-identity"><div class="profile-avatar faculty-avatar" id="facultyProfileAvatar" aria-hidden="true">FA</div><div><p class="profile-eyebrow">Faculty profile</p><h2 id="facultyProfileName"></h2><p id="facultyProfileMeta"></p></div></div><button class="profile-close" onclick="closeModal('facultyProfileModal')" aria-label="Close faculty profile" title="Close">×</button></header>
+    <nav class="profile-tabs" aria-label="Faculty profile sections"><button class="profile-tab active" data-faculty-tab="overview" onclick="showFacultyProfileTab('overview')">Overview</button><button class="profile-tab" data-faculty-tab="performance" onclick="showFacultyProfileTab('performance')">Section performance</button><button class="profile-tab" data-faculty-tab="activity" onclick="showFacultyProfileTab('activity')">Actions</button><button class="profile-tab" data-faculty-tab="login" onclick="showFacultyProfileTab('login')">Login details</button></nav>
+    <main id="facultyProfileContent"></main>
+  </div></div>
+
+<script>
+  /* ===== Logic gate: admins only ===== */
+  const session = requireRole('admin');
+  // Run the same safe, versioned migration on direct Admin-page visits.
+  if (session && typeof DemoData !== 'undefined') DemoData.install();
+  if (!session) throw new Error('Not authorised — redirecting to login.');
+
+  /* ===== Data stores ===== */
+  const faculty = DB.read('faculty', []);
+  const students = DB.read('students', []);
+  const subjects = DB.read('subjects', []);
+  const subjectAssignments = DB.read('subjectAssignments', []);
+  const allotments = DB.read('allotments', []);
+  const sections = SectionService.migrate(DB.read('sections', []), students);
+  const sectionSubjects = DB.read('sectionSubjects', []);
+  // Persist one-time migration of legacy free-text student section values.
+  DB.write('sections', sections);
+  DB.write('students', students);
+
+  // Lookup map so deleteItem/editItem no longer resolve arrays with eval().
+  // These arrays are only ever mutated in place, so the references stay valid.
+  const STORE = { faculty, students, subjects, sections, subjectAssignments, allotments };
+
+  // Returns false if any write failed, so callers do not report success
+  // for a change that was never stored. DB.write reports the reason itself.
+  function persistAll() {
+    const results = [
+      DB.write('faculty', faculty),
+      DB.write('students', students),
+      DB.write('subjects', subjects),
+      DB.write('subjectAssignments', subjectAssignments),
+      DB.write('allotments', allotments), DB.write('sections', sections),
+      DB.write('sectionSubjects', sectionSubjects)
+    ];
+    return results.every(Boolean);
+  }
+
+  /* ===== Referential integrity helpers =====
+     localStorage has no foreign keys, so related records have to be cleaned
+     up by hand. Without this, deleting a record left orphans behind forever. */
+
+  function removeInPlace(arr, predicate) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+      if (predicate(arr[i])) arr.splice(i, 1);
+    }
+  }
+
+  // Deletes a login account so a removed person can no longer sign in.
+  function removeUserAccount(username) {
+    DB.write('users', DB.read('users', []).filter(u => u.username !== username));
+  }
+
+  // Creates or updates a login, following an ID change to its new username.
+  function upsertUserAccount(oldId, newId, password, role) {
+    let users = DB.read('users', []);
+    if (oldId && oldId !== newId) {
+      users = users.filter(u => u.username !== oldId);
+    }
+    const existing = users.find(u => u.username === newId);
+    if (existing) {
+      existing.password = password;
+      existing.role = role;
+    } else {
+      users.push({ username: newId, password, role });
+    }
+    DB.write('users', users);
+  }
+
+  function syncFacultyPasswords() {
+    const users=DB.read('users',[]), offers=SectionService.offerings(sectionSubjects);
+    faculty.forEach(person=>{const offer=offers.find(item=>item.facultyId===person.id),section=offer?sections.find(item=>item.id===offer.sectionId):null,user=users.find(item=>item.username===person.id&&item.role==='faculty');if(user)user.password=person.last.toLowerCase().replace(/\s+/g,'')+(section?.yearLevel||SectionService.detailsFromId(offer?.sectionId).yearLevel||0);});
+    DB.write('users',users);
+  }
+
+  // Removing exams must also remove their questions and submissions.
+  function removeExamsWhere(predicate) {
+    const exams = DB.read('exams', []);
+    const doomedIds = exams.filter(predicate).map(e => e.id);
+    if (doomedIds.length === 0) return;
+    DB.write('exams', exams.filter(e => !predicate(e)));
+    DB.write('questions', DB.read('questions', []).filter(q => !doomedIds.includes(q.examId)));
+    DB.write('studentSubmissions',
+      DB.read('studentSubmissions', []).filter(s => !doomedIds.includes(s.examId)));
+  }
+
+  let editIndex = null;
+  let editType = null;
+
+  /* ===== Modal helpers ===== */
+  function openModal(id){ document.getElementById(id).style.display='flex'; }
+  function closeModal(id){ document.getElementById(id).style.display='none'; editIndex=null; editType=null; }
+
+  function exportTableCsv(tableId,fileName){
+    const table=document.getElementById(tableId); if(!table)return notify('That table is unavailable.','error');
+    const actionIndex=[...table.querySelectorAll('tr:first-child th')].findIndex(cell=>cell.textContent.trim()==='Actions');
+    const rows=[...table.querySelectorAll('tr:not(.table-group-row)')].filter(row=>!row.hidden).map(row=>[...row.cells].filter((cell,index)=>index!==actionIndex).map(cell=>`"${cell.textContent.trim().replace(/"/g,'""')}"`).join(','));
+    if(rows.length<2)return notify('There are no visible records to export.','info');
+    const blob=new Blob([rows.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=fileName;link.click();URL.revokeObjectURL(url);AuditLog.record('export','table',tableId,{fileName,records:rows.length-1});notify(`Exported ${rows.length-1} record(s).`,'success');
+  }
+
+  function populateStudentSections(selected=[]) {
+    const chosen=new Set(selected);
+    document.getElementById('sSections').innerHTML=sections.length?sections.map(section=>`<label class="student-section-option"><input type="checkbox" name="studentSection" value="${section.id}"${chosen.has(section.id)?' checked':''}><span class="section-choice-mark" aria-hidden="true"></span><span class="section-choice-copy"><strong>${section.id}</strong><small>${section.name}</small></span></label>`).join(''):'<div class="profile-empty">No sections exist yet. Create a section before adding a student.</div>';
+  }
+  function openStudentModal(){ populateStudentSections(); openModal('studentModal'); }
+  function openSectionModal(){ document.getElementById('sectionID').value=''; document.getElementById('sectionName').value=''; document.getElementById('sectionProgram').value='BSCS'; document.getElementById('sectionYear').value='1'; openModal('sectionModal'); }
+  function saveSection(){
+    const id=SectionService.normaliseId(document.getElementById('sectionID').value), sectionNumber=Number(document.getElementById('sectionName').value), name=String(sectionNumber), program=document.getElementById('sectionProgram').value, yearLevel=Number(document.getElementById('sectionYear').value);
+    if(!id||!Number.isInteger(sectionNumber)||sectionNumber<1) return notify('Enter a unique section ID and a valid section number.','error');
+    if(sections.some((section,index)=>section.id===id&&index!==editIndex)) return notify(`Section ID "${id}" already exists.`,'error');
+    const isEdit=editType==='sections'&&editIndex!==null, oldId=isEdit?sections[editIndex].id:null;
+    if(isEdit){
+      sections[editIndex]={id,name,sectionNumber,program,yearLevel};
+      if(oldId!==id){
+        students.forEach(student=>student.sections=(student.sections||[]).map(value=>value===oldId?id:value));
+        sectionSubjects.forEach(item=>{if(item.sectionId===oldId)item.sectionId=id;});
+        const exams=DB.read('exams',[]); exams.forEach(exam=>exam.sections=(exam.sections||[]).map(value=>value===oldId?id:value)); DB.write('exams',exams);
+      }
+    } else sections.push({id,name,sectionNumber,program,yearLevel});
+    if(!persistAll())return; syncFacultyPasswords(); AuditLog.record(isEdit?'update':'create','section',id,{name,program,yearLevel}); closeModal('sectionModal'); loadAll(); notify(`Section ${id} ${isEdit?'updated':'added'}.`,'success');
+  }
+  function openSectionSubjects(index){
+    const section=sections[index]; if(!section)return notify('That section no longer exists.','error');
+    document.getElementById('sectionSubjectsID').value=section.id; document.getElementById('sectionSubjectsTitle').textContent=`Subjects for ${section.id}`;
+    const existingRecord=sectionSubjects.find(item=>item.sectionId===section.id), assigned=new Map((existingRecord?.assignments||[]).map(item=>[item.subjectCode,item]));
+    document.getElementById('sectionSubjects').innerHTML=subjects.length?subjects.map(subject=>`<div class="section-offering-option"><label class="section-subject-option"><input type="checkbox" value="${subject.code}"${assigned.has(subject.code)?' checked':''}><span><strong>${subject.code}</strong><small>${subject.name}</small></span></label><select data-faculty-for="${subject.code}" aria-label="Professor for ${subject.code}"><option value="">Choose professor</option>${faculty.map(person=>`<option value="${person.id}"${assigned.get(subject.code)?.facultyId===person.id?' selected':''}>${person.last}, ${person.first}</option>`).join('')}</select></div>`).join(''):'<p class="profile-empty">Create a subject before assigning it to this section.</p>'; openModal('sectionSubjectsModal');
+  }
+  function saveSectionSubjects(){
+    const sectionId=document.getElementById('sectionSubjectsID').value;
+    const checked=Array.from(document.querySelectorAll('#sectionSubjects input[type="checkbox"]:checked'));
+    const assignments=checked.map(input=>({id:`OFR-${sectionId}-${input.value}`,subjectCode:input.value,facultyId:document.querySelector(`[data-faculty-for="${input.value}"]`).value}));
+    if(assignments.some(item=>!item.facultyId))return notify('Choose one professor for every selected subject.','error');
+    removeInPlace(sectionSubjects,item=>item.sectionId===sectionId); if(assignments.length)sectionSubjects.push({sectionId,assignments});
+    if(!persistAll())return; syncFacultyPasswords(); AuditLog.record('assign-offerings','section',sectionId,{assignments}); closeModal('sectionSubjectsModal'); loadAll(); notify(`Subject offerings for ${sectionId} updated.`,'success');
+  }
+
+  let activeStudentProfile=null;
+  function openStudentProfile(index){
+    const student=students[index]; if(!student)return notify('That student no longer exists.','error');
+    activeStudentProfile=StudentProfileService.build(student,{faculty,subjects,sections,subjectAssignments,allotments,sectionSubjects,exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:AuditLog.read()});
+    document.getElementById('studentProfileAvatar').textContent=`${student.first.charAt(0)}${student.last.charAt(0)}`.toUpperCase();
+    document.getElementById('studentProfileName').textContent=`${student.first} ${student.last}`;
+    document.getElementById('studentProfileMeta').textContent=`${student.id} · ${(student.sections||[]).join(', ')||'No section'}`;
+    showStudentProfileTab('overview'); openModal('studentProfileModal');
+  }
+  function showStudentProfileTab(tab){
+    if(!activeStudentProfile)return;
+    document.querySelectorAll('.profile-tab').forEach(button=>button.classList.toggle('active',button.dataset.profileTab===tab));
+    const p=activeStudentProfile, empty=message=>`<div class="profile-empty">${message}</div>`;
+    if(tab==='overview'){
+      document.getElementById('studentProfileContent').innerHTML=`<section class="profile-stat-grid"><div><strong>${p.stats.subjects}</strong><span>Subjects</span></div><div><strong>${p.stats.attempts}</strong><span>Attempts</span></div><div><strong>${p.stats.completed}</strong><span>Graded</span></div><div><strong>${p.stats.average===null?'—':p.stats.average.toFixed(1)+'%'}</strong><span>Average</span></div></section><section class="profile-columns"><article><h3>Sections</h3>${p.sections.length?p.sections.map(section=>`<div class="profile-list-row"><strong>${section.id}</strong><span>${section.name}</span></div>`).join(''):empty('No section assigned.')}</article><article><h3>Subjects and professors</h3>${p.subjectRows.length?p.subjectRows.map(row=>`<div class="profile-list-row"><strong>${row.code} — ${row.name}</strong><span>${row.professors.length?row.professors.map(prof=>`Prof. ${prof.first} ${prof.last}`).join(', '):'No professor assigned'}</span></div>`).join(''):empty('No subjects assigned.')}</article></section>`;
+    } else if(tab==='history'){
+      document.getElementById('studentProfileContent').innerHTML=p.history.length?`<div class="table-scroll"><table><tr><th>Exam</th><th>Subject</th><th>Submitted</th><th>Status</th></tr>${p.history.map(item=>`<tr><td>${item.exam?.title||'Removed exam'}</td><td>${item.exam?.subjectCode||'—'}</td><td>${item.submission.submittedAt?new Date(item.submission.submittedAt).toLocaleString():'—'}</td><td>${item.pending?'Awaiting review':'Graded'}</td></tr>`).join('')}</table></div>`:empty('No exam history yet.');
+    } else if(tab==='grades') {
+      document.getElementById('studentProfileContent').innerHTML=p.history.length?`<div class="table-scroll"><table><tr><th>Exam</th><th>Score</th><th>Percentage</th><th>Grade</th><th>Result</th></tr>${p.history.map(item=>`<tr><td>${item.exam?.title||'Removed exam'}</td><td>${item.awarded} / ${item.submission.total||0}</td><td>${item.grade?item.grade.percentText+'%':'Pending'}</td><td>${item.grade?item.grade.rating:'—'}</td><td>${item.grade?(item.grade.passed?'Passed':'Failed'):'Awaiting review'}</td></tr>`).join('')}</table></div>`:empty('No grades available yet.');
+    } else if(tab==='activity') {
+      document.getElementById('studentProfileContent').innerHTML=activityMarkup(p.actions,'No recorded student actions.');
+    } else {
+      document.getElementById('studentProfileContent').innerHTML=loginMarkup(p.logins);
+    }
+  }
+
+  function activityMarkup(entries,emptyText){ return entries.length?`<div class="table-scroll"><table><tr><th>Date</th><th>Action</th><th>Record</th></tr>${entries.map(entry=>`<tr><td>${new Date(entry.at).toLocaleString()}</td><td>${entry.action}</td><td>${entry.entityType}${entry.entityId?' · '+entry.entityId:''}</td></tr>`).join('')}</table></div>`:`<div class="profile-empty">${emptyText}</div>`; }
+  function loginMarkup(entries){ const last=entries[0]; return `<section class="profile-stat-grid login-stats"><div><strong>${entries.length}</strong><span>Recorded logins</span></div><div><strong>${last?new Date(last.at).toLocaleDateString():'—'}</strong><span>Last login</span></div></section>${activityMarkup(entries,'No recorded logins yet.')}`; }
+
+  let activeFacultyProfile=null;
+  function openFacultyProfile(index){
+    const person=faculty[index]; if(!person)return notify('That faculty record no longer exists.','error');
+    activeFacultyProfile=FacultyProfileService.build(person,{students,subjects,sections,subjectAssignments,sectionSubjects,exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:AuditLog.read()});
+    document.getElementById('facultyProfileAvatar').textContent=`${person.first.charAt(0)}${person.last.charAt(0)}`.toUpperCase(); document.getElementById('facultyProfileName').textContent=`${person.first} ${person.last}`; document.getElementById('facultyProfileMeta').textContent=person.id; showFacultyProfileTab('overview'); openModal('facultyProfileModal');
+  }
+  function showFacultyProfileTab(tab){
+    const p=activeFacultyProfile;if(!p)return; document.querySelectorAll('[data-faculty-tab]').forEach(button=>button.classList.toggle('active',button.dataset.facultyTab===tab)); const host=document.getElementById('facultyProfileContent');
+    if(tab==='overview')host.innerHTML=`<section class="profile-identity"><div><span>First name</span><strong>${p.person.first}</strong></div><div><span>Last name</span><strong>${p.person.last}</strong></div><div><span>Faculty ID</span><strong>${p.person.id}</strong></div></section><section class="profile-stat-grid"><div><strong>${p.stats.subjects}</strong><span>Subjects</span></div><div><strong>${p.stats.sections}</strong><span>Sections</span></div><div><strong>${p.stats.students}</strong><span>Students</span></div><div><strong>${p.stats.exams}</strong><span>Exams</span></div></section><section class="profile-columns"><article><h3>Subjects</h3>${p.subjectRows.map(subject=>`<div class="profile-list-row"><strong>${subject.code}</strong><span>${subject.name}</span></div>`).join('')||'<div class="profile-empty">No subjects assigned.</div>'}</article><article><h3>Sections handled</h3>${p.sectionRows.map(section=>`<button class="profile-section-link" onclick="openSectionFromProfile('${section.id}')"><strong>${section.id} — ${section.name}</strong><span>${section.codes.join(', ')} · ${section.students.length} students</span></button>`).join('')||'<div class="profile-empty">No sections assigned.</div>'}</article></section>`;
+    else if(tab==='performance')host.innerHTML=p.sectionRows.length?`<section class="performance-list">${p.sectionRows.map(section=>`<article><header><button onclick="openSectionFromProfile('${section.id}')">${section.id}</button><span>${section.students.length} students · ${section.submissions.length} submissions</span></header><div class="performance-track"><span style="width:${section.average===null?0:section.average}%"></span></div><strong>${section.average===null?'No graded submissions':section.average.toFixed(1)+'% average'}</strong></article>`).join('')}</section>`:'<div class="profile-empty">No section performance available.</div>';
+    else if(tab==='activity')host.innerHTML=activityMarkup(p.actions,'No recorded faculty actions.'); else host.innerHTML=loginMarkup(p.logins);
+  }
+  function openSectionFromProfile(sectionId){ closeModal('facultyProfileModal'); showSection('sectionSection'); const row=[...document.querySelectorAll('#sectionTable tr')].find(item=>item.cells[0]?.textContent.trim()===sectionId); if(row){row.classList.add('profile-target-row');row.scrollIntoView({block:'center'});setTimeout(()=>row.classList.remove('profile-target-row'),1800);} }
+
+  /* ===== Save Item (CRUD) ===== */
+  function saveItem(type){
+    if(type==='faculty'){
+      const id=document.getElementById('fID').value.trim();
+      const last=document.getElementById('fLast').value.trim();
+      const first=document.getElementById('fFirst').value.trim();
+      if(!id||!last||!first) return notify('Fill all fields', 'error');
+
+      // Reject duplicate IDs. Previously a second person with an existing ID
+      // was added to the roster but silently given no login at all.
+      if(faculty.some((f,i)=>f.id===id && i!==editIndex)){
+        return notify(`A faculty member with ID "${id}" already exists.`, 'error');
+      }
+
+      const password=last.toLowerCase().replace(/\s+/g,'')+'0';
+      const isEdit = editType==='faculty' && editIndex!==null;
+      const oldId = isEdit ? faculty[editIndex].id : null;
+
+      if(isEdit){
+        faculty[editIndex]={id,last,first};
+        // An ID change has to be carried into every record referencing it,
+        // otherwise the old ID is orphaned across assignments and exams.
+        if(oldId !== id){
+          subjectAssignments.forEach(sa=>{
+            if(Array.isArray(sa.facultyIds)){
+              sa.facultyIds = sa.facultyIds.map(f=>f===oldId?id:f);
+            } else if(sa.facultyId===oldId){
+              sa.facultyId = id;
+            }
+          });
+          sectionSubjects.forEach(record=>(record.assignments||[]).forEach(assignment=>{if(assignment.facultyId===oldId)assignment.facultyId=id;}));
+          allotments.forEach(a=>{ if(a.facultyId===oldId) a.facultyId=id; });
+          const exams=DB.read('exams',[]);
+          exams.forEach(e=>{ if(e.facultyId===oldId) e.facultyId=id; });
+          DB.write('exams',exams);
+        }
+      } else {
+        faculty.push({id,last,first});
+      }
+
+      upsertUserAccount(oldId, id, password, 'faculty');
+      if(!persistAll()) return;
+      syncFacultyPasswords();
+      AuditLog.record(isEdit?'update':'create','faculty',id,{name:`${first} ${last}`});
+      closeModal('facultyModal');
+      notify(isEdit ? `Faculty ${id} updated.` : `Faculty ${id} added. Password: ${password}`, 'success');
+    }
+
+    if(type==='students'){
+      const id=document.getElementById('sID').value.trim();
+      const last=document.getElementById('sLast').value.trim();
+      const first=document.getElementById('sFirst').value.trim();
+      const selectedSections=[...document.querySelectorAll('#sSections input[name="studentSection"]:checked')];
+      const sections=selectedSections.map(input=>input.value);
+      if(!id||!last||!first||!selectedSections.length) return notify('Fill all fields and choose at least one section', 'error');
+
+      if(students.some((s,i)=>s.id===id && i!==editIndex)){
+        return notify(`A student with ID "${id}" already exists.`, 'error');
+      }
+
+      // Matches the seeding rule in login.html, which strips spaces from
+      // surnames like "Dela Cruz" before building the password.
+      const firstSection=sections.find(section=>section.id===selectedSections[0]?.value), password=last.toLowerCase().replace(/\s+/g,'')+(firstSection?.yearLevel||SectionService.detailsFromId(selectedSections[0]?.value).yearLevel||0);
+      const isEdit = editType==='students' && editIndex!==null;
+      const oldId = isEdit ? students[editIndex].id : null;
+
+      if(isEdit){
+        students[editIndex]={id,last,first,sections};
+        if(oldId !== id){
+          allotments.forEach(a=>{ if(a.studentId===oldId) a.studentId=id; });
+          const subs=DB.read('studentSubmissions',[]);
+          subs.forEach(s=>{ if(s.studentId===oldId) s.studentId=id; });
+          DB.write('studentSubmissions',subs);
+        }
+      } else {
+        students.push({id,last,first,sections});
+      }
+
+      upsertUserAccount(oldId, id, password, 'student');
+      if(!persistAll()) return;
+      AuditLog.record(isEdit?'update':'create','student',id,{name:`${first} ${last}`,sections});
+      closeModal('studentModal');
+      notify(isEdit ? `Student ${id} updated.` : `Student ${id} added. Password: ${password}`, 'success');
+    }
+
+    if(type==='subjects'){
+      const code=document.getElementById('subCode').value.trim();
+      const name=document.getElementById('subName').value.trim();
+      if(!code||!name) return notify('Fill all fields', 'error');
+
+      if(subjects.some((s,i)=>s.code===code && i!==editIndex)){
+        return notify(`A subject with code "${code}" already exists.`, 'error');
+      }
+
+      const isEdit = editType==='subjects' && editIndex!==null;
+      const oldCode = isEdit ? subjects[editIndex].code : null;
+
+      if(isEdit){
+        subjects[editIndex]={code,name};
+        if(oldCode !== code){
+          subjectAssignments.forEach(sa=>{ if(sa.subjectCode===oldCode) sa.subjectCode=code; });
+          allotments.forEach(a=>{ if(a.subjectCode===oldCode) a.subjectCode=code; });
+          sectionSubjects.forEach(item=>item.subjectCodes=(item.subjectCodes||[]).map(value=>value===oldCode?code:value));
+          const exams=DB.read('exams',[]);
+          exams.forEach(e=>{ if(e.subjectCode===oldCode) e.subjectCode=code; });
+          DB.write('exams',exams);
+        }
+      } else {
+        subjects.push({code,name});
+      }
+
+      if(!persistAll()) return;
+      AuditLog.record(isEdit?'update':'create','subject',code,{name});
+      closeModal('subjectModal');
+      notify(isEdit ? `Subject ${code} updated.` : `Subject ${code} added.`, 'success');
+    }
+
+    // Backward compatibility: if your allotments Save button still calls saveItem('allotments'),
+    // delegate to the student–subject–faculty handler (requires 3 fields in the modal)
+    if(type==='allotments'){
+      saveAllotment();
+      return;
+    }
+
+    editIndex=null;
+    editType=null;
+    loadAll();
+  }
+
+  /* ===== Faculty–Subject modal ===== */
+  function openFacultySubjectModal(){
+    const subjectSel = document.getElementById("fsSubject");
+    const facultySel = document.getElementById("fsFaculty");
+
+    subjectSel.innerHTML = subjects.map(sub=>`<option value="${sub.code}">${sub.code} - ${sub.name}</option>`).join('');
+    facultySel.innerHTML = faculty.map(f=>`<option value="${f.id}">${f.id} - ${f.last}, ${f.first}</option>`).join('');
+
+    openModal('facultySubjectModal');
+  }
+
+  function saveFacultySubject(){
+  const subjectCode = document.getElementById("fsSubject").value;
+  const facultyId = document.getElementById("fsFaculty").value;
+
+  if(!subjectCode || !facultyId) return notify("Select one subject and one professor", 'error');
+
+  const existing = subjectAssignments.find(sa => sa.subjectCode === subjectCode);
+  if(existing){
+    existing.facultyIds = [facultyId];
+  } else {
+    subjectAssignments.push({ subjectCode, facultyIds:[facultyId] });
+  }
+
+  localStorage.setItem("subjectAssignments", JSON.stringify(subjectAssignments));
+  closeModal("facultySubjectModal");
+  AuditLog.record('assign-professor','subject',subjectCode,{facultyId});
+  notify(`Professor assigned to ${subjectCode}.`, 'success');
+  loadAll();
+}
+
+
+
+  /* ===== Student–Subject–Faculty modal ===== */
+  // Fills the three allotment dropdowns. Both "Add" and "Edit" go through this:
+  // Edit used to set .value on selects that had never been populated, so the
+  // modal opened blank and saving failed with "Select all fields".
+  function populateAllotSelects(){
+    const studentSel = document.getElementById("allotStudent");
+    const subjectSel = document.getElementById("allotSubject");
+    const facultySel = document.getElementById("allotFaculty");
+
+    if(!studentSel || !subjectSel || !facultySel) return null;
+
+    studentSel.innerHTML = students.map(s=>`<option value="${s.id}">${s.id} - ${s.last}, ${s.first}</option>`).join('');
+    subjectSel.innerHTML = subjects.map(sub=>`<option value="${sub.code}">${sub.code} - ${sub.name}</option>`).join('');
+
+    // Only lecturers assigned to the chosen subject may be selected.
+    function refreshFaculty(preselect){
+      const assignment = subjectAssignments.find(sa => sa.subjectCode === subjectSel.value);
+      if(assignment){
+        const facList = Array.isArray(assignment.facultyIds) ? assignment.facultyIds : [assignment.facultyId];
+        facultySel.innerHTML = facList.map(fid => {
+          const fac = faculty.find(f => f.id === fid);
+          return fac ? `<option value="${fac.id}">${fac.id} - ${fac.last}, ${fac.first}</option>` : '';
+        }).join('');
+        if(preselect) facultySel.value = preselect;
+      } else {
+        facultySel.innerHTML = `<option value="">No faculty assigned</option>`;
+      }
+    }
+
+    subjectSel.onchange = () => refreshFaculty();
+    return { studentSel, subjectSel, facultySel, refreshFaculty };
+  }
+
+  function openAllotModal(){
+    const sel = populateAllotSelects();
+    if(!sel){
+      notify("Please update your allotment modal to include Student, Subject, and Faculty selects.", 'error');
+      return;
+    }
+    sel.facultySel.innerHTML = `<option value="">Select a subject first</option>`;
+    openModal('allotModal');
+  }
+
+  function saveAllotment(){
+    const studentId = document.getElementById("allotStudent")?.value;
+    const subjectCode = document.getElementById("allotSubject")?.value;
+    const facultyId = document.getElementById("allotFaculty")?.value;
+
+    if(!studentId || !subjectCode || !facultyId) return notify("Select all fields", 'error');
+
+    // Reject a repeat enrolment of the same student on the same subject.
+    const clash = allotments.findIndex(a =>
+      a.studentId === studentId && a.subjectCode === subjectCode);
+    const isEditingThisRow = editType==='allotments' && editIndex!==null;
+    if(clash !== -1 && clash !== (isEditingThisRow ? editIndex : -1)){
+      const existing = allotments[clash];
+      return notify(existing.facultyId === facultyId
+        ? `${studentId} is already enrolled in ${subjectCode}.`
+        : `${studentId} is already enrolled in ${subjectCode} under a different lecturer.\n\n`
+          + `Edit that entry instead to transfer them.`, 'error');
+    }
+
+    // The chosen lecturer must actually be assigned to the chosen subject.
+    const assignment = subjectAssignments.find(sa => sa.subjectCode === subjectCode);
+    const validFaculty = assignment
+      ? (Array.isArray(assignment.facultyIds) ? assignment.facultyIds : [assignment.facultyId])
+      : [];
+    if(!validFaculty.includes(facultyId)){
+      return notify(`That lecturer is not assigned to ${subjectCode}.`, 'error');
+    }
+
+    if(isEditingThisRow){
+      allotments[editIndex] = {studentId, subjectCode, facultyId};
+    } else {
+      allotments.push({studentId, subjectCode, facultyId});
+    }
+
+    localStorage.setItem("allotments", JSON.stringify(allotments));
+    closeModal('allotModal');
+    notify(isEditingThisRow ? `Enrolment updated for ${studentId}.` : `${studentId} enrolled in ${subjectCode}.`, 'success');
+    editIndex=null; editType=null;
+    loadAll();
+  }
+
+  /* ===== CSV Upload (consolidated) ===== */
+  let csvPreview = [];
+  let csvPreviewType = null;
+
+  function handleCSV(type, input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const lines = e.target.result.split('\n').filter(l=>l.trim());
+      csvPreview = [];
+      csvPreviewType = type;
+
+      lines.forEach(line=>{
+        const parts = line.split(',').map(p=>p.trim());
+        if(type==='faculty' && parts.length>=3){
+          const id = parts[0], last = parts[1], first = parts[2];
+          const password = last.toLowerCase().replace(/\s+/g,'') + '0';
+          csvPreview.push({id,last,first,username:id,password,role:"faculty"});
+        }
+        if(type==='students' && parts.length>=4){
+          const id = parts[0], last = parts[1], first = parts[2], sections = parts.slice(3);
+          // Surnames like "Dela Cruz" must have spaces stripped, matching the
+          // rule used when adding a student manually and when seeding logins.
+          const password = last.toLowerCase().replace(/\s+/g,'') + (SectionService.detailsFromId(sections[0]).yearLevel||0);
+          csvPreview.push({id,last,first,sections,username:id,password,role:"student"});
+        }
+        if(type==='subjects' && parts.length>=2){
+          csvPreview.push({code:parts[0], name:parts[1]});
+        }
+        if(type==='subjectAssignments' && parts.length>=2){
+          // CSV format: subjectCode,facultyId
+          csvPreview.push({subjectCode:parts[0], facultyId:parts[1]});
+        }
+      });
+
+      if(csvPreview.length === 0){
+        notify('No valid rows found in that CSV. Please check the column order.', 'error');
+        return;
+      }
+
+      showCSVModal();
+    };
+    reader.readAsText(file);
+    // Reset so re-picking the same file still fires onchange.
+    input.value = '';
+  }
+
+  function showCSVModal(){
+    const container = document.getElementById('csvPreviewContent');
+    if(!container || csvPreview.length === 0) return;
+
+    const headers = Object.keys(csvPreview[0]);
+    const headerRow = '<tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr>';
+    const rows = csvPreview.map(item =>
+      '<tr>' + headers.map(h=>`<td>${Array.isArray(item[h]) ? item[h].join(', ') : item[h]}</td>`).join('') + '</tr>'
+    ).join('');
+
+    container.innerHTML = `
+    <table>${headerRow}${rows}</table>
+  `;
+
+    openModal('csvPreviewModal');
+
+    setTimeout(() => {
+      const modalBox = document.querySelector('#csvPreviewModal .modal');
+      if (!modalBox) return;
+      const colCount = headers.length;
+      const rowCount = csvPreview.length;
+      const width = Math.min(300 + colCount * 120, window.innerWidth * 0.95);
+      const height = Math.min(200 + rowCount * 30, window.innerHeight * 0.85);
+      modalBox.style.width = width + 'px';
+      modalBox.style.maxHeight = height + 'px';
+      modalBox.style.overflowY = 'auto';
+    }, 50);
+  }
+
+  function confirmUpload(){
+    let added = 0, skipped = 0;
+
+    if(csvPreviewType==='faculty'){
+      csvPreview.forEach(row=>{
+        if(faculty.some(f=>f.id===row.id)){ skipped++; return; }
+        faculty.push({id:row.id,last:row.last,first:row.first});
+        upsertUserAccount(null,row.id,row.password,'faculty');
+        added++;
+      });
+    }
+
+    if(csvPreviewType==='students'){
+      csvPreview.forEach(row=>{
+        if(students.some(s=>s.id===row.id)){ skipped++; return; }
+        students.push({id:row.id,last:row.last,first:row.first,sections:row.sections});
+        upsertUserAccount(null,row.id,row.password,'student');
+        added++;
+      });
+    }
+
+    if(csvPreviewType==='subjects'){
+      csvPreview.forEach(row=>{
+        if(subjects.some(s=>s.code===row.code)){ skipped++; return; }
+        subjects.push({code:row.code,name:row.name});
+        added++;
+      });
+    }
+
+    if(csvPreviewType==='subjectAssignments'){
+      // Merge into the existing {subjectCode, facultyIds:[...]} shape rather
+      // than pushing a second row per subject with a singular facultyId.
+      csvPreview.forEach(row=>{
+        if(!subjects.some(s=>s.code===row.subjectCode)){ skipped++; return; }
+        if(!faculty.some(f=>f.id===row.facultyId)){ skipped++; return; }
+
+        let entry = subjectAssignments.find(sa=>sa.subjectCode===row.subjectCode);
+        if(!entry){
+          entry = {subjectCode:row.subjectCode, facultyIds:[]};
+          subjectAssignments.push(entry);
+        }
+        if(!Array.isArray(entry.facultyIds)){
+          entry.facultyIds = entry.facultyId ? [entry.facultyId] : [];
+          delete entry.facultyId;
+        }
+        if(entry.facultyIds.includes(row.facultyId)){ skipped++; return; }
+        entry.facultyIds.push(row.facultyId);
+        added++;
+      });
+    }
+
+    persistAll();
+    csvPreview = [];
+    csvPreviewType = null;
+    closeModal('csvPreviewModal');
+    loadAll();
+
+    notify(skipped
+      ? `Imported ${added} row(s). Skipped ${skipped} duplicate or unmatched row(s).`
+      : `Imported ${added} row(s).`, added > 0 ? 'success' : 'info');
+  }
+
+  /* ===== Tables ===== */
+  function renderTable(data,tableId,headers,fields,type){
+    const headerRow='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'<th>Actions</th></tr>';
+    const rows=data.map((item,i)=>`
+      <tr>
+        ${fields.map(f=>`<td>${Array.isArray(item[f])?item[f].join(', '):item[f]}</td>`).join('')}
+        <td>
+          <button class="table-icon-btn edit" onclick="editItem('${type}',${i})" aria-label="Edit ${type} record" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1-1a1.4 1.4 0 0 0 0-2l-2-2a1.4 1.4 0 0 0-2 0l-1 1Z"/></svg></button>
+          <button class="table-icon-btn delete" onclick="deleteItem('${type}',${i})" aria-label="Delete ${type} record" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm4 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button>
+        </td>
+      </tr>`).join('');
+    const el=document.getElementById(tableId);
+    if(el) el.innerHTML=headerRow+rows;
+  }
+
+  // Names the record being deleted, and warns about the records that will be
+  // removed along with it, instead of the old anonymous "Delete this entry?".
+  function describeDeletion(type,item){
+    if(type==='faculty'){
+      const exams=DB.read('exams',[]).filter(e=>e.facultyId===item.id).length;
+      const enrolled=allotments.filter(a=>a.facultyId===item.id).length;
+      return {
+        title: `Delete faculty ${item.id}?`,
+        message: `<strong>${item.last}, ${item.first}</strong> will be removed, along with `
+               + `their login, ${exams} exam(s) and all their questions, their subject `
+               + `assignments, and ${enrolled} student enrolment(s).\n\nThis cannot be undone.`
+      };
+    }
+    if(type==='students'){
+      const enrolled=allotments.filter(a=>a.studentId===item.id).length;
+      return {
+        title: `Delete student ${item.id}?`,
+        message: `<strong>${item.last}, ${item.first}</strong> will be removed, along with `
+               + `their login, ${enrolled} enrolment(s) and their exam results.`
+               + `\n\nThis cannot be undone.`
+      };
+    }
+    if(type==='subjects'){
+      const exams=DB.read('exams',[]).filter(e=>e.subjectCode===item.code).length;
+      return {
+        title: `Delete subject ${item.code}?`,
+        message: `<strong>${item.name}</strong> will be removed, along with its faculty `
+               + `assignment, all student enrolments, and ${exams} exam(s) with their `
+               + `questions.\n\nThis cannot be undone.`
+      };
+    }
+    if(type==='sections') return {title:`Delete section ${item.id}?`,message:`<strong>${item.name}</strong> will be removed from all students and section-subject assignments. Existing exams will no longer target it.\n\nThis cannot be undone.`};
+    if(type==='subjectAssignments'){
+      return {
+        title: 'Remove faculty assignment?',
+        message: `No lecturer will be assigned to <strong>${item.subjectCode}</strong> afterwards.`
+      };
+    }
+    if(type==='allotments'){
+      return {
+        title: 'Remove enrolment?',
+        message: `Student <strong>${item.studentId}</strong> will no longer be enrolled in `
+               + `<strong>${item.subjectCode}</strong>.`
+      };
+    }
+    return { title: 'Delete this entry?', message: 'This cannot be undone.' };
+  }
+
+  async function deleteItem(type,index){
+    const arr = STORE[type];
+    if(!required(arr, 'Unknown record type — nothing was deleted.')) return;
+    const item = arr[index];
+    if(!required(item, 'That record no longer exists. The list has been refreshed.')) { loadAll(); return; }
+
+    const d = describeDeletion(type,item);
+    if(!(await confirmDialog({
+      title: d.title,
+      message: d.message,
+      confirmLabel: 'Delete',
+      danger: true
+    }))) return;
+
+    arr.splice(index,1);
+
+    // Clean up everything that referenced the deleted record.
+    if(type==='faculty'){
+      removeUserAccount(item.id);
+      subjectAssignments.forEach(sa=>{
+        if(Array.isArray(sa.facultyIds)){
+          sa.facultyIds = sa.facultyIds.filter(id=>id!==item.id);
+        }
+      });
+      // Drop assignments that no longer have anyone attached.
+      removeInPlace(subjectAssignments, sa=>{
+        const list = Array.isArray(sa.facultyIds) ? sa.facultyIds : [sa.facultyId];
+        return list.filter(Boolean).length === 0;
+      });
+      removeInPlace(allotments, a=>a.facultyId===item.id);
+      removeExamsWhere(e=>e.facultyId===item.id);
+    }
+
+    if(type==='students'){
+      removeUserAccount(item.id);
+      removeInPlace(allotments, a=>a.studentId===item.id);
+      DB.write('studentSubmissions',
+        DB.read('studentSubmissions',[]).filter(s=>s.studentId!==item.id));
+    }
+
+    if(type==='subjects'){
+      removeInPlace(subjectAssignments, sa=>sa.subjectCode===item.code);
+      removeInPlace(allotments, a=>a.subjectCode===item.code);
+      removeExamsWhere(e=>e.subjectCode===item.code);
+      sectionSubjects.forEach(entry=>entry.subjectCodes=(entry.subjectCodes||[]).filter(code=>code!==item.code));
+      removeInPlace(sectionSubjects,entry=>entry.subjectCodes.length===0);
+    }
+    if(type==='sections'){
+      students.forEach(student=>student.sections=(student.sections||[]).filter(id=>id!==item.id));
+      removeInPlace(sectionSubjects,entry=>entry.sectionId===item.id);
+      const exams=DB.read('exams',[]); exams.forEach(exam=>exam.sections=(exam.sections||[]).filter(id=>id!==item.id)); DB.write('exams',exams);
+    }
+
+    persistAll();
+    AuditLog.record('delete',type,item.id||item.code||item.subjectCode||item.studentId,{record:item});
+    loadAll();
+  }
+
+  function editItem(type,index){
+    const arr=STORE[type];
+    if(!required(arr, 'Unknown record type — cannot open the editor.')) return;
+    const item=arr[index];
+    if(!required(item, 'That record no longer exists. The list has been refreshed.')) { loadAll(); return; }
+    editIndex=index;
+    editType=type;
+
+    if(type==='faculty'){
+      document.getElementById('fID').value=item.id;
+      document.getElementById('fLast').value=item.last;
+      document.getElementById('fFirst').value=item.first;
+      openModal('facultyModal');
+    }
+    if(type==='students'){
+      document.getElementById('sID').value=item.id;
+      document.getElementById('sLast').value=item.last;
+      document.getElementById('sFirst').value=item.first;
+      populateStudentSections(item.sections||[]);
+      openModal('studentModal');
+    }
+    if(type==='subjects'){
+      document.getElementById('subCode').value=item.code;
+      document.getElementById('subName').value=item.name;
+      openModal('subjectModal');
+    }
+    if(type==='sections'){ const details=SectionService.detailsFromId(item.id); document.getElementById('sectionID').value=item.id; document.getElementById('sectionName').value=item.sectionNumber||details.sectionNumber||item.name; document.getElementById('sectionProgram').value=item.program||details.program||'BSCS'; document.getElementById('sectionYear').value=String(item.yearLevel||details.yearLevel||1); openModal('sectionModal'); }
+    if(type==='subjectAssignments'){
+  // Populate before selecting: fsSubject is otherwise empty unless the user
+  // happened to open the "Assign" modal earlier in the session.
+  const subjectSel = document.getElementById('fsSubject');
+  subjectSel.innerHTML = subjects.map(sub =>
+    `<option value="${sub.code}">${sub.code} - ${sub.name}</option>`
+  ).join('');
+  subjectSel.value = item.subjectCode;
+
+  const facultySel = document.getElementById('fsFaculty');
+  facultySel.innerHTML = faculty.map(f =>
+    `<option value="${f.id}">${f.id} - ${f.last}, ${f.first}</option>`
+  ).join('');
+
+  // Legacy records may contain several IDs; the current one-professor rule
+  // keeps the first valid assignment when the record is opened.
+  const assigned = item.facultyIds || (item.facultyId ? [item.facultyId] : []);
+  facultySel.value = assigned.find(id => faculty.some(f => f.id === id)) || '';
+
+  openModal('facultySubjectModal');
+}
+
+    if(type==='allotments'){
+      const sel = populateAllotSelects();
+      if(!required(sel, 'The enrolment form is unavailable on this page.')) return;
+      sel.studentSel.value = item.studentId;
+      sel.subjectSel.value = item.subjectCode;
+      // Build the faculty list for this subject, then select the current one.
+      sel.refreshFaculty(item.facultyId);
+      openModal('allotModal');
+    }
+  }
+
+  function loadAll(){
+    // Counts
+    const setText = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+    setText('countFaculty', faculty.length);
+    setText('countStudents', students.length);
+    setText('countSubjects', subjects.length);
+    setText('countAllot', allotments.length);
+    setText('countFacultySubject', subjectAssignments.length);
+    setText('countSections', sections.length);
+    setText('countAudit', AuditLog.read().length);
+
+    // Core tables
+    const facultyRows=faculty.map((person,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}</td><td><button class="table-icon-btn edit" onclick="editItem('faculty',${index})" aria-label="Edit faculty record" title="Edit"><svg viewBox="0 0 24 24"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg></button><button class="table-icon-btn delete" onclick="deleteItem('faculty',${index})" aria-label="Delete faculty record" title="Delete"><svg viewBox="0 0 24 24"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg></button></td></tr>`).join('');
+    document.getElementById('facultyTable').innerHTML='<tr><th>ID</th><th>Last name</th><th>First name</th><th>Actions</th></tr>'+facultyRows;
+    const assignedFaculty=new Set([...SectionService.offerings(sectionSubjects).map(item=>item.facultyId),...subjectAssignments.flatMap(item=>item.facultyIds||(item.facultyId?[item.facultyId]:[]))].filter(Boolean));
+    const unassignedRows=faculty.map((person,index)=>({person,index})).filter(item=>!assignedFaculty.has(item.person.id)).map(({person,index})=>`<tr class="profile-row" tabindex="0" onclick="openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}</td><td><span class="assignment-status unassigned">Unassigned</span></td></tr>`).join('');
+    document.getElementById('unassignedFacultyTable').innerHTML='<tr><th>ID</th><th>Last name</th><th>First name</th><th>Status</th></tr>'+(unassignedRows||'<tr><td colspan="4" class="profile-empty">Every professor currently has an assigned subject.</td></tr>');
+    const studentRows=students.map((student,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openStudentProfile(${index})" onkeydown="if(event.key==='Enter')openStudentProfile(${index})"><td>${student.id}</td><td colspan="2">${student.last}, ${student.first}</td><td>${(student.sections||[]).join(', ')}</td><td><button class="table-icon-btn edit" onclick="editItem('students',${index})" aria-label="Edit student record" title="Edit"><svg viewBox="0 0 24 24"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg></button><button class="table-icon-btn delete" onclick="deleteItem('students',${index})" aria-label="Delete student record" title="Delete"><svg viewBox="0 0 24 24"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg></button></td></tr>`).join('');
+    document.getElementById('studentTable').innerHTML='<tr><th>ID</th><th colspan="2">Student name</th><th>Sections</th><th>Actions</th></tr>'+studentRows;
+    renderTable(subjects,'subjectTable',['Code','Name'],['code','name'],'subjects');
+    const sectionRows=sections.map((section,index)=>`<tr><td><strong>${section.id}</strong></td><td>${section.name}</td><td>${SectionService.assignedCodes(section.id,sectionSubjects).map(code=>`<span class="subject-code-chip">${code}</span>`).join('')||'<span class="muted-cell">No subjects assigned</span>'}</td><td><div class="row-actions"><button class="table-icon-btn subjects" onclick="openSectionSubjects(${index})" aria-label="Assign subjects to ${section.id}" title="Assign subjects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 2.4 1.2L14 5h3.5A2.5 2.5 0 0 1 20 7.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5.5Zm2.5-.5a.5.5 0 0 0-.5.5V18h12V7.5a.5.5 0 0 0-.5-.5H13l-1.2-1.6A1 1 0 0 0 11 5H6.5Z"/></svg></button><button class="table-icon-btn edit" onclick="editItem('sections',${index})" aria-label="Edit section ${section.id}" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg></button><button class="table-icon-btn delete" onclick="deleteItem('sections',${index})" aria-label="Delete section ${section.id}" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg></button></div></td></tr>`).join('');
+    document.getElementById('sectionTable').innerHTML='<tr><th>Unique ID</th><th>Year Level</th><th>Curriculum</th><th>Section</th><th>Subjects</th><th>Actions</th></tr>'+sectionRows;
+    [...document.querySelectorAll('#sectionTable tr')].slice(1).forEach((row,index)=>{const section=sections[index],details=SectionService.detailsFromId(section.id),program=section.program||details.program;row.cells[1].textContent=section.sectionNumber||details.sectionNumber||section.name||'—';row.insertCell(1).textContent=section.yearLevel||details.yearLevel||'—';row.insertCell(2).textContent=program||'—';});
+
+    // Faculty–Subject table
+    const fsEl = document.getElementById('facultySubjectTable');
+    const fsRows = subjectAssignments.map((a,i)=>{
+  const s = subjects.find(x=>x.code===a.subjectCode);
+  const facList = Array.isArray(a.facultyIds) ? a.facultyIds : [a.facultyId];
+  const facNames = facList.map(fid=>{
+    const f = faculty.find(x=>x.id===fid);
+    return f ? `${f.id} - ${f.last}, ${f.first}` : '(deleted faculty)';
+  }).join('<br>');
+  return `<tr>
+    <td>${s ? `${s.code} - ${s.name}` : '(deleted subject)'}</td>
+    <td>${facNames}</td>
+    <td>
+      <button class="table-icon-btn edit" onclick="editItem('subjectAssignments',${i})" aria-label="Edit faculty assignment" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1-1a1.4 1.4 0 0 0 0-2l-2-2a1.4 1.4 0 0 0-2 0l-1 1Z"/></svg></button>
+      <button class="table-icon-btn delete" onclick="deleteItem('subjectAssignments',${i})" aria-label="Delete faculty assignment" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm4 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button>
+    </td>
+  </tr>`;
+}).join('');
+document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></tr>` + fsRows;
+
+    // Student–Subject–Faculty table
+    const allotEl = document.getElementById('allotTable');
+    if(allotEl){
+      const allotRows = allotments.map((a,i)=>{
+        const st = students.find(x=>x.id===a.studentId);
+        const sub = subjects.find(x=>x.code===a.subjectCode);
+        const fac = faculty.find(x=>x.id===a.facultyId);
+        return `<tr>
+          <td>${st ? `${st.id} - ${st.last}, ${st.first}` : '(deleted student)'}</td>
+          <td>${sub ? `${sub.code} - ${sub.name}` : '(deleted subject)'}</td>
+          <td>${fac ? `${fac.id} - ${fac.last}, ${fac.first}` : '(deleted faculty)'}</td>
+          <td>
+            <button class="table-icon-btn edit" onclick="editItem('allotments',${i})" aria-label="Edit student allotment" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1-1a1.4 1.4 0 0 0 0-2l-2-2a1.4 1.4 0 0 0-2 0l-1 1Z"/></svg></button>
+            <button class="table-icon-btn delete" onclick="deleteItem('allotments',${i})" aria-label="Delete student allotment" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm4 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button>
+          </td>
+        </tr>`;
+      }).join('');
+      allotEl.innerHTML = `<tr><th>Student</th><th>Subject</th><th>Faculty</th><th>Actions</th></tr>` + allotRows;
+    }
+    renderAuditLog();
+    AdminTableTools.mount('faculty',document.getElementById('facultyTable'),document.querySelector('#facultySection .action-box'));
+    AdminTableTools.mount('unassignedFaculty',document.getElementById('unassignedFacultyTable'),document.getElementById('unassignedFacultyTools'));
+    AdminTableTools.mount('students',document.getElementById('studentTable'),document.querySelector('#studentSection .action-box'));
+    AdminTableTools.mount('sections',document.getElementById('sectionTable'),document.querySelector('#sectionSection .table-corner-actions'));
+    AdminTableTools.mount('subjects',document.getElementById('subjectTable'),document.querySelector('#subjectSection .action-box'));
+    AdminTableTools.mount('professors',document.getElementById('facultySubjectTable'),document.querySelector('#facultySubjectSection .action-box'));
+  }
+
+  function auditPersonRows(list){ return list.length?list.map(student=>`<div class="profile-list-row"><strong>${student.last}, ${student.first}</strong><span>${student.id} · ${(student.sections||[]).join(', ')||'No section'}</span></div>`).join(''):'<div class="profile-empty">None</div>'; }
+  function renderParticipation(){
+    const exams=DB.read('exams',[]), exam=exams.find(item=>item.id===document.getElementById('auditExam').value);
+    if(!exam){ document.getElementById('participationSummary').innerHTML=''; document.getElementById('auditTaken').innerHTML='<div class="profile-empty">Choose an exam.</div>'; document.getElementById('auditNotTaken').innerHTML=''; return; }
+    const result=AuditLog.participation(exam,students,allotments,sectionSubjects,DB.read('studentSubmissions',[]));
+    document.getElementById('participationSummary').innerHTML=`<div><strong>${result.taken.length+result.notTaken.length}</strong><span>Eligible</span></div><div><strong>${result.taken.length}</strong><span>Took exam</span></div><div><strong>${result.notTaken.length}</strong><span>Did not take</span></div><div><strong>${result.taken.length+result.notTaken.length?Math.round(result.taken.length/(result.taken.length+result.notTaken.length)*100):0}%</strong><span>Participation</span></div>`;
+    document.getElementById('auditTaken').innerHTML=auditPersonRows(result.taken); document.getElementById('auditNotTaken').innerHTML=auditPersonRows(result.notTaken);
+  }
+  let activeAuditTab='faculty';
+  function setAuditTab(tab){
+    activeAuditTab=['faculty','admin','login'].includes(tab)?tab:'faculty';
+    document.querySelectorAll('.audit-tab').forEach(button=>{
+      const active=button.dataset.auditTab===activeAuditTab;
+      button.classList.toggle('active',active);
+      button.setAttribute('aria-selected',String(active));
+    });
+    renderAuditLog();
+  }
+  function renderAuditLog(){
+    const visibleEntries=AuditLog.read().filter(entry=>activeAuditTab==='login'
+      ? entry.action==='login'
+      : entry.actorRole===activeAuditTab&&entry.action!=='login');
+    const visibleRows=visibleEntries.map(entry=>`<tr><td>${new Date(entry.at).toLocaleString()}</td><td><strong>${entry.actorId}</strong><br>${entry.actorRole}</td><td>${entry.action}</td><td>${entry.entityType}${entry.entityId?' - '+entry.entityId:''}</td></tr>`).join('');
+    const emptyLabel=activeAuditTab==='login'?'No sign-ins recorded yet.':`No ${activeAuditTab==='faculty'?'professor':'admin'} changes recorded yet.`;
+    document.getElementById('auditTable').innerHTML='<tr><th>Date and time</th><th>Account</th><th>Activity</th><th>Changed record</th></tr>'+(visibleRows||`<tr><td colspan="4" class="muted-cell">${emptyLabel}</td></tr>`);
+    AdminTableTools.mount('audit',document.getElementById('auditTable'),document.getElementById('auditTableTools'));
+    return;
+    const examSelect=document.getElementById('auditExam'), exams=DB.read('exams',[]), previous=examSelect.value;
+    examSelect.innerHTML=exams.length?exams.map(exam=>`<option value="${exam.id}">${exam.title} — ${exam.subjectCode}</option>`).join(''):'<option value="">No exams available</option>'; if(exams.some(exam=>exam.id===previous))examSelect.value=previous;
+    const rows=AuditLog.read().map(entry=>`<tr><td>${new Date(entry.at).toLocaleString()}</td><td><strong>${entry.actorId}</strong><br>${entry.actorRole}</td><td>${entry.action}</td><td>${entry.entityType}${entry.entityId?' · '+entry.entityId:''}</td></tr>`).join('');
+    document.getElementById('auditTable').innerHTML='<tr><th>Date and time</th><th>Actor</th><th>Action</th><th>Record</th></tr>'+rows; renderParticipation();
+    AdminTableTools.mount('audit',document.getElementById('auditTable'),document.getElementById('auditTableTools'));
+  }
+
+  /* ===== Navigation =====
+     The shared drawer from ui.js, identical on all three dashboards. */
+  let adminNav = null;
+  function showSection(id){ if(adminNav) adminNav.show(id); }
+  function openAdminCard(event,id){
+    if(event && event.target.closest('button,input,select,a')) return;
+    showSection(id);
+  }
+  function activateAdminCard(event,id){
+    if(event.key==='Enter'||event.key===' '){ event.preventDefault(); showSection(id); }
+  }
+
+  // logout() comes from auth.js — it clears the session before redirecting.
+
+  /* ===== Header profile menu ===== */
+  mountProfileMenu({
+    name: 'Administrator',
+    role: 'admin',
+    id: session.username,
+    container: '#topbarRight'
+  });
+
+  /* ===== Init ===== */
+  loadAll();
+
+  adminNav = mountSidebar({
+    items: [
+      { id: 'dashboardSection',      label: 'Dashboard',                 icon: '🏠' },
+      { id: 'facultySection',        label: 'Faculty Management',        icon: '👤' },
+      { id: 'studentSection',        label: 'Student Management',        icon: '👥' },
+      { id: 'sectionSection',        label: 'Section Management',        icon: '▦' },
+      { id: 'subjectSection',        label: 'Subject Management',        icon: '📚' },
+      { id: 'facultySubjectSection', label: 'Faculty–Subject Allotment', icon: '🎓' },
+      { id: 'auditSection',          label: 'Audit Log',                 icon: '◷' }
+    ],
+    titleEl: null
+  });
+
+  // Close modals when clicking outside
+  window.addEventListener('click',function(e){
+    ['facultyModal','studentModal','studentProfileModal','facultyProfileModal','sectionModal','sectionSubjectsModal','subjectModal','facultySubjectModal','allotModal','csvPreviewModal'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && el.style.display==='flex' && e.target===el) closeModal(id);
+    });
+  });
+</script>
+
+</body>
+</html>

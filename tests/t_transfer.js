@@ -1,0 +1,15 @@
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+console.log('=== OO. Section assignment replaces direct Student allotment UI ===');
+const s=SEED();
+s.subjectAssignments=[{subjectCode:'SUB1',facultyIds:['F1','F2']},{subjectCode:'SUB2',facultyIds:['F2']}];
+s.sections=[{id:'A',name:'Section A'}]; s.sectionSubjects=[{sectionId:'A',subjectCodes:['SUB2']}]; s.allotments=[];
+let r=load('admin.html',{...s,currentUser:{username:'admin',role:'admin'}});
+ok(!r.d.getElementById('allotmentSection'),'obsolete allotment workspace is absent');
+ok(!!r.d.getElementById('sectionSection'),'Section workspace is the enrolment route');
+r.w.openSectionSubjects(0);
+ok(r.d.querySelectorAll('#sectionSubjects input[type="checkbox"]').length===2,'Section can choose from all subjects');
+r.w.close();
+let st=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+ok(/SUB2/.test(st.d.querySelector('#subjectsTable tbody').textContent),'Student receives the section subject');
+st.w.close(); process.exit(0);

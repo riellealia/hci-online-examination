@@ -1,0 +1,12 @@
+{
+  "name": "hci-online-examination-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-level tests for the Online Examination System prototype",
+  "scripts": {
+    "test": "node run-all.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

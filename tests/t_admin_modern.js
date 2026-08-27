@@ -1,0 +1,21 @@
+const fs=require('fs');
+const path=require('path');
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+
+console.log('=== ADMIN MODERN UI. Calm cards and accessible icon actions ===');
+const html=fs.readFileSync(path.join(__dirname,'..','html','admin.html'),'utf8');
+const css=fs.readFileSync(path.join(__dirname,'..','css','admin-modern.css'),'utf8');
+ok(/admin-modern\.css/.test(html),'Admin loads a dedicated visual layer');
+ok(/repeat\(5/.test(css) && /repeat\(3/.test(css) && /repeat\(2/.test(css),'metric grid adapts across desktop, tablet, and mobile');
+ok(/background: #fff !important/.test(css),'legacy multicolor card surfaces are overridden with neutral surfaces');
+ok(/table-icon-btn/.test(css) && /focus-visible/.test(css),'icon actions include hover and keyboard focus treatments');
+const r=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
+const actions=[...r.d.querySelectorAll('#facultyTable .table-icon-btn')];
+ok(actions.length>=2 && actions.length%2===0,'each Faculty row uses two compact icon actions');
+ok(actions.every(button=>button.querySelector('svg')),'row actions use scalable SVG icons');
+ok(actions.every(button=>button.getAttribute('aria-label') && button.title),'icons retain accessible names and tooltips');
+ok(r.d.querySelectorAll('.plus-circle').length===5 && [...r.d.querySelectorAll('.plus-circle')].every(button=>button.tagName==='BUTTON'),'dashboard add actions use semantic buttons');
+ok(/\.student-profile-page[^}]*height:calc\(100dvh - 36px\)[^}]*overflow-y:auto/.test(css),'profile page has a viewport-bound vertical scroll region');
+r.w.close();
+process.exit(0);

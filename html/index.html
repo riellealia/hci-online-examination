@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Examination System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/shared-ui.css">
+</head>
+
+<body class="login-bg">
+  <div class="overlay"></div>
+  
+  <div class="container login-container">
+    <div class="header">
+      <img src="../assets/logo.PNG" alt="NEU Logo" class="logo" />
+      <div>
+        <h1>NEW ERA UNIVERSITY</h1>
+        <h3>COLLEGE OF INFORMATION AND COMPUTER STUDIES</h3>
+      </div>
+    </div>
+    
+    <p class="subtitle">Online Examination System</p>
+    
+    <div class="role-buttons">
+      <button onclick="goToLogin('admin')" class="btn admin">ADMIN</button>
+      <button onclick="goToLogin('faculty')" class="btn faculty">FACULTY</button>
+      <button onclick="goToLogin('student')" class="btn student">STUDENT</button>
+    </div>
+  </div>
+  
+  <script>
+    function goToLogin(role) {
+      window.location.href = `login.html?role=${role}`;
+    }
+  </script>
+
+</body>
+</html>

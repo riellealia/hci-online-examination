@@ -1,0 +1,64 @@
+const {load,SEED}=require('./harness');
+const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+const today=new Date().toLocaleDateString('en-CA');
+
+(async()=>{
+console.log('=== RESULT VISIBILITY. Faculty policy is enforced everywhere ===');
+let s=SEED();
+let r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
+r.w.editExam('e1');
+r.d.getElementById('examScoreRelease').value='never';
+r.d.getElementById('examAnswerRelease').value='immediate';
+r.d.getElementById('examShowSubmittedAnswers').checked=true;
+await r.w.saveExam();
+let exam=r.read('exams').find(item=>item.id==='e1');
+ok(exam.scoreRelease==='never' && exam.answerRelease==='immediate' && exam.showSubmittedAnswers,'Faculty visibility settings persist');
+r.w.editExam('e1');
+ok(r.d.getElementById('examScoreRelease').value==='never' && r.d.getElementById('examAnswerRelease').value==='immediate','visibility settings restore when editing');
+r.w.close();
+
+const submission={id:'sub1',studentId:'S1',examId:'e1',score:10,total:10,submittedAt:new Date().toISOString(),answers:[{questionId:'q1',type:'mcq',selectedIndex:0,selectedText:'A',isCorrect:true,points:10,awarded:10}]};
+s=SEED();
+s.exams=[{...s.exams[0],scoreRelease:'never',answerRelease:'immediate',showSubmittedAnswers:true}];
+s.studentSubmissions=[submission];
+r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+const history=r.d.querySelector('#resultsTable tbody').textContent;
+ok(/Hidden by instructor/.test(history),'result history hides raw score');
+ok(!/100%|1\.00/.test(history),'result history does not leak percentage or rating');
+ok(/Answer review/.test(r.d.getElementById('resultsRemarks').textContent),'answer review appears when allowed');
+ok(/Correct answer/.test(r.d.getElementById('resultsRemarks').textContent)&&/A/.test(r.d.getElementById('resultsRemarks').textContent),'allowed review includes answer key');
+r.w.close();
+
+s=SEED();
+s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59',scoreRelease:'never',answerRelease:'immediate',showSubmittedAnswers:true}];
+r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+r.w.startExam('e1');
+const answer=r.d.querySelector('input[name="q_q1"][value="0"]');
+answer.checked=true; answer.dispatchEvent(new r.w.Event('change',{bubbles:true}));
+r.w.goToQuestion(1);
+const essay=r.d.querySelector('.short-ans-input'); essay.value='x'; essay.dispatchEvent(new r.w.Event('input',{bubbles:true}));
+r.w.reviewAnswers();
+await r.w.submitExamAnswers();
+const result=r.d.getElementById('examResultSection').textContent;
+ok(/hidden scores/.test(result),'immediate result hides score when disabled');
+ok(/Answer review/.test(result),'immediate answer review can remain independently enabled');
+r.w.close();
+
+s=SEED();
+s.exams=[{...s.exams[0],scoreRelease:'immediate',answerRelease:'never',showSubmittedAnswers:false}];
+s.studentSubmissions=[submission];
+r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+ok(/10\s*\/\s*10/.test(r.d.querySelector('#resultsTable tbody').textContent),'score appears when enabled');
+ok(!/Answer review/.test(r.d.getElementById('resultsRemarks').textContent),'answer key remains hidden when review is disabled');
+const oldExam={date:'2020-01-01',end:'23:59',scoreRelease:'after-deadline'};
+ok(r.w.resultVisibility(oldExam,submission).showScore,'after-deadline releases once deadline passes');
+const futureExam={date:'2999-01-01',end:'23:59',scoreRelease:'after-deadline'};
+ok(!r.w.resultVisibility(futureExam,submission).showScore,'after-deadline remains hidden before deadline');
+ok(r.w.resultReleaseAllowed('after-grading',oldExam,submission),'after-grading releases a fully marked submission');
+const pending={...submission,answers:[{needsManualGrading:true,awarded:null}]};
+ok(!r.w.resultReleaseAllowed('after-grading',oldExam,pending),'after-grading waits for manual marks');
+ok(r.w.releaseDateReached('2020-01-01T00:00'),'chosen past date releases');
+ok(!r.w.releaseDateReached('2999-01-01T00:00'),'chosen future date remains hidden');
+r.w.close();
+process.exit(0);
+})();
