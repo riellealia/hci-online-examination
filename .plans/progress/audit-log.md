@@ -1,5 +1,16 @@
 # Project Audit Log
 
+## 2026-08-29 — Shared header inbox and report status data
+
+- **Area:** Admin, Faculty, and Student headers; Faculty reports
+- **Changed:** Added a mail/inbox icon directly beside and before every profile avatar. Its panel combines role-relevant mail, question-report updates, and Admin announcements.
+- **Faculty badge:** The Reports sidebar item shows a pill count for open reports belonging only to that professor's exams.
+- **Demo data:** Added question reports in open, reviewed, resolved, and dismissed states, plus student mail, a report-resolution notice, and Admin announcements.
+- **Privacy:** Faculty only receive reports and mail addressed to them; Students only receive their own report updates; Admin receives announcements and an aggregate report status.
+- **Files:** `js/ui.js`, `js/demo-data.js`, `css/shared-ui.css`, `html/faculty.html`, and focused tests.
+- **Verification:** Shared navigation, question reports, Student workflows, Admin cards, and rich demo-data suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Faculty roster subject context
 
 - **Area:** Faculty student roster

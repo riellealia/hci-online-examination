@@ -3306,6 +3306,7 @@ function confirmQuestionCSVUpload() {
 // ======= NAVIGATION MOUNT =======
 // Placed last: mountSidebar shows the first section immediately, which can call
 // back into page functions, so every declaration must already be initialised.
+const pendingFacultyReportCount=reportsForExams(exams.filter(exam=>exam.facultyId===facultyId).map(exam=>exam.id)).filter(report=>report.status==='open').length;
 facultyNav = mountSidebar({
     items: [
         { id: 'subjects-tab', label: 'My Subjects', icon: '📚' },
@@ -3317,6 +3318,7 @@ facultyNav = mountSidebar({
     titleEl: null,
     onSelect: onFacultySection
 });
+if(pendingFacultyReportCount){const reportLink=document.querySelector('#sidebar [data-panel="reports-tab"]');reportLink?.insertAdjacentHTML('beforeend',`<span class="nav-count" aria-label="${pendingFacultyReportCount} pending reports">${pendingFacultyReportCount}</span>`);}
 </script>
 
 </body>

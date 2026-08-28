@@ -24,6 +24,8 @@ r.w.close();
 
 s.questionReports=[report,{id:'other',studentId:'S2',examId:'foreign',questionId:'qx',category:'other',details:'Hidden',status:'open'}];
 r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
+ok(r.d.querySelector('#sidebar [data-panel="reports-tab"] .nav-count')?.textContent==='1','Faculty sidebar shows the owned pending-report count');
+ok(/Both choices appear valid/.test(r.d.querySelector('.header-inbox-panel')?.textContent||''),'Faculty header inbox includes owned question reports');
 r.w.displayQuestionReports();
 const view=r.d.getElementById('reportsView');
 ok(/Both choices appear valid/.test(view.textContent),'Faculty sees report for an owned exam');
@@ -52,6 +54,7 @@ r.w.close();
 r=load('student.html',{...s,studentNotifications:[notice],currentUser:{username:'S1',role:'student'}});
 ok(r.d.getElementById('studentNotificationsCard').style.display==='block','Student sees report-update card');
 ok(/answer key was corrected/.test(r.d.getElementById('studentNotifications').textContent),'Student sees Faculty resolution message');
+ok(/answer key was corrected/.test(r.d.querySelector('.header-inbox-panel')?.textContent||''),'Student header inbox includes the private report update');
 r.w.close();
 process.exit(0);
 })();

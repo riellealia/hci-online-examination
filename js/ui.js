@@ -121,6 +121,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
       <a id="link-${it.id}" href="#${it.id}" data-panel="${it.id}">
         <span class="nav-icon" aria-hidden="true">${it.icon || ''}</span>
         <span>${it.label}</span>
+        ${Number(it.badge)>0?`<span class="nav-count" aria-label="${Number(it.badge)} pending">${Number(it.badge)}</span>`:''}
       </a>`).join('')}
   `;
   document.body.appendChild(bar);
@@ -409,9 +410,40 @@ function mountProfileMenu({ name, role, id, container }) {
   const initials = initialsFrom(name);
   const roleLabel = String(role || '').replace(/^./, c => c.toUpperCase());
 
+  const safe = value => String(value == null ? '' : value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  const announcements = typeof DB !== 'undefined' ? DB.read('adminAnnouncements', []) : [];
+  const reports = typeof DB !== 'undefined' ? DB.read('questionReports', []) : [];
+  const exams = typeof DB !== 'undefined' ? DB.read('exams', []) : [];
+  const emails = typeof DB !== 'undefined' ? DB.read('studentEmails', []) : [];
+  const reportNotices = typeof DB !== 'undefined' ? DB.read('studentNotifications', []) : [];
+  let inboxItems = announcements.filter(item => !item.audience || item.audience === 'all' || item.audience === role)
+    .map(item => ({kind:'Announcement',title:item.title||'Admin announcement',text:item.message||'',at:item.createdAt,pending:!item.read}));
+  if (role === 'faculty') {
+    const owned = new Set(exams.filter(exam => exam.facultyId === id).map(exam => exam.id));
+    inboxItems.push(...reports.filter(report => owned.has(report.examId)).map(report => ({kind:`Report · ${report.status}`,title:report.category||'Question report',text:report.details||'',at:report.createdAt,pending:report.status==='open'})));
+    inboxItems.push(...emails.filter(email => email.facultyId === id).map(email => ({kind:'Student mail',title:email.subject||'Message from student',text:email.message||'',at:email.sentAt,pending:email.read!==true})));
+  } else if (role === 'student') {
+    inboxItems.push(...reportNotices.filter(item => item.studentId === id).map(item => ({kind:'Report update',title:'Question report status',text:item.message||'',at:item.createdAt,pending:item.read!==true})));
+  } else if (role === 'admin') {
+    const openCount = reports.filter(report => report.status === 'open').length;
+    if (reports.length) inboxItems.push({kind:'System status',title:'Question reports',text:`${openCount} pending · ${reports.length} total`,at:new Date().toISOString(),pending:openCount>0});
+  }
+  inboxItems.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
+  const pendingInboxCount=inboxItems.filter(item=>item.pending).length;
+
   const wrap = document.createElement('div');
   wrap.className = 'profile-wrap';
   wrap.innerHTML = `
+    <div class="header-inbox-wrap">
+      <button type="button" class="header-inbox-btn" aria-label="Open inbox${pendingInboxCount?` — ${pendingInboxCount} pending`:''}" aria-expanded="false" title="Inbox">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4V5Zm2 2v1.1l6 4.2 6-4.2V7H6Zm12 10v-6.5l-6 4.2-6-4.2V17h12Z"/></svg>
+        ${pendingInboxCount?`<span class="header-inbox-count">${pendingInboxCount}</span>`:''}
+      </button>
+      <section class="header-inbox-panel" aria-hidden="true">
+        <header><strong>Inbox</strong><span>${pendingInboxCount} pending</span></header>
+        <div class="header-inbox-list">${inboxItems.length?inboxItems.slice(0,12).map(item=>`<article class="header-inbox-item${item.pending?' pending':''}"><span>${safe(item.kind)}</span><strong>${safe(item.title)}</strong><p>${safe(item.text)}</p></article>`).join(''):'<p class="header-inbox-empty">No messages or updates.</p>'}</div>
+      </section>
+    </div>
     <button type="button" class="avatar avatar-sm" id="avatarBtn"
             aria-haspopup="true" aria-expanded="false"
             aria-label="Account menu for ${name}" title="${name}">${initials}</button>
@@ -438,6 +470,8 @@ function mountProfileMenu({ name, role, id, container }) {
 
   const btn = wrap.querySelector('#avatarBtn');
   const panel = wrap.querySelector('#profilePanel');
+  const inboxBtn=wrap.querySelector('.header-inbox-btn');
+  const inboxPanel=wrap.querySelector('.header-inbox-panel');
 
   function setOpen(open) {
     panel.classList.toggle('open', open);
@@ -447,12 +481,14 @@ function mountProfileMenu({ name, role, id, container }) {
 
   btn.addEventListener('click', e => {
     e.stopPropagation();
+    inboxPanel.classList.remove('open');
     setOpen(!panel.classList.contains('open'));
   });
+  inboxBtn.addEventListener('click',e=>{e.stopPropagation();setOpen(false);const open=!inboxPanel.classList.contains('open');inboxPanel.classList.toggle('open',open);inboxPanel.setAttribute('aria-hidden',String(!open));inboxBtn.setAttribute('aria-expanded',String(open));});
 
   // Click-away and Escape both dismiss the panel.
   document.addEventListener('click', e => {
-    if (!wrap.contains(e.target)) setOpen(false);
+    if (!wrap.contains(e.target)) { setOpen(false); inboxPanel.classList.remove('open'); }
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && panel.classList.contains('open')) {

@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 19,
+  version: 20,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -141,7 +141,20 @@ const DemoData = {
       auditEntry('demo-a11','2026-08-20T08:45:00+08:00','23-32534-345','faculty','release-grade','submission','DEMO-SUB-2'),
       auditEntry('demo-a12','2026-08-24T18:12:00+08:00','2025-00002','student','login','session','2025-00002')
     ];
-    Object.entries({faculty,students,subjects,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog}).forEach(([key,value])=>DB.write(key,value));
+    const questionReports=[
+      {id:'DEMO-REPORT-001',studentId:'2025-00002',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q01',category:'Incorrect answer key',details:'The displayed answer appears different from the lesson example.',status:'open',createdAt:'2026-08-28T09:15:00+08:00',resolvedAt:null},
+      {id:'DEMO-REPORT-002',studentId:'2025-00017',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q03',category:'Unclear wording',details:'The wording could be interpreted in two different ways.',status:'open',createdAt:'2026-08-27T14:30:00+08:00',resolvedAt:null},
+      {id:'DEMO-REPORT-003',studentId:'2025-00021',examId:'DEMO-EXAM-005',questionId:'DEMO-EXAM-005-Q02',category:'Image or attachment',details:'The referenced diagram did not appear during the attempt.',status:'reviewed',createdAt:'2026-08-26T11:20:00+08:00',resolutionNote:'The attachment link is being checked.',resolvedAt:null},
+      {id:'DEMO-REPORT-004',studentId:'2025-00002',examId:'DEMO-EXAM-005',questionId:'DEMO-EXAM-005-Q04',category:'Scoring concern',details:'My response matched the accepted wording but was marked incorrect.',status:'resolved',createdAt:'2026-08-24T16:05:00+08:00',resolutionNote:'The answer was reviewed and the score was corrected.',resolvedAt:'2026-08-25T10:00:00+08:00'},
+      {id:'DEMO-REPORT-005',studentId:'2025-00036',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q05',category:'Other',details:'Submitted as a duplicate report.',status:'dismissed',createdAt:'2026-08-23T08:45:00+08:00',resolvedAt:null}
+    ];
+    const adminAnnouncements=[
+      {id:'ANN-001',title:'Scheduled maintenance',message:'The examination portal will undergo a short maintenance check on Saturday at 7:00 PM.',audience:'all',createdAt:'2026-08-28T13:00:00+08:00'},
+      {id:'ANN-002',title:'Faculty reminder',message:'Please verify examination schedules and section access before publishing.',audience:'faculty',createdAt:'2026-08-27T09:00:00+08:00'}
+    ];
+    const studentEmails=[{id:'DEMO-MAIL-001',studentId:'2025-00002',facultyId:'23-32534-345',subject:'CCS211-24 — Question about Skills Check',message:'May I clarify the feedback on question 4?',sentAt:'2026-08-28T15:42:00+08:00',read:false}];
+    const studentNotifications=[{id:'DEMO-NOTICE-001',studentId:'2025-00002',reportId:'DEMO-REPORT-004',message:'Your scoring concern was resolved and the answer was reviewed.',createdAt:'2026-08-25T10:05:00+08:00',read:false}];
+    Object.entries({faculty,students,subjects,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
     localStorage.setItem('demoCurriculumVersion',String(this.version)); return true;
   }
 };

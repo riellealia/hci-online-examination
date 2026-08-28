@@ -16,6 +16,8 @@ for(const [page,user,count,firstLabel] of pages){
   ok(!!btn,`${page}: has a menu button`);
   ok(links.length===count,`${page}: ${links.length} sections (expected ${count})`);
   ok(r.d.getElementById('pageTitle').textContent==='NEW ERA UNIVERSITY',`${page}: site header shows the institution name`);
+  const headerControls=r.d.querySelector('.topbar-right .profile-wrap');
+  ok(!!headerControls?.querySelector('.header-inbox-btn')&&headerControls.firstElementChild.classList.contains('header-inbox-wrap'),`${page}: inbox sits beside and before the profile icon`);
   ok(links[0].classList.contains('active'),`${page}: first section marked active`);
   ok([...links].every(a=>a.querySelector('.nav-icon')),`${page}: every link has an icon`);
   r.w.close();

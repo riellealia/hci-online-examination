@@ -23,6 +23,9 @@ ok(direct.read('students').length===619&&direct.d.getElementById('countStudents'
 ok(direct.d.querySelectorAll('#unassignedFacultyTable tr').length===6,'Admin lists the five professors without assigned subjects');
 const demoUsers=direct.read('users'),demoAudit=direct.read('applicationAuditLog'),demoSubs=direct.read('studentSubmissions');
 const demoExams=direct.read('exams'),demoQuestions=direct.read('questions'),demoEnrollments=direct.read('studentEnrollments');
+const demoReports=direct.read('questionReports'),demoAnnouncements=direct.read('adminAnnouncements');
+ok(['open','reviewed','resolved','dismissed'].every(status=>demoReports.some(report=>report.status===status)),'demo question reports cover open, reviewed, resolved, and dismissed statuses');
+ok(demoAnnouncements.length>=2&&/Scheduled maintenance/.test(direct.d.querySelector('.header-inbox-panel')?.textContent||''),'Admin announcements are seeded and appear in the header inbox');
 ok(demoUsers.find(user=>user.username==='2025-00002').password==='santos2025'&&demoUsers.find(user=>user.username==='23-32534-345').password==='reyes23','named Student and Faculty demo credentials are fixed');
 const reyesOfferings=records.flatMap(record=>(record.assignments||[]).map(item=>({...item,sectionId:record.sectionId}))).filter(item=>item.facultyId==='23-32534-345');
 const santosCodes=new Set(demoEnrollments.filter(item=>item.studentId==='2025-00002').map(item=>item.subjectCode));
