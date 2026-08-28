@@ -9,10 +9,11 @@ const css=fs.readFileSync(path.join(__dirname,'..','css','admin-modern.css'),'ut
 ok(/admin-modern\.css/.test(html),'Admin loads a dedicated visual layer');
 ok(/dashboard-monitoring[^}]*order:2/.test(css)&&/site-status-panel[^}]*order:3/.test(css),'monitoring is visually placed before status cells');
 ok(/\.dashboard-monitoring[^}]*background:#fff/.test(css)&&/:root\[data-theme="dark"\][^{]*\.dashboard-monitoring[^}]*background:#18222e/.test(css),'monitoring is light by default and dark only in dark mode');
-ok(/repeat\(5/.test(css) && /repeat\(3/.test(css) && /repeat\(2/.test(css),'metric grid adapts across desktop, tablet, and mobile');
+ok(/card-grid[^}]*repeat\(3/.test(css) && /repeat\(2/.test(css) && /grid-template-columns: 1fr/.test(css),'balanced shortcut grid adapts across desktop, tablet, and mobile');
 ok(/background: #fff !important/.test(css),'legacy multicolor card surfaces are overridden with neutral surfaces');
 ok(/table-icon-btn/.test(css) && /focus-visible/.test(css),'icon actions include hover and keyboard focus treatments');
 const r=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
+ok(r.d.querySelectorAll('#dashboardSection .card-note').length===6,'every management shortcut includes a concise description');
 const actions=[...r.d.querySelectorAll('#facultyTable .admin-row-action')];
 ok(actions.length>0&&actions.length===r.d.querySelectorAll('#facultyTable tr').length-1,'each Faculty row uses one compact settings action');
 ok(actions.every(action=>/Edit/.test(action.textContent)&&/Delete/.test(action.textContent)),'each Faculty settings menu names Edit and Delete');

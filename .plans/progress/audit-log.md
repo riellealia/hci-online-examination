@@ -8,6 +8,7 @@
 - **Monitoring:** Added live charts for measured interface response time, browser-storage size/record count, and available browser connection quality. Unsupported network details are labeled unavailable instead of being fabricated.
 - **Controls:** Added Start, Restart, and Stop controls for the client-side monitoring session, and moved the Grid/List switch directly above the management cards.
 - **Layout correction:** Monitoring now appears before the compact status cells. Its light surface is used in light mode and the dark monitoring style is limited to dark mode. The redundant visible Site status heading was removed.
+- **Management shortcuts:** Reworked the plain 5+1 card arrangement into a balanced 3-by-2 grid with concise descriptions, subtle Admin-blue accent variants, improved depth, and clearer hover/focus feedback. List view remains available.
 - **Responsive design:** Status cells reduce from four columns to two and then one; List view also adapts for narrow screens. Light and dark themes are supported.
 - **Verification:** Dashboard, Admin visual, responsive-layout, and shared-navigation focused suites pass.
 - **Result:** Complete
