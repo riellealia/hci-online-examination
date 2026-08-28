@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Faculty roster subject context
+
+- **Area:** Faculty student roster
+- **Changed:** Added the selected subject's full name and code between the subject and section tab rows. The context updates with subject selection.
+- **Files:** `html/faculty.html`, `tests/t_faculty_workspace.js`
+- **Verification:** Faculty workspace suite passes, including roster tabs, subject context, profile navigation, and workspace workflows.
+- **Result:** Complete
+
 ## 2026-08-29 — Student examination status tabs
 
 - **Area:** Student examinations

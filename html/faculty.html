@@ -230,6 +230,9 @@
     .roster-page-head h2 { margin:0 0 5px; color:var(--ink); font-size:24px; }
     .roster-page-head p { margin:0; color:var(--ink-soft); }
     .roster-tab-label { margin:14px 0 2px; color:var(--ink-soft); font-size:11px; font-weight:800; letter-spacing:.065em; text-transform:uppercase; }
+    .roster-subject-context { display:flex; align-items:baseline; gap:9px; margin:14px 0 2px; color:var(--ink); }
+    .roster-subject-context strong { font-size:16px; }
+    .roster-subject-context span { color:var(--ink-soft); font-size:12px; }
 
     /* Secondary: tinted, so the primary action on the card stays obvious */
     .view-exams-btn {
@@ -2987,7 +2990,8 @@ function renderStudentSectionTable() {
     const subjectTabs=subjectCodes.map(code=>{const subject=freshSubjects.find(item=>item.code===code);return `<button type="button" class="student-section-tab ${code===activeStudentRosterSubject?'active':''}" onclick="selectStudentRosterSubject('${code}')" title="${subject?.name||code}">${code}</button>`}).join('');
     const sectionTabs=sectionIds.map(id=>`<button type="button" class="student-section-tab ${id===activeStudentRosterSection?'active':''}" onclick="selectStudentRosterSection('${id}')">${id}<span class="student-section-count">${studentsForSection(id).length}</span></button>`).join('');
     const rows=roster.map(student=>`<tr role="link" tabindex="0" aria-label="Open profile for ${student.first} ${student.last}" onclick="RoleProfileViewer.openStudent('${student.id}',{viewerRole:'faculty',viewerId:'${facultyId}',subjectCode:'${activeStudentRosterSubject}',sectionId:'${activeStudentRosterSection}'})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><td><strong>${student.id}</strong></td><td><span class="roster-name">${student.last}, ${student.first}</span></td><td><span class="roster-subject-chip">${activeStudentRosterSection}</span></td></tr>`).join('');
-    studentsView.innerHTML=`<div class="exams-section"><header class="roster-page-head"><h2>My Students</h2><p>Browse students enrolled in the subjects and sections you currently handle.</p></header><div class="roster-tab-label">Subjects</div><div class="student-section-tabs" role="tablist" aria-label="Subjects">${subjectTabs}</div><div class="roster-tab-label">Sections</div><div class="student-section-tabs" role="tablist" aria-label="Sections in ${activeStudentRosterSubject}">${sectionTabs}</div><div class="table-scroll student-roster-shell"><table class="student-roster-table"><thead><tr><th>Student ID</th><th>Student</th><th>Section</th></tr></thead><tbody>${rows||'<tr><td colspan="3" class="muted-cell">No students enrolled in this subject and section.</td></tr>'}</tbody></table></div></div>`;
+    const activeSubject=freshSubjects.find(item=>item.code===activeStudentRosterSubject);
+    studentsView.innerHTML=`<div class="exams-section"><header class="roster-page-head"><h2>My Students</h2><p>Browse students enrolled in the subjects and sections you currently handle.</p></header><div class="roster-tab-label">Subjects</div><div class="student-section-tabs" role="tablist" aria-label="Subjects">${subjectTabs}</div><div class="roster-subject-context"><strong>${activeSubject?.name||activeStudentRosterSubject}</strong><span>${activeStudentRosterSubject}</span></div><div class="roster-tab-label">Sections</div><div class="student-section-tabs" role="tablist" aria-label="Sections in ${activeStudentRosterSubject}">${sectionTabs}</div><div class="table-scroll student-roster-shell"><table class="student-roster-table"><thead><tr><th>Student ID</th><th>Student</th><th>Section</th></tr></thead><tbody>${rows||'<tr><td colspan="3" class="muted-cell">No students enrolled in this subject and section.</td></tr>'}</tbody></table></div></div>`;
 }
 
 function displayMyStudents() {

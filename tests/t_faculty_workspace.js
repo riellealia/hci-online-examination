@@ -14,6 +14,7 @@ ok(!r.d.querySelector('#subjectList .view-exams-btn')&&!/Open Subject/.test(r.d.
 r.w.displayMyStudents();
 ok(/My Students/.test(r.d.getElementById('studentsView').textContent)&&/Browse students enrolled/.test(r.d.getElementById('studentsView').textContent),'student roster has a page title and description');
 ok(r.d.querySelectorAll('#studentsView .roster-tab-label').length===2,'subject and section tab rows have visible titles');
+ok(/HCI/.test(r.d.querySelector('#studentsView .roster-subject-context')?.textContent||''),'selected subject name appears between subject and section tabs');
 const rosterRow=r.d.querySelector('#studentsView .student-roster-table tbody tr[role="link"]');
 ok(!!rosterRow,'every student roster row is a clickable profile link');
 rosterRow?.click();
