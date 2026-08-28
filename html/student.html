@@ -184,6 +184,13 @@
   .exam-list-row:hover,.exam-list-row:focus-visible { background:#f8fbf9; outline:none; }
   .exam-list-row.has-feedback { background:#fffaf0; box-shadow:inset 4px 0 #d4972d; }
   .exam-list-row.has-feedback:hover,.exam-list-row.has-feedback:focus-visible { background:#fff6e3; }
+  .exam-filter-tabs { display:flex; gap:24px; margin:4px 0 16px; border-bottom:1px solid var(--line); overflow-x:auto; scrollbar-width:none; }
+  .exam-filter-tab { position:relative; display:inline-flex; align-items:center; gap:7px; width:auto; min-height:42px; padding:8px 1px 11px; border:0; border-radius:0; background:transparent!important; color:var(--ink-soft); font-weight:700; white-space:nowrap; box-shadow:none; }
+  .exam-filter-tab::after { content:""; position:absolute; right:0; bottom:-1px; left:0; height:2px; border-radius:2px 2px 0 0; background:transparent; }
+  .exam-filter-tab:hover,.exam-filter-tab.active { color:var(--accent); background:transparent!important; }
+  .exam-filter-tab.active::after { background:var(--accent); }
+  .exam-filter-count { display:inline-grid; place-items:center; min-width:23px; height:20px; padding:0 6px; border-radius:999px; background:var(--surface-soft); color:var(--ink-soft); font-size:11px; font-weight:800; }
+  .exam-filter-tab.active .exam-filter-count { background:var(--accent-soft); color:var(--accent); }
   .exam-list-title { color:#26384c; font-size:15px; font-weight:750; line-height:1.45; }
   .exam-list-meta { display:flex; flex-wrap:wrap; gap:5px 13px; margin-top:5px; color:#6c7b73; font-size:12px; }
   .exam-list-meta span+span::before { content:'·'; margin-right:13px; color:#a3ada7; }
@@ -374,6 +381,7 @@
   <div id="exams-panel" class="section-card">
     <h3>📝 My Examinations</h3>
     <div class="role-table-tools" id="studentExamTools"></div>
+    <nav id="examFilterTabs" class="exam-filter-tabs" aria-label="Filter examinations"></nav>
     <div id="examSubjectCards" class="exam-compact-list"></div>
     <div class="table-scroll compat-table">
       <table id="examTable" class="compat-table" aria-hidden="true">
@@ -988,8 +996,30 @@ function renderExamSubjectCards(list) {
   }).join('');
 }
 
+let activeExamFilter = 'overview';
+function examFilterState(exam) {
+  const done = submissions.some(item => item.studentId === currentStudent.id && item.examId === exam.id);
+  if (done) return 'done';
+  return examWindow(exam).state === 'closed' ? 'missed' : 'pending';
+}
+function selectExamFilter(filter) {
+  activeExamFilter = ['overview','done','pending','missed'].includes(filter) ? filter : 'overview';
+  renderStudentExamList(relevantExams);
+}
+function renderExamFilterTabs(list) {
+  const host = document.getElementById('examFilterTabs');
+  if (!host) return;
+  const counts = { overview:list.length, done:0, pending:0, missed:0 };
+  list.forEach(exam => { counts[examFilterState(exam)] += 1; });
+  host.innerHTML = ['overview','done','pending','missed'].map(filter =>
+    `<button type="button" class="exam-filter-tab ${activeExamFilter===filter?'active':''}" aria-selected="${activeExamFilter===filter}" onclick="selectExamFilter('${filter}')"><span>${filter[0].toUpperCase()+filter.slice(1)}</span><span class="exam-filter-count">${counts[filter]}</span></button>`
+  ).join('');
+}
+
 function renderStudentExamList(list) {
   const container = document.getElementById('examSubjectCards');
+  renderExamFilterTabs(list);
+  const visibleList = activeExamFilter === 'overview' ? list : list.filter(exam => examFilterState(exam) === activeExamFilter);
   const stateRank = exam => {
     const submitted = submissions.some(item => item.studentId === currentStudent.id && item.examId === exam.id);
     if (submitted) return 2;
@@ -997,7 +1027,12 @@ function renderStudentExamList(list) {
     return state === 'open' ? 0 : state === 'upcoming' ? 1 : 3;
   };
   const scheduledAt = exam => new Date(exam.datetime || `${exam.date || '9999-12-31'}T${exam.start || '23:59'}:00`).getTime();
-  const ordered = list.slice().sort((a, b) => stateRank(a) - stateRank(b) || scheduledAt(a) - scheduledAt(b));
+  const ordered = visibleList.slice().sort((a, b) => stateRank(a) - stateRank(b) || scheduledAt(a) - scheduledAt(b));
+
+  if (!ordered.length) {
+    container.innerHTML = `<div class="no-exams">No ${activeExamFilter} examinations.</div>`;
+    return;
+  }
 
   container.innerHTML = ordered.map(exam => {
     const subject = subjects.find(item => item.code === exam.subjectCode);

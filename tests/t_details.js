@@ -18,6 +18,11 @@ ok(r.d.querySelectorAll('#overview-panel button.stat-card').length===3,'overview
 ok(r.d.querySelector('#examTable .exam-clickable-row')?.tabIndex===0,'an exam table row is clickable and keyboard accessible');
 ok(r.d.querySelectorAll('#examSubjectCards .exam-list-row').length===1,'examinations use a compact list');
 ok(/2 items/.test(r.d.querySelector('#examSubjectCards .exam-list-row').textContent),'list shows the actual number of questions');
+const examTabs=[...r.d.querySelectorAll('#examFilterTabs .exam-filter-tab')];
+ok(examTabs.map(tab=>tab.textContent.replace(/\d+/g,'').trim()).join('|')==='Overview|Done|Pending|Missed','examinations provide Overview, Done, Pending, and Missed tabs');
+ok(examTabs.every(tab=>tab.querySelector('.exam-filter-count')),'every examination tab has a live count pill');
+r.w.selectExamFilter('pending');
+ok(r.d.querySelectorAll('#examSubjectCards .exam-list-row').length===1&&r.d.querySelector('.exam-filter-tab.active')?.textContent.includes('Pending'),'Pending filters the examination list and updates the active tab');
 const calendarExam=r.d.querySelector('#examCalendar .calendar-exam');
 ok(!!calendarExam,'the monthly calendar places the exam in its date cell');
 calendarExam.click();

@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Student examination status tabs
+
+- **Area:** Student examinations
+- **Changed:** Added transparent underline tabs for Overview, Done, Pending, and Missed, with live count pills and functional list filtering.
+- **Classification:** Submitted exams are Done, expired unsubmitted exams are Missed, and open or upcoming unsubmitted exams are Pending.
+- **Files:** `html/student.html`, `tests/t_details.js`
+- **Verification:** Examination details, grading, and responsive-layout focused suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Faculty dark-mode contrast repair
 
 - **Area:** Faculty interface and shared theme
