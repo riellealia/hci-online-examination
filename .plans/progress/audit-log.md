@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Question report status tabs and sorting
+
+- **Area:** Faculty question reports
+- **Changed:** Removed the redundant open-report total and status dropdown. Added transparent underline tabs for All, Pending, Resolved, and Dismissed, each with a live count pill.
+- **Status mapping:** Pending combines reports that are newly open and already in review so active concerns stay in one queue.
+- **Sorting:** Added Recent, Reporter name, Subject, Section, and Status sorting with a transforming ascending/descending icon.
+- **Files:** `html/faculty.html`, `css/shared-ui.css`, `tests/t_reports.js`
+- **Verification:** Question-report, navigation, and responsive suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Reporter-aware question report cards
 
 - **Area:** Faculty question reports
