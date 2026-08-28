@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 20,
+  version: 21,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -144,9 +144,16 @@ const DemoData = {
     const questionReports=[
       {id:'DEMO-REPORT-001',studentId:'2025-00002',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q01',category:'Incorrect answer key',details:'The displayed answer appears different from the lesson example.',status:'open',createdAt:'2026-08-28T09:15:00+08:00',resolvedAt:null},
       {id:'DEMO-REPORT-002',studentId:'2025-00017',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q03',category:'Unclear wording',details:'The wording could be interpreted in two different ways.',status:'open',createdAt:'2026-08-27T14:30:00+08:00',resolvedAt:null},
-      {id:'DEMO-REPORT-003',studentId:'2025-00021',examId:'DEMO-EXAM-005',questionId:'DEMO-EXAM-005-Q02',category:'Image or attachment',details:'The referenced diagram did not appear during the attempt.',status:'reviewed',createdAt:'2026-08-26T11:20:00+08:00',resolutionNote:'The attachment link is being checked.',resolvedAt:null},
-      {id:'DEMO-REPORT-004',studentId:'2025-00002',examId:'DEMO-EXAM-005',questionId:'DEMO-EXAM-005-Q04',category:'Scoring concern',details:'My response matched the accepted wording but was marked incorrect.',status:'resolved',createdAt:'2026-08-24T16:05:00+08:00',resolutionNote:'The answer was reviewed and the score was corrected.',resolvedAt:'2026-08-25T10:00:00+08:00'},
-      {id:'DEMO-REPORT-005',studentId:'2025-00036',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q05',category:'Other',details:'Submitted as a duplicate report.',status:'dismissed',createdAt:'2026-08-23T08:45:00+08:00',resolvedAt:null}
+      {id:'DEMO-REPORT-003',studentId:'2025-00021',examId:'DEMO-EXAM-007',questionId:'DEMO-EXAM-007-Q02',category:'Technical issue',details:'The selected choice cleared when I moved to the next question.',status:'open',createdAt:'2026-08-27T10:10:00+08:00',resolvedAt:null},
+      {id:'DEMO-REPORT-004',studentId:'2025-00021',examId:'DEMO-EXAM-005',questionId:'DEMO-EXAM-005-Q02',category:'Image or attachment',details:'The referenced diagram did not appear during the attempt.',status:'reviewed',createdAt:'2026-08-26T11:20:00+08:00',resolutionNote:'The attachment link is being checked.',resolvedAt:null},
+      {id:'DEMO-REPORT-005',studentId:'2025-00036',examId:'DEMO-EXAM-020',questionId:'DEMO-EXAM-020-Q01',category:'Question content',details:'The network address in the question may contain a typographical error.',status:'reviewed',createdAt:'2026-08-26T08:40:00+08:00',resolutionNote:'Compared the item with the faculty question bank.',resolvedAt:null},
+      {id:'DEMO-REPORT-006',studentId:'2025-00051',examId:'DEMO-EXAM-037',questionId:'DEMO-EXAM-037-Q03',category:'Missing choice',details:'The expected process step was not included among the choices.',status:'reviewed',createdAt:'2026-08-25T15:30:00+08:00',resolutionNote:'The available choices are under review.',resolvedAt:null},
+      {id:'DEMO-REPORT-007',studentId:'2025-00002',examId:'DEMO-EXAM-005',questionId:'DEMO-EXAM-005-Q04',category:'Scoring concern',details:'My response matched the accepted wording but was marked incorrect.',status:'resolved',createdAt:'2026-08-24T16:05:00+08:00',resolutionNote:'The answer was reviewed and the score was corrected.',resolvedAt:'2026-08-25T10:00:00+08:00'},
+      {id:'DEMO-REPORT-008',studentId:'2025-00066',examId:'DEMO-EXAM-039',questionId:'DEMO-EXAM-039-Q02',category:'Timer concern',details:'The page briefly froze while the timer continued counting.',status:'resolved',createdAt:'2026-08-24T11:35:00+08:00',resolutionNote:'Attempt logs were checked and additional time was granted.',resolvedAt:'2026-08-24T14:20:00+08:00'},
+      {id:'DEMO-REPORT-009',studentId:'2025-00081',examId:'DEMO-ALWAYS-OPEN',questionId:'DEMO-ALWAYS-OPEN-Q06',category:'Accessibility',details:'The matching labels were difficult to identify using keyboard navigation.',status:'resolved',createdAt:'2026-08-23T13:10:00+08:00',resolutionNote:'Keyboard labels were added to the matching controls.',resolvedAt:'2026-08-24T09:05:00+08:00'},
+      {id:'DEMO-REPORT-010',studentId:'2025-00036',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q05',category:'Duplicate report',details:'This concern was already submitted for the same question.',status:'dismissed',createdAt:'2026-08-23T08:45:00+08:00',resolutionNote:'Dismissed because an earlier open report covers the same issue.',resolvedAt:null},
+      {id:'DEMO-REPORT-011',studentId:'2025-00096',examId:'DEMO-EXAM-007',questionId:'DEMO-EXAM-007-Q04',category:'No issue found',details:'The question appeared blank for a moment after loading.',status:'dismissed',createdAt:'2026-08-22T17:25:00+08:00',resolutionNote:'The saved attempt and question content loaded normally during review.',resolvedAt:null},
+      {id:'DEMO-REPORT-012',studentId:'2025-00111',examId:'DEMO-EXAM-020',questionId:'DEMO-EXAM-020-Q05',category:'Out of scope',details:'Request to change the examination schedule through a question report.',status:'dismissed',createdAt:'2026-08-22T09:50:00+08:00',resolutionNote:'Schedule requests must be sent through Faculty mail.',resolvedAt:null}
     ];
     const adminAnnouncements=[
       {id:'ANN-001',title:'Scheduled maintenance',message:'The examination portal will undergo a short maintenance check on Saturday at 7:00 PM.',audience:'all',createdAt:'2026-08-28T13:00:00+08:00'},

@@ -25,6 +25,7 @@ const demoUsers=direct.read('users'),demoAudit=direct.read('applicationAuditLog'
 const demoExams=direct.read('exams'),demoQuestions=direct.read('questions'),demoEnrollments=direct.read('studentEnrollments');
 const demoReports=direct.read('questionReports'),demoAnnouncements=direct.read('adminAnnouncements');
 ok(['open','reviewed','resolved','dismissed'].every(status=>demoReports.some(report=>report.status===status)),'demo question reports cover open, reviewed, resolved, and dismissed statuses');
+ok(['open','reviewed','resolved','dismissed'].every(status=>demoReports.filter(report=>report.status===status).length===3),'demo queue provides three examples under every report-status filter');
 ok(demoAnnouncements.length>=2&&/Scheduled maintenance/.test(direct.d.querySelector('.header-inbox-panel')?.textContent||''),'Admin announcements are seeded and appear in the header inbox');
 ok(demoUsers.find(user=>user.username==='2025-00002').password==='santos2025'&&demoUsers.find(user=>user.username==='23-32534-345').password==='reyes23','named Student and Faculty demo credentials are fixed');
 const reyesOfferings=records.flatMap(record=>(record.assignments||[]).map(item=>({...item,sectionId:record.sectionId}))).filter(item=>item.facultyId==='23-32534-345');

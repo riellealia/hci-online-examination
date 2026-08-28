@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Complete question-report demonstration queue
+
+- **Area:** Faculty question reports and demo data
+- **Changed:** Expanded the seeded queue to 12 reports: three Open, three Reviewed, three Resolved, and three Dismissed.
+- **Coverage:** Includes answer-key, wording, technical, missing-media, missing-choice, scoring, timer, accessibility, duplicate, no-issue-found, and out-of-scope examples.
+- **Integrity:** Every report references an existing examination and question owned by the demo Faculty account.
+- **Files:** `js/demo-data.js`, `tests/t_rich_seed.js`
+- **Verification:** Exact 3/3/3/3 status distribution confirmed with zero invalid report references; rich seed and report workflow suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Shared header inbox and report status data
 
 - **Area:** Admin, Faculty, and Student headers; Faculty reports
