@@ -841,15 +841,16 @@
   }
 
   /* ===== Tables ===== */
+  function rowActionMenu(type,index,label='record'){
+    return `<div class="section-action-wrap admin-row-action"><button class="table-icon-btn section-action-trigger" onclick="toggleSectionActionMenu(event)" aria-label="Settings for ${label}" title="Settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/></svg></button><nav class="section-action-menu" role="menu" aria-label="Actions for ${label}"><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);editItem('${type}',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>Edit</span></button><button type="button" class="danger" role="menuitem" onclick="closeSectionActionMenu(event);deleteItem('${type}',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete</span></button></nav></div>`;
+  }
+
   function renderTable(data,tableId,headers,fields,type){
     const headerRow='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'<th>Actions</th></tr>';
     const rows=data.map((item,i)=>`
       <tr>
         ${fields.map(f=>`<td>${Array.isArray(item[f])?item[f].join(', '):item[f]}</td>`).join('')}
-        <td>
-          <button class="table-icon-btn edit" onclick="editItem('${type}',${i})" aria-label="Edit ${type} record" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1-1a1.4 1.4 0 0 0 0-2l-2-2a1.4 1.4 0 0 0-2 0l-1 1Z"/></svg></button>
-          <button class="table-icon-btn delete" onclick="deleteItem('${type}',${i})" aria-label="Delete ${type} record" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm4 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button>
-        </td>
+        <td>${rowActionMenu(type,i,item.code||item.id||type+' record')}</td>
       </tr>`).join('');
     const el=document.getElementById(tableId);
     if(el) el.innerHTML=headerRow+rows;
@@ -1033,12 +1034,12 @@
     setText('countAudit', AuditLog.read().length);
 
     // Core tables
-    const facultyRows=faculty.map((person,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}</td><td><button class="table-icon-btn edit" onclick="editItem('faculty',${index})" aria-label="Edit faculty record" title="Edit"><svg viewBox="0 0 24 24"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg></button><button class="table-icon-btn delete" onclick="deleteItem('faculty',${index})" aria-label="Delete faculty record" title="Delete"><svg viewBox="0 0 24 24"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg></button></td></tr>`).join('');
+    const facultyRows=faculty.map((person,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}</td><td>${rowActionMenu('faculty',index,person.id)}</td></tr>`).join('');
     document.getElementById('facultyTable').innerHTML='<tr><th>ID</th><th>Last name</th><th>First name</th><th>Actions</th></tr>'+facultyRows;
     const assignedFaculty=new Set([...SectionService.offerings(sectionSubjects).map(item=>item.facultyId),...subjectAssignments.flatMap(item=>item.facultyIds||(item.facultyId?[item.facultyId]:[]))].filter(Boolean));
     const unassignedRows=faculty.map((person,index)=>({person,index})).filter(item=>!assignedFaculty.has(item.person.id)).map(({person,index})=>`<tr class="profile-row" tabindex="0" onclick="openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}</td><td><span class="assignment-status unassigned">Unassigned</span></td></tr>`).join('');
     document.getElementById('unassignedFacultyTable').innerHTML='<tr><th>ID</th><th>Last name</th><th>First name</th><th>Status</th></tr>'+(unassignedRows||'<tr><td colspan="4" class="profile-empty">Every professor currently has an assigned subject.</td></tr>');
-    const studentRows=students.map((student,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openStudentProfile(${index})" onkeydown="if(event.key==='Enter')openStudentProfile(${index})"><td>${student.id}</td><td colspan="2">${student.last}, ${student.first}</td><td>${(student.sections||[]).join(', ')}</td><td><button class="table-icon-btn edit" onclick="editItem('students',${index})" aria-label="Edit student record" title="Edit"><svg viewBox="0 0 24 24"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg></button><button class="table-icon-btn delete" onclick="deleteItem('students',${index})" aria-label="Delete student record" title="Delete"><svg viewBox="0 0 24 24"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg></button></td></tr>`).join('');
+    const studentRows=students.map((student,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openStudentProfile(${index})" onkeydown="if(event.key==='Enter')openStudentProfile(${index})"><td>${student.id}</td><td colspan="2">${student.last}, ${student.first}</td><td>${(student.sections||[]).join(', ')}</td><td>${rowActionMenu('students',index,student.id)}</td></tr>`).join('');
     document.getElementById('studentTable').innerHTML='<tr><th>ID</th><th colspan="2">Student name</th><th>Sections</th><th>Actions</th></tr>'+studentRows;
     renderTable(subjects,'subjectTable',['Code','Name'],['code','name'],'subjects');
     const sectionRows=sections.map((section,index)=>`<tr><td><strong>${section.id}</strong></td><td>${section.name}</td><td>${SectionService.assignedCodes(section.id,sectionSubjects).map(code=>`<span class="subject-code-chip">${code}</span>`).join('')||'<span class="muted-cell">No subjects assigned</span>'}</td><td><div class="section-action-wrap"><button class="table-icon-btn section-action-trigger" onclick="toggleSectionActionMenu(event)" aria-label="Settings for ${section.id}" title="Section settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/></svg></button><nav class="section-action-menu" role="menu" aria-label="Actions for ${section.id}"><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);openSectionSubjects(${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 2.4 1.2L14 5h3.5A2.5 2.5 0 0 1 20 7.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5.5Zm2.5-.5a.5.5 0 0 0-.5.5V18h12V7.5a.5.5 0 0 0-.5-.5H13l-1.2-1.6A1 1 0 0 0 11 5H6.5Z"/></svg><span>Assign subjects</span></button><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);editItem('sections',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>Edit section</span></button><button type="button" class="danger" role="menuitem" onclick="closeSectionActionMenu(event);deleteItem('sections',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete section</span></button></nav></div></td></tr>`).join('');
@@ -1057,10 +1058,7 @@
   return `<tr>
     <td>${s ? `${s.code} - ${s.name}` : '(deleted subject)'}</td>
     <td>${facNames}</td>
-    <td>
-      <button class="table-icon-btn edit" onclick="editItem('subjectAssignments',${i})" aria-label="Edit faculty assignment" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1-1a1.4 1.4 0 0 0 0-2l-2-2a1.4 1.4 0 0 0-2 0l-1 1Z"/></svg></button>
-      <button class="table-icon-btn delete" onclick="deleteItem('subjectAssignments',${i})" aria-label="Delete faculty assignment" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm4 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button>
-    </td>
+    <td>${rowActionMenu('subjectAssignments',i,a.subjectCode)}</td>
   </tr>`;
 }).join('');
 document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></tr>` + fsRows;
@@ -1076,10 +1074,7 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
           <td>${st ? `${st.id} - ${st.last}, ${st.first}` : '(deleted student)'}</td>
           <td>${sub ? `${sub.code} - ${sub.name}` : '(deleted subject)'}</td>
           <td>${fac ? `${fac.id} - ${fac.last}, ${fac.first}` : '(deleted faculty)'}</td>
-          <td>
-            <button class="table-icon-btn edit" onclick="editItem('allotments',${i})" aria-label="Edit student allotment" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm12.5-16.5 4 4 1-1a1.4 1.4 0 0 0 0-2l-2-2a1.4 1.4 0 0 0-2 0l-1 1Z"/></svg></button>
-            <button class="table-icon-btn delete" onclick="deleteItem('allotments',${i})" aria-label="Delete student allotment" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Zm4 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg></button>
-          </td>
+          <td>${rowActionMenu('allotments',i,a.studentId)}</td>
         </tr>`;
       }).join('');
       allotEl.innerHTML = `<tr><th>Student</th><th>Subject</th><th>Faculty</th><th>Actions</th></tr>` + allotRows;
