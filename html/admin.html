@@ -32,10 +32,6 @@
   <div id="dashboardSection" class="panel">
     <header class="dashboard-overview-head">
       <div><p class="dashboard-eyebrow">Administration</p><h2>System overview</h2><p>Monitor the prototype and open a management area.</p></div>
-      <div class="dashboard-view-switch" role="group" aria-label="Dashboard card view">
-        <button type="button" class="dashboard-view-btn active" data-view="grid" onclick="setDashboardView('grid')" aria-label="Grid view" title="Grid view" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"/></svg></button>
-        <button type="button" class="dashboard-view-btn" data-view="list" onclick="setDashboardView('list')" aria-label="List view" title="List view" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h3v3H4V5Zm5 0h11v3H9V5ZM4 10.5h3v3H4v-3Zm5 0h11v3H9v-3ZM4 16h3v3H4v-3Zm5 0h11v3H9v-3Z"/></svg></button>
-      </div>
     </header>
     <section class="site-status-panel" aria-labelledby="siteStatusTitle">
       <div class="site-status-heading"><span class="status-pulse" id="siteStatusPulse" aria-hidden="true"></span><div><h3 id="siteStatusTitle">Site status</h3><p id="siteStatusSummary" aria-live="polite">Checking application status…</p></div></div>
@@ -47,13 +43,19 @@
       </div>
     </section>
     <section class="dashboard-monitoring" aria-labelledby="monitoringTitle">
-      <div class="monitoring-head"><div><h3 id="monitoringTitle">Application monitoring</h3><p>Live client-side measurements from this browser session.</p></div><span class="monitoring-live"><i aria-hidden="true"></i> Live</span></div>
+      <div class="monitoring-head"><div><h3 id="monitoringTitle">Application monitoring</h3><p>Live client-side measurements from this browser session.</p></div><div class="monitoring-actions"><span class="monitoring-live" id="monitoringState"><i aria-hidden="true"></i><span>Live</span></span><button type="button" class="monitor-control start" id="monitorStart" onclick="startMonitoring()" title="Start monitoring"><span aria-hidden="true">▶</span> Start</button><button type="button" class="monitor-control restart" id="monitorRestart" onclick="restartMonitoring()" title="Restart monitoring"><span aria-hidden="true">↻</span> Restart</button><button type="button" class="monitor-control stop" id="monitorStop" onclick="stopMonitoring()" title="Stop monitoring"><span aria-hidden="true">■</span> Stop</button></div></div>
       <div class="monitoring-grid">
         <article class="monitor-card"><header><span>Interface response</span><strong id="metricResponse">—</strong></header><div class="monitor-chart" aria-hidden="true"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><path class="chart-grid" d="M0 24H300M0 48H300M0 72H300"/><polygon id="responseArea" points="0,96 300,96"/><polyline id="responseLine" points=""/></svg></div><footer><span>Local read time</span><span>Lower is better</span></footer></article>
         <article class="monitor-card"><header><span>Stored data</span><strong id="metricStorage">—</strong></header><div class="monitor-chart" aria-hidden="true"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><path class="chart-grid" d="M0 24H300M0 48H300M0 72H300"/><polygon id="storageArea" points="0,96 300,96"/><polyline id="storageLine" points=""/></svg></div><footer><span>Browser storage</span><span id="metricRecords">0 records</span></footer></article>
         <article class="monitor-card"><header><span>Connection</span><strong id="metricConnection">—</strong></header><div class="monitor-chart connection-chart" aria-hidden="true"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><path class="chart-grid" d="M0 24H300M0 48H300M0 72H300"/><polygon id="connectionArea" points="0,96 300,96"/><polyline id="connectionLine" points=""/></svg></div><footer><span id="metricNetworkType">Browser network</span><span id="metricLatency">—</span></footer></article>
       </div>
     </section>
+    <div class="dashboard-card-toolbar">
+      <div class="dashboard-view-switch" role="group" aria-label="Dashboard card view">
+        <button type="button" class="dashboard-view-btn active" data-view="grid" onclick="setDashboardView('grid')" aria-label="Grid view" title="Grid view" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"/></svg></button>
+        <button type="button" class="dashboard-view-btn" data-view="list" onclick="setDashboardView('list')" aria-label="List view" title="List view" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h3v3H4V5Zm5 0h11v3H9V5ZM4 10.5h3v3H4v-3Zm5 0h11v3H9v-3ZM4 16h3v3H4v-3Zm5 0h11v3H9v-3Z"/></svg></button>
+      </div>
+    </div>
     <div class="card-grid">
       <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySection')" onkeydown="activateAdminCard(event,'facultySection')" aria-label="Open Faculty Management">
         <div class="card-top"><div class="card-icon">👤</div><div class="card-count" id="countFaculty">0</div></div>
@@ -1234,14 +1236,45 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
     refreshMonitoring();
   }
 
+  let monitoringTimer=null;
+  function updateMonitoringControls(running){
+    const state=document.getElementById('monitoringState');
+    state?.classList.toggle('paused',!running);
+    const stateLabel=state?.querySelector('span');
+    if(stateLabel)stateLabel.textContent=running?'Live':'Paused';
+    const start=document.getElementById('monitorStart'),restart=document.getElementById('monitorRestart'),stop=document.getElementById('monitorStop');
+    if(start)start.disabled=running;
+    if(restart)restart.disabled=false;
+    if(stop)stop.disabled=!running;
+  }
+  function startMonitoring(){
+    if(monitoringTimer)return;
+    refreshSiteStatus();
+    monitoringTimer=window.setInterval(refreshSiteStatus,1000);
+    updateMonitoringControls(true);
+  }
+  function stopMonitoring(){
+    if(monitoringTimer)window.clearInterval(monitoringTimer);
+    monitoringTimer=null;
+    updateMonitoringControls(false);
+  }
+  function restartMonitoring(){
+    stopMonitoring();
+    Object.values(monitorHistory).forEach(values=>values.splice(0,values.length));
+    ['response','storage','connection'].forEach(name=>{
+      document.getElementById(`${name}Line`)?.setAttribute('points','');
+      document.getElementById(`${name}Area`)?.setAttribute('points','0,96 300,96');
+    });
+    startMonitoring();
+  }
+
   function initializeDashboardOverview(){
     let savedView='grid';
     try{ savedView=localStorage.getItem(dashboardViewKey)||'grid'; }catch(error){}
     setDashboardView(savedView);
-    refreshSiteStatus();
     window.addEventListener('online',refreshSiteStatus);
     window.addEventListener('offline',refreshSiteStatus);
-    window.setInterval(refreshSiteStatus,1000);
+    startMonitoring();
   }
 
   // logout() comes from auth.js — it clears the session before redirecting.

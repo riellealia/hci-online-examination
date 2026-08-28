@@ -6,6 +6,12 @@ ok(!!r.d.querySelector('.site-status-panel')&&/CSV \+ browser storage/.test(r.d.
 ok(r.d.querySelectorAll('.monitor-card').length===3&&/Interface response/.test(r.d.querySelector('.dashboard-monitoring').textContent),'dashboard shows three real client-side monitoring charts');
 ok(r.d.getElementById('responseLine').getAttribute('points').length>0&&/records/.test(r.d.getElementById('metricRecords').textContent),'monitoring charts receive measured browser data');
 ok(r.d.querySelectorAll('.dashboard-view-btn').length===2,'dashboard offers grid and list views');
+ok(r.d.querySelector('.dashboard-card-toolbar').nextElementSibling.classList.contains('card-grid'),'view switch sits directly before the management cards');
+ok(r.d.querySelectorAll('.monitor-control').length===3,'monitoring has Start, Restart, and Stop controls');
+r.w.stopMonitoring();
+ok(/Paused/.test(r.d.getElementById('monitoringState').textContent)&&!r.d.getElementById('monitorStart').disabled&&r.d.getElementById('monitorStop').disabled,'Stop pauses sampling and updates its controls');
+r.w.startMonitoring();
+ok(/Live/.test(r.d.getElementById('monitoringState').textContent)&&r.d.getElementById('monitorStart').disabled&&!r.d.getElementById('monitorStop').disabled,'Start resumes live sampling');
 r.w.setDashboardView('list');
 ok(r.d.getElementById('dashboardSection').classList.contains('dashboard-view-list')&&r.w.localStorage.getItem('adminDashboardView:admin')==='list','list view applies and is saved for the Admin account');
 const cards=[...r.d.querySelectorAll('.admin-dashboard-link')];

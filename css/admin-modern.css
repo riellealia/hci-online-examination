@@ -10,6 +10,7 @@ body[data-role="admin"] .dashboard-view-btn { display:grid; place-items:center; 
 body[data-role="admin"] .dashboard-view-btn svg { width:19px; height:19px; fill:currentColor; }
 body[data-role="admin"] .dashboard-view-btn:hover { background:#f0f5fa; color:#315f8d; }
 body[data-role="admin"] .dashboard-view-btn.active { background:#e7f0f9; color:#315f8d; }
+body[data-role="admin"] .dashboard-card-toolbar { display:flex; justify-content:flex-end; margin:0 0 10px; }
 body[data-role="admin"] .site-status-panel { margin-bottom:18px; padding:18px 20px; border:1px solid #dfe6ef; border-radius:18px; background:#fff; box-shadow:0 8px 26px rgba(29,45,72,.055); }
 body[data-role="admin"] .site-status-heading { display:flex; align-items:center; gap:11px; margin-bottom:15px; }
 body[data-role="admin"] .site-status-heading h3 { margin:0 0 2px; color:#1d2b3d; font-size:16px; }
@@ -32,6 +33,14 @@ body[data-role="admin"] .monitoring-head h3 { margin:0 0 3px; color:#f5f8fc; fon
 body[data-role="admin"] .monitoring-head p { margin:0; color:#9fb0c2; font-size:12px; }
 body[data-role="admin"] .monitoring-live { display:inline-flex; align-items:center; gap:7px; color:#9fb0c2; font-size:11px; font-weight:750; text-transform:uppercase; }
 body[data-role="admin"] .monitoring-live i { width:8px; height:8px; border-radius:50%; background:#56c878; box-shadow:0 0 0 4px rgba(86,200,120,.12); }
+body[data-role="admin"] .monitoring-live.paused i { background:#8897a7; box-shadow:0 0 0 4px rgba(136,151,167,.12); }
+body[data-role="admin"] .monitoring-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:7px; }
+body[data-role="admin"] .monitor-control { display:inline-flex; align-items:center; justify-content:center; gap:6px; width:auto; min-height:36px; margin:0; padding:7px 11px; border:0; border-radius:8px; color:#fff; font-size:12px; font-weight:750; cursor:pointer; }
+body[data-role="admin"] .monitor-control.start { background:#399758; }
+body[data-role="admin"] .monitor-control.restart { background:#586b7f; }
+body[data-role="admin"] .monitor-control.stop { background:#c43b40; }
+body[data-role="admin"] .monitor-control:hover { filter:brightness(1.08); }
+body[data-role="admin"] .monitor-control:disabled { opacity:.42; cursor:not-allowed; filter:none; }
 body[data-role="admin"] .monitoring-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
 body[data-role="admin"] .monitor-card { min-width:0; padding:14px; border:1px solid #2c3947; border-radius:13px; background:#111923; }
 body[data-role="admin"] .monitor-card header,.monitor-card footer { display:flex; align-items:center; justify-content:space-between; gap:10px; }
@@ -238,6 +247,7 @@ body[data-role="admin"] .profile-target-row { animation:profileTarget 1.8s ease;
 @media (max-width: 420px) { body[data-role="admin"] .card-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { body[data-role="admin"] .site-status-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width: 900px) { body[data-role="admin"] .monitoring-grid { grid-template-columns:1fr; } body[data-role="admin"] .monitor-chart{height:74px} }
+@media (max-width: 640px) { body[data-role="admin"] .monitoring-head { align-items:stretch; flex-direction:column; } body[data-role="admin"] .monitoring-actions { justify-content:flex-start; } }
 @media (max-width: 520px) { body[data-role="admin"] .dashboard-overview-head { align-items:flex-start; } body[data-role="admin"] .dashboard-overview-head h2{font-size:21px} body[data-role="admin"] .site-status-panel{padding:14px} body[data-role="admin"] .site-status-list{grid-template-columns:1fr} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-top{gap:9px;padding-left:12px} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-count{min-width:36px;font-size:23px} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-bottom{padding-right:12px} }
 
 /* Admin dark mode: this file loads after shared-ui.css, so its light component
