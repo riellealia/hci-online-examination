@@ -46,6 +46,14 @@
         <div class="site-status-item"><span class="status-icon time" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 3v4.6l3.2 2-1.1 1.7-4.1-2.6V7h2Z"/></svg></span><span><small>Local time</small><strong id="siteLocalTime">—</strong></span></div>
       </div>
     </section>
+    <section class="dashboard-monitoring" aria-labelledby="monitoringTitle">
+      <div class="monitoring-head"><div><h3 id="monitoringTitle">Application monitoring</h3><p>Live client-side measurements from this browser session.</p></div><span class="monitoring-live"><i aria-hidden="true"></i> Live</span></div>
+      <div class="monitoring-grid">
+        <article class="monitor-card"><header><span>Interface response</span><strong id="metricResponse">—</strong></header><div class="monitor-chart" aria-hidden="true"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><path class="chart-grid" d="M0 24H300M0 48H300M0 72H300"/><polygon id="responseArea" points="0,96 300,96"/><polyline id="responseLine" points=""/></svg></div><footer><span>Local read time</span><span>Lower is better</span></footer></article>
+        <article class="monitor-card"><header><span>Stored data</span><strong id="metricStorage">—</strong></header><div class="monitor-chart" aria-hidden="true"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><path class="chart-grid" d="M0 24H300M0 48H300M0 72H300"/><polygon id="storageArea" points="0,96 300,96"/><polyline id="storageLine" points=""/></svg></div><footer><span>Browser storage</span><span id="metricRecords">0 records</span></footer></article>
+        <article class="monitor-card"><header><span>Connection</span><strong id="metricConnection">—</strong></header><div class="monitor-chart connection-chart" aria-hidden="true"><svg viewBox="0 0 300 96" preserveAspectRatio="none"><path class="chart-grid" d="M0 24H300M0 48H300M0 72H300"/><polygon id="connectionArea" points="0,96 300,96"/><polyline id="connectionLine" points=""/></svg></div><footer><span id="metricNetworkType">Browser network</span><span id="metricLatency">—</span></footer></article>
+      </div>
+    </section>
     <div class="card-grid">
       <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySection')" onkeydown="activateAdminCard(event,'facultySection')" aria-label="Open Faculty Management">
         <div class="card-top"><div class="card-icon">👤</div><div class="card-count" id="countFaculty">0</div></div>
@@ -1174,6 +1182,45 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
     try{ localStorage.setItem(dashboardViewKey,selected); }catch(error){}
   }
 
+  const monitorHistory={response:[],storage:[],connection:[]};
+  function formatMetricBytes(bytes){
+    if(bytes<1024)return `${bytes} B`;
+    if(bytes<1024*1024)return `${(bytes/1024).toFixed(1)} KB`;
+    return `${(bytes/(1024*1024)).toFixed(2)} MB`;
+  }
+  function pushMonitorSample(name,value){
+    const values=monitorHistory[name];
+    values.push(Number.isFinite(value)?Math.max(0,value):0);
+    if(values.length>24)values.shift();
+    while(values.length<24)values.unshift(values[0]||0);
+    const maximum=Math.max(...values,1);
+    const points=values.map((sample,index)=>`${(index/(values.length-1)*300).toFixed(1)},${(92-(sample/maximum)*78).toFixed(1)}`);
+    const line=document.getElementById(`${name}Line`),area=document.getElementById(`${name}Area`);
+    line?.setAttribute('points',points.join(' '));
+    area?.setAttribute('points',`0,96 ${points.join(' ')} 300,96`);
+  }
+  function refreshMonitoring(){
+    const started=performance.now();
+    try{ JSON.parse(localStorage.getItem('students')||'[]'); }catch(error){}
+    const response=Math.max(.01,performance.now()-started);
+    let bytes=0;
+    try{ for(let index=0;index<localStorage.length;index++){const key=localStorage.key(index)||'';bytes+=(key.length+(localStorage.getItem(key)||'').length)*2;} }catch(error){}
+    const recordCount=['faculty','students','subjects','sections','subjectAssignments','sectionSubjects','exams','questions','studentSubmissions'].reduce((total,key)=>total+DB.read(key,[]).length,0);
+    const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+    const connected=navigator.onLine!==false;
+    const connectionValue=connected?(Number(connection?.downlink)||1):0;
+    const responseText=response<1?`${response.toFixed(2)} ms`:`${response.toFixed(1)} ms`;
+    document.getElementById('metricResponse').textContent=responseText;
+    document.getElementById('metricStorage').textContent=formatMetricBytes(bytes);
+    document.getElementById('metricRecords').textContent=`${recordCount.toLocaleString()} records`;
+    document.getElementById('metricConnection').textContent=!connected?'Offline':connection?.downlink?`${connection.downlink} Mbps`:'Online';
+    document.getElementById('metricNetworkType').textContent=connection?.effectiveType?`${connection.effectiveType.toUpperCase()} connection`:'Browser network';
+    document.getElementById('metricLatency').textContent=connection?.rtt?`${connection.rtt} ms RTT`:'RTT unavailable';
+    pushMonitorSample('response',response);
+    pushMonitorSample('storage',bytes);
+    pushMonitorSample('connection',connectionValue);
+  }
+
   function refreshSiteStatus(){
     const connected=navigator.onLine!==false;
     const network=document.getElementById('siteNetworkStatus');
@@ -1184,6 +1231,7 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
     if(summary)summary.textContent=connected?'The interface is available and the browser is online.':'The interface is available locally; internet access is offline.';
     pulse?.classList.toggle('offline',!connected);
     if(clock)clock.textContent=new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());
+    refreshMonitoring();
   }
 
   function initializeDashboardOverview(){

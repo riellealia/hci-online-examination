@@ -26,6 +26,25 @@ body[data-role="admin"] .status-icon.app { background:#e8f6ed; color:#2d8b52; }
 body[data-role="admin"] .status-icon.data { background:#f1ecfa; color:#6c4ca1; }
 body[data-role="admin"] .status-icon.time { background:#fff3dc; color:#a56b14; }
 body[data-role="admin"] .status-icon svg { width:19px; height:19px; fill:currentColor; }
+body[data-role="admin"] .dashboard-monitoring { margin-bottom:18px; padding:18px 20px 20px; border:1px solid #dfe6ef; border-radius:18px; background:#18222e; color:#edf4fb; box-shadow:0 10px 30px rgba(17,31,46,.12); }
+body[data-role="admin"] .monitoring-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
+body[data-role="admin"] .monitoring-head h3 { margin:0 0 3px; color:#f5f8fc; font-size:16px; }
+body[data-role="admin"] .monitoring-head p { margin:0; color:#9fb0c2; font-size:12px; }
+body[data-role="admin"] .monitoring-live { display:inline-flex; align-items:center; gap:7px; color:#9fb0c2; font-size:11px; font-weight:750; text-transform:uppercase; }
+body[data-role="admin"] .monitoring-live i { width:8px; height:8px; border-radius:50%; background:#56c878; box-shadow:0 0 0 4px rgba(86,200,120,.12); }
+body[data-role="admin"] .monitoring-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+body[data-role="admin"] .monitor-card { min-width:0; padding:14px; border:1px solid #2c3947; border-radius:13px; background:#111923; }
+body[data-role="admin"] .monitor-card header,.monitor-card footer { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+body[data-role="admin"] .monitor-card header span { color:#c8d4df; font-size:13px; font-weight:700; }
+body[data-role="admin"] .monitor-card header strong { color:#71d48d; font-size:14px; }
+body[data-role="admin"] .monitor-card footer { color:#8496a9; font-size:10px; }
+body[data-role="admin"] .monitor-chart { height:96px; margin:10px 0 8px; }
+body[data-role="admin"] .monitor-chart svg { display:block; width:100%; height:100%; overflow:visible; }
+body[data-role="admin"] .monitor-chart .chart-grid { fill:none; stroke:#344353; stroke-width:1; vector-effect:non-scaling-stroke; }
+body[data-role="admin"] .monitor-chart polygon { fill:rgba(78,183,105,.22); }
+body[data-role="admin"] .monitor-chart polyline { fill:none; stroke:#55bf72; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+body[data-role="admin"] .connection-chart polygon { fill:rgba(70,155,221,.2); }
+body[data-role="admin"] .connection-chart polyline { stroke:#55a9e8; }
 
 body[data-role="admin"] .card-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
 body[data-role="admin"] #dashboardSection.dashboard-view-list .card-grid { grid-template-columns:1fr; gap:9px; }
@@ -218,6 +237,7 @@ body[data-role="admin"] .profile-target-row { animation:profileTarget 1.8s ease;
 }
 @media (max-width: 420px) { body[data-role="admin"] .card-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { body[data-role="admin"] .site-status-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width: 900px) { body[data-role="admin"] .monitoring-grid { grid-template-columns:1fr; } body[data-role="admin"] .monitor-chart{height:74px} }
 @media (max-width: 520px) { body[data-role="admin"] .dashboard-overview-head { align-items:flex-start; } body[data-role="admin"] .dashboard-overview-head h2{font-size:21px} body[data-role="admin"] .site-status-panel{padding:14px} body[data-role="admin"] .site-status-list{grid-template-columns:1fr} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-top{gap:9px;padding-left:12px} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-count{min-width:36px;font-size:23px} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-bottom{padding-right:12px} }
 
 /* Admin dark mode: this file loads after shared-ui.css, so its light component

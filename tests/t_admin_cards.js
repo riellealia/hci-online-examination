@@ -3,6 +3,8 @@ const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 console.log('=== ADMIN DASHBOARD CARDS. Direct, accessible list navigation ===');
 const r=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 ok(!!r.d.querySelector('.site-status-panel')&&/CSV \+ browser storage/.test(r.d.querySelector('.site-status-panel').textContent),'dashboard shows an honest local prototype status panel');
+ok(r.d.querySelectorAll('.monitor-card').length===3&&/Interface response/.test(r.d.querySelector('.dashboard-monitoring').textContent),'dashboard shows three real client-side monitoring charts');
+ok(r.d.getElementById('responseLine').getAttribute('points').length>0&&/records/.test(r.d.getElementById('metricRecords').textContent),'monitoring charts receive measured browser data');
 ok(r.d.querySelectorAll('.dashboard-view-btn').length===2,'dashboard offers grid and list views');
 r.w.setDashboardView('list');
 ok(r.d.getElementById('dashboardSection').classList.contains('dashboard-view-list')&&r.w.localStorage.getItem('adminDashboardView:admin')==='list','list view applies and is saved for the Admin account');

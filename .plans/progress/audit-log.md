@@ -5,6 +5,7 @@
 - **Area:** Admin dashboard
 - **Changed:** Added account-persisted Grid and List views plus a compact status panel before the management cards.
 - **Status signals:** Reports honest client-side information: browser online/offline state, interface availability, CSV/browser-storage data mode, and live local time. It does not imitate unavailable backend CPU, memory, or server metrics.
+- **Monitoring:** Added live charts for measured interface response time, browser-storage size/record count, and available browser connection quality. Unsupported network details are labeled unavailable instead of being fabricated.
 - **Responsive design:** Status cells reduce from four columns to two and then one; List view also adapts for narrow screens. Light and dark themes are supported.
 - **Verification:** Dashboard, Admin visual, responsive-layout, and shared-navigation focused suites pass.
 - **Result:** Complete
