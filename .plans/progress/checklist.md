@@ -14,6 +14,7 @@ assertions and one legacy-suite crash after recent UI restructuring; see
 - [x] Admin, Faculty, and Student login entry points
 - [x] Credential and role validation
 - [x] Cross-role dashboard protection
+- [x] Admin dashboard Grid/List views saved per account, with an honest live client-side site-status panel
 - [x] Logout clears the current session
 - [x] Clear and accessible authentication error state
 - [x] Correct all HTML paths to shared CSS, JavaScript, logo, and background assets

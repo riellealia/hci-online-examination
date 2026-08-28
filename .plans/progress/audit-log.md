@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Admin dashboard overview and live status
+
+- **Area:** Admin dashboard
+- **Changed:** Added account-persisted Grid and List views plus a compact status panel before the management cards.
+- **Status signals:** Reports honest client-side information: browser online/offline state, interface availability, CSV/browser-storage data mode, and live local time. It does not imitate unavailable backend CPU, memory, or server metrics.
+- **Responsive design:** Status cells reduce from four columns to two and then one; List view also adapts for narrow screens. Light and dark themes are supported.
+- **Verification:** Dashboard, Admin visual, responsive-layout, and shared-navigation focused suites pass.
+- **Result:** Complete
+
 This file records meaningful changes to the plan, implementation, testing, and documentation. Add new entries at the top of the log.
 
 ## 2026-08-27 — Course pages, weekly content, and GitHub checkpoint

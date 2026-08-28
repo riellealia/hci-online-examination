@@ -1,7 +1,39 @@
 body[data-role="admin"] { background: #f6f8fb; color: #172033; }
 body[data-role="admin"] > .panel { width: min(1440px, calc(100% - 48px)); margin: 24px auto; padding: 0; background: transparent; box-shadow: none; }
 
+body[data-role="admin"] .dashboard-overview-head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:16px; }
+body[data-role="admin"] .dashboard-overview-head h2 { margin:2px 0 4px; color:#172033; font-size:25px; letter-spacing:-.025em; }
+body[data-role="admin"] .dashboard-overview-head p { margin:0; color:#718096; }
+body[data-role="admin"] .dashboard-eyebrow { color:#315f8d !important; font-size:11px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+body[data-role="admin"] .dashboard-view-switch { display:flex; flex:none; gap:6px; padding:4px; border:1px solid #dfe6ef; border-radius:13px; background:#fff; box-shadow:0 4px 14px rgba(29,45,72,.06); }
+body[data-role="admin"] .dashboard-view-btn { display:grid; place-items:center; width:40px; height:40px; padding:0; border:0; border-radius:9px; background:transparent; color:#718096; cursor:pointer; }
+body[data-role="admin"] .dashboard-view-btn svg { width:19px; height:19px; fill:currentColor; }
+body[data-role="admin"] .dashboard-view-btn:hover { background:#f0f5fa; color:#315f8d; }
+body[data-role="admin"] .dashboard-view-btn.active { background:#e7f0f9; color:#315f8d; }
+body[data-role="admin"] .site-status-panel { margin-bottom:18px; padding:18px 20px; border:1px solid #dfe6ef; border-radius:18px; background:#fff; box-shadow:0 8px 26px rgba(29,45,72,.055); }
+body[data-role="admin"] .site-status-heading { display:flex; align-items:center; gap:11px; margin-bottom:15px; }
+body[data-role="admin"] .site-status-heading h3 { margin:0 0 2px; color:#1d2b3d; font-size:16px; }
+body[data-role="admin"] .site-status-heading p { margin:0; color:#718096; font-size:12px; }
+body[data-role="admin"] .status-pulse { width:10px; height:10px; flex:none; border-radius:50%; background:#33a060; box-shadow:0 0 0 5px rgba(51,160,96,.12); }
+body[data-role="admin"] .status-pulse.offline { background:#d08a24; box-shadow:0 0 0 5px rgba(208,138,36,.13); }
+body[data-role="admin"] .site-status-list { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+body[data-role="admin"] .site-status-item { display:flex; align-items:center; gap:11px; min-width:0; padding:12px; border:1px solid #e5eaf1; border-radius:13px; background:#f8fafc; }
+body[data-role="admin"] .site-status-item>span:last-child { display:flex; min-width:0; flex-direction:column; gap:2px; }
+body[data-role="admin"] .site-status-item small { color:#77869a; font-size:10px; font-weight:750; letter-spacing:.045em; text-transform:uppercase; }
+body[data-role="admin"] .site-status-item strong { overflow:hidden; color:#26384d; font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+body[data-role="admin"] .status-icon { display:grid; place-items:center; width:36px; height:36px; flex:none; border-radius:10px; background:#e8f1fa; color:#315f8d; }
+body[data-role="admin"] .status-icon.app { background:#e8f6ed; color:#2d8b52; }
+body[data-role="admin"] .status-icon.data { background:#f1ecfa; color:#6c4ca1; }
+body[data-role="admin"] .status-icon.time { background:#fff3dc; color:#a56b14; }
+body[data-role="admin"] .status-icon svg { width:19px; height:19px; fill:currentColor; }
+
 body[data-role="admin"] .card-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-grid { grid-template-columns:1fr; gap:9px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card { display:grid; grid-template-columns:minmax(180px,.55fr) minmax(0,1fr); height:82px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-top { align-items:center; padding:12px 10px 12px 16px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-icon { width:40px; height:40px; font-size:19px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-count { font-size:27px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-bottom { align-items:center; padding:12px 16px 12px 10px; }
 body[data-role="admin"] .card { height: 168px; border: 1px solid #e3e8f0 !important; border-radius: 18px; background: #fff; box-shadow: 0 8px 28px rgba(29, 45, 72, .07); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 body[data-role="admin"] .card:hover { transform: translateY(-3px); border-color: #b8c9df !important; box-shadow: 0 14px 34px rgba(29, 45, 72, .11); }
 body[data-role="admin"] .card-top { flex: 1; padding: 22px 22px 8px; background: #fff !important; }
@@ -184,6 +216,8 @@ body[data-role="admin"] .profile-target-row { animation:profileTarget 1.8s ease;
   body[data-role="admin"] .action-box { flex-direction: row; align-items:center; }
 }
 @media (max-width: 420px) { body[data-role="admin"] .card-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { body[data-role="admin"] .site-status-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width: 520px) { body[data-role="admin"] .dashboard-overview-head { align-items:flex-start; } body[data-role="admin"] .dashboard-overview-head h2{font-size:21px} body[data-role="admin"] .site-status-panel{padding:14px} body[data-role="admin"] .site-status-list{grid-template-columns:1fr} body[data-role="admin"] #dashboardSection.dashboard-view-list .card{grid-template-columns:1fr; height:112px} }
 
 /* Admin dark mode: this file loads after shared-ui.css, so its light component
    declarations need an explicit token-based dark counterpart here. */
@@ -196,6 +230,13 @@ body[data-role="admin"] .profile-target-row { animation:profileTarget 1.8s ease;
   color:var(--ink) !important;
   border-color:var(--line-strong) !important;
 }
+:root[data-theme="dark"] body[data-role="admin"] :is(.dashboard-view-switch,.site-status-panel,.site-status-item) { background:var(--surface) !important; border-color:var(--line-strong) !important; }
+:root[data-theme="dark"] body[data-role="admin"] .site-status-item { background:var(--surface-soft) !important; }
+:root[data-theme="dark"] body[data-role="admin"] :is(.dashboard-overview-head h2,.site-status-heading h3,.site-status-item strong) { color:var(--ink) !important; }
+:root[data-theme="dark"] body[data-role="admin"] :is(.dashboard-overview-head p,.site-status-heading p,.site-status-item small) { color:var(--ink-soft) !important; }
+:root[data-theme="dark"] body[data-role="admin"] .dashboard-view-btn { color:var(--ink-soft); }
+:root[data-theme="dark"] body[data-role="admin"] .dashboard-view-btn:hover,
+:root[data-theme="dark"] body[data-role="admin"] .dashboard-view-btn.active { background:var(--accent-soft) !important; color:var(--accent) !important; }
 :root[data-theme="dark"] body[data-role="admin"] :is(.student-profile-page,.section-choice-mark) {
   background:var(--surface-soft) !important;
   color:var(--ink) !important;

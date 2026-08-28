@@ -30,6 +30,22 @@
   </div>
 
   <div id="dashboardSection" class="panel">
+    <header class="dashboard-overview-head">
+      <div><p class="dashboard-eyebrow">Administration</p><h2>System overview</h2><p>Monitor the prototype and open a management area.</p></div>
+      <div class="dashboard-view-switch" role="group" aria-label="Dashboard card view">
+        <button type="button" class="dashboard-view-btn active" data-view="grid" onclick="setDashboardView('grid')" aria-label="Grid view" title="Grid view" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z"/></svg></button>
+        <button type="button" class="dashboard-view-btn" data-view="list" onclick="setDashboardView('list')" aria-label="List view" title="List view" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h3v3H4V5Zm5 0h11v3H9V5ZM4 10.5h3v3H4v-3Zm5 0h11v3H9v-3ZM4 16h3v3H4v-3Zm5 0h11v3H9v-3Z"/></svg></button>
+      </div>
+    </header>
+    <section class="site-status-panel" aria-labelledby="siteStatusTitle">
+      <div class="site-status-heading"><span class="status-pulse" id="siteStatusPulse" aria-hidden="true"></span><div><h3 id="siteStatusTitle">Site status</h3><p id="siteStatusSummary" aria-live="polite">Checking application status…</p></div></div>
+      <div class="site-status-list">
+        <div class="site-status-item"><span class="status-icon network" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 18.5 15 15a4.2 4.2 0 0 0-6 0l3 3.5Zm-6-7 1.8 1.8a6 6 0 0 1 8.4 0l1.8-1.8a8.5 8.5 0 0 0-12 0ZM2.5 8l1.8 1.8a11 11 0 0 1 15.4 0L21.5 8a13.5 13.5 0 0 0-19 0Z"/></svg></span><span><small>Browser connection</small><strong id="siteNetworkStatus">Checking</strong></span></div>
+        <div class="site-status-item"><span class="status-icon app" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10.2 16.6-4.1-4.1 1.8-1.8 2.3 2.3 5.9-5.9 1.8 1.8-7.7 7.7Z"/></svg></span><span><small>Interface</small><strong>Operational</strong></span></div>
+        <div class="site-status-item"><span class="status-icon data" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3ZM4 9.3c1.8 1.2 4.8 1.7 8 1.7s6.2-.5 8-1.7V13c0 1.7-3.6 3-8 3s-8-1.3-8-3V9.3Zm0 7c1.8 1.2 4.8 1.7 8 1.7s6.2-.5 8-1.7V18c0 1.7-3.6 3-8 3s-8-1.3-8-3v-1.7Z"/></svg></span><span><small>Data source</small><strong>CSV + browser storage</strong></span></div>
+        <div class="site-status-item"><span class="status-icon time" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 3v4.6l3.2 2-1.1 1.7-4.1-2.6V7h2Z"/></svg></span><span><small>Local time</small><strong id="siteLocalTime">—</strong></span></div>
+      </div>
+    </section>
     <div class="card-grid">
       <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySection')" onkeydown="activateAdminCard(event,'facultySection')" aria-label="Open Faculty Management">
         <div class="card-top"><div class="card-icon">👤</div><div class="card-count" id="countFaculty">0</div></div>
@@ -1144,6 +1160,42 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
     if(event.key==='Enter'||event.key===' '){ event.preventDefault(); showSection(id); }
   }
 
+  const dashboardViewKey=`adminDashboardView:${session.username}`;
+  function setDashboardView(view){
+    const selected=view==='list'?'list':'grid';
+    const dashboard=document.getElementById('dashboardSection');
+    dashboard.classList.toggle('dashboard-view-list',selected==='list');
+    dashboard.dataset.dashboardView=selected;
+    document.querySelectorAll('.dashboard-view-btn').forEach(button=>{
+      const active=button.dataset.view===selected;
+      button.classList.toggle('active',active);
+      button.setAttribute('aria-pressed',String(active));
+    });
+    try{ localStorage.setItem(dashboardViewKey,selected); }catch(error){}
+  }
+
+  function refreshSiteStatus(){
+    const connected=navigator.onLine!==false;
+    const network=document.getElementById('siteNetworkStatus');
+    const summary=document.getElementById('siteStatusSummary');
+    const pulse=document.getElementById('siteStatusPulse');
+    const clock=document.getElementById('siteLocalTime');
+    if(network)network.textContent=connected?'Online':'Offline';
+    if(summary)summary.textContent=connected?'The interface is available and the browser is online.':'The interface is available locally; internet access is offline.';
+    pulse?.classList.toggle('offline',!connected);
+    if(clock)clock.textContent=new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());
+  }
+
+  function initializeDashboardOverview(){
+    let savedView='grid';
+    try{ savedView=localStorage.getItem(dashboardViewKey)||'grid'; }catch(error){}
+    setDashboardView(savedView);
+    refreshSiteStatus();
+    window.addEventListener('online',refreshSiteStatus);
+    window.addEventListener('offline',refreshSiteStatus);
+    window.setInterval(refreshSiteStatus,1000);
+  }
+
   // logout() comes from auth.js — it clears the session before redirecting.
 
   /* ===== Header profile menu ===== */
@@ -1156,6 +1208,7 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
 
   /* ===== Init ===== */
   loadAll();
+  initializeDashboardOverview();
 
   adminNav = mountSidebar({
     items: [
