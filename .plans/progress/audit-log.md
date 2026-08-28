@@ -14,6 +14,14 @@
 
 This file records meaningful changes to the plan, implementation, testing, and documentation. Add new entries at the top of the log.
 
+## 2026-08-29 — Faculty subject-card visual refresh
+
+- **Area:** Faculty My Subjects
+- **Changed:** Replaced plain code/title tiles with fully clickable modern course cards containing a course icon, directional affordance, handled-section count, exam count, subtle varied accents, stronger hover depth, and responsive spacing.
+- **Themes:** Added coordinated light and dark treatments without introducing separate Open buttons.
+- **Verification:** Faculty workspace, shared profile/theme, and navigation focused suites pass.
+- **Result:** Complete
+
 ## 2026-08-27 — Course pages, weekly content, and GitHub checkpoint
 
 - **Area:** Faculty and Student course pages, learning content, regression evidence, repository

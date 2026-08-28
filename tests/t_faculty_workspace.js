@@ -5,6 +5,8 @@ console.log('=== FACULTY SUBJECT WORKSPACE. Course-level authoring and oversight
 let seed=SEED();
 let r=load('faculty.html',{...seed,currentUser:{username:'F1',role:'faculty'}});
 ok(!!r.d.querySelector('#subjectList .sub-card[role="button"]'),'assigned subject card is clickable');
+ok(!!r.d.querySelector('#subjectList .sub-course-icon svg')&&!!r.d.querySelector('#subjectList .sub-open-arrow svg'),'subject cards include a course icon and open affordance');
+ok(r.d.querySelectorAll('#subjectList .sub-meta span').length>=2,'subject cards show section and exam counts');
 ok(!r.d.querySelector('#subjectList .view-exams-btn')&&!/Open Subject/.test(r.d.getElementById('subjectList').textContent),'subject cards do not repeat a separate open button');
 r.w.FacultySubjectWorkspace.open('SUB1');
 ok(r.d.getElementById('subject-workspace-tab').style.display==='block','subject opens its own workspace page');
