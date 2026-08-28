@@ -1,6 +1,7 @@
 body[data-role="admin"] { background: #f6f8fb; color: #172033; }
 body[data-role="admin"] > .panel { width: min(1440px, calc(100% - 48px)); margin: 24px auto; padding: 0; background: transparent; box-shadow: none; }
-body[data-role="admin"] #dashboardSection { display:flex; flex-direction:column; }
+body[data-role="admin"] #dashboardSection,
+body[data-role="admin"] #dashboardSection.active { display:flex !important; flex-direction:column; }
 body[data-role="admin"] #dashboardSection .dashboard-overview-head { order:1; }
 body[data-role="admin"] #dashboardSection .dashboard-monitoring { order:2; }
 body[data-role="admin"] #dashboardSection .site-status-panel { order:3; }
