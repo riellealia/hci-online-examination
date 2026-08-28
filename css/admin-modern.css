@@ -113,6 +113,16 @@ body[data-role="admin"] .management-table-shell table th:last-child { min-width:
 body[data-role="admin"] .management-table-shell .table-scroll { max-height:calc(100vh - 230px); overflow:auto; }
 body[data-role="admin"] .row-actions { display:flex; align-items:center; gap:5px; }
 body[data-role="admin"] table .table-icon-btn.subjects:hover { border-color:#99b5d1; background:#edf5fc; color:#315f8d; transform:translateY(-1px); }
+body[data-role="admin"] .section-action-wrap { display:inline-flex; position:relative; }
+body[data-role="admin"] .section-action-trigger:hover,
+body[data-role="admin"] .section-action-trigger[aria-expanded="true"] { border-color:#99b5d1; background:#edf5fc; color:#315f8d; }
+body[data-role="admin"] .section-action-menu { position:fixed; z-index:1200; display:none; width:190px; padding:6px; border:1px solid var(--line,#dce3ec); border-radius:12px; background:var(--surface,#fff); box-shadow:0 14px 34px rgba(26,43,62,.18); }
+body[data-role="admin"] .section-action-menu.open { display:grid; gap:2px; }
+body[data-role="admin"] .section-action-menu button { display:flex; align-items:center; gap:10px; width:100%; min-height:40px; padding:9px 10px; border:0; border-radius:8px; background:transparent; color:var(--ink,#26384d); font:inherit; text-align:left; cursor:pointer; }
+body[data-role="admin"] .section-action-menu button:hover { background:var(--accent-soft,#edf5fc); color:var(--accent,#315f8d); }
+body[data-role="admin"] .section-action-menu button.danger { color:#b63838; }
+body[data-role="admin"] .section-action-menu button.danger:hover { background:#fff0f0; color:#a52424; }
+body[data-role="admin"] .section-action-menu svg { width:18px; height:18px; flex:none; fill:currentColor; }
 body[data-role="admin"] .subject-code-chip { display:inline-flex; margin:2px 5px 2px 0; padding:4px 9px; border-radius:999px; background:#edf3f9; color:#365d82; font-size:12px; font-weight:750; }
 body[data-role="admin"] .muted-cell { color:#8793a3; }
 @media(max-width:600px){body[data-role="admin"] .section-management-head{align-items:flex-start}}
