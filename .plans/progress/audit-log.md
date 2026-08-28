@@ -21,6 +21,7 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - **Themes:** Added coordinated light and dark treatments without introducing separate Open buttons.
 - **Verification:** Faculty workspace, shared profile/theme, and navigation focused suites pass.
 - **Result:** Complete
+- **Follow-up:** Converted Faculty subject and section selectors from bordered pills to transparent underline tabs with an accent underline, hover state, keyboard focus, and horizontal overflow support.
 
 ## 2026-08-27 — Course pages, weekly content, and GitHub checkpoint
 
