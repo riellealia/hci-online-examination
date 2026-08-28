@@ -1382,7 +1382,7 @@ function onFacultySection(id) {
     if (id === 'reports-tab') displayQuestionReports();
 }
 
-function displayQuestionReports() {
+function displayQuestionReportsLegacy() {
     const host = document.getElementById('reportsView');
     const ownedIds = exams.filter(exam => exam.facultyId === facultyId).map(exam => exam.id);
     const reports = reportsForExams(ownedIds).sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -1396,6 +1396,16 @@ function displayQuestionReports() {
           </div>
           <div class="report-actions"><button type="button" class="report-question-open" onclick="openReportedQuestion('${report.id}')" aria-label="View and edit reported question" title="View reported question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.2 0 9.3 4.4 10 7-.7 2.6-4.8 7-10 7S2.7 14.6 2 12c.7-2.6 4.8-7 10-7Zm0 2c-3.7 0-6.9 2.9-7.8 5 .9 2.1 4.1 5 7.8 5s6.9-2.9 7.8-5C18.9 9.9 15.7 7 12 7Zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg></button><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','reviewed')" ${report.status==='reviewed'?'disabled':''}>In review</button><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','resolved')" ${report.status==='resolved'?'disabled':''}>Resolve</button><button type="button" class="delete-btn" onclick="toggleQuestionReport('${report.id}','dismissed')" ${report.status==='dismissed'?'disabled':''}>Dismiss</button></div></article>`;
       }).join('') : '<div class="no-exams">No question reports for your exams.</div>'}</div>`;
+}
+
+function displayQuestionReports() {
+    const host=document.getElementById('reportsView'),ownedIds=exams.filter(exam=>exam.facultyId===facultyId).map(exam=>exam.id);
+    const reports=reportsForExams(ownedIds).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+    host.innerHTML=`<div class="exams-section"><div class="exams-header"><h3>Question Reports</h3><span>${reports.filter(report=>report.status==='open').length} open</span></div><div class="question-report-filter"><label for="reportStatusFilter">Status</label><select id="reportStatusFilter" onchange="filterQuestionReports()"><option value="all">All statuses</option><option value="open">Open</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></div>${reports.length?reports.map(report=>{
+      const exam=exams.find(item=>item.id===report.examId),question=questions.find(item=>item.id===report.questionId),student=students.find(item=>item.id===report.studentId),subject=subjects.find(item=>item.code===exam?.subjectCode),enrollment=studentEnrollments.find(item=>item.studentId===report.studentId&&item.subjectCode===exam?.subjectCode&&(exam?.sections||[]).includes(item.sectionId));
+      const reporterName=student?`${student.last}, ${student.first}`:report.studentId,section=enrollment?.sectionId||(student?.sections||[])[0]||'No section';
+      return `<article class="question-report ${report.status}" data-report-status="${report.status}" data-question-id="${report.questionId}" role="button" tabindex="0" aria-label="Open reported question" onclick="if(!event.target.closest('button,.report-settings-menu'))openReportedQuestion('${report.id}')" onkeydown="if(event.key==='Enter'){event.preventDefault();openReportedQuestion('${report.id}')}"><div class="report-main"><header class="report-card-head"><div><strong>${escapeQuestionMedia(reporterName)}</strong><small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(section)} · ${escapeQuestionMedia(exam?.subjectCode||'No subject')} — ${escapeQuestionMedia(subject?.name||'Unknown subject')}</small></div><span class="report-status">${report.status}</span></header><h4>${escapeQuestionMedia(question?.text||'Question removed')}</h4><span class="report-problem-pill">${escapeQuestionMedia(report.category.replace('-',' '))}</span><p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(exam?.title||'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small></div><div class="report-actions"><button type="button" class="report-action-icon review" onclick="event.stopPropagation();requestReportStatus('${report.id}','reviewed')" ${report.status==='reviewed'?'disabled':''} aria-label="Mark in review" title="In review">&#128065;</button><button type="button" class="report-action-icon resolve" onclick="event.stopPropagation();requestReportStatus('${report.id}','resolved')" ${report.status==='resolved'?'disabled':''} aria-label="Resolve report" title="Resolve">&#10003;</button><button type="button" class="report-action-icon dismiss" onclick="event.stopPropagation();requestReportStatus('${report.id}','dismissed')" ${report.status==='dismissed'?'disabled':''} aria-label="Dismiss report" title="Dismiss">&times;</button><div class="report-settings-wrap"><button type="button" class="report-action-icon settings" onclick="event.stopPropagation();toggleReportSettings('${report.id}',this)" aria-label="Report settings" title="Settings">&#9881;</button><div class="report-settings-menu" data-report-menu="${report.id}"><button type="button" onclick="event.stopPropagation();viewReportStudent('${report.id}')"><span>&#128100;</span>View student profile</button><button type="button" onclick="event.stopPropagation();mailReportStudent('${report.id}')"><span>&#9993;</span>Mail student</button><button type="button" onclick="event.stopPropagation();openReportedQuestion('${report.id}')"><span>&#128065;</span>View question</button><button type="button" class="danger" onclick="event.stopPropagation();blockReportStudent('${report.id}')"><span>&#9940;</span>Block from reporting</button><button type="button" onclick="event.stopPropagation();copyReportStudentId('${report.id}')"><span>&#10697;</span>Copy ID</button></div></div></div></article>`;
+    }).join(''):'<div class="no-exams">No question reports for your exams.</div>'}</div>`;
 }
 
 function openReportedQuestion(reportId) {
@@ -1440,6 +1450,28 @@ function filterQuestionReports() {
         item.hidden = status !== 'all' && item.dataset.reportStatus !== status;
     });
 }
+
+function ownedQuestionReport(reportId){const ownedIds=exams.filter(exam=>exam.facultyId===facultyId).map(exam=>exam.id);return reportsForExams(ownedIds).find(report=>report.id===reportId);}
+async function requestReportStatus(reportId,status){
+    if(status==='reviewed')return toggleQuestionReport(reportId,status);
+    const report=ownedQuestionReport(reportId);if(!report)return false;
+    const note=await textareaInputDialog({title:status==='resolved'?'Resolve this report?':'Dismiss this report?',label:'Resolution note',value:report.resolutionNote||'',confirmLabel:status==='resolved'?'Resolve':'Dismiss',danger:status==='dismissed'});
+    if(!note){notify('Add a resolution note before changing this report.','error');return false;}
+    saveQuestionReportNote(reportId,note);const changed=toggleQuestionReport(reportId,status);if(changed)notifyReportStudent(reportId);return changed;
+}
+function toggleReportSettings(reportId,button){
+    const menu=document.querySelector(`[data-report-menu="${reportId}"]`),open=!menu?.classList.contains('open');
+    document.querySelectorAll('.report-settings-menu.open').forEach(item=>item.classList.remove('open'));
+    if(open)menu?.classList.add('open');button?.setAttribute('aria-expanded',String(open));
+}
+function reportContext(reportId){
+    const report=ownedQuestionReport(reportId),exam=exams.find(item=>item.id===report?.examId),student=students.find(item=>item.id===report?.studentId),enrollment=studentEnrollments.find(item=>item.studentId===report?.studentId&&item.subjectCode===exam?.subjectCode&&(exam?.sections||[]).includes(item.sectionId));
+    return{report,exam,student,enrollment};
+}
+function viewReportStudent(reportId){const {report,exam,enrollment}=reportContext(reportId);if(!report)return false;RoleProfileViewer.openStudent(report.studentId,{viewerRole:'faculty',viewerId:facultyId,subjectCode:exam?.subjectCode,sectionId:enrollment?.sectionId});return true;}
+async function mailReportStudent(reportId){const {report,exam,student}=reportContext(reportId);if(!report)return false;const message=await textareaInputDialog({title:`Mail ${student?`${student.first} ${student.last}`:report.studentId}`,label:'Message',confirmLabel:'Send'});if(!message)return false;const notices=DB.read('studentNotifications',[]);notices.push({id:`faculty-mail-${Date.now()}`,studentId:report.studentId,reportId:report.id,message,createdAt:new Date().toISOString(),read:false,type:'faculty-mail',subjectCode:exam?.subjectCode});DB.write('studentNotifications',notices);notify('Message sent to the student.','success');return true;}
+async function blockReportStudent(reportId){const {report,student}=reportContext(reportId);if(!report)return false;if(!(await confirmDialog({title:'Block new reports?',message:`${student?`${student.first} ${student.last}`:report.studentId} will no longer be able to submit question reports for your exams.`,confirmLabel:'Block reporting',danger:true})))return false;const blocked=DB.read('reportBlockedStudents',[]);if(!blocked.some(item=>item.studentId===report.studentId&&item.facultyId===facultyId))blocked.push({studentId:report.studentId,facultyId,blockedAt:new Date().toISOString()});DB.write('reportBlockedStudents',blocked);notify('Student blocked from submitting new reports.','success');return true;}
+async function copyReportStudentId(reportId){const {report}=reportContext(reportId);if(!report)return false;try{await navigator.clipboard.writeText(report.studentId);}catch(error){const field=document.createElement('textarea');field.value=report.studentId;document.body.appendChild(field);field.select();document.execCommand?.('copy');field.remove();}notify(`${report.studentId} copied.`, 'success');return true;}
 
 function toggleQuestionReport(reportId, status) {
     const ownedIds = exams.filter(exam => exam.facultyId === facultyId).map(exam => exam.id);

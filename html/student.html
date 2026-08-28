@@ -2030,6 +2030,7 @@ function submitQuestionReport() {
     details:document.getElementById('questionReportDetails').value });
   if (!result.ok) {
     notify(result.reason === 'duplicate' ? 'You already have an open report for this question.'
+      : result.reason === 'blocked' ? 'Your instructor has disabled new question reports from this account. Use the mail icon to contact them.'
       : result.reason === 'storage' ? 'The report could not be saved. Please try again.'
       : 'Describe the problem before sending the report.', 'error');
     return false;

@@ -7,6 +7,9 @@ function readQuestionReports() {
 
 function createQuestionReport({ studentId, examId, questionId, attemptId = null, category, details }) {
   if (!studentId || !examId || !questionId || !category || !String(details || '').trim()) return { ok:false, reason:'missing' };
+  const exam=DB.read('exams',[]).find(item=>item.id===examId);
+  const blocked=DB.read('reportBlockedStudents',[]);
+  if (exam && blocked.some(item=>item.studentId===studentId&&item.facultyId===exam.facultyId)) return { ok:false, reason:'blocked' };
   const reports = readQuestionReports();
   if (reports.some(r => r.studentId === studentId && r.examId === examId && r.questionId === questionId && r.status === 'open')) {
     return { ok:false, reason:'duplicate' };

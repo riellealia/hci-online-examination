@@ -284,6 +284,23 @@ function textInputDialog({ title = 'Edit', label = 'Name', value = '', confirmLa
   });
 }
 
+function textareaInputDialog({ title = 'Add a note', label = 'Note', value = '', confirmLabel = 'Save', danger = false } = {}) {
+  return new Promise(resolve => {
+    const bg=document.createElement('div');
+    bg.className='modal-bg confirm-bg';bg.style.display='flex';
+    bg.innerHTML=`<div class="modal confirm-box" role="dialog" aria-modal="true"><h3></h3><label class="dialog-input-label"><span></span><textarea rows="4"></textarea></label><div class="confirm-actions"><button type="button" class="confirm-cancel">Cancel</button><button type="button" class="confirm-ok ${danger?'is-danger':''}">${confirmLabel}</button></div></div>`;
+    bg.querySelector('h3').textContent=title;bg.querySelector('label span').textContent=label;
+    const input=bg.querySelector('textarea');input.value=value;
+    document.body.appendChild(bg);
+    const done=result=>{bg.remove();resolve(result)};
+    bg.querySelector('.confirm-cancel').onclick=()=>done(null);
+    bg.querySelector('.confirm-ok').onclick=()=>done(input.value.trim());
+    bg.onclick=event=>{if(event.target===bg)done(null)};
+    bg.onkeydown=event=>{if(event.key==='Escape')done(null)};
+    input.focus();input.select();
+  });
+}
+
 /* Three-way guard for editable forms. The caller can save, deliberately
    discard, or continue editing without relying on the browser's confirm UI. */
 function saveDiscardDialog({ title = 'Unsaved changes', message = 'What would you like to do?' } = {}) {

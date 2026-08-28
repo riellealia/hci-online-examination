@@ -1,5 +1,18 @@
 # Project Audit Log
 
+## 2026-08-29 — Reporter-aware question report cards
+
+- **Area:** Faculty question reports
+- **Card structure:** Added the reporter's name, ID, class/section, and section subject in a compact header, followed by the reported question, a problem-type pill, and the student's description.
+- **Visible actions:** Reduced each card to four icon controls: In review, Resolve, Dismiss, and Settings.
+- **Resolution workflow:** Resolve and Dismiss now require a resolution note in a designed textarea dialog. In review remains a direct status action.
+- **Settings menu:** Added View student profile, Mail student, View question, Block from reporting, and Copy ID.
+- **Enforcement:** Blocking is stored per Faculty–Student relationship and prevents new reports for that professor's exams. Existing reports remain in history.
+- **Compatibility:** Student profiles support both current enrollments and older allotment records.
+- **Files:** `html/faculty.html`, `html/student.html`, `js/ui.js`, `js/question-reports.js`, `js/role-profile.js`, `css/shared-ui.css`, and report tests.
+- **Verification:** Reporting, authoring, Faculty workspace, Student workflow, navigation, and responsive suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Simplified Faculty report actions
 
 - **Area:** Faculty question reports and question editor

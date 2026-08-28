@@ -7,10 +7,11 @@ const RoleProfileViewer=(()=>{
     if(host)return host;
     host=document.createElement('div');host.id='roleProfileOverlay';host.className='role-profile-overlay';host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');host.setAttribute('aria-label','Student profile');host.addEventListener('click',event=>{if(event.target===host)close()});document.body.appendChild(host);return host;
   }
-  function data(){return{students:DB.read('students',[]),faculty:DB.read('faculty',[]),subjects:DB.read('subjects',[]),enrollments:DB.read('studentEnrollments',[]),sectionSubjects:DB.read('sectionSubjects',[]),exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:DB.read('applicationAuditLog',[])};}
+  function data(){return{students:DB.read('students',[]),faculty:DB.read('faculty',[]),subjects:DB.read('subjects',[]),enrollments:DB.read('studentEnrollments',[]),allotments:DB.read('allotments',[]),sectionSubjects:DB.read('sectionSubjects',[]),exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:DB.read('applicationAuditLog',[])};}
   function relevant(d,student){
     const enrollment=d.enrollments.filter(item=>item.studentId===student.id&&(!context.subjectCode||item.subjectCode===context.subjectCode)&&(!context.sectionId||item.sectionId===context.sectionId));
-    return enrollment;
+    if(enrollment.length)return enrollment;
+    return d.allotments.filter(item=>item.studentId===student.id&&(!context.subjectCode||item.subjectCode===context.subjectCode)&&(!context.viewerId||context.viewerRole!=='faculty'||item.facultyId===context.viewerId)).map(item=>({studentId:item.studentId,subjectCode:item.subjectCode,sectionId:context.sectionId||(student.sections||[])[0]||'Legacy section'}));
   }
   function renderFaculty(d,student,enrollment){
     const examIds=new Set(d.exams.filter(exam=>exam.facultyId===context.viewerId&&(!context.subjectCode||exam.subjectCode===context.subjectCode)).map(exam=>exam.id));
