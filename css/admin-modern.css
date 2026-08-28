@@ -29,11 +29,12 @@ body[data-role="admin"] .status-icon svg { width:19px; height:19px; fill:current
 
 body[data-role="admin"] .card-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
 body[data-role="admin"] #dashboardSection.dashboard-view-list .card-grid { grid-template-columns:1fr; gap:9px; }
-body[data-role="admin"] #dashboardSection.dashboard-view-list .card { display:grid; grid-template-columns:minmax(180px,.55fr) minmax(0,1fr); height:82px; }
-body[data-role="admin"] #dashboardSection.dashboard-view-list .card-top { align-items:center; padding:12px 10px 12px 16px; }
-body[data-role="admin"] #dashboardSection.dashboard-view-list .card-icon { width:40px; height:40px; font-size:19px; }
-body[data-role="admin"] #dashboardSection.dashboard-view-list .card-count { font-size:27px; }
-body[data-role="admin"] #dashboardSection.dashboard-view-list .card-bottom { align-items:center; padding:12px 16px 12px 10px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card { display:flex; flex-direction:row; align-items:center; height:82px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-top { flex:0 0 auto; align-items:center; justify-content:flex-start; gap:14px; padding:12px 10px 12px 16px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-icon { width:40px; height:40px; margin:0; font-size:19px; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-count { min-width:44px; margin:0; font-size:27px; text-align:left; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-bottom { flex:1; align-items:center; justify-content:space-between; min-width:0; padding:12px 16px 12px 0; }
+body[data-role="admin"] #dashboardSection.dashboard-view-list .card-label { min-width:0; text-align:left; }
 body[data-role="admin"] .card { height: 168px; border: 1px solid #e3e8f0 !important; border-radius: 18px; background: #fff; box-shadow: 0 8px 28px rgba(29, 45, 72, .07); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 body[data-role="admin"] .card:hover { transform: translateY(-3px); border-color: #b8c9df !important; box-shadow: 0 14px 34px rgba(29, 45, 72, .11); }
 body[data-role="admin"] .card-top { flex: 1; padding: 22px 22px 8px; background: #fff !important; }
@@ -217,7 +218,7 @@ body[data-role="admin"] .profile-target-row { animation:profileTarget 1.8s ease;
 }
 @media (max-width: 420px) { body[data-role="admin"] .card-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { body[data-role="admin"] .site-status-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-@media (max-width: 520px) { body[data-role="admin"] .dashboard-overview-head { align-items:flex-start; } body[data-role="admin"] .dashboard-overview-head h2{font-size:21px} body[data-role="admin"] .site-status-panel{padding:14px} body[data-role="admin"] .site-status-list{grid-template-columns:1fr} body[data-role="admin"] #dashboardSection.dashboard-view-list .card{grid-template-columns:1fr; height:112px} }
+@media (max-width: 520px) { body[data-role="admin"] .dashboard-overview-head { align-items:flex-start; } body[data-role="admin"] .dashboard-overview-head h2{font-size:21px} body[data-role="admin"] .site-status-panel{padding:14px} body[data-role="admin"] .site-status-list{grid-template-columns:1fr} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-top{gap:9px;padding-left:12px} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-count{min-width:36px;font-size:23px} body[data-role="admin"] #dashboardSection.dashboard-view-list .card-bottom{padding-right:12px} }
 
 /* Admin dark mode: this file loads after shared-ui.css, so its light component
    declarations need an explicit token-based dark counterpart here. */
