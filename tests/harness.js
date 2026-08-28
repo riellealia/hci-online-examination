@@ -22,6 +22,7 @@ const ADMIN_TABLE_TOOLS=fs.readFileSync(DIR+'../js/admin-table-tools.js','utf8')
 const DEMO_DATA=fs.readFileSync(DIR+'../js/demo-data.js','utf8');
 const FACULTY_SUBJECT_WORKSPACE=fs.readFileSync(DIR+'../js/faculty-subject-workspace.js','utf8');
 const STUDENT_CARD_TOOLS=fs.readFileSync(DIR+'../js/student-card-tools.js','utf8');
+const ROLE_PROFILE=fs.readFileSync(DIR+'../js/role-profile.js','utf8');
 
 function load(page, seed, opts={}){
   // Inline auth.js: jsdom will not fetch it from disk.
@@ -35,6 +36,7 @@ function load(page, seed, opts={}){
     .replace('<script src="../js/demo-data.js"></script>', `<script>${DEMO_DATA}</script>`)
     .replace('<script src="../js/faculty-subject-workspace.js"></script>', `<script>${FACULTY_SUBJECT_WORKSPACE}</script>`)
     .replace('<script src="../js/student-card-tools.js"></script>', `<script>${STUDENT_CARD_TOOLS}</script>`)
+    .replace('<script src="../js/role-profile.js"></script>', `<script>${ROLE_PROFILE}</script>`)
     .replace('<script src="../js/auth.js"></script>', `<script>${AUTH}</script>`)
     .replace('<script src="../js/ui.js"></script>', `<script>${UI}</script>`)
     .replace('<script src="../js/dates.js"></script>', `<script>${DATES}</script>`)

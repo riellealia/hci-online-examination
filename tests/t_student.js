@@ -14,7 +14,7 @@ ok(!/SUB2/.test(r.d.querySelector('#examTable tbody').textContent),'no unrelated
 r.w.close();
 
 console.log('\n=== K2. Enrolled subjects use cards ===');
-s=SEED(); r=stu(s);
+s=SEED(); s.students.push({id:'S2',last:'Reyes',first:'Ana',sections:['A']}); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'},{studentId:'S2',subjectCode:'SUB1',sectionId:'A'}]; s.sectionSubjects=[{sectionId:'A',assignments:[{subjectCode:'SUB1',facultyId:'F1'}]}]; r=stu(s);
 ok(r.d.querySelectorAll('#studentSubjectCards .enrolled-subject-card').length>0,'each enrolled subject is rendered as a card');
 ok(r.d.getElementById('subjectsTable').classList.contains('compat-table')||r.d.getElementById('subjectsTable').closest('.compat-table'),'the old subject table is not part of the visible interface');
 r.d.querySelector('#studentSubjectCards .enrolled-subject-card').click();
@@ -22,6 +22,11 @@ ok(r.d.getElementById('subject-detail-panel').style.display==='block','clicking 
 ok(r.d.querySelectorAll('#studentSubjectDetail .subject-info-cell').length>=5,'subject page separates details, professor, rules, schedule, and exams into cells');
 ok(!r.d.querySelector('#sidebar [data-panel="subject-detail-panel"]'),'redundant Subject Details sidebar item is absent');
 ok(/Handles:/.test(r.d.querySelector('#studentSubjectDetail').textContent),'professor listing identifies handled sections');
+const classmate=r.d.querySelector('#studentSubjectDetail .classmate-row');
+ok(!!classmate,'subject page lists classmates as clickable limited profiles');
+classmate.click();
+ok(/Limited public information/.test(r.d.getElementById('roleProfileOverlay').textContent)&&/private information are hidden/.test(r.d.querySelector('.role-profile-content').textContent)&&!r.d.querySelector('.role-profile-tabs'),'fellow-student profile hides academic and account details');
+r.w.RoleProfileViewer.close();
 const emailButton=r.d.querySelector('#studentSubjectDetail .professor-email');
 ok(emailButton?.tagName==='BUTTON','professor listing provides an in-site email-composer icon');
 emailButton.click();

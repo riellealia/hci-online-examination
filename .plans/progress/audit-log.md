@@ -22,6 +22,7 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - **Verification:** Faculty workspace, shared profile/theme, and navigation focused suites pass.
 - **Result:** Complete
 - **Follow-up:** Converted Faculty subject and section selectors from bordered pills to transparent underline tabs with an accent underline, hover state, keyboard focus, and horizontal overflow support.
+- **Roster and profiles:** Added the missing My Students page title/description and Subjects/Sections tab labels. Entire Faculty roster rows now open role-scoped Student profile pages. Faculty can only open students within the selected handled offering and only sees relevant academic records. Student subject pages list classmates, but fellow-student profiles expose only shared class context and explicitly hide grades, submissions, activity, login details, and credentials.
 
 ## 2026-08-27 — Course pages, weekly content, and GitHub checkpoint
 
