@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Faculty dark-mode contrast repair
+
+- **Area:** Faculty interface and shared theme
+- **Changed:** Replaced remaining hard-coded light surfaces in faculty rosters, exams, question reports, question editing, previews, grading, and import panels with shared dark-theme surfaces and readable text colors.
+- **Reason:** Faculty pages were displaying white panels with near-white text after dark mode was enabled.
+- **Files:** `css/shared-ui.css`
+- **Verification:** Faculty workspace/profile and the rest of the unaffected browser-level suites pass. The full runner retains older publish/relationship seed failures and one non-terminating legacy test unrelated to this CSS change.
+- **Result:** Complete
+
 ## 2026-08-29 — Admin dashboard overview and live status
 
 - **Area:** Admin dashboard

@@ -1680,6 +1680,40 @@ body { overflow-x: hidden; }
 }
 :root[data-theme="dark"] .subject-detail-exam:hover { background:var(--accent-soft) !important; }
 
+/* Faculty legacy panels predate the shared theme and still declare literal
+   white surfaces. Keep the faculty interface consistently dark and readable. */
+:root[data-theme="dark"] body[data-role="faculty"] :is(
+  .exams-section,.exam-item,.questions-section,.question-item,.options-list,
+  .grade-item,.grade-ans,.preview-instructions,.preview-q,.preview-opt,
+  .preview-written,.question-report,.question-report-filter,.no-exams,
+  .table-scroll,#csvPreviewContent,#subjectCheckboxList
+) {
+  background:var(--surface) !important;
+  color:var(--ink) !important;
+  border-color:var(--line-strong) !important;
+}
+:root[data-theme="dark"] body[data-role="faculty"] :is(
+  .exam-item,.question-item,.options-list,.grade-item,.preview-instructions,
+  .preview-q,.question-report-filter,.no-exams
+) { background:var(--surface-soft) !important; }
+:root[data-theme="dark"] body[data-role="faculty"] :is(
+  .exam-item-info p,.option-item,.grade-auto-note,.preview-head p,
+  .preview-pts,.preview-written,.no-exams,.question-report small
+) { color:var(--ink-soft) !important; }
+:root[data-theme="dark"] body[data-role="faculty"] :is(
+  .exams-header h3,.exam-item-info h4,.question-text,.preview-q-text,
+  .question-report h4,.question-report p,.form-group label
+) { color:var(--ink) !important; }
+:root[data-theme="dark"] body[data-role="faculty"] .preview-opt.is-correct {
+  background:rgba(92,184,111,.17) !important;
+  border-color:rgba(92,184,111,.42) !important;
+}
+:root[data-theme="dark"] body[data-role="faculty"] :is(#csvPreviewContent,#subjectCheckboxList)[style] {
+  background:var(--surface-soft) !important;
+  color:var(--ink) !important;
+  border-color:var(--line-strong) !important;
+}
+
 /* Authentication is a public screen, so signed-in account preferences never
    recolor it. Keep its branded image and light, high-contrast form controls. */
 body.login-bg {
