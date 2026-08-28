@@ -7,6 +7,7 @@
 - **Status signals:** Reports honest client-side information: browser online/offline state, interface availability, CSV/browser-storage data mode, and live local time. It does not imitate unavailable backend CPU, memory, or server metrics.
 - **Monitoring:** Added live charts for measured interface response time, browser-storage size/record count, and available browser connection quality. Unsupported network details are labeled unavailable instead of being fabricated.
 - **Controls:** Added Start, Restart, and Stop controls for the client-side monitoring session, and moved the Grid/List switch directly above the management cards.
+- **Layout correction:** Monitoring now appears before the compact status cells. Its light surface is used in light mode and the dark monitoring style is limited to dark mode. The redundant visible Site status heading was removed.
 - **Responsive design:** Status cells reduce from four columns to two and then one; List view also adapts for narrow screens. Light and dark themes are supported.
 - **Verification:** Dashboard, Admin visual, responsive-layout, and shared-navigation focused suites pass.
 - **Result:** Complete

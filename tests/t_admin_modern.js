@@ -7,6 +7,8 @@ console.log('=== ADMIN MODERN UI. Calm cards and accessible icon actions ===');
 const html=fs.readFileSync(path.join(__dirname,'..','html','admin.html'),'utf8');
 const css=fs.readFileSync(path.join(__dirname,'..','css','admin-modern.css'),'utf8');
 ok(/admin-modern\.css/.test(html),'Admin loads a dedicated visual layer');
+ok(/dashboard-monitoring[^}]*order:2/.test(css)&&/site-status-panel[^}]*order:3/.test(css),'monitoring is visually placed before status cells');
+ok(/\.dashboard-monitoring[^}]*background:#fff/.test(css)&&/:root\[data-theme="dark"\][^{]*\.dashboard-monitoring[^}]*background:#18222e/.test(css),'monitoring is light by default and dark only in dark mode');
 ok(/repeat\(5/.test(css) && /repeat\(3/.test(css) && /repeat\(2/.test(css),'metric grid adapts across desktop, tablet, and mobile');
 ok(/background: #fff !important/.test(css),'legacy multicolor card surfaces are overridden with neutral surfaces');
 ok(/table-icon-btn/.test(css) && /focus-visible/.test(css),'icon actions include hover and keyboard focus treatments');

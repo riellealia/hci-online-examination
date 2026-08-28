@@ -33,8 +33,8 @@
     <header class="dashboard-overview-head">
       <div><p class="dashboard-eyebrow">Administration</p><h2>System overview</h2><p>Monitor the prototype and open a management area.</p></div>
     </header>
-    <section class="site-status-panel" aria-labelledby="siteStatusTitle">
-      <div class="site-status-heading"><span class="status-pulse" id="siteStatusPulse" aria-hidden="true"></span><div><h3 id="siteStatusTitle">Site status</h3><p id="siteStatusSummary" aria-live="polite">Checking application status…</p></div></div>
+    <section class="site-status-panel" aria-label="Site status">
+      <span class="status-pulse" id="siteStatusPulse" aria-hidden="true"></span><span id="siteStatusSummary" class="sr-only" aria-live="polite">Checking application status…</span>
       <div class="site-status-list">
         <div class="site-status-item"><span class="status-icon network" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 18.5 15 15a4.2 4.2 0 0 0-6 0l3 3.5Zm-6-7 1.8 1.8a6 6 0 0 1 8.4 0l1.8-1.8a8.5 8.5 0 0 0-12 0ZM2.5 8l1.8 1.8a11 11 0 0 1 15.4 0L21.5 8a13.5 13.5 0 0 0-19 0Z"/></svg></span><span><small>Browser connection</small><strong id="siteNetworkStatus">Checking</strong></span></div>
         <div class="site-status-item"><span class="status-icon app" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10.2 16.6-4.1-4.1 1.8-1.8 2.3 2.3 5.9-5.9 1.8 1.8-7.7 7.7Z"/></svg></span><span><small>Interface</small><strong>Operational</strong></span></div>
