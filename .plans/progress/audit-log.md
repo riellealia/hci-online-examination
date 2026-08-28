@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Simplified Faculty report actions
+
+- **Area:** Faculty question reports and question editor
+- **Changed:** Reduced each report row to an icon for opening the reported question plus In review, Resolve, and Dismiss actions. Removed the row-level Notify Student and Reopen controls.
+- **Interaction:** The entire report cell opens the existing editable question workspace. A report-context cell appears above the question with its status, reporter, concern, and autosaving resolution note.
+- **Layout:** Removed the always-visible resolution textarea from report rows so the queue remains compact.
+- **Files:** `html/faculty.html`, `css/shared-ui.css`, `tests/t_reports.js`
+- **Verification:** Question-report and question-authoring suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Complete question-report demonstration queue
 
 - **Area:** Faculty question reports and demo data

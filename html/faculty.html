@@ -1073,6 +1073,7 @@
 
         <div class="authoring-body">
             <main class="question-canvas">
+                <section id="reportedQuestionContext" class="reported-question-context" hidden></section>
                 <div class="form-group">
                     <label for="questionText">Question prompt:</label>
                     <textarea id="questionText" placeholder="Enter your question here..."></textarea>
@@ -1389,12 +1390,27 @@ function displayQuestionReports() {
       <div class="question-report-filter"><label for="reportStatusFilter">Status</label><select id="reportStatusFilter" onchange="filterQuestionReports()"><option value="all">All statuses</option><option value="open">Open</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></div>
       ${reports.length ? reports.map(report => {
         const exam = exams.find(e=>e.id===report.examId); const question = questions.find(q=>q.id===report.questionId);
-        return `<article class="question-report ${report.status}" data-report-status="${report.status}" data-question-id="${report.questionId}"><div class="report-main"><strong>${escapeQuestionMedia(report.category.replace('-', ' '))}</strong>
+        return `<article class="question-report ${report.status}" data-report-status="${report.status}" data-question-id="${report.questionId}" role="button" tabindex="0" aria-label="Open reported question" onclick="if(!event.target.closest('button,textarea,select,label'))openReportedQuestion('${report.id}')" onkeydown="if(event.key==='Enter'){event.preventDefault();openReportedQuestion('${report.id}')}"><div class="report-main"><strong>${escapeQuestionMedia(report.category.replace('-', ' '))}</strong>
           <span class="report-status">${report.status}</span><h4>${escapeQuestionMedia(question?.text || 'Question removed')}</h4>
           <p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(exam?.title || 'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small>
-          <label class="report-note-label">Resolution note <textarea data-report-note="${report.id}" oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Explain what was checked or changed">${escapeQuestionMedia(report.resolutionNote || '')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label></div>
-          <div class="report-actions"><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','reviewed')">Reviewed</button><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','resolved')">Resolve</button><button type="button" class="delete-btn" onclick="toggleQuestionReport('${report.id}','dismissed')">Dismiss</button><button type="button" class="edit-btn" onclick="notifyReportResolution('${report.id}')">Notify student</button>${report.status !== 'open' ? `<button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','open')">Reopen</button>` : ''}</div></article>`;
+          </div>
+          <div class="report-actions"><button type="button" class="report-question-open" onclick="openReportedQuestion('${report.id}')" aria-label="View and edit reported question" title="View reported question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.2 0 9.3 4.4 10 7-.7 2.6-4.8 7-10 7S2.7 14.6 2 12c.7-2.6 4.8-7 10-7Zm0 2c-3.7 0-6.9 2.9-7.8 5 .9 2.1 4.1 5 7.8 5s6.9-2.9 7.8-5C18.9 9.9 15.7 7 12 7Zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg></button><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','reviewed')" ${report.status==='reviewed'?'disabled':''}>In review</button><button type="button" class="edit-btn" onclick="toggleQuestionReport('${report.id}','resolved')" ${report.status==='resolved'?'disabled':''}>Resolve</button><button type="button" class="delete-btn" onclick="toggleQuestionReport('${report.id}','dismissed')" ${report.status==='dismissed'?'disabled':''}>Dismiss</button></div></article>`;
       }).join('') : '<div class="no-exams">No question reports for your exams.</div>'}</div>`;
+}
+
+function openReportedQuestion(reportId) {
+    const ownedIds=exams.filter(exam=>exam.facultyId===facultyId).map(exam=>exam.id);
+    const report=reportsForExams(ownedIds).find(item=>item.id===reportId);
+    if(!report){notify('That report is not available.','error');return false;}
+    const question=questions.find(item=>item.id===report.questionId&&item.examId===report.examId);
+    if(!question){notify('The reported question no longer exists.','error');return false;}
+    facultyNav?.show('exams-tab');
+    manageQuestions(report.examId);
+    editQuestion(report.questionId);
+    const context=document.getElementById('reportedQuestionContext');
+    context.hidden=false;
+    context.innerHTML=`<div class="reported-question-head"><div><span>Question report</span><strong>${escapeQuestionMedia(report.category)}</strong></div><span class="report-status">${escapeQuestionMedia(report.status)}</span></div><p>${escapeQuestionMedia(report.details)}</p><small>Reported by ${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small><label>Resolution note<textarea oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Add what you checked or changed">${escapeQuestionMedia(report.resolutionNote||'')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label>`;
+    return true;
 }
 
 function openQuestionReports(questionId) {
@@ -1429,7 +1445,7 @@ function toggleQuestionReport(reportId, status) {
     const ownedIds = exams.filter(exam => exam.facultyId === facultyId).map(exam => exam.id);
     if (!reportsForExams(ownedIds).some(report => report.id === reportId)) { notify('You cannot update that report.', 'error'); return false; }
     if (!setQuestionReportStatus(reportId, status)) { notify('The report status could not be saved.', 'error'); return false; }
-    displayQuestionReports(); notify(status === 'resolved' ? 'Report resolved.' : 'Report reopened.', 'success'); return true;
+    displayQuestionReports(); notify(status === 'resolved' ? 'Report resolved.' : status === 'reviewed' ? 'Report marked in review.' : 'Report dismissed.', 'success'); return true;
 }
 
 async function notifyReportResolution(reportId) {
@@ -2038,6 +2054,9 @@ function chooseQuestionType(type) {
 function editQuestion(questionId) {
     const question = questions.find(q => q.id === questionId);
     if (!required(question, 'That question no longer exists.')) { manageQuestions(currentEditingExamForQuestions); return; }
+    const reportContext=document.getElementById('reportedQuestionContext');
+    reportContext.hidden=true;
+    reportContext.innerHTML='';
 
     currentEditingQuestionId = questionId;
     document.getElementById('questionModalTitle').textContent = 'Edit Question';
@@ -2107,6 +2126,7 @@ function closeQuestionModal() {
     questionDraftTimer = null;
     document.getElementById('questionModal').classList.remove('active');
     document.getElementById('questionModal').classList.remove('choosing-type');
+    document.getElementById('reportedQuestionContext').hidden=true;
     closeQuestionInspector();
     currentEditingQuestionId = null;
 }
