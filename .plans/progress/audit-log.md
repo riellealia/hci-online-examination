@@ -1228,3 +1228,8 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Weekly content now stays expanded inside its week by default, removing the unnecessary second collapse level.
 - Faculty can explicitly enable “Allow students to collapse this content” per content cell.
 - Replaced separate Markdown/heading text modes with one content mode and a compact formatting toolbar for bold, italic, headings, lists, and links.
+## 2026-08-29 — Unified Edit Week cell controls
+
+- Edit Week now uses the same content kind, formatting toolbar, availability, prerequisite, and collapsible settings as Add Content.
+- Added an icon-only Add cell action and a red trash action on every editable cell.
+- Saving synchronizes added, edited, and explicitly deleted cells while preserving attached exam and file records.

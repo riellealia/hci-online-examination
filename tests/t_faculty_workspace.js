@@ -48,6 +48,15 @@ ok(r.w.FacultySubjectWorkspace.attachExamToWeek(3,'e1'),'Faculty can attach an e
 ok(r.read('subjectWorkspaceContent').some(item=>item.week===3&&item.type==='exam'&&item.examId==='e1'),'weekly content stores an exam reference without moving the exam');
 ok(!!r.d.querySelector('.week-stack .attached-exam-link'),'attached exam appears inside the selected week');
 ok(!!r.d.querySelector('.faculty-exam-cell'),'the original exam cell remains in the Examinations section');
+r.w.FacultySubjectWorkspace.renameWeek(3);
+const weekEditor=r.d.querySelector('.enhanced-week-editor');
+ok(!!weekEditor&&!!weekEditor.querySelector('.add-week-cell'),'Edit Week uses the matching editor and provides an Add cell icon');
+const beforeCells=weekEditor.querySelectorAll('.week-editor-cell').length;
+weekEditor.querySelector('.add-week-cell').click();
+ok(weekEditor.querySelectorAll('.week-editor-cell').length===beforeCells+1,'Add cell creates another editable content cell');
+weekEditor.querySelector('.week-editor-cell:last-child .delete-week-cell').click();
+ok(weekEditor.querySelectorAll('.week-editor-cell').length===beforeCells,'each Edit Week cell has a working red trash action');
+weekEditor.querySelector('.week-editor-close').click();
 
 r.w.FacultySubjectWorkspace.showTab('members');
 ok(/Prof\.|F1/.test(r.d.querySelector('.workspace-main').textContent),'Members lists faculty across the subject');
