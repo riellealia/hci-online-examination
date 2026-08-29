@@ -1033,7 +1033,7 @@
             <div class="checkbox-stack"><label><input type="checkbox" id="examShowSubmittedAnswers"> Show the student's submitted answers</label><label><input type="checkbox" id="examShowFeedback" checked> Show Faculty feedback</label></div>
         </fieldset>
         <div class="modal-buttons">
-            <button id="editExamQuestionsBtn" class="cancel-btn" type="button" onclick="openQuestionsFromExamEditor()" hidden aria-label="Edit questions">&#9776; Questions</button>
+            <button id="editExamQuestionsBtn" class="cancel-btn" type="button" onclick="openQuestionsFromExamEditor()" hidden aria-label="Open questions">&#9776; Open questions</button>
             <button class="save-btn" onclick="saveExam()">Save Exam</button>
             <button class="cancel-btn" onclick="closeExamModal()">Cancel</button>
         </div>
@@ -1872,14 +1872,14 @@ function displayAllFacultyExams() {
                     <div style="margin-bottom: 30px;">
                         <h4 style="color: var(--accent); margin-bottom: 12px;">${subCode} - ${subject ? subject.name : 'Unknown Subject'}</h4>
                         ${examsForSub.map(exam => `
-                            <div class="exam-item">
+                            <div class="exam-item" data-exam-id="${exam.id}" role="button" tabindex="0" onclick="if(!event.target.closest('.exam-item-actions'))manageQuestions('${exam.id}')" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('.exam-item-actions')){event.preventDefault();manageQuestions('${exam.id}')}">
                                 <div class="exam-item-info">
                                     <h4>${exam.title}</h4>
                                     <p><strong>Date:</strong> ${exam.date}</p>
                                     <p><strong>Time:</strong> ${exam.start} - ${exam.end}</p>
                                     <p><strong>Description:</strong> ${exam.desc || 'N/A'}</p>
                                 </div>
-                                <div class="exam-item-actions"><button class="exam-icon-btn questions" onclick="manageQuestions('${exam.id}')" aria-label="Open questions" title="Open questions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 6h16v3H4v-3Zm0 6h10v3H4v-3Z"/></svg></button>${examActionsMenu(exam.id)}</div>
+                                <div class="exam-item-actions">${examActionsMenu(exam.id)}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -1921,14 +1921,14 @@ function displayExamsBySubject(subjectCode) {
                     <button class="add-exam-btn exam-icon-btn" onclick="openExamModal('${subjectCode}')" aria-label="Create exam" title="Create exam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button>
                 </div>
                 ${myExams.map(exam => `
-                    <div class="exam-item">
+                    <div class="exam-item" data-exam-id="${exam.id}" role="button" tabindex="0" onclick="if(!event.target.closest('.exam-item-actions'))manageQuestions('${exam.id}')" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('.exam-item-actions')){event.preventDefault();manageQuestions('${exam.id}')}">
                         <div class="exam-item-info">
                             <h4>${exam.title}</h4>
                             <p><strong>Date:</strong> ${exam.date}</p>
                             <p><strong>Time:</strong> ${exam.start} - ${exam.end}</p>
                             <p><strong>Description:</strong> ${exam.desc || 'N/A'}</p>
                         </div>
-                        <div class="exam-item-actions"><button class="exam-icon-btn questions" onclick="manageQuestions('${exam.id}')" aria-label="Open questions" title="Open questions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 6h16v3H4v-3Zm0 6h10v3H4v-3Z"/></svg></button>${examActionsMenu(exam.id)}</div>
+                        <div class="exam-item-actions">${examActionsMenu(exam.id)}</div>
                     </div>
                 `).join('')}
             </div>

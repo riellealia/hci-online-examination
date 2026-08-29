@@ -1250,3 +1250,9 @@ This file records meaningful changes to the plan, implementation, testing, and d
 
 - Removed the redundant Questions icon from Faculty Course Page exam cells.
 - Clicking anywhere on an exam cell now remains the single action for opening that exam’s question bank; the settings icon remains separate.
+## 2026-08-29 — Unified exam opening routes
+
+- Faculty Course Page, My Exams, and subject-filtered exam cells now all open their selected question bank when the cell is clicked or keyboard-activated.
+- Removed redundant question-list icons from those cells while preserving their separate settings menus.
+- Renamed the general-settings action to “Open questions” and retained its working navigation.
+- Reverified Student Subject → Exam cell → standard exam-details prompt.

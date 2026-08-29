@@ -75,10 +75,14 @@ courseExamCell.click();
 ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'clicking the Faculty Course Page exam cell opens its question bank');
 ok(r.d.getElementById('exams-tab').style.display==='block','Questions action navigates from the Course Page to the visible question bank page');
 r.w.displayAllFacultyExams();
-const listQuestionButton=r.d.querySelector('#examsView .exam-item-actions > .questions');
-ok(!!listQuestionButton,'Faculty exam lists expose Questions beside the settings menu');
-listQuestionButton.click();
-ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'Faculty exam-list Questions icon opens the selected exam question bank');
+const listExamCell=r.d.querySelector('#examsView .exam-item[data-exam-id="e1"]');
+ok(!!listExamCell&&!listExamCell.querySelector('.questions'),'Faculty exam lists use the exam cell instead of a redundant Questions icon');
+listExamCell.click();
+ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'clicking a Faculty My Exams cell opens the selected question bank');
+r.w.displayExamsBySubject('SUB1');
+const subjectExamCell=r.d.querySelector('#examsView .exam-item[data-exam-id="e1"]');
+subjectExamCell.click();
+ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'clicking an exam in a Faculty subject-filtered list opens its questions');
 seed.subjectWorkspaceContent=r.read('subjectWorkspaceContent');
 r.w.close();
 
