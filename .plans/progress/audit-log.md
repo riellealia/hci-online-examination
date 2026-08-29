@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Related report in mail context
+
+- **Area:** Shared inbox message prompt and Faculty reports
+- **Changed:** Gave the Close action a visible muted-gray treatment in both themes. Messages associated with a question report now show a compact related-report cell inside the prompt.
+- **Navigation:** Clicking the related-report cell closes the prompt, opens the Faculty Reports page, selects the correct status tab, scrolls to the report, and briefly highlights it.
+- **Files:** `js/ui.js`, `html/faculty.html`, `css/shared-ui.css`, `tests/t_inbox.js`
+- **Verification:** Shared inbox, question-report, and navigation suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Inbox-title count pill
 
 - **Area:** Shared header inbox

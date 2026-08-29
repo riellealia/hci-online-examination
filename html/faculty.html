@@ -1417,12 +1417,23 @@ function displayQuestionReports() {
       const subjectNameLink=`<a class="report-subject-link" href="#subject-${escapeQuestionMedia(exam?.subjectCode||'')}" onclick="event.stopPropagation();FacultySubjectWorkspace.open('${escapeQuestionMedia(exam?.subjectCode||'')}');return false">${escapeQuestionMedia(subject?.name||'Unknown subject')}</a>`;
       return `<article class="question-report ${report.status}" data-report-status="${report.status}" data-question-id="${report.questionId}" role="button" tabindex="0" aria-label="Open reported question" onclick="if(!event.target.closest('button,a,.report-settings-menu'))openReportedQuestion('${report.id}')" onkeydown="if(event.key==='Enter'){event.preventDefault();openReportedQuestion('${report.id}')}"><div class="report-main"><header class="report-card-head"><div>${reporterLink}<small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(section)} · ${subjectCodeLink} — ${subjectNameLink}</small></div><span class="report-status">${report.status}</span></header><h4>${escapeQuestionMedia(question?.text||'Question removed')}</h4><span class="report-problem-pill">${escapeQuestionMedia(report.category.replace('-',' '))}</span><p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(exam?.title||'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small></div><div class="report-actions"><button type="button" class="report-action-icon review" onclick="event.stopPropagation();requestReportStatus('${report.id}','reviewed')" ${report.status==='reviewed'?'disabled':''} aria-label="Mark in review" title="In review">&#128065;</button><button type="button" class="report-action-icon resolve" onclick="event.stopPropagation();requestReportStatus('${report.id}','resolved')" ${report.status==='resolved'?'disabled':''} aria-label="Resolve report" title="Resolve">&#10003;</button><button type="button" class="report-action-icon dismiss" onclick="event.stopPropagation();requestReportStatus('${report.id}','dismissed')" ${report.status==='dismissed'?'disabled':''} aria-label="Dismiss report" title="Dismiss">&times;</button><div class="report-settings-wrap"><button type="button" class="report-action-icon settings" onclick="event.stopPropagation();toggleReportSettings('${report.id}',this)" aria-label="Report settings" title="Settings">&#9881;</button><div class="report-settings-menu" data-report-menu="${report.id}"><button type="button" onclick="event.stopPropagation();viewReportStudent('${report.id}')"><span>&#128100;</span>View student profile</button><button type="button" onclick="event.stopPropagation();mailReportStudent('${report.id}')"><span>&#9993;</span>Mail student</button><button type="button" onclick="event.stopPropagation();openReportedQuestion('${report.id}')"><span>&#128065;</span>View question</button><button type="button" class="danger" onclick="event.stopPropagation();blockReportStudent('${report.id}')"><span>&#9940;</span>Block from reporting</button><button type="button" onclick="event.stopPropagation();copyReportStudentId('${report.id}')"><span>&#10697;</span>Copy ID</button></div></div></div></article>`;
     }).join(''):'<div class="no-exams">No question reports for your exams.</div>'}</div>`;
-    host.querySelectorAll('.question-report').forEach(card=>{
+    host.querySelectorAll('.question-report').forEach((card,index)=>{
+      card.dataset.reportId=reports[index]?.id||'';
       const visualStatus=reportStatusGroup({status:card.dataset.reportStatus});
       card.classList.add(visualStatus);
       const pill=card.querySelector('.report-status');
       if(pill)pill.textContent=visualStatus[0].toUpperCase()+visualStatus.slice(1);
     });
+}
+
+function focusQuestionReport(reportId){
+    const report=ownedQuestionReport(reportId);if(!report)return false;
+    activeReportTab=reportStatusGroup(report);
+    switchTab('reports-tab');displayQuestionReports();
+    const card=document.querySelector(`#reportsView .question-report[data-report-id="${reportId}"]`);
+    if(!card)return false;
+    card.classList.add('inbox-report-target');card.focus();card.scrollIntoView?.({behavior:'smooth',block:'center'});
+    setTimeout(()=>card.classList.remove('inbox-report-target'),1800);return true;
 }
 
 function openReportedQuestion(reportId) {

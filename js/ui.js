@@ -449,13 +449,13 @@ function mountProfileMenu({ name, role, id, container }) {
   const inboxOwner=`${role}:${id||'anonymous'}`;
   const inboxReceipts=typeof DB!=='undefined'?DB.read('inboxReadReceipts',[]):[];
   inboxItems.forEach((item,index)=>{
-    let source='announcement',sourceId=null,senderId=null;
+    let source='announcement',sourceId=null,senderId=null,relatedReportId=null;
     if(item.kind.startsWith('Report ·')){const record=reports.find(report=>report.details===item.text&&report.category===item.title);source='report';sourceId=record?.id||index;}
-    else if(item.kind==='Student mail'){const record=emails.find(email=>email.message===item.text&&email.subject===item.title);source='student-mail';sourceId=record?.id||index;senderId=record?.studentId||null;}
-    else if(item.kind==='Report update'||item.kind==='Faculty mail'){const record=reportNotices.find(notice=>notice.message===item.text);const report=reports.find(report=>report.id===record?.reportId),exam=exams.find(exam=>exam.id===report?.examId);source='student-notice';sourceId=record?.id||index;senderId=record?.facultyId||exam?.facultyId||null;}
+    else if(item.kind==='Student mail'){const record=emails.find(email=>email.message===item.text&&email.subject===item.title);source='student-mail';sourceId=record?.id||index;senderId=record?.studentId||null;relatedReportId=record?.reportId||reports.find(report=>report.studentId===senderId&&item.title.includes(exams.find(exam=>exam.id===report.examId)?.subjectCode||'__no_subject__'))?.id||null;}
+    else if(item.kind==='Report update'||item.kind==='Faculty mail'){const record=reportNotices.find(notice=>notice.message===item.text);const report=reports.find(report=>report.id===record?.reportId),exam=exams.find(exam=>exam.id===report?.examId);source='student-notice';sourceId=record?.id||index;senderId=record?.facultyId||exam?.facultyId||null;relatedReportId=record?.reportId||null;}
     else if(item.kind==='System status'){source='system';sourceId='question-reports';}
     else {const record=announcements.find(announcement=>announcement.message===item.text&&announcement.title===item.title);sourceId=record?.id||index;}
-    item.key=`${source}:${sourceId}`;item.source=source;item.sourceId=sourceId;item.senderId=senderId;
+    item.key=`${source}:${sourceId}`;item.source=source;item.sourceId=sourceId;item.senderId=senderId;item.relatedReportId=relatedReportId;
     if(inboxReceipts.includes(`${inboxOwner}:${item.key}`))item.pending=false;
   });
   const pendingInboxCount=inboxItems.filter(item=>item.pending).length;
@@ -535,7 +535,15 @@ function mountProfileMenu({ name, role, id, container }) {
     refreshInboxPending();
     if(item.source==='report'&&typeof openReportedQuestion==='function'){inboxPanel.classList.remove('open');openReportedQuestion(item.sourceId);return;}
     const canReply=(role==='faculty'&&item.source==='student-mail'&&item.senderId)||(role==='student'&&item.source==='student-notice'&&item.senderId);
-    const wantsReply=await confirmDialog({title:item.title,message:`${item.kind}\n\n${item.text}`,confirmLabel:canReply?'Reply':'Done',cancelLabel:'Close'});
+    const contextPromise=confirmDialog({title:item.title,message:`${item.kind}\n\n${item.text}`,confirmLabel:canReply?'Reply':'Done',cancelLabel:'Close'});
+    const related=reports.find(report=>report.id===item.relatedReportId);
+    if(related&&typeof focusQuestionReport==='function'){
+      const visualStatus=related.status==='open'||related.status==='reviewed'?'pending':related.status;
+      const message=document.querySelector('.confirm-bg .confirm-msg');
+      message?.insertAdjacentHTML('afterend',`<button type="button" class="inbox-related-report ${safe(visualStatus)}"><span class="inbox-related-report-head"><strong>Related report</strong><span>${safe(visualStatus)}</span></span><b>${safe(related.category||'Question report')}</b><small>${safe(related.details||'Open this report')}</small></button>`);
+      document.querySelector('.inbox-related-report')?.addEventListener('click',()=>{document.querySelector('.confirm-bg .confirm-cancel')?.click();focusQuestionReport(related.id);});
+    }
+    const wantsReply=await contextPromise;
     if(wantsReply&&canReply)await replyToInboxItem(item);
   }
 
