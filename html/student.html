@@ -891,6 +891,14 @@ function openStudentSubject(code) {
         return `<button type="button" class="subject-detail-exam" data-open-exam="${escapeQuestionMedia(exam.id)}" onclick="openExamDetails('${exam.id}')"><strong>${escapeQuestionMedia(exam.title || 'Examination')}</strong><span>${escapeQuestionMedia(schedule)}</span><span>${exam.questionIds?.length || questions.filter(question => question.examId === exam.id).length} items · ${exam.durationMinutes || 'No'} minute time limit</span></button>`;
       }).join('') : '<div class="subject-empty">No examinations are available for this subject.</div>'}</div></section>
     </div>`;
+  document.querySelectorAll('#studentSubjectDetail .learning-cell:not(.locked)').forEach((cell,index) => {
+    const item = learningContent.filter(entry => !learningCellState(entry,learningContent.indexOf(entry),learningContent).locked)[index];
+    if (item && !item.collapsible) {
+      cell.open = true;
+      cell.classList.add('always-open');
+      cell.addEventListener('toggle', () => { if (!cell.open) cell.open = true; });
+    }
+  });
   studentNav.show('subject-detail-panel');
 }
 

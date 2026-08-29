@@ -1223,3 +1223,8 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Faculty can attach an existing subject examination from a week’s three-dot menu.
 - The weekly reference opens the exam questions for faculty and the standard exam-details prompt for students.
 - The examination remains independently available in the course Examinations section.
+## 2026-08-29 — Weekly content readability and formatting
+
+- Weekly content now stays expanded inside its week by default, removing the unnecessary second collapse level.
+- Faculty can explicitly enable “Allow students to collapse this content” per content cell.
+- Replaced separate Markdown/heading text modes with one content mode and a compact formatting toolbar for bold, italic, headings, lists, and links.

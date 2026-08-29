@@ -31,6 +31,8 @@ r.d.querySelector('.section-preview-option').click();
 ok(r.d.getElementById('facultySubjectWorkspace').classList.contains('is-section-preview'),'section selection transforms the workspace into preview mode');
 ok(/Section preview/.test(r.d.querySelector('.preview-banner').textContent),'preview identifies the selected section');
 r.w.FacultySubjectWorkspace.showTab('main');
+ok(r.d.querySelectorAll('#workspaceBlockType option').length===3&&!/Markdown|Heading/.test(r.d.getElementById('workspaceBlockType').textContent),'weekly editor has one automatic text mode instead of separate Markdown and heading modes');
+ok(r.d.querySelectorAll('.rich-text-toolbar button').length>=6,'weekly editor provides direct formatting controls');
 
 r.d.getElementById('workspaceWeek').value='3';
 r.d.getElementById('workspaceBlockTitle').value='Interaction Design';
@@ -38,6 +40,7 @@ r.d.getElementById('workspaceBlockBody').value='## Goals\n- Learn usability prin
 r.w.FacultySubjectWorkspace.addBlock();
 const content=r.read('subjectWorkspaceContent');
 ok(content.some(item=>item.subjectCode==='SUB1'&&item.week===3&&item.title==='Interaction Design'),'weekly content cell autosaves');
+ok(content.find(item=>item.title==='Interaction Design').collapsible===false&&r.d.querySelector('.student-content-block.always-open')?.open,'content stays expanded unless faculty explicitly enables collapsing');
 ok(/Interaction Design/.test(r.d.querySelector('.week-stack').textContent),'saved cell appears in the selected week');
 ok(!!r.d.querySelector('.content-block h2')&&!!r.d.querySelector('.content-block strong'),'Markdown headings and emphasis render inside cells');
 ok(r.read('applicationAuditLog').some(item=>item.action==='add'&&item.entityType==='subject-content'),'content creation is audited');
@@ -73,6 +76,7 @@ let student=load('student.html',{...seed,currentUser:{username:'S1',role:'studen
 student.w.openStudentSubject('SUB1');
 ok(/Week 3/.test(student.d.getElementById('studentSubjectDetail').textContent),'Faculty weekly content appears on the real Student subject page');
 ok(/Interaction Design/.test(student.d.getElementById('studentSubjectDetail').textContent),'Student sees the published content cell');
+ok(student.d.querySelector('.learning-cell.always-open')?.open,'Student content is flat inside its week unless faculty enables collapsing');
 const attachedExam=student.d.querySelector('#studentSubjectDetail .attached-exam-link');
 ok(!!attachedExam,'Student sees the exam attached to the week');
 attachedExam?.click();
