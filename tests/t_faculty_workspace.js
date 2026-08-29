@@ -52,6 +52,16 @@ ok(!!r.d.querySelector('.workspace-grade-table table'),'Grades provides a sectio
 r.w.FacultySubjectWorkspace.showTab('logs');
 ok([...r.d.querySelectorAll('.workspace-subtabs button')].some(button=>button.textContent.includes('Faculty')),'Logs provides a Faculty subtab');
 ok([...r.d.querySelectorAll('.workspace-subtabs button')].some(button=>button.textContent.includes('Students')),'Logs provides a Students subtab');
+r.w.FacultySubjectWorkspace.showTab('main');
+const courseExamQuestionButton=r.d.querySelector('.faculty-exam-cell-actions button[aria-label="Open questions"]');
+ok(!!courseExamQuestionButton,'Faculty Course Page exam cells provide a direct Questions icon');
+courseExamQuestionButton.click();
+ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'Faculty Course Page Questions icon opens the selected exam question bank');
+r.w.displayAllFacultyExams();
+const listQuestionButton=r.d.querySelector('#examsView .exam-item-actions > .questions');
+ok(!!listQuestionButton,'Faculty exam lists expose Questions beside the settings menu');
+listQuestionButton.click();
+ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'Faculty exam-list Questions icon opens the selected exam question bank');
 r.w.close();
 
 seed.subjectWorkspaceContent=content;

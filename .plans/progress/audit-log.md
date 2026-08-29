@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Student exit confirmation and Faculty question access
+
+- **Student Subject page:** Added a direct click fallback to every subject-specific exam cell while retaining shared exam-cell navigation.
+- **Attempt actions:** Replaced the separate draft-exit footer action with `Save & Submit Exam`, which opens the answered/unanswered review before final submission.
+- **Leaving:** The exam header exit now opens the Save Draft and Exit confirmation whenever an attempt is active.
+- **Faculty Course Page:** Exam cells now open their question bank; separate Questions and Settings icons remain available per cell.
+- **Faculty exam lists:** Added a visible Questions icon beside the settings menu in both all-exam and subject-filtered views.
+
 ## 2026-08-29 — Last-question review and post-submit routing
 
 - **Last question:** Replaced the disabled Next control with an enabled `Review & Submit` action.

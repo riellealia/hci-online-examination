@@ -495,7 +495,7 @@
           <span class="timer-clock" id="timerClock">--:--</span>
           <span class="timer-label" id="timerLabel"></span>
         </div>
-        <button onclick="closeExamModal()" class="exam-close" aria-label="Exit examination" title="Exit examination">✕</button>
+        <button onclick="requestExamExit()" class="exam-close" aria-label="Exit examination" title="Save draft and exit">✕</button>
       </div>
     </header>
     <main class="exam-page-content">
@@ -529,8 +529,7 @@
     <div id="examResultSection" style="display:none;"></div>
 
     <div id="examModalActions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-      <button class="btn-take-exam" onclick="submitExamAnswers()"><span aria-hidden="true">&#10003;</span> Submit</button>
-      <button onclick="saveDraftAndExit()" class="btn-secondary"><span aria-hidden="true">&#8617;</span> Save Draft &amp; Exit</button>
+      <button class="btn-take-exam" onclick="reviewAnswers()"><span aria-hidden="true">&#10003;</span> Save &amp; Submit Exam</button>
     </div>
     </main>
   </div>
@@ -889,7 +888,7 @@ function openStudentSubject(code) {
       <section class="subject-info-cell subject-detail-exams"><h3>&#128218; Weekly learning content</h3><div class="learning-week-stack">${learningWeeks.length ? learningWeeks.map(week => {const weekRecord=learningContent.find(item=>item.week===week);return `<details class="learning-week"><summary><strong>Week ${week} · ${escapeQuestionMedia(weekRecord?.weekTitle || `Week ${week}`)}</strong></summary>${weekRecord?.weekDescription?`<p class="learning-week-description">${escapeQuestionMedia(weekRecord.weekDescription)}</p>`:''}${learningContent.filter(item=>item.week===week).map(item=>{const index=learningContent.indexOf(item),state=learningCellState(item,index,learningContent);return state.locked?`<div class="learning-cell locked"><strong>${escapeQuestionMedia(item.title||'Content')}</strong><span>&#128274; ${escapeQuestionMedia(state.label)}</span></div>`:`<details class="learning-cell" ontoggle="recordLearningCellView('${item.id}',this)"><summary><strong>${escapeQuestionMedia(item.title||'Content')}</strong></summary><div class="learning-cell-body">${item.type==='file'?`<a href="${item.dataUrl||'#'}" download="${escapeQuestionMedia(item.fileName||item.title)}">&#128206; ${escapeQuestionMedia(item.title||item.fileName)}</a>`:item.type==='link'?`<a href="${escapeQuestionMedia(item.url||'#')}" target="_blank" rel="noopener">&#128279; ${escapeQuestionMedia(item.title||item.url)}</a>${item.body?`<p>${escapeQuestionMedia(item.body)}</p>`:''}`:escapeQuestionMedia(item.body||'')}</div></details>`}).join('')}</details>`}).join('') : '<div class="subject-empty">Your professor has not published weekly content yet.</div>'}</div></section>
       <section class="subject-info-cell subject-detail-exams"><h3>&#9997; Examinations</h3><div class="subject-detail-exam-grid">${subjectExams.length ? subjectExams.map(exam => {
         const schedule = exam.date ? `${exam.date} · ${exam.start || '09:00'}–${exam.end || '23:59'}` : 'Always open';
-        return `<button type="button" class="subject-detail-exam" data-open-exam="${escapeQuestionMedia(exam.id)}"><strong>${escapeQuestionMedia(exam.title || 'Examination')}</strong><span>${escapeQuestionMedia(schedule)}</span><span>${exam.questionIds?.length || questions.filter(question => question.examId === exam.id).length} items · ${exam.durationMinutes || 'No'} minute time limit</span></button>`;
+        return `<button type="button" class="subject-detail-exam" data-open-exam="${escapeQuestionMedia(exam.id)}" onclick="openExamDetails('${exam.id}')"><strong>${escapeQuestionMedia(exam.title || 'Examination')}</strong><span>${escapeQuestionMedia(schedule)}</span><span>${exam.questionIds?.length || questions.filter(question => question.examId === exam.id).length} items · ${exam.durationMinutes || 'No'} minute time limit</span></button>`;
       }).join('') : '<div class="subject-empty">No examinations are available for this subject.</div>'}</div></section>
     </div>`;
   studentNav.show('subject-detail-panel');
@@ -1377,8 +1376,7 @@ function startExam(examId) {
   // Rebuild the action buttons: submitting an earlier exam replaces this markup,
   // so without restoring it the next exam would open with no Submit button.
   actionsSec.innerHTML = `
-    <button class="btn-take-exam" onclick="reviewAnswers()"><span aria-hidden="true">&#10003;</span> Review &amp; Submit</button>
-    <button class="btn-secondary" onclick="saveDraftAndExit()"><span aria-hidden="true">&#8617;</span> Save Draft &amp; Exit</button>
+    <button class="btn-take-exam" onclick="reviewAnswers()"><span aria-hidden="true">&#10003;</span> Save &amp; Submit Exam</button>
   `;
 
   // Answering view is visible; the review step starts hidden.
@@ -1784,8 +1782,7 @@ function backToQuestions() {
   document.getElementById('examReviewSection').style.display = 'none';
   document.getElementById('examQuestionsContainer').style.display = 'block';
   document.getElementById('examModalActions').innerHTML = `
-    <button class="btn-take-exam" onclick="reviewAnswers()">Review &amp; Submit</button>
-    <button class="btn-secondary" onclick="saveDraftAndExit()">Save Draft &amp; Exit</button>
+    <button class="btn-take-exam" onclick="reviewAnswers()">Save &amp; Submit Exam</button>
   `;
   renderCurrentQuestion();
 }
@@ -2108,6 +2105,12 @@ function closeExamModal() {
   document.getElementById('saveState').style.display = 'none';
   activeExamId = null;
   activeAttempt = null;
+}
+
+function requestExamExit() {
+  if (activeAttempt) return saveDraftAndExit();
+  closeExamModal();
+  return Promise.resolve(true);
 }
 
 async function saveDraftAndExit() {

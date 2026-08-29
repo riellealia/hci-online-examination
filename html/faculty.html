@@ -1879,7 +1879,7 @@ function displayAllFacultyExams() {
                                     <p><strong>Time:</strong> ${exam.start} - ${exam.end}</p>
                                     <p><strong>Description:</strong> ${exam.desc || 'N/A'}</p>
                                 </div>
-                                <div class="exam-item-actions">${examActionsMenu(exam.id)}</div>
+                                <div class="exam-item-actions"><button class="exam-icon-btn questions" onclick="manageQuestions('${exam.id}')" aria-label="Open questions" title="Open questions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 6h16v3H4v-3Zm0 6h10v3H4v-3Z"/></svg></button>${examActionsMenu(exam.id)}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -1928,7 +1928,7 @@ function displayExamsBySubject(subjectCode) {
                             <p><strong>Time:</strong> ${exam.start} - ${exam.end}</p>
                             <p><strong>Description:</strong> ${exam.desc || 'N/A'}</p>
                         </div>
-                        <div class="exam-item-actions">${examActionsMenu(exam.id)}</div>
+                        <div class="exam-item-actions"><button class="exam-icon-btn questions" onclick="manageQuestions('${exam.id}')" aria-label="Open questions" title="Open questions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 6h16v3H4v-3Zm0 6h10v3H4v-3Z"/></svg></button>${examActionsMenu(exam.id)}</div>
                     </div>
                 `).join('')}
             </div>

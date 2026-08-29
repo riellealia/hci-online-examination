@@ -29,7 +29,10 @@ ok(r.d.getElementById('flagQ').getAttribute('aria-pressed')==='true','flag butto
 ok(!/Flag for review|Flagged/.test(r.d.getElementById('flagQ').textContent),'flag control is icon-only');
 ok(r.d.getElementById('flagQ').nextElementSibling?.classList.contains('report-question-btn'),'flag icon sits beside the report icon');
 ok(r.d.querySelectorAll('.q-nav button').length===2,'question footer contains only uniform Previous and Next controls');
-ok(/Save Draft & Exit/.test(r.d.getElementById('examModalActions').textContent),'draft exit is clearly distinguished from final submission');
+ok(/Save & Submit Exam/.test(r.d.getElementById('examModalActions').textContent)&&!/Save Draft & Exit/.test(r.d.getElementById('examModalActions').textContent),'attempt footer uses one Save & Submit action instead of a competing draft-exit button');
+r.d.querySelector('#takeExamModal .exam-close').click();
+ok(/Save draft and leave/.test(r.d.querySelector('.confirm-box')?.textContent||''),'leaving an active attempt opens the Save Draft and Exit confirmation');
+r.d.querySelector('.confirm-box .confirm-cancel').click();
 r.w.placeNavigatorHandle(120,90,false);
 ok(r.d.getElementById('examNavigator').classList.contains('is-positioned')&&r.d.getElementById('examNavigator').style.left==='120px'&&r.d.getElementById('examNavigator').style.top==='90px','question navigator handle can be repositioned');
 ok(/flagged/i.test(r.d.querySelector('.nav-cell[data-index="0"]').getAttribute('aria-label')),'navigator announces flag');
