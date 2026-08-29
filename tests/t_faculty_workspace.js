@@ -41,6 +41,10 @@ ok(content.some(item=>item.subjectCode==='SUB1'&&item.week===3&&item.title==='In
 ok(/Interaction Design/.test(r.d.querySelector('.week-stack').textContent),'saved cell appears in the selected week');
 ok(!!r.d.querySelector('.content-block h2')&&!!r.d.querySelector('.content-block strong'),'Markdown headings and emphasis render inside cells');
 ok(r.read('applicationAuditLog').some(item=>item.action==='add'&&item.entityType==='subject-content'),'content creation is audited');
+ok(r.w.FacultySubjectWorkspace.attachExamToWeek(3,'e1'),'Faculty can attach an existing subject exam to a week');
+ok(r.read('subjectWorkspaceContent').some(item=>item.week===3&&item.type==='exam'&&item.examId==='e1'),'weekly content stores an exam reference without moving the exam');
+ok(!!r.d.querySelector('.week-stack .attached-exam-link'),'attached exam appears inside the selected week');
+ok(!!r.d.querySelector('.faculty-exam-cell'),'the original exam cell remains in the Examinations section');
 
 r.w.FacultySubjectWorkspace.showTab('members');
 ok(/Prof\.|F1/.test(r.d.querySelector('.workspace-main').textContent),'Members lists faculty across the subject');
@@ -62,12 +66,16 @@ const listQuestionButton=r.d.querySelector('#examsView .exam-item-actions > .que
 ok(!!listQuestionButton,'Faculty exam lists expose Questions beside the settings menu');
 listQuestionButton.click();
 ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'Faculty exam-list Questions icon opens the selected exam question bank');
+seed.subjectWorkspaceContent=r.read('subjectWorkspaceContent');
 r.w.close();
 
-seed.subjectWorkspaceContent=content;
 let student=load('student.html',{...seed,currentUser:{username:'S1',role:'student'}});
 student.w.openStudentSubject('SUB1');
 ok(/Week 3/.test(student.d.getElementById('studentSubjectDetail').textContent),'Faculty weekly content appears on the real Student subject page');
 ok(/Interaction Design/.test(student.d.getElementById('studentSubjectDetail').textContent),'Student sees the published content cell');
+const attachedExam=student.d.querySelector('#studentSubjectDetail .attached-exam-link');
+ok(!!attachedExam,'Student sees the exam attached to the week');
+attachedExam?.click();
+ok(student.d.getElementById('takeExamModal').classList.contains('active'),'attached weekly exam opens the normal examination details prompt');
 student.w.close();
 process.exit(0);

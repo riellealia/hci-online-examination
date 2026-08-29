@@ -1218,3 +1218,8 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - **Visibility:** System overview, application monitoring, site status, view controls, and management shortcut cards now render only while Dashboard is selected.
 - **Monitoring:** Live sampling pauses on every Admin management page and resumes when returning to Dashboard.
 - **Verification:** Added computed-visibility and monitoring-state regression checks across Dashboard and Student Management navigation.
+## 2026-08-29 — Exams attached to weekly content
+
+- Faculty can attach an existing subject examination from a week’s three-dot menu.
+- The weekly reference opens the exam questions for faculty and the standard exam-details prompt for students.
+- The examination remains independently available in the course Examinations section.
