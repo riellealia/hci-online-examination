@@ -1241,3 +1241,8 @@ This file records meaningful changes to the plan, implementation, testing, and d
 
 - Replaced the bright light-theme delete surface with a color-mixed danger surface derived from `--danger`, `--surface`, and `--line`.
 - Replaced the platform-colored trash emoji visually with a monochrome CSS mask so the icon follows the current theme.
+## 2026-08-29 — Theme-aware notification toasts
+
+- Removed fixed white, green, and red colors from shared toast presentation.
+- Added semantic toast surface, text, muted, success, and error tokens with dark-theme success contrast.
+- Success, error, and information notifications now follow light/dark account themes across Admin, Faculty, and Student pages.
