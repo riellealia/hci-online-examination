@@ -68,6 +68,14 @@
   --status-resolved-surface: #E5F4E9;
   --status-dismissed: #A23939;
   --status-dismissed-surface: #FDE8E7;
+
+  /* Compatibility aliases for older components; all resolve through the
+     current shared token system instead of depending on individual pages. */
+  --accent-strong: var(--accent-dark);
+  --border: var(--line);
+  --text-muted: var(--ink-soft);
+  --success: var(--status-resolved);
+  --ok-soft: var(--status-resolved-surface);
 }
 
 /* Muted role accents, per the project plan */
@@ -1763,30 +1771,22 @@ body.login-bg .login-container :is(input,textarea)::placeholder { color:#6b7280 
 .resolution-dialog{position:relative;padding-top:26px}.resolution-dialog .dialog-close-x{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:34px;min-width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent!important;color:var(--ink-soft)!important;font-size:25px;line-height:1}.resolution-dialog .dialog-close-x:hover{background:var(--surface-soft)!important;color:var(--ink)!important}.confirm-skip{background:transparent!important;color:var(--ink-soft)!important;border:1px solid var(--line)!important}.confirm-skip:hover{background:var(--surface-soft)!important;color:var(--ink)!important}
 
 /* The report shown in Edit Question mirrors the report card status treatment. */
-.reported-question-context{display:flex;align-items:center;justify-content:space-between;gap:16px;border-left-width:1px}.reported-question-context .report-main{flex:1}.reported-question-context .report-card-head{margin-bottom:12px}.reported-question-context .report-card-head>div{display:grid;gap:3px}.reported-question-context h4{margin:8px 0}@media(max-width:700px){.reported-question-context{align-items:stretch;flex-direction:column}.reported-question-context .report-actions{justify-content:flex-start}}
+.reported-question-context{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;border-left-width:1px}.reported-question-context .report-main{flex:1}.reported-question-context .report-card-head{margin-bottom:12px;padding-right:92px}.reported-question-context .report-card-head>div{display:grid;gap:3px}.reported-question-context .report-status{position:absolute;top:14px;right:14px;margin:0}.reported-question-context h4{margin:8px 0}@media(max-width:700px){.reported-question-context{align-items:stretch;flex-direction:column}.reported-question-context .report-actions{justify-content:flex-start}}
 
-/* Must follow the legacy Faculty dark-surface rule above, which sets a gray
-   border with !important. Keep the whole report outline identical to its pill. */
-
-/* Canonical report status system. The same variables drive the card outline,
-   pill, hover and focus in Reports, Edit Question, and Inbox. */
-:is(.question-report,.reported-question-context,.inbox-related-report).pending{--report-status-color:var(--status-pending);--report-status-surface:var(--status-pending-surface)}
-:is(.question-report,.reported-question-context,.inbox-related-report).resolved{--report-status-color:var(--status-resolved);--report-status-surface:var(--status-resolved-surface)}
-:is(.question-report,.reported-question-context,.inbox-related-report).dismissed{--report-status-color:var(--status-dismissed);--report-status-surface:var(--status-dismissed-surface)}
-:is(.question-report,.reported-question-context,.inbox-related-report).pending,
-:is(.question-report,.reported-question-context,.inbox-related-report).resolved,
-:is(.question-report,.reported-question-context,.inbox-related-report).dismissed{border:1px solid var(--report-status-color)!important}
-:root[data-theme="dark"] body[data-role] :is(.question-report,.reported-question-context,.inbox-related-report):is(.pending,.resolved,.dismissed){border:1px solid var(--report-status-color)!important}
-:is(.question-report,.reported-question-context,.inbox-related-report) :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--report-status-color)!important;background:var(--report-status-surface)!important;color:var(--report-status-color)!important}
-.question-report[role="button"]:is(:hover,:focus-visible),.inbox-related-report:is(:hover,:focus-visible){border-color:var(--report-status-color)!important;background:color-mix(in srgb,var(--report-status-color) 4%,var(--surface));outline:none;box-shadow:var(--sh-sm)}
-
-/* Page-scoped enforcement beats older role-theme rules without duplicating
-   literal colors. Hover and focus inherit the exact same status variable. */
-#reportsView .question-report:is(.pending,.resolved,.dismissed),
-#reportedQuestionContext:is(.pending,.resolved,.dismissed),
-.header-inbox-panel .inbox-related-report:is(.pending,.resolved,.dismissed){border-color:var(--report-status-color)!important}
-#reportsView .question-report:is(.pending,.resolved,.dismissed):is(:hover,:focus-visible),
-.header-inbox-panel .inbox-related-report:is(.pending,.resolved,.dismissed):is(:hover,:focus-visible){border-color:var(--report-status-color)!important}
+/* Canonical report states. Bind components directly to theme tokens so older
+   Faculty surface rules cannot replace semantic borders with neutral gray. */
+:is(.question-report,.reported-question-context,.inbox-related-report).pending{border-color:var(--status-pending)!important}
+:is(.question-report,.reported-question-context,.inbox-related-report).resolved{border-color:var(--status-resolved)!important}
+:is(.question-report,.reported-question-context,.inbox-related-report).dismissed{border-color:var(--status-dismissed)!important}
+body[data-role] #reportsView .question-report.pending{border-color:var(--status-pending)!important}
+body[data-role] #reportsView .question-report.resolved{border-color:var(--status-resolved)!important}
+body[data-role] #reportsView .question-report.dismissed{border-color:var(--status-dismissed)!important}
+:is(.question-report,.reported-question-context,.inbox-related-report).pending :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--status-pending)!important;background:var(--status-pending-surface)!important;color:var(--status-pending)!important}
+:is(.question-report,.reported-question-context,.inbox-related-report).resolved :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--status-resolved)!important;background:var(--status-resolved-surface)!important;color:var(--status-resolved)!important}
+:is(.question-report,.reported-question-context,.inbox-related-report).dismissed :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--status-dismissed)!important;background:var(--status-dismissed-surface)!important;color:var(--status-dismissed)!important}
+.question-report.pending:is(:hover,:focus-visible),.inbox-related-report.pending:is(:hover,:focus-visible){border-color:var(--status-pending)!important;background:color-mix(in srgb,var(--status-pending) 4%,var(--surface))}
+.question-report.resolved:is(:hover,:focus-visible),.inbox-related-report.resolved:is(:hover,:focus-visible){border-color:var(--status-resolved)!important;background:color-mix(in srgb,var(--status-resolved) 4%,var(--surface))}
+.question-report.dismissed:is(:hover,:focus-visible),.inbox-related-report.dismissed:is(:hover,:focus-visible){border-color:var(--status-dismissed)!important;background:color-mix(in srgb,var(--status-dismissed) 4%,var(--surface))}
 
 /* Choice rows: selecting the radio sets the answer key; deletion is icon-only. */
 .option-input-group>label{display:none}.option-input-group .remove-option-btn{display:grid;place-items:center;width:36px;min-width:36px;height:36px;min-height:36px;padding:0;border:1px solid color-mix(in srgb,var(--danger) 38%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--danger) 9%,var(--surface));color:var(--danger);font-size:0}.option-input-group .remove-option-btn::before{content:none}.option-input-group .remove-option-btn svg{width:18px;height:18px;fill:currentColor}.option-input-group .remove-option-btn:hover{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 16%,var(--surface));color:var(--danger)}

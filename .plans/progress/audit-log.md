@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Report cascade, variable, and encoding audit
+
+- **Area:** Reports page, Edit Question report context, Inbox report cells, and shared UI tokens
+- **Borders:** Removed the intermediate report-color variable and bound Pending, Resolved, and Dismissed components directly to their shared semantic tokens, including hover/focus.
+- **Layout:** Anchored the embedded Pending/Resolved/Dismissed pill to the report card's top-right corner.
+- **Variables:** Defined five legacy compatibility aliases through current shared tokens; no unresolved shared-style variables remain.
+- **Encoding:** Checked every live file under `html/`, `js/`, and `css/`; no mojibake sequences were found.
+- **Verification:** Report, Inbox, and question-type suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Minimal answer-choice controls
 
 - **Area:** Faculty multiple-choice question editor
