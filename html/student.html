@@ -765,10 +765,21 @@ function openResultReviewPage(submissionId) {
   const exam = submission && exams.find(item => item.id === submission.examId);
   const source = document.getElementById(`resultReview_${submissionId}`);
   if (!submission || !exam || !source) return;
+  const visibility = resultVisibility(exam, submission);
+  const pending = (submission.answers || []).filter(answer => answer.needsManualGrading && answer.awarded === null);
+  const awarded = (submission.answers || []).reduce((total, answer) => total + (answer.awarded || 0), 0);
+  const grade = pending.length === 0 && visibility.showScore ? gradeFor(awarded, submission.total) : null;
   markFeedbackViewed(exam.id);
   document.getElementById('studentReviewTitle').textContent = exam.title || 'Exam review';
   document.getElementById('studentReviewMeta').textContent = `${exam.subjectCode} · Submitted ${new Date(submission.submittedAt).toLocaleString()}`;
-  document.getElementById('studentReviewFeedback').innerHTML = submission.remarks ? `<div class="remark-box"><strong>Professor feedback</strong><p>${escapeQuestionMedia(submission.remarks)}</p></div>` : '';
+  document.getElementById('studentReviewFeedback').innerHTML = `
+    <div class="score-box result-page-score">
+      <strong>Submission recorded</strong>
+      <span>${visibility.showScore ? `${awarded} / ${submission.total}${pending.length ? ' so far' : ''}` : 'Score hidden by your professor'}</span>
+      ${grade ? `<span class="grade-chip ${grade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${grade.rating}</span><span class="grade-sub">${grade.percentText}% · ${grade.remark}</span></span>` : ''}
+      ${pending.length ? `<small>${pending.length} answer${pending.length === 1 ? '' : 's'} awaiting marking</small>` : ''}
+    </div>
+    ${submission.remarks ? `<div class="remark-box"><strong>Professor feedback</strong><p>${escapeQuestionMedia(submission.remarks)}</p></div>` : ''}`;
   document.getElementById('studentReviewContent').innerHTML = source.innerHTML;
   studentNav.show('review-detail-panel');
   window.scrollTo?.(0,0);
@@ -1366,7 +1377,7 @@ function startExam(examId) {
   // Rebuild the action buttons: submitting an earlier exam replaces this markup,
   // so without restoring it the next exam would open with no Submit button.
   actionsSec.innerHTML = `
-    <button class="btn-take-exam" onclick="reviewAnswers()"><span aria-hidden="true">&#10003;</span> Review</button>
+    <button class="btn-take-exam" onclick="reviewAnswers()"><span aria-hidden="true">&#10003;</span> Review &amp; Submit</button>
     <button class="btn-secondary" onclick="saveDraftAndExit()"><span aria-hidden="true">&#8617;</span> Save Draft &amp; Exit</button>
   `;
 
@@ -1472,17 +1483,18 @@ function renderCurrentQuestion() {
   const q = currentExamQuestions[idx];
   const flagged = isFlagged(activeAttempt, q.id);
   const previousLocked = idx === 0 || navigationMode === 'forward';
+  const isLastQuestion = idx === currentExamQuestions.length - 1;
 
   container.innerHTML = questionMarkup(q, idx) + `
     <div class="q-nav">
       <button type="button" class="btn-secondary" id="prevQ" ${previousLocked ? 'disabled' : ''}
               title="${navigationMode === 'forward' && idx > 0 ? 'Previous questions are disabled by your instructor.' : ''}">&larr; Previous</button>
       <button type="button" class="btn-take-exam" id="nextQ"
-              ${idx === currentExamQuestions.length - 1 ? 'disabled' : ''}>Next &rarr;</button>
+              aria-label="${isLastQuestion ? 'Review answers and submit examination' : 'Next question'}">${isLastQuestion ? 'Review &amp; Submit' : 'Next &rarr;'}</button>
     </div>`;
 
   document.getElementById('prevQ').addEventListener('click', () => goToQuestion(idx - 1));
-  document.getElementById('nextQ').addEventListener('click', () => goToQuestion(idx + 1));
+  document.getElementById('nextQ').addEventListener('click', () => isLastQuestion ? reviewAnswers() : goToQuestion(idx + 1));
   document.getElementById('flagQ').addEventListener('click', toggleCurrentFlag);
   wireAnswerInputs();
   bindQuestionMediaFallbacks(container);
@@ -1772,7 +1784,7 @@ function backToQuestions() {
   document.getElementById('examReviewSection').style.display = 'none';
   document.getElementById('examQuestionsContainer').style.display = 'block';
   document.getElementById('examModalActions').innerHTML = `
-    <button class="btn-take-exam" onclick="reviewAnswers()">Review Answers</button>
+    <button class="btn-take-exam" onclick="reviewAnswers()">Review &amp; Submit</button>
     <button class="btn-secondary" onclick="saveDraftAndExit()">Save Draft &amp; Exit</button>
   `;
   renderCurrentQuestion();
@@ -1969,6 +1981,9 @@ async function submitExamAnswers(opts = {}) {
   actionsSec.innerHTML = `<button onclick="closeExamModal()" class="btn-take-exam" style="background:var(--accent);">Close & Return to Dashboard</button>`;
   loadExams();
   loadResults();
+  const submittedId = savedSubmission.id;
+  closeExamModal();
+  openResultReviewPage(submittedId);
 }
 
 function bindImageDragDrop(scope) {

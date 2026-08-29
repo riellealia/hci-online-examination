@@ -37,9 +37,14 @@ ok(/flagged/i.test(r.d.querySelector('.nav-cell[data-index="0"]').getAttribute('
 r.w.goToQuestion(1);
 ok(/Question 2 of 2/.test(r.d.getElementById('examProgress').textContent),'Next moves to question 2');
 ok(r.d.querySelector('.q-title').textContent==='Essay Q','second question content shown');
+ok(!r.d.getElementById('nextQ').disabled&&/Review.*Submit/.test(r.d.getElementById('nextQ').textContent),'last-question Next becomes an enabled Review & Submit action');
 const essay=r.d.querySelector('.short-ans-input[data-qid="q2"]');
 essay.value='Recovered essay';
 essay.dispatchEvent(new r.w.Event('input',{bubbles:true}));
+r.d.getElementById('nextQ').click();
+ok(r.d.getElementById('examReviewSection').style.display==='block'&&/2 of 2/.test(r.d.getElementById('examReviewSection').textContent),'last-question action opens the completeness review instead of exiting');
+ok((r.read('studentSubmissions')||[]).length===0,'opening the completeness review does not submit immediately');
+r.w.backToQuestions();
 r.w.closeExamModal();
 
 const attempts=r.read('examAttempts');
@@ -66,6 +71,8 @@ ok(/Flagged/.test(r.d.getElementById('examReviewSection').textContent),'review i
 r.w.submitExamAnswers();
 ok((r.read('studentSubmissions')||[]).length===1,'final submission recorded once');
 ok(!r.read('examAttempts')?.['S1::e1'],'draft attempt cleared only after successful submission');
+ok(r.d.getElementById('review-detail-panel').style.display==='block'&&!r.d.getElementById('takeExamModal').classList.contains('active'),'successful submission automatically opens the score and review page');
+ok(/Submission recorded/.test(r.d.getElementById('studentReviewFeedback').textContent),'result page confirms the recorded submission and score state');
 r.w.close();
 
 console.log('\n=== FACULTY SETTINGS. Presentation and navigation are persisted ===');

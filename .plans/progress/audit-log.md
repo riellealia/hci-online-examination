@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Last-question review and post-submit routing
+
+- **Last question:** Replaced the disabled Next control with an enabled `Review & Submit` action.
+- **Confirmation:** The action captures the current answer and opens the full answered/unanswered review; it does not submit or exit immediately.
+- **Final submission:** Only `Confirm & Submit Final` records the attempt.
+- **After submission:** The exam workspace closes and the dedicated score/review page opens automatically, respecting Faculty score and answer-release settings.
+- **Coverage:** Added checks for button state, completeness review, non-submission before confirmation, saved submission, and automatic result routing.
+
 ## 2026-08-29 — Unified Student exam-cell navigation
 
 - **Area:** Subject pages, My Examinations, overview schedule, monthly calendar, always-open examinations, and the compatibility exam table.
