@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Linked report identities and subjects
+
+- **Area:** Faculty question reports
+- **Changed:** Made each reporter name a student-profile link and made both the subject code and subject name links to the corresponding Faculty Course Page.
+- **Interaction:** Link clicks no longer trigger the report card's question-editor action.
+- **Files:** `html/faculty.html`, `css/shared-ui.css`, `tests/t_reports.js`
+- **Verification:** Question-report, Faculty Course Page, and responsive suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Return from reported-question editing
 
 - **Area:** Faculty question reports and question editor

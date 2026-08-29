@@ -41,6 +41,11 @@ ok(r.d.querySelector('.report-sort-direction').className!==directionBefore,'asce
 const reportActions=[...view.querySelectorAll('.question-report .report-action-icon')];
 ok(reportActions.length===4&&!/Notify student|Reopen/.test(view.textContent),'report row keeps only review, resolve, dismiss, and settings icons');
 ok(/S1/.test(view.querySelector('.report-card-head')?.textContent||'')&&!!view.querySelector('.report-problem-pill'),'report header identifies the reporter and the problem is a pill');
+ok(!!view.querySelector('.report-profile-link')&&view.querySelectorAll('.report-subject-link').length===2,'reporter name and subject code/name are links');
+view.querySelector('.report-profile-link').click();
+ok(r.d.getElementById('roleProfileOverlay')?.classList.contains('open'),'reporter name opens the student profile');r.w.RoleProfileViewer.close();
+view.querySelector('.report-subject-link').click();
+ok(r.d.getElementById('subject-workspace-tab').style.display!=='none','subject link opens the subject Course Page');r.w.switchTab('reports-tab');
 view.querySelector('.report-action-icon.settings').click();
 ok(/View student profile/.test(view.querySelector('.report-settings-menu.open')?.textContent||'')&&/Mail student/.test(view.querySelector('.report-settings-menu.open')?.textContent||'')&&/View question/.test(view.querySelector('.report-settings-menu.open')?.textContent||'')&&/Block from reporting/.test(view.querySelector('.report-settings-menu.open')?.textContent||'')&&/Copy ID/.test(view.querySelector('.report-settings-menu.open')?.textContent||''),'settings menu contains the five reporter actions');
 ok(r.w.viewReportStudent(report.id)===true&&r.d.getElementById('roleProfileOverlay')?.classList.contains('open'),'settings opens the reporter profile');r.w.RoleProfileViewer.close();
