@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Visible report status borders
+
+- **Area:** Faculty question reports and Inbox report links
+- **Changed:** Increased the full-border contrast and made the left status edge thicker for Pending (orange), Resolved (green), and Dismissed (red), including dedicated dark-theme colors.
+- **Loading:** Added a stylesheet cache version to the Faculty page so browsers fetch the updated rules.
+- **Files:** `css/shared-ui.css`, `html/faculty.html`
+- **Verification:** Question-report and shared Inbox suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Higher-contrast Inbox count
 
 - **Area:** Shared Inbox panel
