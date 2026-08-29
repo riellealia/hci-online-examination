@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Shared inbox read state and replies
+
+- **Area:** Shared Admin, Faculty, and Student header inbox
+- **Changed:** Made the mail icon borderless and placed its pending-count pill beside the icon. Added a clickable Read all control that clears unread highlights and the header ping.
+- **Persistence:** Read receipts are stored per signed-in account, so reading another user's inbox does not affect the current account.
+- **Message workflow:** Clicking mail opens its full context in a prompt. Faculty can reply to Students, and Students can reply to Faculty; report notifications retain their Faculty sender.
+- **Files:** `js/ui.js`, `html/faculty.html`, `css/shared-ui.css`, `tests/t_inbox.js`
+- **Verification:** Dedicated inbox tests and navigation, reporting, Student workflow, and rich demo-data suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Linked report identities and subjects
 
 - **Area:** Faculty question reports

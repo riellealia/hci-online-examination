@@ -440,12 +440,24 @@ function mountProfileMenu({ name, role, id, container }) {
     inboxItems.push(...reports.filter(report => owned.has(report.examId)).map(report => ({kind:`Report · ${report.status}`,title:report.category||'Question report',text:report.details||'',at:report.createdAt,pending:report.status==='open'})));
     inboxItems.push(...emails.filter(email => email.facultyId === id).map(email => ({kind:'Student mail',title:email.subject||'Message from student',text:email.message||'',at:email.sentAt,pending:email.read!==true})));
   } else if (role === 'student') {
-    inboxItems.push(...reportNotices.filter(item => item.studentId === id).map(item => ({kind:'Report update',title:'Question report status',text:item.message||'',at:item.createdAt,pending:item.read!==true})));
+    inboxItems.push(...reportNotices.filter(item => item.studentId === id).map(item => ({kind:item.type==='faculty-mail'?'Faculty mail':'Report update',title:item.subject||'Question report status',text:item.message||'',at:item.createdAt,pending:item.read!==true})));
   } else if (role === 'admin') {
     const openCount = reports.filter(report => report.status === 'open').length;
     if (reports.length) inboxItems.push({kind:'System status',title:'Question reports',text:`${openCount} pending · ${reports.length} total`,at:new Date().toISOString(),pending:openCount>0});
   }
   inboxItems.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
+  const inboxOwner=`${role}:${id||'anonymous'}`;
+  const inboxReceipts=typeof DB!=='undefined'?DB.read('inboxReadReceipts',[]):[];
+  inboxItems.forEach((item,index)=>{
+    let source='announcement',sourceId=null,senderId=null;
+    if(item.kind.startsWith('Report ·')){const record=reports.find(report=>report.details===item.text&&report.category===item.title);source='report';sourceId=record?.id||index;}
+    else if(item.kind==='Student mail'){const record=emails.find(email=>email.message===item.text&&email.subject===item.title);source='student-mail';sourceId=record?.id||index;senderId=record?.studentId||null;}
+    else if(item.kind==='Report update'||item.kind==='Faculty mail'){const record=reportNotices.find(notice=>notice.message===item.text);const report=reports.find(report=>report.id===record?.reportId),exam=exams.find(exam=>exam.id===report?.examId);source='student-notice';sourceId=record?.id||index;senderId=record?.facultyId||exam?.facultyId||null;}
+    else if(item.kind==='System status'){source='system';sourceId='question-reports';}
+    else {const record=announcements.find(announcement=>announcement.message===item.text&&announcement.title===item.title);sourceId=record?.id||index;}
+    item.key=`${source}:${sourceId}`;item.source=source;item.sourceId=sourceId;item.senderId=senderId;
+    if(inboxReceipts.includes(`${inboxOwner}:${item.key}`))item.pending=false;
+  });
   const pendingInboxCount=inboxItems.filter(item=>item.pending).length;
 
   const wrap = document.createElement('div');
@@ -457,8 +469,8 @@ function mountProfileMenu({ name, role, id, container }) {
         ${pendingInboxCount?`<span class="header-inbox-count">${pendingInboxCount}</span>`:''}
       </button>
       <section class="header-inbox-panel" aria-hidden="true">
-        <header><strong>Inbox</strong><span>${pendingInboxCount} pending</span></header>
-        <div class="header-inbox-list">${inboxItems.length?inboxItems.slice(0,12).map(item=>`<article class="header-inbox-item${item.pending?' pending':''}"><span>${safe(item.kind)}</span><strong>${safe(item.title)}</strong><p>${safe(item.text)}</p></article>`).join(''):'<p class="header-inbox-empty">No messages or updates.</p>'}</div>
+        <header><strong>Inbox</strong><div class="header-inbox-head-actions"><button type="button" class="header-inbox-read-all">Read all</button><span class="header-inbox-pending">${pendingInboxCount} pending</span></div></header>
+        <div class="header-inbox-list">${inboxItems.length?inboxItems.slice(0,12).map((item,index)=>`<button type="button" class="header-inbox-item${item.pending?' pending':''}" data-inbox-index="${index}"><span>${safe(item.kind)}</span><strong>${safe(item.title)}</strong><p>${safe(item.text)}</p></button>`).join(''):'<p class="header-inbox-empty">No messages or updates.</p>'}</div>
       </section>
     </div>
     <button type="button" class="avatar avatar-sm" id="avatarBtn"
@@ -489,6 +501,43 @@ function mountProfileMenu({ name, role, id, container }) {
   const panel = wrap.querySelector('#profilePanel');
   const inboxBtn=wrap.querySelector('.header-inbox-btn');
   const inboxPanel=wrap.querySelector('.header-inbox-panel');
+  const visibleInboxItems=inboxItems.slice(0,12);
+
+  function markInboxRead(items){
+    if(typeof DB==='undefined')return;
+    const next=new Set(DB.read('inboxReadReceipts',[]));
+    items.forEach(item=>{next.add(`${inboxOwner}:${item.key}`);item.pending=false;});
+    DB.write('inboxReadReceipts',[...next]);
+  }
+  function refreshInboxPending(){
+    const count=inboxItems.filter(item=>item.pending).length,badge=wrap.querySelector('.header-inbox-count');
+    if(count){if(badge)badge.textContent=count;else inboxBtn.insertAdjacentHTML('beforeend',`<span class="header-inbox-count">${count}</span>`);}else badge?.remove();
+    wrap.querySelector('.header-inbox-pending').textContent=`${count} pending`;
+    inboxBtn.setAttribute('aria-label',`Open inbox${count?` — ${count} pending`:''}`);
+  }
+  async function replyToInboxItem(item){
+    const reply=await textareaInputDialog({title:`Reply: ${item.title}`,label:'Message',confirmLabel:'Send reply'});
+    if(!reply)return false;
+    if(role==='faculty'&&item.senderId){
+      const notices=DB.read('studentNotifications',[]);
+      notices.push({id:`faculty-mail-${Date.now()}`,studentId:item.senderId,facultyId:id,message:reply,subject:`Re: ${item.title}`,createdAt:new Date().toISOString(),read:false,type:'faculty-mail'});
+      DB.write('studentNotifications',notices);
+    }else if(role==='student'&&item.senderId){
+      const outgoing=DB.read('studentEmails',[]);
+      outgoing.push({id:`student-mail-${Date.now()}`,studentId:id,facultyId:item.senderId,subject:`Re: ${item.title}`,message:reply,sentAt:new Date().toISOString(),read:false});
+      DB.write('studentEmails',outgoing);
+    }else return false;
+    notify('Reply sent.','success');return true;
+  }
+  async function openInboxItem(item,index){
+    markInboxRead([item]);
+    wrap.querySelector(`[data-inbox-index="${index}"]`)?.classList.remove('pending');
+    refreshInboxPending();
+    if(item.source==='report'&&typeof openReportedQuestion==='function'){inboxPanel.classList.remove('open');openReportedQuestion(item.sourceId);return;}
+    const canReply=(role==='faculty'&&item.source==='student-mail'&&item.senderId)||(role==='student'&&item.source==='student-notice'&&item.senderId);
+    const wantsReply=await confirmDialog({title:item.title,message:`${item.kind}\n\n${item.text}`,confirmLabel:canReply?'Reply':'Done',cancelLabel:'Close'});
+    if(wantsReply&&canReply)await replyToInboxItem(item);
+  }
 
   function setOpen(open) {
     panel.classList.toggle('open', open);
@@ -502,6 +551,14 @@ function mountProfileMenu({ name, role, id, container }) {
     setOpen(!panel.classList.contains('open'));
   });
   inboxBtn.addEventListener('click',e=>{e.stopPropagation();setOpen(false);const open=!inboxPanel.classList.contains('open');inboxPanel.classList.toggle('open',open);inboxPanel.setAttribute('aria-hidden',String(!open));inboxBtn.setAttribute('aria-expanded',String(open));});
+  wrap.querySelector('.header-inbox-read-all').addEventListener('click',event=>{
+    event.stopPropagation();markInboxRead(inboxItems);
+    wrap.querySelectorAll('.header-inbox-item.pending').forEach(item=>item.classList.remove('pending'));
+    refreshInboxPending();
+  });
+  wrap.querySelectorAll('.header-inbox-item').forEach(button=>button.addEventListener('click',event=>{
+    event.stopPropagation();openInboxItem(visibleInboxItems[Number(button.dataset.inboxIndex)],Number(button.dataset.inboxIndex));
+  }));
 
   // Click-away and Escape both dismiss the panel.
   document.addEventListener('click', e => {
