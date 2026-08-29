@@ -1787,3 +1787,6 @@ body.login-bg .login-container :is(input,textarea)::placeholder { color:#6b7280 
 .header-inbox-panel .inbox-related-report:is(.pending,.resolved,.dismissed){border-color:var(--report-status-color)!important}
 #reportsView .question-report:is(.pending,.resolved,.dismissed):is(:hover,:focus-visible),
 .header-inbox-panel .inbox-related-report:is(.pending,.resolved,.dismissed):is(:hover,:focus-visible){border-color:var(--report-status-color)!important}
+
+/* Choice rows: selecting the radio sets the answer key; deletion is icon-only. */
+.option-input-group>label{display:none}.option-input-group .remove-option-btn{display:grid;place-items:center;width:36px;min-width:36px;height:36px;min-height:36px;padding:0;border:1px solid color-mix(in srgb,var(--danger) 38%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--danger) 9%,var(--surface));color:var(--danger);font-size:0}.option-input-group .remove-option-btn::before{content:none}.option-input-group .remove-option-btn svg{width:18px;height:18px;fill:currentColor}.option-input-group .remove-option-btn:hover{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 16%,var(--surface));color:var(--danger)}

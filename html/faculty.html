@@ -908,7 +908,7 @@
     .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-status-scope">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-choice-controls">
 <link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20260827-9">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
@@ -1080,7 +1080,7 @@
                 </div>
 
                 <div id="mcqOptions" class="options-list">
-                    <label>Answer choices (select the correct answer):</label>
+                    <label>Answer choices:</label>
                     <div id="optionsContainer"></div>
                     <button class="icon-action" onclick="addOption()" aria-label="Add answer choice" title="Add answer choice">&#43;</button>
                 </div>
@@ -2097,6 +2097,7 @@ function openQuestionModal() {
         </div>
     `;
     currentOptionIndex = 2;
+    renumberOptions();
     questionCommitted = false;
     restoreQuestionDraft();
     lastQuestionType = document.getElementById('questionType').value;
@@ -2470,14 +2471,26 @@ function removeOption(btnEl) {
 }
 
 // Keep placeholders and radio values aligned with actual DOM order, so the
-// option a user marks "Correct" is the option that gets saved as correct.
+// The selected radio is the answer key; no repeated text label is needed.
 function renumberOptions() {
     const groups = document.querySelectorAll('#optionsContainer .option-input-group');
     groups.forEach((group, idx) => {
         const text = group.querySelector('input[type="text"]');
         const radio = group.querySelector('input[type="radio"]');
         if (text) text.placeholder = `Option ${String.fromCharCode(65 + idx)}`;
-        if (radio) radio.value = idx;
+        if (radio) {
+            radio.value = idx;
+            radio.setAttribute('aria-label', `Set option ${String.fromCharCode(65 + idx)} as the right answer`);
+            radio.title = 'Set as right answer';
+        }
+        group.querySelectorAll('label').forEach(label => label.remove());
+        const remove = group.querySelector('button[onclick*="removeOption"]');
+        if (remove) {
+            remove.classList.add('remove-option-btn');
+            remove.setAttribute('aria-label', `Delete option ${String.fromCharCode(65 + idx)}`);
+            remove.title = 'Delete choice';
+            remove.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg>';
+        }
     });
     currentOptionIndex = groups.length;
 }

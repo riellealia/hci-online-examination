@@ -8,6 +8,7 @@ let s=SEED();
 let r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
 r.w.manageQuestions('e1');
 r.w.openQuestionModal();
+ok(!r.d.querySelector('#optionsContainer label')&&r.d.querySelectorAll('#optionsContainer .remove-option-btn svg').length===2,'MCQ choices use radios without repeated Correct labels and red trash-icon delete actions');
 r.d.getElementById('questionText').value='The Earth orbits the Sun.';
 const type=r.d.getElementById('questionType');
 type.value='truefalse';

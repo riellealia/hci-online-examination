@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Minimal answer-choice controls
+
+- **Area:** Faculty multiple-choice question editor
+- **Changed:** Removed repeated Correct labels and the instructional wording from the choices heading; selecting a radio now serves as the sole answer-key control.
+- **Delete:** Replaced text/× removal controls with accessible red trash-can icons using the shared danger variable.
+- **Files:** `html/faculty.html`, `css/shared-ui.css`
+- **Verification:** Question editing and type suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Scoped semantic border enforcement
 
 - **Area:** Reports page, Edit Question report card, and Inbox report cell
