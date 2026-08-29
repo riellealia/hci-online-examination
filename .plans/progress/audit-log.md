@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Full report status borders
+
+- **Area:** Faculty reports and related-report mail cells
+- **Changed:** Extended each semantic status accent around the complete card border while retaining a stronger left edge: orange Pending, green Resolved, and red Dismissed.
+- **Themes:** Used softened border shades separately for light and dark modes.
+- **Files:** `css/shared-ui.css`
+- **Verification:** Question-report and shared inbox suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Related report in mail context
 
 - **Area:** Shared inbox message prompt and Faculty reports
