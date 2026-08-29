@@ -73,6 +73,7 @@ const courseExamQuestionButton=r.d.querySelector('.faculty-exam-cell-actions but
 ok(!!courseExamQuestionButton,'Faculty Course Page exam cells provide a direct Questions icon');
 courseExamQuestionButton.click();
 ok(/Question bank/.test(r.d.getElementById('examsView').textContent),'Faculty Course Page Questions icon opens the selected exam question bank');
+ok(r.d.getElementById('exams-tab').style.display==='block','Questions action navigates from the Course Page to the visible question bank page');
 r.w.displayAllFacultyExams();
 const listQuestionButton=r.d.querySelector('#examsView .exam-item-actions > .questions');
 ok(!!listQuestionButton,'Faculty exam lists expose Questions beside the settings menu');

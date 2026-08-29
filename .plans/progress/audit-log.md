@@ -1233,3 +1233,7 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Edit Week now uses the same content kind, formatting toolbar, availability, prerequisite, and collapsible settings as Add Content.
 - Added an icon-only Add cell action and a red trash action on every editable cell.
 - Saving synchronizes added, edited, and explicitly deleted cells while preserving attached exam and file records.
+## 2026-08-29 — Faculty Questions navigation repair
+
+- Fixed Questions actions that rendered the question bank while leaving a different Faculty page visible.
+- The shared question-management route now selects My Exams before rendering, including access from exam settings, Course Pages, and exam lists.
