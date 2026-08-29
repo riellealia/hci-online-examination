@@ -1246,3 +1246,7 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Removed fixed white, green, and red colors from shared toast presentation.
 - Added semantic toast surface, text, muted, success, and error tokens with dark-theme success contrast.
 - Success, error, and information notifications now follow light/dark account themes across Admin, Faculty, and Student pages.
+## 2026-08-29 — Course Page exam-cell interaction
+
+- Removed the redundant Questions icon from Faculty Course Page exam cells.
+- Clicking anywhere on an exam cell now remains the single action for opening that exam’s question bank; the settings icon remains separate.
