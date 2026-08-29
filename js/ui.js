@@ -129,6 +129,9 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   const known = panels || items.map(i => i.id);
   const routePanels = new Set(items.map(item => item.id));
   const routeKey = `neu:last-panel:${location.pathname}`;
+  const historyKey = `neu-panel:${location.pathname}`;
+  let activePanel = null;
+  let historyIndex = 0;
 
   function savedPanel() {
     const hashPanel = decodeURIComponent(location.hash.replace(/^#/, '').split('/')[0] || '');
@@ -146,6 +149,8 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   }
 
   function show(id, options = {}) {
+    if (!known.includes(id)) return false;
+    const changed = activePanel !== id;
     known.forEach(p => {
       const el = document.getElementById(p);
       if (el) el.style.display = (p === id) ? 'block' : 'none';
@@ -161,9 +166,30 @@ function mountSidebar({ items, panels, container = '.topbar-left',
     setOpen(false);
     if (routePanels.has(id)) {
       try { sessionStorage.setItem(routeKey, id); } catch (_) {}
-      if (options.syncUrl !== false) history.replaceState(null, '', `#${encodeURIComponent(id)}`);
+      if (options.syncUrl !== false) {
+        const state = { neuPanelKey: historyKey, panel: id, index: historyIndex };
+        if (options.fromHistory) {
+          history.replaceState(state, '', `#${encodeURIComponent(id)}`);
+        } else if (changed && activePanel !== null) {
+          historyIndex += 1;
+          state.index = historyIndex;
+          history.pushState(state, '', `#${encodeURIComponent(id)}`);
+        } else {
+          history.replaceState(state, '', `#${encodeURIComponent(id)}`);
+        }
+      }
     }
+    activePanel = id;
     if (onSelect) onSelect(id);
+    return true;
+  }
+
+  function back(fallback = items[0].id) {
+    if (historyIndex > 0) {
+      history.back();
+      return true;
+    }
+    return show(fallback);
   }
 
   menuBtn.addEventListener('click', e => {
@@ -182,8 +208,21 @@ function mountSidebar({ items, panels, container = '.topbar-left',
     if (bar.style.width === '260px' && !bar.contains(e.target) && e.target !== menuBtn) setOpen(false);
   });
 
-  show(startAt || savedPanel() || items[0].id, { syncUrl: false });
-  return { show, open: () => setOpen(true), close: () => setOpen(false) };
+  window.addEventListener('popstate', event => {
+    const state = event.state;
+    if (!state || state.neuPanelKey !== historyKey || !routePanels.has(state.panel)) return;
+    historyIndex = Number.isFinite(state.index) ? state.index : 0;
+    show(state.panel, { fromHistory: true });
+  });
+
+  show(startAt || savedPanel() || items[0].id);
+  return {
+    show,
+    back,
+    current: () => activePanel,
+    open: () => setOpen(true),
+    close: () => setOpen(false)
+  };
 }
 
 /* ---------- Toast notifications ----------

@@ -473,7 +473,7 @@
 
   <!-- Internal result-review page; intentionally absent from the sidebar. -->
   <div id="review-detail-panel" class="section-card" style="display:none;">
-    <div class="review-page-head"><button type="button" class="icon-action" onclick="studentNav.show('results-panel')" aria-label="Back to My Results" title="Back to My Results">&#8592;</button><div><h2 id="studentReviewTitle">Exam review</h2><p id="studentReviewMeta"></p></div></div>
+    <div class="review-page-head"><button type="button" class="icon-action" onclick="studentNav.back('results-panel')" aria-label="Go back" title="Go back">&#8592;</button><div><h2 id="studentReviewTitle">Exam review</h2><p id="studentReviewMeta"></p></div></div>
     <div id="studentReviewFeedback"></div>
     <div id="studentReviewContent"></div>
   </div>
@@ -877,7 +877,7 @@ function openStudentSubject(code) {
 
   document.getElementById('studentSubjectDetail').innerHTML = `
     <section class="subject-detail-hero">
-      <button type="button" class="icon-action" onclick="studentNav.show('subjects-panel')" aria-label="Back to My Subjects" title="Back to My Subjects">&#8592;</button>
+      <button type="button" class="icon-action" onclick="studentNav.back('subjects-panel')" aria-label="Go back" title="Go back">&#8592;</button>
       <div><div class="subject-detail-code">${escapeQuestionMedia(code)}</div><h2>${escapeQuestionMedia(subject?.name || code)}</h2><p>${escapeQuestionMedia(description)}</p></div>
     </section>
     <div class="subject-detail-grid">

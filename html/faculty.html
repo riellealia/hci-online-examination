@@ -1949,8 +1949,26 @@ let questionDraftTimer = null;
 let questionDraftWired = false;
 let questionCommitted = false;
 let questionModalReturnPanel = null;
+let questionBankBackAction = null;
+
+function goBackFromQuestionBank() {
+    const restore = questionBankBackAction;
+    questionBankBackAction = null;
+    if (typeof restore === 'function') {
+        restore();
+        return;
+    }
+    displayAllFacultyExams();
+    if (facultyNav) facultyNav.show('exams-tab');
+}
 
 function manageQuestions(examId) {
+    const originPanel = facultyNav && typeof facultyNav.current === 'function'
+        ? facultyNav.current()
+        : 'exams-tab';
+    questionBankBackAction = originPanel !== 'exams-tab'
+        ? () => facultyNav.back('exams-tab')
+        : () => displayAllFacultyExams();
     if (typeof facultyNav !== 'undefined' && facultyNav) facultyNav.show('exams-tab');
     currentEditingExamForQuestions = examId;
     const exam = exams.find(e => e.id === examId);
@@ -1963,7 +1981,7 @@ function manageQuestions(examId) {
 
     const html = `
         <div>
-            <button class="back-btn icon-only" onclick="displayAllFacultyExams(); switchTab('exams-tab', document.querySelectorAll('.tab-btn')[1])" aria-label="Back to all exams" title="Back to all exams"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
+            <button class="back-btn icon-only" onclick="goBackFromQuestionBank()" aria-label="Go back" title="Go back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
             <div class="exams-section">
                 <div class="exams-header question-catalog-head">
                     <div class="question-catalog-title"><span>Question bank</span><h3>${exam.title}</h3></div>

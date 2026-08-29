@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Shared Back navigation
+
+- **All roles:** Admin, Faculty, and Student panel changes now create browser-history entries through the shared navigation component.
+- **Browser controls:** Browser Back restores the previous internal panel instead of jumping to a fixed destination; refreshing retains the current panel.
+- **Student:** Subject-detail and result-review Back icons now return to the actual previous panel, with safe Subjects and Results fallbacks.
+- **Faculty:** Course Page Back uses shared history, and leaving an exam question bank returns to the page that opened it when possible.
+- **Verification:** Shared navigation checks pass for all three roles; JavaScript syntax and whitespace validation pass.
+
 ## 2026-08-29 — Student exit confirmation and Faculty question access
 
 - **Student Subject page:** Added a direct click fallback to every subject-specific exam cell while retaining shared exam-cell navigation.
