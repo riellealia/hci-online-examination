@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Higher-contrast Inbox count
+
+- **Area:** Shared Inbox panel
+- **Changed:** Increased the title count pill's size and font weight, with stronger red contrast and dedicated dark-theme coloring.
+- **Files:** `css/shared-ui.css`
+- **Verification:** Shared inbox tests pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Full report status borders
 
 - **Area:** Faculty reports and related-report mail cells
