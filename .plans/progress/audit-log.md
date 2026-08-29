@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Scoped semantic border enforcement
+
+- **Area:** Reports page, Edit Question report card, and Inbox report cell
+- **Changed:** Enforced each complete card outline at its real component scope using the same shared variable as its pill: Pending orange, Resolved green, Dismissed red.
+- **Interaction:** Hover and keyboard focus retain the status color instead of switching to the Faculty teal accent.
+- **Implementation:** No component-level status hex values; component rules consume shared light/dark theme tokens.
+- **Files:** `css/shared-ui.css`, `html/faculty.html`, `tests/t_reports.js`
+- **Verification:** Report and Inbox suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Variable-driven report status colors
 
 - **Area:** Reports page, Edit Question report context, and shared Inbox report cells

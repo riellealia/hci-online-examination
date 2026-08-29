@@ -1779,3 +1779,11 @@ body.login-bg .login-container :is(input,textarea)::placeholder { color:#6b7280 
 :root[data-theme="dark"] body[data-role] :is(.question-report,.reported-question-context,.inbox-related-report):is(.pending,.resolved,.dismissed){border:1px solid var(--report-status-color)!important}
 :is(.question-report,.reported-question-context,.inbox-related-report) :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--report-status-color)!important;background:var(--report-status-surface)!important;color:var(--report-status-color)!important}
 .question-report[role="button"]:is(:hover,:focus-visible),.inbox-related-report:is(:hover,:focus-visible){border-color:var(--report-status-color)!important;background:color-mix(in srgb,var(--report-status-color) 4%,var(--surface));outline:none;box-shadow:var(--sh-sm)}
+
+/* Page-scoped enforcement beats older role-theme rules without duplicating
+   literal colors. Hover and focus inherit the exact same status variable. */
+#reportsView .question-report:is(.pending,.resolved,.dismissed),
+#reportedQuestionContext:is(.pending,.resolved,.dismissed),
+.header-inbox-panel .inbox-related-report:is(.pending,.resolved,.dismissed){border-color:var(--report-status-color)!important}
+#reportsView .question-report:is(.pending,.resolved,.dismissed):is(:hover,:focus-visible),
+.header-inbox-panel .inbox-related-report:is(.pending,.resolved,.dismissed):is(:hover,:focus-visible){border-color:var(--report-status-color)!important}
