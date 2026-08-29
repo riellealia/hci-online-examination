@@ -1237,3 +1237,7 @@ This file records meaningful changes to the plan, implementation, testing, and d
 
 - Fixed Questions actions that rendered the question bank while leaving a different Faculty page visible.
 - The shared question-management route now selects My Exams before rendering, including access from exam settings, Course Pages, and exam lists.
+## 2026-08-29 — Dark-mode delete control
+
+- Replaced the bright light-theme delete surface with a color-mixed danger surface derived from `--danger`, `--surface`, and `--line`.
+- Replaced the platform-colored trash emoji visually with a monochrome CSS mask so the icon follows the current theme.
