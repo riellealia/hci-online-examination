@@ -1256,3 +1256,8 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Removed redundant question-list icons from those cells while preserving their separate settings menus.
 - Renamed the general-settings action to “Open questions” and retained its working navigation.
 - Reverified Student Subject → Exam cell → standard exam-details prompt.
+## 2026-08-29 — Edit Week cell menus and dark footer
+
+- Replaced the direct cell trash button with a three-dot menu on every Edit Week cell.
+- Added icon-labeled Move up, Move down, and Delete cell actions; ordering is persisted by the existing Save changes flow.
+- Remapped the Edit Week Cancel control to shared surfaces and typography, including an explicit dark-theme rule.

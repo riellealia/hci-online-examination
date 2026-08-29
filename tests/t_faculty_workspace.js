@@ -54,8 +54,12 @@ ok(!!weekEditor&&!!weekEditor.querySelector('.add-week-cell'),'Edit Week uses th
 const beforeCells=weekEditor.querySelectorAll('.week-editor-cell').length;
 weekEditor.querySelector('.add-week-cell').click();
 ok(weekEditor.querySelectorAll('.week-editor-cell').length===beforeCells+1,'Add cell creates another editable content cell');
-weekEditor.querySelector('.week-editor-cell:last-child .delete-week-cell').click();
-ok(weekEditor.querySelectorAll('.week-editor-cell').length===beforeCells,'each Edit Week cell has a working red trash action');
+const addedWeekCell=weekEditor.querySelector('.week-editor-cell:last-child');
+ok(addedWeekCell.querySelectorAll('.week-cell-menu [data-cell-action]').length===3,'every Edit Week cell has a three-dot menu with move up, move down, and delete actions');
+addedWeekCell.querySelector('[data-cell-action="up"]').click();
+ok(!!addedWeekCell.nextElementSibling,'Move up changes the cell order');
+addedWeekCell.querySelector('[data-cell-action="delete"]').click();
+ok(weekEditor.querySelectorAll('.week-editor-cell').length===beforeCells,'Delete cell removes only the selected cell');
 weekEditor.querySelector('.week-editor-close').click();
 
 r.w.FacultySubjectWorkspace.showTab('members');
