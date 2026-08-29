@@ -48,7 +48,8 @@ let mailing=r.w.mailReportStudent(report.id);r.d.querySelector('.confirm-box tex
 ok(await mailing&&r.read('studentNotifications').some(item=>item.type==='faculty-mail'&&item.studentId==='S1'),'settings mail action sends a private student message');
 ok(r.w.openReportedQuestion(report.id)===true&&r.d.getElementById('questionModal').classList.contains('active'),'clicking a report opens its question editor');
 ok(/Both choices appear valid/.test(r.d.getElementById('reportedQuestionContext').textContent),'question editor shows the report context beside editable settings');
-r.w.closeQuestionModal();r.w.displayQuestionReports();
+r.w.closeQuestionModal();
+ok(r.d.getElementById('reports-tab').style.display!=='none'&&/Both choices appear valid/.test(r.d.getElementById('reportsView').textContent),'question editor Back returns to the originating reports page');
 let resolving=r.w.requestReportStatus(report.id,'resolved');
 const resolutionDialog=r.d.querySelector('.confirm-box textarea');resolutionDialog.value='Confirmed the answer key issue.';r.d.querySelector('.confirm-box .confirm-ok').click();
 ok(await resolving,'Faculty can resolve an owned report after adding a note');

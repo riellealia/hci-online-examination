@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Return from reported-question editing
+
+- **Area:** Faculty question reports and question editor
+- **Changed:** Opening a question from a report now records Question Reports as its origin. Desktop Back, mobile Back, and saving return to that report page instead of exposing the intermediate Question Bank.
+- **State:** The selected report status tab and sorting choices remain active after returning.
+- **Files:** `html/faculty.html`, `tests/t_reports.js`
+- **Verification:** Question-report, authoring, and navigation suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Consistent browser title
 
 - **Area:** Application shell

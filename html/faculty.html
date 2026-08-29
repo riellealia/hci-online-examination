@@ -1425,6 +1425,7 @@ function openReportedQuestion(reportId) {
     facultyNav?.show('exams-tab');
     manageQuestions(report.examId);
     editQuestion(report.questionId);
+    questionModalReturnPanel='reports-tab';
     const context=document.getElementById('reportedQuestionContext');
     context.hidden=false;
     context.innerHTML=`<div class="reported-question-head"><div><span>Question report</span><strong>${escapeQuestionMedia(report.category)}</strong></div><span class="report-status">${escapeQuestionMedia(report.status)}</span></div><p>${escapeQuestionMedia(report.details)}</p><small>Reported by ${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small><label>Resolution note<textarea oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Add what you checked or changed">${escapeQuestionMedia(report.resolutionNote||'')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label>`;
@@ -1918,6 +1919,7 @@ let currentOptionIndex = 0;
 let questionDraftTimer = null;
 let questionDraftWired = false;
 let questionCommitted = false;
+let questionModalReturnPanel = null;
 
 function manageQuestions(examId) {
     currentEditingExamForQuestions = examId;
@@ -2033,6 +2035,7 @@ function duplicateQuestion(questionId) {
 }
 
 function openQuestionModal() {
+    questionModalReturnPanel = null;
     currentEditingQuestionId = null;
     document.getElementById('questionModalTitle').textContent = 'Add Question';
     document.getElementById('questionText').value = '';
@@ -2087,6 +2090,7 @@ function chooseQuestionType(type) {
 }
 
 function editQuestion(questionId) {
+    questionModalReturnPanel = null;
     const question = questions.find(q => q.id === questionId);
     if (!required(question, 'That question no longer exists.')) { manageQuestions(currentEditingExamForQuestions); return; }
     const reportContext=document.getElementById('reportedQuestionContext');
@@ -2156,6 +2160,8 @@ function editQuestion(questionId) {
 }
 
 function closeQuestionModal() {
+    const returnPanel = questionModalReturnPanel;
+    questionModalReturnPanel = null;
     if (!questionCommitted) saveQuestionDraftNow();
     if (questionDraftTimer) clearTimeout(questionDraftTimer);
     questionDraftTimer = null;
@@ -2164,6 +2170,7 @@ function closeQuestionModal() {
     document.getElementById('reportedQuestionContext').hidden=true;
     closeQuestionInspector();
     currentEditingQuestionId = null;
+    if (returnPanel) switchTab(returnPanel);
 }
 
 function toggleQuestionInspector() {
@@ -2665,9 +2672,10 @@ function saveQuestion(addAnother = false) {
     }
     clearQuestionDraft(currentEditingExamForQuestions, currentEditingQuestionId);
     questionCommitted = true;
+    const returnPanel = questionModalReturnPanel;
     closeQuestionModal();
     notify(wasEdit ? 'Question updated.' : 'Question added.', 'success');
-    manageQuestions(currentEditingExamForQuestions);
+    if (!returnPanel) manageQuestions(currentEditingExamForQuestions);
     if (addAnother) openQuestionModal();
 }
 
