@@ -1212,3 +1212,9 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Mention affected files so changes are traceable.
 - If work is reverted, retain the original entry and add a new reversal entry.
 - Update `checklist.md` and `completion-rate.md` in the same change whenever a status changes.
+## 2026-08-29 — Admin Dashboard-only overview scope
+
+- **Cause:** A global `display:flex !important` rule kept the Dashboard panel visible after sidebar navigation set it to `display:none`.
+- **Visibility:** System overview, application monitoring, site status, view controls, and management shortcut cards now render only while Dashboard is selected.
+- **Monitoring:** Live sampling pauses on every Admin management page and resumes when returning to Dashboard.
+- **Verification:** Added computed-visibility and monitoring-state regression checks across Dashboard and Student Management navigation.

@@ -21,7 +21,10 @@ ok(cards.every(card=>card.tabIndex===0&&card.getAttribute('role')==='link'&&card
 cards[1].dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
 ok(r.d.getElementById('studentSection').style.display==='block','clicking Students opens its management page');
 ok(r.d.getElementById('studentTable').textContent.includes('S1'),'destination shows the student list');
+ok(r.w.getComputedStyle(r.d.getElementById('dashboardSection')).display==='none','Dashboard overview and monitoring are not visually persistent on management pages');
+ok(/Paused/.test(r.d.getElementById('monitoringState').textContent),'monitoring pauses while the Dashboard page is not selected');
 r.w.showSection('dashboardSection');
+ok(r.d.getElementById('dashboardSection').style.display==='block'&&/Live/.test(r.d.getElementById('monitoringState').textContent),'returning to Dashboard restores its page and live monitoring');
 cards[2].dispatchEvent(new r.w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
 ok(r.d.getElementById('subjectSection').style.display==='block','Enter on Subjects opens its management page');
 ok(r.d.getElementById('subjectTable').textContent.includes('SUB1'),'destination shows the subject list');
