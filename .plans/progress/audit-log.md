@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Larger header inbox icon
+
+- **Area:** Shared role headers
+- **Changed:** Enlarged the borderless mail icon and moved its pending-count pill to overlap the icon's bottom-right corner.
+- **Files:** `css/shared-ui.css`
+- **Verification:** Shared inbox and navigation suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Faculty-style Student subject cards
 
 - **Area:** Student My Subjects
