@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Corrected dark-mode report border override
+
+- **Area:** Faculty Question Reports in dark mode
+- **Cause:** A later legacy dark-surface rule applied a gray border with `!important`, overriding the semantic report-card border while leaving the pill colored.
+- **Changed:** Added final status-specific overrides so the complete card border exactly matches the pill: orange Pending, green Resolved, and red Dismissed.
+- **Files:** `css/shared-ui.css`, `html/faculty.html`
+- **Verification:** Report suite passes and a regression assertion covers the final dark-mode override.
+- **Result:** Complete
+
 ## 2026-08-29 — Matching report context and skippable resolution
 
 - **Area:** Faculty Edit Question and report resolution dialog

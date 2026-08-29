@@ -1,9 +1,12 @@
 const {load,SEED}=require('./harness');
+const fs=require('fs'),path=require('path');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 const today=new Date().toLocaleDateString('en-CA');
 
 (async()=>{
 console.log('=== QUESTION REPORTS. Student report to scoped Faculty resolution ===');
+const sharedCss=fs.readFileSync(path.join(__dirname,'..','css','shared-ui.css'),'utf8');
+ok(/body\[data-role="faculty"\] \.question-report\.pending\{border:1px solid #edc27b!important\}/.test(sharedCss),'dark-mode report border overrides the legacy gray important rule');
 let s=SEED();
 s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59'}];
 let r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
