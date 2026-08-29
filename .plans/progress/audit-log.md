@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Report borders matched to status pills
+
+- **Area:** Faculty report cards and related Inbox report cells
+- **Changed:** Removed the thick left-edge treatment. Every report now has one uniform full border using exactly the status pill's foreground color: orange Pending, green Resolved, and red Dismissed.
+- **Themes:** Matched colors are defined separately for comfortable light and dark theme contrast.
+- **Files:** `css/shared-ui.css`, `html/faculty.html`
+- **Verification:** Question-report and Inbox suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Persistent page and report focus
 
 - **Area:** Shared role navigation and Faculty question reports
