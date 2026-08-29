@@ -908,7 +908,7 @@
     .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-status-border-override">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-matched-report-flow">
 <link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20260827-9">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
@@ -1450,8 +1450,14 @@ function openReportedQuestion(reportId) {
     questionModalReturnPanel='reports-tab';
     const context=document.getElementById('reportedQuestionContext'),visualStatus=reportStatusGroup(report),student=students.find(item=>item.id===report.studentId),exam=exams.find(item=>item.id===report.examId),subject=subjects.find(item=>item.code===exam?.subjectCode),enrollment=studentEnrollments.find(item=>item.studentId===report.studentId&&item.subjectCode===exam?.subjectCode&&(exam?.sections||[]).includes(item.sectionId)),reporter=student?`${student.last}, ${student.first}`:report.studentId,section=enrollment?.sectionId||(student?.sections||[])[0]||'No section';
     context.hidden=false;context.className=`reported-question-context ${visualStatus}`;
-    context.innerHTML=`<header class="report-card-head"><div><strong>${escapeQuestionMedia(reporter)}</strong><small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(section)} · ${escapeQuestionMedia(exam?.subjectCode||'No subject')} — ${escapeQuestionMedia(subject?.name||'Unknown subject')}</small></div><span class="report-status">${visualStatus[0].toUpperCase()+visualStatus.slice(1)}</span></header><h4>${escapeQuestionMedia(question.text||'Question removed')}</h4><span class="report-problem-pill">${escapeQuestionMedia(report.category.replace('-',' '))}</span><p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(exam?.title||'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small><label>Resolution note<textarea oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Add what you checked or changed">${escapeQuestionMedia(report.resolutionNote||'')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label>`;
+    context.innerHTML=`<div class="report-main"><header class="report-card-head"><div><strong>${escapeQuestionMedia(reporter)}</strong><small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(section)} · ${escapeQuestionMedia(exam?.subjectCode||'No subject')} — ${escapeQuestionMedia(subject?.name||'Unknown subject')}</small></div><span class="report-status">${visualStatus[0].toUpperCase()+visualStatus.slice(1)}</span></header><h4>${escapeQuestionMedia(question.text||'Question removed')}</h4><span class="report-problem-pill">${escapeQuestionMedia(report.category.replace('-',' '))}</span><p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(exam?.title||'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small></div><div class="report-actions"><button type="button" class="report-action-icon review" onclick="updateOpenReportStatus('${report.id}','reviewed')" ${report.status==='reviewed'?'disabled':''} aria-label="Mark in review" title="In review">&#128065;</button><button type="button" class="report-action-icon resolve" onclick="updateOpenReportStatus('${report.id}','resolved')" ${report.status==='resolved'?'disabled':''} aria-label="Resolve report" title="Resolve">&#10003;</button><button type="button" class="report-action-icon dismiss" onclick="updateOpenReportStatus('${report.id}','dismissed')" ${report.status==='dismissed'?'disabled':''} aria-label="Dismiss report" title="Dismiss">&times;</button><div class="report-settings-wrap"><button type="button" class="report-action-icon settings" onclick="toggleReportSettings('${report.id}',this)" aria-label="Report settings" title="Settings">&#9881;</button><div class="report-settings-menu" data-report-menu="${report.id}"><button type="button" onclick="viewReportStudent('${report.id}')"><span>&#128100;</span>View student profile</button><button type="button" onclick="mailReportStudent('${report.id}')"><span>&#9993;</span>Mail student</button><button type="button" class="danger" onclick="blockReportStudent('${report.id}')"><span>&#9940;</span>Block from reporting</button><button type="button" onclick="copyReportStudentId('${report.id}')"><span>&#10697;</span>Copy ID</button></div></div></div>`;
     return true;
+}
+
+async function updateOpenReportStatus(reportId,status){
+    const changed=await requestReportStatus(reportId,status);
+    if(changed)openReportedQuestion(reportId);
+    return changed;
 }
 
 function openQuestionReports(questionId) {

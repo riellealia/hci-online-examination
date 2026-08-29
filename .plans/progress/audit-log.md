@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Unified report-card actions and resolution flow
+
+- **Area:** Faculty Edit Question report context
+- **Changed:** Embedded report cards now use the same content/action layout as the Reports page, including In review, Resolve, Dismiss, and Settings icon actions.
+- **Flow:** Removed the always-visible resolution textarea; notes are requested only by the Resolve or Dismiss prompt, where they may be entered or skipped.
+- **Files:** `html/faculty.html`, `css/shared-ui.css`
+- **Verification:** Report workflow suite passes.
+- **Result:** Complete
+
 ## 2026-08-29 — Corrected dark-mode report border override
 
 - **Area:** Faculty Question Reports in dark mode
