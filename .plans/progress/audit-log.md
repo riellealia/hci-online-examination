@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Matching report context and skippable resolution
+
+- **Area:** Faculty Edit Question and report resolution dialog
+- **Changed:** The embedded report now matches the Reports-page card structure and semantic full-border treatment.
+- **Dialog:** Replaced the bottom Cancel button with a top-right close icon and added Skip, which changes status without requiring or sending a resolution note.
+- **Files:** `html/faculty.html`, `js/ui.js`, `css/shared-ui.css`
+- **Verification:** Question-report and shared dialog tests pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Report borders matched to status pills
 
 - **Area:** Faculty report cards and related Inbox report cells

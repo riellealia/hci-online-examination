@@ -300,16 +300,17 @@ function textInputDialog({ title = 'Edit', label = 'Name', value = '', confirmLa
   });
 }
 
-function textareaInputDialog({ title = 'Add a note', label = 'Note', value = '', confirmLabel = 'Save', danger = false } = {}) {
+function textareaInputDialog({ title = 'Add a note', label = 'Note', value = '', confirmLabel = 'Save', danger = false, allowSkip = false } = {}) {
   return new Promise(resolve => {
     const bg=document.createElement('div');
     bg.className='modal-bg confirm-bg';bg.style.display='flex';
-    bg.innerHTML=`<div class="modal confirm-box" role="dialog" aria-modal="true"><h3></h3><label class="dialog-input-label"><span></span><textarea rows="4"></textarea></label><div class="confirm-actions"><button type="button" class="confirm-cancel">Cancel</button><button type="button" class="confirm-ok ${danger?'is-danger':''}">${confirmLabel}</button></div></div>`;
+    bg.innerHTML=`<div class="modal confirm-box ${allowSkip?'resolution-dialog':''}" role="dialog" aria-modal="true">${allowSkip?'<button type="button" class="dialog-close-x confirm-cancel" aria-label="Close" title="Close">&times;</button>':''}<h3></h3><label class="dialog-input-label"><span></span><textarea rows="4"></textarea></label><div class="confirm-actions">${allowSkip?'<button type="button" class="confirm-skip">Skip</button>':'<button type="button" class="confirm-cancel">Cancel</button>'}<button type="button" class="confirm-ok ${danger?'is-danger':''}">${confirmLabel}</button></div></div>`;
     bg.querySelector('h3').textContent=title;bg.querySelector('label span').textContent=label;
     const input=bg.querySelector('textarea');input.value=value;
     document.body.appendChild(bg);
     const done=result=>{bg.remove();resolve(result)};
     bg.querySelector('.confirm-cancel').onclick=()=>done(null);
+    bg.querySelector('.confirm-skip')?.addEventListener('click',()=>done(''));
     bg.querySelector('.confirm-ok').onclick=()=>done(input.value.trim());
     bg.onclick=event=>{if(event.target===bg)done(null)};
     bg.onkeydown=event=>{if(event.key==='Escape')done(null)};

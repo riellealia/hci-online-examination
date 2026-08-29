@@ -908,7 +908,7 @@
     .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-matched-report-borders">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-report-context-dialog">
 <link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20260827-9">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
@@ -1448,9 +1448,9 @@ function openReportedQuestion(reportId) {
     manageQuestions(report.examId);
     editQuestion(report.questionId);
     questionModalReturnPanel='reports-tab';
-    const context=document.getElementById('reportedQuestionContext');
-    context.hidden=false;
-    context.innerHTML=`<div class="reported-question-head"><div><span>Question report</span><strong>${escapeQuestionMedia(report.category)}</strong></div><span class="report-status">${escapeQuestionMedia(report.status)}</span></div><p>${escapeQuestionMedia(report.details)}</p><small>Reported by ${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small><label>Resolution note<textarea oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Add what you checked or changed">${escapeQuestionMedia(report.resolutionNote||'')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label>`;
+    const context=document.getElementById('reportedQuestionContext'),visualStatus=reportStatusGroup(report),student=students.find(item=>item.id===report.studentId),exam=exams.find(item=>item.id===report.examId),subject=subjects.find(item=>item.code===exam?.subjectCode),enrollment=studentEnrollments.find(item=>item.studentId===report.studentId&&item.subjectCode===exam?.subjectCode&&(exam?.sections||[]).includes(item.sectionId)),reporter=student?`${student.last}, ${student.first}`:report.studentId,section=enrollment?.sectionId||(student?.sections||[])[0]||'No section';
+    context.hidden=false;context.className=`reported-question-context ${visualStatus}`;
+    context.innerHTML=`<header class="report-card-head"><div><strong>${escapeQuestionMedia(reporter)}</strong><small>${escapeQuestionMedia(report.studentId)} · ${escapeQuestionMedia(section)} · ${escapeQuestionMedia(exam?.subjectCode||'No subject')} — ${escapeQuestionMedia(subject?.name||'Unknown subject')}</small></div><span class="report-status">${visualStatus[0].toUpperCase()+visualStatus.slice(1)}</span></header><h4>${escapeQuestionMedia(question.text||'Question removed')}</h4><span class="report-problem-pill">${escapeQuestionMedia(report.category.replace('-',' '))}</span><p>${escapeQuestionMedia(report.details)}</p><small>${escapeQuestionMedia(exam?.title||'Exam removed')} · ${escapeQuestionMedia(new Date(report.createdAt).toLocaleString())}</small><label>Resolution note<textarea oninput="scheduleReportNote('${report.id}',this.value)" placeholder="Add what you checked or changed">${escapeQuestionMedia(report.resolutionNote||'')}</textarea><span class="save-state" data-report-save="${report.id}"></span></label>`;
     return true;
 }
 
@@ -1481,9 +1481,9 @@ function ownedQuestionReport(reportId){const ownedIds=exams.filter(exam=>exam.fa
 async function requestReportStatus(reportId,status){
     if(status==='reviewed')return toggleQuestionReport(reportId,status);
     const report=ownedQuestionReport(reportId);if(!report)return false;
-    const note=await textareaInputDialog({title:status==='resolved'?'Resolve this report?':'Dismiss this report?',label:'Resolution note',value:report.resolutionNote||'',confirmLabel:status==='resolved'?'Resolve':'Dismiss',danger:status==='dismissed'});
-    if(!note){notify('Add a resolution note before changing this report.','error');return false;}
-    saveQuestionReportNote(reportId,note);const changed=toggleQuestionReport(reportId,status);if(changed)notifyReportStudent(reportId);return changed;
+    const note=await textareaInputDialog({title:status==='resolved'?'Resolve this report?':'Dismiss this report?',label:'Resolution note',value:report.resolutionNote||'',confirmLabel:status==='resolved'?'Resolve':'Dismiss',danger:status==='dismissed',allowSkip:true});
+    if(note===null)return false;
+    if(note)saveQuestionReportNote(reportId,note);const changed=toggleQuestionReport(reportId,status);if(changed&&note)notifyReportStudent(reportId);return changed;
 }
 function toggleReportSettings(reportId,button){
     const menu=document.querySelector(`[data-report-menu="${reportId}"]`),open=!menu?.classList.contains('open');

@@ -54,6 +54,7 @@ let mailing=r.w.mailReportStudent(report.id);r.d.querySelector('.confirm-box tex
 ok(await mailing&&r.read('studentNotifications').some(item=>item.type==='faculty-mail'&&item.studentId==='S1'),'settings mail action sends a private student message');
 ok(r.w.openReportedQuestion(report.id)===true&&r.d.getElementById('questionModal').classList.contains('active'),'clicking a report opens its question editor');
 ok(/Both choices appear valid/.test(r.d.getElementById('reportedQuestionContext').textContent),'question editor shows the report context beside editable settings');
+ok(r.d.getElementById('reportedQuestionContext').classList.contains('pending')&&/S1/.test(r.d.getElementById('reportedQuestionContext').textContent),'embedded report matches the status card and reporter context');
 r.w.closeQuestionModal();
 ok(r.d.getElementById('reports-tab').style.display!=='none'&&/Both choices appear valid/.test(r.d.getElementById('reportsView').textContent),'question editor Back returns to the originating reports page');
 let resolving=r.w.requestReportStatus(report.id,'resolved');
@@ -64,7 +65,10 @@ ok(r.w.toggleQuestionReport(report.id,'open')===true,'resolved report can be reo
 ok(r.w.toggleQuestionReport(report.id,'reviewed')===true,'report can be marked reviewed');
 r.w.selectReportTab('pending');
 ok(!!r.d.querySelector('.question-report')&&r.d.querySelector('.report-filter-tab.active')?.textContent.includes('Pending'),'pending tab combines open and in-review reports');
-ok(r.w.toggleQuestionReport(report.id,'dismissed')===true,'report can be dismissed');
+let skipping=r.w.requestReportStatus(report.id,'dismissed');
+ok(!!r.d.querySelector('.resolution-dialog .dialog-close-x')&&!!r.d.querySelector('.resolution-dialog .confirm-skip'),'resolution prompt uses a top-right close icon and Skip action');
+r.d.querySelector('.resolution-dialog .confirm-skip').click();
+ok(await skipping&&r.read('questionReports').find(item=>item.id===report.id).status==='dismissed','report can be dismissed while skipping the optional note');
 r.w.toggleQuestionReport(report.id,'open');
 r.w.openReportedQuestion(report.id);
 const note=r.d.querySelector('#reportedQuestionContext textarea');
