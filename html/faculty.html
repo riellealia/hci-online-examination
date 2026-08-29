@@ -908,12 +908,12 @@
     .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-report-borders">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20260829-persistent-routes">
 <link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20260827-9">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
 <script src="../js/grading.js"></script>
-<script src="../js/ui.js"></script>
+<script src="../js/ui.js?v=20260829-persistent-routes"></script>
 <script src="../js/role-profile.js"></script>
 <script src="../js/faculty-subject-workspace.js"></script>
 </head>
@@ -1432,8 +1432,10 @@ function focusQuestionReport(reportId){
     switchTab('reports-tab');displayQuestionReports();
     const card=document.querySelector(`#reportsView .question-report[data-report-id="${reportId}"]`);
     if(!card)return false;
-    card.classList.add('inbox-report-target');card.focus();card.scrollIntoView?.({behavior:'smooth',block:'center'});
-    setTimeout(()=>card.classList.remove('inbox-report-target'),1800);return true;
+    document.querySelectorAll('#reportsView .inbox-report-target').forEach(item=>{item.classList.remove('inbox-report-target');item.removeAttribute('aria-current')});
+    card.classList.add('inbox-report-target');card.setAttribute('aria-current','true');
+    history.replaceState(null,'',`#reports-tab/report/${encodeURIComponent(reportId)}`);
+    card.focus({preventScroll:true});card.scrollIntoView?.({behavior:'smooth',block:'center'});return true;
 }
 
 function openReportedQuestion(reportId) {
@@ -3402,6 +3404,10 @@ facultyNav = mountSidebar({
     onSelect: onFacultySection
 });
 if(pendingFacultyReportCount){const reportLink=document.querySelector('#sidebar [data-panel="reports-tab"]');reportLink?.insertAdjacentHTML('beforeend',`<span class="nav-count" aria-label="${pendingFacultyReportCount} pending reports">${pendingFacultyReportCount}</span>`);}
+const facultyRouteParts=location.hash.replace(/^#/,'').split('/');
+if(facultyRouteParts[0]==='reports-tab'&&facultyRouteParts[1]==='report'&&facultyRouteParts[2]){
+    requestAnimationFrame(()=>focusQuestionReport(decodeURIComponent(facultyRouteParts[2])));
+}
 </script>
 
 </body>

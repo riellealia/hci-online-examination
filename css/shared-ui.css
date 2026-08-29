@@ -1742,3 +1742,5 @@ body.login-bg .login-container :is(input,select,textarea) {
   border-color:#cbd2da !important;
 }
 body.login-bg .login-container :is(input,textarea)::placeholder { color:#6b7280 !important; }
+/* Persistent target emphasis for links that open a specific report. */
+.question-report.inbox-report-target{outline:3px solid var(--accent)!important;outline-offset:4px!important;background:color-mix(in srgb,var(--accent) 8%,var(--surface))!important;box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 14%,transparent),var(--sh-lg)!important}

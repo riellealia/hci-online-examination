@@ -1,5 +1,14 @@
 # Project Audit Log
 
+## 2026-08-29 — Persistent page and report focus
+
+- **Area:** Shared role navigation and Faculty question reports
+- **Changed:** Sidebar pages now persist in the URL and session state, so refreshing retains the current page across Admin, Faculty, and Student interfaces.
+- **Reports:** Redirects to a report now retain the report ID in the URL and keep the exact report card visibly highlighted until navigation changes.
+- **Files:** `js/ui.js`, `css/shared-ui.css`, `html/admin.html`, `html/faculty.html`, `html/student.html`
+- **Verification:** Shared navigation, question-report, and Inbox suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Visible report status borders
 
 - **Area:** Faculty question reports and Inbox report links

@@ -127,13 +127,25 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   document.body.appendChild(bar);
 
   const known = panels || items.map(i => i.id);
+  const routePanels = new Set(items.map(item => item.id));
+  const routeKey = `neu:last-panel:${location.pathname}`;
+
+  function savedPanel() {
+    const hashPanel = decodeURIComponent(location.hash.replace(/^#/, '').split('/')[0] || '');
+    if (routePanels.has(hashPanel)) return hashPanel;
+    try {
+      const stored = sessionStorage.getItem(routeKey);
+      if (routePanels.has(stored)) return stored;
+    } catch (_) {}
+    return null;
+  }
 
   function setOpen(open) {
     bar.style.width = open ? '260px' : '0';
     menuBtn.setAttribute('aria-expanded', String(open));
   }
 
-  function show(id) {
+  function show(id, options = {}) {
     known.forEach(p => {
       const el = document.getElementById(p);
       if (el) el.style.display = (p === id) ? 'block' : 'none';
@@ -147,6 +159,10 @@ function mountSidebar({ items, panels, container = '.topbar-left',
       if (t) t.textContent = item.label;
     }
     setOpen(false);
+    if (routePanels.has(id)) {
+      try { sessionStorage.setItem(routeKey, id); } catch (_) {}
+      if (options.syncUrl !== false) history.replaceState(null, '', `#${encodeURIComponent(id)}`);
+    }
     if (onSelect) onSelect(id);
   }
 
@@ -166,7 +182,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
     if (bar.style.width === '260px' && !bar.contains(e.target) && e.target !== menuBtn) setOpen(false);
   });
 
-  show(startAt || items[0].id);
+  show(startAt || savedPanel() || items[0].id, { syncUrl: false });
   return { show, open: () => setOpen(true), close: () => setOpen(false) };
 }
 
