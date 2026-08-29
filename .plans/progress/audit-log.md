@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Faculty-style Student subject cards
+
+- **Area:** Student My Subjects
+- **Changed:** Rebuilt Student subject cards using the Faculty course-card visual language: course icon, colored code, title, directional arrow, left accent, count pills, and a subtle decorative ring.
+- **Metadata:** Replaced the section pill with the assigned professor's name and retained a subject-specific examination count.
+- **Themes:** Added coordinated light and dark treatments with rotating muted course accents.
+- **Files:** `html/student.html`, `css/shared-ui.css`, `tests/t_student.js`
+- **Verification:** Student workflow, shared UI/theme, responsive, and rich demo-data suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Theme-aware report status accents
 
 - **Area:** Faculty question-report cards
