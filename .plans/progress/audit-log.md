@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Unified Student exam-cell navigation
+
+- **Area:** Subject pages, My Examinations, overview schedule, monthly calendar, always-open examinations, and the compatibility exam table.
+- **Behavior:** Every non-Results exam cell now uses one delegated mouse and keyboard interaction that opens the shared exam-details prompt.
+- **Results exception:** Result cells retain their dedicated answer-review page instead of opening the exam briefing.
+- **Actions:** Start, resume, retake, saved-draft review, and completed-answer review remain governed by the examination state and Faculty visibility settings.
+- **Verification:** Added direct Subject-page and My Examinations cell-click regression coverage.
+
 ## 2026-08-29 — Report component cascade isolation
 
 - **Cause:** Legacy report-card declarations and the semantic state rules shared one large stylesheet, allowing stale/colliding card styles to neutralize the visible border and retain the old flex-positioned status pill.

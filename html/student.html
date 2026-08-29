@@ -878,7 +878,7 @@ function openStudentSubject(code) {
       <section class="subject-info-cell subject-detail-exams"><h3>&#128218; Weekly learning content</h3><div class="learning-week-stack">${learningWeeks.length ? learningWeeks.map(week => {const weekRecord=learningContent.find(item=>item.week===week);return `<details class="learning-week"><summary><strong>Week ${week} · ${escapeQuestionMedia(weekRecord?.weekTitle || `Week ${week}`)}</strong></summary>${weekRecord?.weekDescription?`<p class="learning-week-description">${escapeQuestionMedia(weekRecord.weekDescription)}</p>`:''}${learningContent.filter(item=>item.week===week).map(item=>{const index=learningContent.indexOf(item),state=learningCellState(item,index,learningContent);return state.locked?`<div class="learning-cell locked"><strong>${escapeQuestionMedia(item.title||'Content')}</strong><span>&#128274; ${escapeQuestionMedia(state.label)}</span></div>`:`<details class="learning-cell" ontoggle="recordLearningCellView('${item.id}',this)"><summary><strong>${escapeQuestionMedia(item.title||'Content')}</strong></summary><div class="learning-cell-body">${item.type==='file'?`<a href="${item.dataUrl||'#'}" download="${escapeQuestionMedia(item.fileName||item.title)}">&#128206; ${escapeQuestionMedia(item.title||item.fileName)}</a>`:item.type==='link'?`<a href="${escapeQuestionMedia(item.url||'#')}" target="_blank" rel="noopener">&#128279; ${escapeQuestionMedia(item.title||item.url)}</a>${item.body?`<p>${escapeQuestionMedia(item.body)}</p>`:''}`:escapeQuestionMedia(item.body||'')}</div></details>`}).join('')}</details>`}).join('') : '<div class="subject-empty">Your professor has not published weekly content yet.</div>'}</div></section>
       <section class="subject-info-cell subject-detail-exams"><h3>&#9997; Examinations</h3><div class="subject-detail-exam-grid">${subjectExams.length ? subjectExams.map(exam => {
         const schedule = exam.date ? `${exam.date} · ${exam.start || '09:00'}–${exam.end || '23:59'}` : 'Always open';
-        return `<button type="button" class="subject-detail-exam" onclick="openExamDetails('${exam.id}')"><strong>${escapeQuestionMedia(exam.title || 'Examination')}</strong><span>${escapeQuestionMedia(schedule)}</span><span>${exam.questionIds?.length || questions.filter(question => question.examId === exam.id).length} items · ${exam.durationMinutes || 'No'} minute time limit</span></button>`;
+        return `<button type="button" class="subject-detail-exam" data-open-exam="${escapeQuestionMedia(exam.id)}"><strong>${escapeQuestionMedia(exam.title || 'Examination')}</strong><span>${escapeQuestionMedia(schedule)}</span><span>${exam.questionIds?.length || questions.filter(question => question.examId === exam.id).length} items · ${exam.durationMinutes || 'No'} minute time limit</span></button>`;
       }).join('') : '<div class="subject-empty">No examinations are available for this subject.</div>'}</div></section>
     </div>`;
   studentNav.show('subject-detail-panel');
@@ -951,7 +951,7 @@ function loadExams() {
     }
 
     const row = document.createElement('tr');
-    row.className='exam-clickable-row';row.tabIndex=0;row.setAttribute('aria-label',`View details for ${ex.title||'Examination'}`);row.onclick=event=>{if(!event.target.closest('button'))openExamDetails(ex.id);};row.onkeydown=event=>{if(event.key==='Enter')openExamDetails(ex.id);};
+    row.className='exam-clickable-row';row.dataset.openExam=ex.id;row.tabIndex=0;row.setAttribute('aria-label',`View details for ${ex.title||'Examination'}`);
     row.innerHTML = `
       <td><strong>${ex.subjectCode}</strong></td>
       <td>${sub ? sub.name : 'Unknown'}</td>
@@ -986,7 +986,7 @@ function renderExamSubjectCards(list) {
       if (exhausted) { status = '<span class="status-active">Attempt limit reached</span>'; action = `<button class="btn-secondary" onclick="event.stopPropagation();openExamDetails('${exam.id}')">View details</button>`; }
       else if (win.state === 'upcoming') { status = `<span class="countdown" data-time="${examTime}">Calculating...</span>`; action = '<button class="btn-secondary" disabled>Not yet open</button>'; }
       else if (win.state === 'closed') { status = '<span class="countdown">Closed</span>'; action = `<button class="btn-secondary" onclick="event.stopPropagation();openExamDetails('${exam.id}')">View details</button>`; }
-      return `<div class="subject-exam-row" tabindex="0" role="button" aria-label="View ${escapeQuestionMedia(exam.title || 'examination')}" onclick="openExamDetails('${exam.id}')" onkeydown="if(event.key==='Enter')openExamDetails('${exam.id}')">
+      return `<div class="subject-exam-row" data-open-exam="${escapeQuestionMedia(exam.id)}" tabindex="0" role="button" aria-label="View ${escapeQuestionMedia(exam.title || 'examination')}">
         <div><div class="subject-exam-name">${escapeQuestionMedia(exam.title || 'Examination')}</div><div class="subject-exam-meta">${exam.questionIds?.length || 0} items · ${exam.durationMinutes || 'No'} minute${exam.durationMinutes === 1 ? '' : 's'}</div></div>
         <div class="subject-exam-meta">${scheduled}</div><div>${status}</div><div>${action}</div>
       </div>`;
@@ -1071,7 +1071,7 @@ function renderStudentExamList(list) {
       status = '<span class="countdown">Missed</span>';
       button = `<button class="btn-secondary" onclick="event.stopPropagation();openExamDetails('${exam.id}')">Details</button>`;
     }
-    return `<article class="exam-list-row${hasFeedback ? ' has-feedback' : ''}" data-exam="${escapeQuestionMedia(exam.id)}" data-subject="${escapeQuestionMedia(exam.subjectCode)}" tabindex="0" role="button" aria-label="View ${escapeQuestionMedia(exam.title || 'examination')}" onclick="openExamDetails('${exam.id}')" onkeydown="if(event.key==='Enter')openExamDetails('${exam.id}')">
+    return `<article class="exam-list-row${hasFeedback ? ' has-feedback' : ''}" data-exam="${escapeQuestionMedia(exam.id)}" data-open-exam="${escapeQuestionMedia(exam.id)}" data-subject="${escapeQuestionMedia(exam.subjectCode)}" tabindex="0" role="button" aria-label="View ${escapeQuestionMedia(exam.title || 'examination')}">
       <div><div class="exam-list-title">${escapeQuestionMedia(exam.title || 'Examination')}</div><div class="exam-list-meta"><span>${escapeQuestionMedia(exam.subjectCode)} — ${escapeQuestionMedia(subject?.name || 'Subject')}</span><span>${itemCount} item${itemCount === 1 ? '' : 's'}</span><span>${exam.durationMinutes ? `${exam.durationMinutes} min` : 'No time limit'}</span><span>${escapeQuestionMedia(scheduled)}</span><span>${status}</span></div></div>
       <div class="exam-list-actions">${hasFeedback ? '<span class="exam-feedback-badge">● Remark</span>' : ''}${score ? `<span class="exam-list-score">${score}</span>` : ''}${button}</div>
     </article>`;
@@ -2163,19 +2163,86 @@ function goToExams() {
   if (studentNav) studentNav.show('exams-panel');
 }
 
-function loadNextUpEnhanced(){
-  const box=document.getElementById('nextUp');if(!box)return;const open=[],upcoming=[];
-  relevantExams.forEach(exam=>{if(attemptsForExam(exam.id)>=attemptsAllowed(exam))return;const windowState=examWindow(exam);if(windowState.state==='open')open.push(exam);else if(windowState.state==='upcoming')upcoming.push({exam,start:windowState.start});});upcoming.sort((a,b)=>a.start-b.start);
-  const rows=[];if(open.length){rows.push('<div class="nextup-date">Today</div>');open.forEach(exam=>{const close=exam.date&&exam.end?`${exam.date}T${exam.end}:00`:'';rows.push(`<div class="nextup-row urgent"><span class="nextup-tag">Open</span><button class="nextup-exam-link" onclick="openExamDetails('${exam.id}')">${exam.title}</button>${close?`<span class="countdown" data-time="${close}">Calculating...</span>`:'<span class="status-active">No deadline</span>'}</div>`);});}
-  const groups=new Map();upcoming.slice(0,8).forEach(item=>{if(!groups.has(item.exam.date))groups.set(item.exam.date,[]);groups.get(item.exam.date).push(item);});groups.forEach((items,date)=>{rows.push(`<div class="nextup-date">${new Date(date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div>`);items.forEach(({exam,start})=>rows.push(`<div class="nextup-row upcoming-row"><button class="nextup-exam-link" onclick="openExamDetails('${exam.id}')">${exam.title}</button><span class="countdown" data-time="${start.toISOString()}">Calculating...</span></div>`));});
-  const awaiting=submissions.filter(item=>item.studentId===currentStudent.id&&(item.answers||[]).some(answer=>answer.needsManualGrading&&answer.awarded===null)).length;if(awaiting)rows.push(`<div class="nextup-row"><span class="nextup-tag soon">Awaiting marking</span><span>${awaiting} submission(s) still being marked</span></div>`);box.innerHTML=rows.join('')||'<div class="nextup-row"><span>Nothing needs your attention right now.</span></div>';
+/* Every student-facing exam cell uses one interaction path. Results are not
+   included: result rows keep their dedicated answer-review navigation. */
+function examCellTarget(event) {
+  const cell = event.target.closest('[data-open-exam]');
+  if (!cell) return null;
+  const nestedButton = event.target.closest('button');
+  if (nestedButton && nestedButton !== cell) return null;
+  return cell;
+}
+
+document.addEventListener('click', event => {
+  const cell = examCellTarget(event);
+  if (!cell) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openExamDetails(cell.dataset.openExam);
+}, true);
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const cell = examCellTarget(event);
+  if (!cell) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openExamDetails(cell.dataset.openExam);
+}, true);
+
+function loadNextUpEnhanced() {
+  const box = document.getElementById('nextUp');
+  if (!box) return;
+  const open = [], upcoming = [];
+  relevantExams.forEach(exam => {
+    if (attemptsForExam(exam.id) >= attemptsAllowed(exam)) return;
+    const windowState = examWindow(exam);
+    if (windowState.state === 'open') open.push(exam);
+    else if (windowState.state === 'upcoming') upcoming.push({ exam, start:windowState.start });
+  });
+  upcoming.sort((a, b) => a.start - b.start);
+  const rows = [];
+  if (open.length) {
+    rows.push('<div class="nextup-date">Today</div>');
+    open.forEach(exam => {
+      const close = exam.date && exam.end ? `${exam.date}T${exam.end}:00` : '';
+      rows.push(`<div class="nextup-row urgent"><span class="nextup-tag">Open</span><button class="nextup-exam-link" data-open-exam="${escapeQuestionMedia(exam.id)}">${escapeQuestionMedia(exam.title)}</button>${close ? `<span class="countdown" data-time="${close}">Calculating...</span>` : '<span class="status-active">No deadline</span>'}</div>`);
+    });
+  }
+  const groups = new Map();
+  upcoming.slice(0, 8).forEach(item => {
+    if (!groups.has(item.exam.date)) groups.set(item.exam.date, []);
+    groups.get(item.exam.date).push(item);
+  });
+  groups.forEach((items, date) => {
+    rows.push(`<div class="nextup-date">${new Date(date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div>`);
+    items.forEach(({exam,start}) => rows.push(`<div class="nextup-row upcoming-row"><button class="nextup-exam-link" data-open-exam="${escapeQuestionMedia(exam.id)}">${escapeQuestionMedia(exam.title)}</button><span class="countdown" data-time="${start.toISOString()}">Calculating...</span></div>`));
+  });
+  const awaiting = submissions.filter(item => item.studentId === currentStudent.id && (item.answers || []).some(answer => answer.needsManualGrading && answer.awarded === null)).length;
+  if (awaiting) rows.push(`<div class="nextup-row"><span class="nextup-tag soon">Awaiting marking</span><span>${awaiting} submission(s) still being marked</span></div>`);
+  box.innerHTML = rows.join('') || '<div class="nextup-row"><span>Nothing needs your attention right now.</span></div>';
 }
 
 let calendarCursor=new Date();calendarCursor.setDate(1);
 function changeCalendarMonth(offset){calendarCursor.setMonth(calendarCursor.getMonth()+offset);renderExamCalendar();}
-function renderExamCalendar(){
-  const host=document.getElementById('examCalendar'),always=document.getElementById('alwaysOpenExams');if(!host)return;const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth(),today=new Date(),firstDay=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate();document.getElementById('calendarTitle').textContent=new Date(year,month,1).toLocaleDateString(undefined,{month:'long',year:'numeric'})+' exam calendar';
-  const cells=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day=>`<div class="calendar-weekday">${day}</div>`);for(let blank=0;blank<firstDay;blank++)cells.push('<div class="calendar-day outside" aria-hidden="true"></div>');for(let day=1;day<=days;day++){const key=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,dayExams=relevantExams.filter(exam=>exam.date===key),isToday=day===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();cells.push(`<div class="calendar-day${isToday?' today':''}"><span class="calendar-number">${day}</span>${dayExams.map(exam=>`<button type="button" class="calendar-exam" onclick="openExamDetails('${exam.id}')" title="${exam.title}">${exam.title}</button>`).join('')}</div>`);}host.innerHTML=cells.join('');const permanent=relevantExams.filter(exam=>!exam.date);always.innerHTML=permanent.length?'<strong>Always open:</strong>'+permanent.map(exam=>`<button type="button" class="calendar-exam" onclick="openExamDetails('${exam.id}')">${exam.title}</button>`).join(''):'';
+function renderExamCalendar() {
+  const host = document.getElementById('examCalendar'), always = document.getElementById('alwaysOpenExams');
+  if (!host) return;
+  const year = calendarCursor.getFullYear(), month = calendarCursor.getMonth(), today = new Date();
+  const firstDay = new Date(year, month, 1).getDay(), days = new Date(year, month + 1, 0).getDate();
+  document.getElementById('calendarTitle').textContent = new Date(year, month, 1).toLocaleDateString(undefined,{month:'long',year:'numeric'}) + ' exam calendar';
+  const cells = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day => `<div class="calendar-weekday">${day}</div>`);
+  for (let blank = 0; blank < firstDay; blank++) cells.push('<div class="calendar-day outside" aria-hidden="true"></div>');
+  for (let day = 1; day <= days; day++) {
+    const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayExams = relevantExams.filter(exam => exam.date === key);
+    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const buttons = dayExams.map(exam => `<button type="button" class="calendar-exam" data-open-exam="${escapeQuestionMedia(exam.id)}" title="${escapeQuestionMedia(exam.title)}">${escapeQuestionMedia(exam.title)}</button>`).join('');
+    cells.push(`<div class="calendar-day${isToday?' today':''}"><span class="calendar-number">${day}</span>${buttons}</div>`);
+  }
+  host.innerHTML = cells.join('');
+  const permanent = relevantExams.filter(exam => !exam.date);
+  always.innerHTML = permanent.length ? '<strong>Always open:</strong>' + permanent.map(exam => `<button type="button" class="calendar-exam" data-open-exam="${escapeQuestionMedia(exam.id)}">${escapeQuestionMedia(exam.title)}</button>`).join('') : '';
 }
 
 function loadStudentNotifications() {

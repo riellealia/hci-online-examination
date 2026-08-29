@@ -23,6 +23,11 @@ ok(r.d.getElementById('subjectsTable').classList.contains('compat-table')||r.d.g
 r.d.querySelector('#studentSubjectCards .enrolled-subject-card').click();
 ok(r.d.getElementById('subject-detail-panel').style.display==='block','clicking a subject card opens its subject page');
 ok(r.d.querySelectorAll('#studentSubjectDetail .subject-info-cell').length>=5,'subject page separates details, professor, rules, schedule, and exams into cells');
+const subjectExamCell=r.d.querySelector('#studentSubjectDetail [data-open-exam]');
+ok(!!subjectExamCell,'subject page renders examinations as shared interactive exam cells');
+subjectExamCell.click();
+ok(r.d.getElementById('takeExamModal').classList.contains('active')&&r.d.getElementById('examBriefing').style.display==='block','clicking a Subject examination opens the exam-details prompt');
+r.w.closeExamModal();
 ok(!r.d.querySelector('#sidebar [data-panel="subject-detail-panel"]'),'redundant Subject Details sidebar item is absent');
 ok(/Handles:/.test(r.d.querySelector('#studentSubjectDetail').textContent),'professor listing identifies handled sections');
 const classmate=r.d.querySelector('#studentSubjectDetail .classmate-row');

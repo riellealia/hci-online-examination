@@ -23,6 +23,10 @@ ok(examTabs.map(tab=>tab.textContent.replace(/\d+/g,'').trim()).join('|')==='Ove
 ok(examTabs.every(tab=>tab.querySelector('.exam-filter-count')),'every examination tab has a live count pill');
 r.w.selectExamFilter('pending');
 ok(r.d.querySelectorAll('#examSubjectCards .exam-list-row').length===1&&r.d.querySelector('.exam-filter-tab.active')?.textContent.includes('Pending'),'Pending filters the examination list and updates the active tab');
+const examinationCell=r.d.querySelector('#examSubjectCards [data-open-exam]');
+examinationCell.click();
+ok(r.d.getElementById('takeExamModal').classList.contains('active'),'clicking a My Examinations cell opens the shared details dialog');
+r.w.closeExamModal();
 const calendarExam=r.d.querySelector('#examCalendar .calendar-exam');
 ok(!!calendarExam,'the monthly calendar places the exam in its date cell');
 calendarExam.click();
