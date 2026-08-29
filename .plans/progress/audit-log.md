@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Consistent browser title
+
+- **Area:** Application shell
+- **Changed:** Standardized every public and role page browser title to `Online Examination`.
+- **Files:** `html/index.html`, `html/login.html`, `html/admin.html`, `html/faculty.html`, `html/student.html`
+- **Verification:** Confirmed the Faculty page is served locally on port 8000 and all five documents contain the new title.
+- **Result:** Complete
+
 ## 2026-08-29 — Question report status tabs and sorting
 
 - **Area:** Faculty question reports
