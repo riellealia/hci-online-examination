@@ -469,7 +469,7 @@ function mountProfileMenu({ name, role, id, container }) {
         ${pendingInboxCount?`<span class="header-inbox-count">${pendingInboxCount}</span>`:''}
       </button>
       <section class="header-inbox-panel" aria-hidden="true">
-        <header><strong>Inbox</strong><div class="header-inbox-head-actions"><button type="button" class="header-inbox-read-all">Read all</button><span class="header-inbox-pending">${pendingInboxCount} pending</span></div></header>
+        <header><strong>Inbox</strong><div class="header-inbox-head-actions"><button type="button" class="header-inbox-read-all">Read all</button></div></header>
         <div class="header-inbox-list">${inboxItems.length?inboxItems.slice(0,12).map((item,index)=>`<button type="button" class="header-inbox-item${item.pending?' pending':''}" data-inbox-index="${index}"><span>${safe(item.kind)}</span><strong>${safe(item.title)}</strong><p>${safe(item.text)}</p></button>`).join(''):'<p class="header-inbox-empty">No messages or updates.</p>'}</div>
       </section>
     </div>
@@ -512,7 +512,6 @@ function mountProfileMenu({ name, role, id, container }) {
   function refreshInboxPending(){
     const count=inboxItems.filter(item=>item.pending).length,badge=wrap.querySelector('.header-inbox-count');
     if(count){if(badge)badge.textContent=count;else inboxBtn.insertAdjacentHTML('beforeend',`<span class="header-inbox-count">${count}</span>`);}else badge?.remove();
-    wrap.querySelector('.header-inbox-pending').textContent=`${count} pending`;
     inboxBtn.setAttribute('aria-label',`Open inbox${count?` — ${count} pending`:''}`);
   }
   async function replyToInboxItem(item){

@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Simplified inbox header
+
+- **Area:** Shared header inbox
+- **Changed:** Removed the duplicated pending-count text from the Inbox panel header. The compact count badge remains on the mail icon.
+- **Files:** `js/ui.js`
+- **Verification:** Shared inbox tests pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Larger header inbox icon
 
 - **Area:** Shared role headers
