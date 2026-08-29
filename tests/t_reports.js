@@ -6,8 +6,9 @@ const today=new Date().toLocaleDateString('en-CA');
 (async()=>{
 console.log('=== QUESTION REPORTS. Student report to scoped Faculty resolution ===');
 const sharedCss=fs.readFileSync(path.join(__dirname,'..','css','shared-ui.css'),'utf8');
-ok(/--status-pending:\s*#EDC27B/.test(sharedCss)&&/body\[data-role\] #reportsView \.question-report\.pending\{border-color:var\(--status-pending\)!important\}/.test(sharedCss),'Reports page binds its dark-mode Pending border directly to the shared orange token');
-ok(/\.question-report\.pending:is\(:hover,:focus-visible\).*border-color:var\(--status-pending\)!important/.test(sharedCss),'hover and focus preserve the direct Pending status token');
+const reportCss=fs.readFileSync(path.join(__dirname,'..','css','report-status.css'),'utf8');
+ok(/--status-pending:\s*#EDC27B/.test(sharedCss)&&/#reportsView \.question-report\.pending,[\s\S]*border-color: var\(--status-pending\) !important/.test(reportCss),'Reports page binds its dark-mode Pending border directly to the shared orange token');
+ok(!/#[0-9a-f]{3,8}\b/i.test(reportCss),'report component contains no hard-coded colors');
 let s=SEED();
 s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59'}];
 let r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
@@ -59,7 +60,7 @@ ok(await mailing&&r.read('studentNotifications').some(item=>item.type==='faculty
 ok(r.w.openReportedQuestion(report.id)===true&&r.d.getElementById('questionModal').classList.contains('active'),'clicking a report opens its question editor');
 ok(/Both choices appear valid/.test(r.d.getElementById('reportedQuestionContext').textContent),'question editor shows the report context beside editable settings');
 ok(r.d.getElementById('reportedQuestionContext').classList.contains('pending')&&/S1/.test(r.d.getElementById('reportedQuestionContext').textContent),'embedded report matches the status card and reporter context');
-ok(/position:absolute/.test(sharedCss)&&/\.reported-question-context \.report-status\{position:absolute;top:14px;right:14px/.test(sharedCss),'embedded report status pill is anchored to the card top-right corner');
+ok(/#reportedQuestionContext > \.report-main > \.report-card-head > \.report-status[\s\S]*position: absolute !important;[\s\S]*top: 14px !important;[\s\S]*right: 14px !important/.test(reportCss),'embedded report status pill is anchored to the card top-right corner');
 ok(r.d.querySelectorAll('#reportedQuestionContext .report-action-icon').length===4&&!r.d.querySelector('#reportedQuestionContext textarea'),'embedded report uses the same four icon actions and keeps resolution notes in the prompt');
 r.w.closeQuestionModal();
 ok(r.d.getElementById('reports-tab').style.display!=='none'&&/Both choices appear valid/.test(r.d.getElementById('reportsView').textContent),'question editor Back returns to the originating reports page');

@@ -1,0 +1,66 @@
+/* Report status component
+   Loaded last on Faculty pages so legacy card rules cannot neutralize state. */
+
+#reportsView .question-report,
+#reportedQuestionContext.reported-question-context,
+.header-inbox-panel .inbox-related-report {
+  border-style: solid !important;
+  border-width: 1px !important;
+}
+
+#reportsView .question-report.pending,
+#reportedQuestionContext.reported-question-context.pending,
+.header-inbox-panel .inbox-related-report.pending {
+  border-color: var(--status-pending) !important;
+}
+
+#reportsView .question-report.resolved,
+#reportedQuestionContext.reported-question-context.resolved,
+.header-inbox-panel .inbox-related-report.resolved {
+  border-color: var(--status-resolved) !important;
+}
+
+#reportsView .question-report.dismissed,
+#reportedQuestionContext.reported-question-context.dismissed,
+.header-inbox-panel .inbox-related-report.dismissed {
+  border-color: var(--status-dismissed) !important;
+}
+
+#reportsView .question-report.pending .report-status,
+#reportedQuestionContext.pending .report-status,
+.header-inbox-panel .inbox-related-report.pending .inbox-related-report-head > span {
+  border-color: var(--status-pending) !important;
+  background: var(--status-pending-surface) !important;
+  color: var(--status-pending) !important;
+}
+
+#reportsView .question-report.resolved .report-status,
+#reportedQuestionContext.resolved .report-status,
+.header-inbox-panel .inbox-related-report.resolved .inbox-related-report-head > span {
+  border-color: var(--status-resolved) !important;
+  background: var(--status-resolved-surface) !important;
+  color: var(--status-resolved) !important;
+}
+
+#reportsView .question-report.dismissed .report-status,
+#reportedQuestionContext.dismissed .report-status,
+.header-inbox-panel .inbox-related-report.dismissed .inbox-related-report-head > span {
+  border-color: var(--status-dismissed) !important;
+  background: var(--status-dismissed-surface) !important;
+  color: var(--status-dismissed) !important;
+}
+
+#reportedQuestionContext.reported-question-context {
+  position: relative !important;
+}
+
+#reportedQuestionContext > .report-main > .report-card-head {
+  padding-right: 104px !important;
+}
+
+#reportedQuestionContext > .report-main > .report-card-head > .report-status {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  margin: 0 !important;
+}

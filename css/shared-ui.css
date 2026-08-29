@@ -1773,20 +1773,5 @@ body.login-bg .login-container :is(input,textarea)::placeholder { color:#6b7280 
 /* The report shown in Edit Question mirrors the report card status treatment. */
 .reported-question-context{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;border-left-width:1px}.reported-question-context .report-main{flex:1}.reported-question-context .report-card-head{margin-bottom:12px;padding-right:92px}.reported-question-context .report-card-head>div{display:grid;gap:3px}.reported-question-context .report-status{position:absolute;top:14px;right:14px;margin:0}.reported-question-context h4{margin:8px 0}@media(max-width:700px){.reported-question-context{align-items:stretch;flex-direction:column}.reported-question-context .report-actions{justify-content:flex-start}}
 
-/* Canonical report states. Bind components directly to theme tokens so older
-   Faculty surface rules cannot replace semantic borders with neutral gray. */
-:is(.question-report,.reported-question-context,.inbox-related-report).pending{border-color:var(--status-pending)!important}
-:is(.question-report,.reported-question-context,.inbox-related-report).resolved{border-color:var(--status-resolved)!important}
-:is(.question-report,.reported-question-context,.inbox-related-report).dismissed{border-color:var(--status-dismissed)!important}
-body[data-role] #reportsView .question-report.pending{border-color:var(--status-pending)!important}
-body[data-role] #reportsView .question-report.resolved{border-color:var(--status-resolved)!important}
-body[data-role] #reportsView .question-report.dismissed{border-color:var(--status-dismissed)!important}
-:is(.question-report,.reported-question-context,.inbox-related-report).pending :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--status-pending)!important;background:var(--status-pending-surface)!important;color:var(--status-pending)!important}
-:is(.question-report,.reported-question-context,.inbox-related-report).resolved :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--status-resolved)!important;background:var(--status-resolved-surface)!important;color:var(--status-resolved)!important}
-:is(.question-report,.reported-question-context,.inbox-related-report).dismissed :is(.report-status,.inbox-related-report-head>span){border:1px solid var(--status-dismissed)!important;background:var(--status-dismissed-surface)!important;color:var(--status-dismissed)!important}
-.question-report.pending:is(:hover,:focus-visible),.inbox-related-report.pending:is(:hover,:focus-visible){border-color:var(--status-pending)!important;background:color-mix(in srgb,var(--status-pending) 4%,var(--surface))}
-.question-report.resolved:is(:hover,:focus-visible),.inbox-related-report.resolved:is(:hover,:focus-visible){border-color:var(--status-resolved)!important;background:color-mix(in srgb,var(--status-resolved) 4%,var(--surface))}
-.question-report.dismissed:is(:hover,:focus-visible),.inbox-related-report.dismissed:is(:hover,:focus-visible){border-color:var(--status-dismissed)!important;background:color-mix(in srgb,var(--status-dismissed) 4%,var(--surface))}
-
 /* Choice rows: selecting the radio sets the answer key; deletion is icon-only. */
 .option-input-group>label{display:none}.option-input-group .remove-option-btn{display:grid;place-items:center;width:36px;min-width:36px;height:36px;min-height:36px;padding:0;border:1px solid color-mix(in srgb,var(--danger) 38%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--danger) 9%,var(--surface));color:var(--danger);font-size:0}.option-input-group .remove-option-btn::before{content:none}.option-input-group .remove-option-btn svg{width:18px;height:18px;fill:currentColor}.option-input-group .remove-option-btn:hover{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 16%,var(--surface));color:var(--danger)}

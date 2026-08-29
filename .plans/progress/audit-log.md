@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Report component cascade isolation
+
+- **Cause:** Legacy report-card declarations and the semantic state rules shared one large stylesheet, allowing stale/colliding card styles to neutralize the visible border and retain the old flex-positioned status pill.
+- **Fix:** Moved the final component contract into `css/report-status.css`, loaded after every Faculty stylesheet.
+- **State contract:** Pending, Resolved, and Dismissed borders and pills read the same shared theme token; the component file contains no literal colors.
+- **Position:** The Edit Question status pill is anchored to the report container's top-right corner with an exact child selector.
+- **Scope:** Reports page, Edit Question, and Inbox report cells.
+
 ## 2026-08-29 — Report cascade, variable, and encoding audit
 
 - **Area:** Reports page, Edit Question report context, Inbox report cells, and shared UI tokens
