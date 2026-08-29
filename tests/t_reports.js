@@ -34,6 +34,7 @@ const reportTabs=[...view.querySelectorAll('.report-filter-tab')];
 ok(reportTabs.length===4&&reportTabs.map(tab=>tab.textContent.replace(/\d+/g,'').trim()).join('|')==='All|Pending|Resolved|Dismissed','reports use the four status tabs');
 ok(!view.querySelector('#reportStatusFilter')&&!/\d+ open/.test(view.querySelector('.exams-header')?.textContent||''),'old open count and status dropdown are removed');
 ok(reportTabs.every(tab=>tab.querySelector('.report-filter-count')),'every status tab includes its count pill');
+ok(view.querySelector('.question-report').classList.contains('pending')&&view.querySelector('.report-status').textContent==='Pending','open and in-review reports share the Pending card status');
 const sortOptions=[...view.querySelectorAll('#reportSort option')].map(option=>option.textContent);
 ok(['Recent','Reporter name','Subject','Section','Status'].every(label=>sortOptions.includes(label)),'report sorting includes recent, reporter, subject, section, and status');
 const directionBefore=view.querySelector('.report-sort-direction').className;r.w.toggleReportSort();

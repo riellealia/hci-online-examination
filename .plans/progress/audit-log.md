@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Theme-aware report status accents
+
+- **Area:** Faculty question-report cards
+- **Status mapping:** Open and In Review now display as Pending; Resolved and Dismissed retain their names.
+- **Visual treatment:** Anchored the status pill to the card's upper-right corner. Only the pill and left border carry status color: muted orange for Pending, green for Resolved, and red for Dismissed.
+- **Themes:** Added separate softened light- and dark-theme color values for comfortable contrast without tinting the entire card.
+- **Files:** `html/faculty.html`, `css/shared-ui.css`, `tests/t_reports.js`
+- **Verification:** Question-report and responsive suites pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Shared inbox read state and replies
 
 - **Area:** Shared Admin, Faculty, and Student header inbox
