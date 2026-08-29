@@ -14,6 +14,7 @@ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
   const inboxButton=page.d.querySelector('.header-inbox-btn');
   ok(inboxButton.querySelector('svg')?.nextElementSibling?.classList.contains('header-inbox-count'),'pending count pill sits beside the inbox icon');
   inboxButton.click();
+  ok(page.d.querySelector('.header-inbox-title-count')?.textContent==='2','pending count pill appears beside the Inbox title');
   const mail=[...page.d.querySelectorAll('.header-inbox-item')].find(item=>/Student mail/.test(item.textContent));
   mail.click();await tick();
   ok(/Could you clarify question one/.test(page.d.querySelector('.confirm-msg')?.textContent||''),'clicking mail opens its full context prompt');
@@ -23,7 +24,7 @@ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
   ok(page.read('studentNotifications').some(item=>item.studentId==='S1'&&item.facultyId==='F1'&&item.type==='faculty-mail'),'Faculty can mail a reply back to the student');
   inboxButton.click();
   page.d.querySelector('.header-inbox-read-all').click();
-  ok(!page.d.querySelector('.header-inbox-count')&&!page.d.querySelector('.header-inbox-item.pending'),'Read all removes the count ping and unread highlights');
+  ok(!page.d.querySelector('.header-inbox-count')&&!page.d.querySelector('.header-inbox-title-count')&&!page.d.querySelector('.header-inbox-item.pending'),'Read all removes both count pills and unread highlights');
   ok(page.read('inboxReadReceipts').length===2,'read state is stored for the signed-in Faculty account');
   page.w.close();
 

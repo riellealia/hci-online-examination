@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-29 — Inbox-title count pill
+
+- **Area:** Shared header inbox
+- **Changed:** Added a compact pending-count pill directly beside the Inbox title. It updates with individual reads and disappears after Read all.
+- **Files:** `js/ui.js`, `css/shared-ui.css`, `tests/t_inbox.js`
+- **Verification:** Shared inbox tests pass.
+- **Result:** Complete
+
 ## 2026-08-29 — Simplified inbox header
 
 - **Area:** Shared header inbox
