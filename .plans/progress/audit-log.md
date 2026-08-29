@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-29 — Variable-driven report status colors
+
+- **Area:** Reports page, Edit Question report context, and shared Inbox report cells
+- **Cause:** A generic hover rule replaced semantic report borders with the role accent, while duplicated literal colors made the cascade difficult to maintain.
+- **Changed:** Centralized Pending, Resolved, and Dismissed foreground/surface colors as shared light/dark theme variables. Cards, pills, hover, and focus now consume the same status variables.
+- **Cleanup:** Removed duplicated report and Inbox status hex declarations from component rules.
+- **Files:** `css/shared-ui.css`, `html/faculty.html`, `tests/t_reports.js`
+- **Verification:** Report and Inbox suites pass; regression checks cover variables and hover/focus color stability.
+- **Result:** Complete
+
 ## 2026-08-29 — Unified report-card actions and resolution flow
 
 - **Area:** Faculty Edit Question report context

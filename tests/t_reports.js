@@ -6,7 +6,8 @@ const today=new Date().toLocaleDateString('en-CA');
 (async()=>{
 console.log('=== QUESTION REPORTS. Student report to scoped Faculty resolution ===');
 const sharedCss=fs.readFileSync(path.join(__dirname,'..','css','shared-ui.css'),'utf8');
-ok(/body\[data-role="faculty"\] \.question-report\.pending\{border:1px solid #edc27b!important\}/.test(sharedCss),'dark-mode report border overrides the legacy gray important rule');
+ok(/--status-pending:\s*#EDC27B/.test(sharedCss)&&/:root\[data-theme="dark"\] body\[data-role\].*border:1px solid var\(--report-status-color\)!important/.test(sharedCss),'report cards use shared dark-mode status tokens with enough specificity to beat the legacy gray rule');
+ok(/\.question-report\[role="button"\]:is\(:hover,:focus-visible\).*border-color:var\(--report-status-color\)!important/.test(sharedCss),'hover and focus preserve the report status border color');
 let s=SEED();
 s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59'}];
 let r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
