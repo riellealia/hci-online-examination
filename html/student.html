@@ -806,7 +806,11 @@ function loadStudentSubjects() {
     const fac = assignedFacultyId ? faculty.find(f => f.id === assignedFacultyId) : null;
     const sectionLabel = enrollment?.sectionId || (currentStudent.sections||[]).join(', ') || '—';
     const instructorLabel = fac ? `Prof. ${fac.first} ${fac.last}` : 'To be assigned';
-    const examCount=exams.filter(exam=>exam.subjectCode===code&&(!(exam.sections||[]).length||(enrollment?.sectionId&&(exam.sections||[]).includes(enrollment.sectionId)))).length;
+    const subjectExams=exams.filter(exam=>exam.status!=='draft'&&exam.subjectCode===code&&(!(exam.sections||[]).length||(enrollment?.sectionId&&(exam.sections||[]).includes(enrollment.sectionId))));
+    const examCount=subjectExams.length;
+    const completedExamIds=new Set(submissions.filter(submission=>submission.studentId===currentStudent.id).map(submission=>submission.examId));
+    const completedExamCount=subjectExams.filter(exam=>completedExamIds.has(exam.id)).length;
+    const progressPercent=examCount?Math.round(completedExamCount/examCount*100):0;
 
     const card = document.createElement('button');
     card.type = 'button';
@@ -817,7 +821,12 @@ function loadStudentSubjects() {
       <div class="student-course-head"><span class="student-course-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6.5A3.5 3.5 0 0 1 14 7.5V20a4.5 4.5 0 0 0-3.5-1.5H4V4Zm16 0h-3.5A3.5 3.5 0 0 0 14 5.1a5.5 5.5 0 0 1 1 3.2V20a4.5 4.5 0 0 1 3.5-1.5H20V4Z"/></svg></span><span class="student-course-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m13 5-1.4 1.4 4.6 4.6H5v2h11.2l-4.6 4.6L13 19l7-7-7-7Z"/></svg></span></div>
       <span class="enrolled-subject-code student-course-code">${escapeQuestionMedia(code)}</span>
       <h4>${escapeQuestionMedia(sub ? sub.name : 'Unknown Subject')}</h4>
-      <div class="enrolled-subject-meta student-course-meta"><span class="student-course-professor">${escapeQuestionMedia(instructorLabel)}</span><span>${examCount} exam${examCount===1?'':'s'}</span></div>`;
+      <div class="enrolled-subject-meta student-course-meta"><span class="student-course-professor">${escapeQuestionMedia(instructorLabel)}</span><span>${examCount} exam${examCount===1?'':'s'}</span></div>
+      <div class="student-course-progress" role="progressbar" aria-label="${escapeQuestionMedia(code)} examination progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
+        <div class="student-course-progress-label"><span>Exam progress</span><strong>${progressPercent}%</strong></div>
+        <div class="student-course-progress-track"><span style="width:${progressPercent}%"></span></div>
+        <small>${completedExamCount} of ${examCount} exam${examCount===1?'':'s'} completed</small>
+      </div>`;
     card.addEventListener('click', () => openStudentSubject(code));
     cards.appendChild(card);
 
@@ -2299,6 +2308,13 @@ loadNextUpEnhanced();
 renderExamCalendar();
 startCountdown();
 loadStudentNotifications();
+window.addEventListener('storage', event => {
+  if (event.key === 'exams' || event.key === 'studentSubmissions') {
+    exams = DB.read('exams', []);
+    submissions = DB.read('studentSubmissions', []);
+    loadStudentSubjects();
+  }
+});
 AdminTableTools.mount('student-exams',document.getElementById('examTable'),document.getElementById('studentExamTools'));
 AdminTableTools.mount('student-results',document.getElementById('resultsTable'),document.getElementById('studentResultTools'));
 AdminTableTools.mount('student-subjects',document.getElementById('subjectsTable'),document.getElementById('studentSubjectTools'));
