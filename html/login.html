@@ -260,6 +260,7 @@
     const rConfig = roleStyles[role];
     const label = rConfig.label;
     document.body.dataset.role = role;
+    btn.style.setProperty('background', 'var(--accent)', 'important');
     
     loginRole.textContent = `${label} Login`;
     btn.classList.add(rConfig.class);

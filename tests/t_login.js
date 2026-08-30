@@ -30,6 +30,7 @@ function openLogin(role,store={}){
 console.log('=== S. Credentials no longer exposed on screen ===');
 let r=openLogin('admin');
 ok(r.d.body.dataset.role==='admin','Admin login activates the Admin site theme');
+ok(r.d.getElementById('loginBtn').style.getPropertyValue('background')==='var(--accent)'&&r.d.getElementById('loginBtn').style.getPropertyPriority('background')==='important','Admin login button is locked to the active site accent variable');
 const text=[...r.d.body.querySelectorAll('*')].filter(e=>e.tagName!=='SCRIPT').map(e=>e.childNodes).flatMap(n=>[...n]).filter(n=>n.nodeType===3).map(n=>n.textContent).join(' ');
 ok(!/admin123|Reyes890|Cruz001/.test(text),'no passwords rendered anywhere on the page');
 ok(!r.d.getElementById('credHint'),'credentials hint box gone');
@@ -58,11 +59,11 @@ let cu=r.read('currentUser');
 ok(cu && cu.username==='admin' && cu.role==='admin','admin logs in');
 ok(cu && cu.password===undefined,'session stores no password');
 
-r=openLogin('faculty'); ok(r.d.body.dataset.role==='faculty','Faculty login activates the Faculty site theme'); r.submit('12-34567-890','reyes0');
+r=openLogin('faculty'); ok(r.d.body.dataset.role==='faculty'&&r.d.getElementById('loginBtn').style.getPropertyValue('background')==='var(--accent)','Faculty login button uses the Faculty site accent'); r.submit('12-34567-890','reyes0');
 cu=r.read('currentUser');
 ok(cu && cu.role==='faculty','faculty logs in with the seeded rule');
 
-r=openLogin('student'); ok(r.d.body.dataset.role==='student','Student login activates the Student site theme'); r.submit('2024-00001','delacruz3');
+r=openLogin('student'); ok(r.d.body.dataset.role==='student'&&r.d.getElementById('loginBtn').style.getPropertyValue('background')==='var(--accent)','Student login button uses the Student site accent'); r.submit('2024-00001','delacruz3');
 cu=r.read('currentUser');
 ok(cu && cu.role==='student','student logs in with the seeded rule');
 process.exit(0);
