@@ -137,7 +137,7 @@
   .review-choice.is-correct { background:#e8f5e9; color:#2f6b3c; font-weight:700; }
   #resultsRemarks { display:none; }
   .subject-empty { padding:28px; color:#78857e; text-align:center; }
-  .enrolled-subject-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; }
+  .enrolled-subject-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
   .enrolled-subject-card { min-height:180px; padding:20px; border:1px solid #e0e8e3; border-radius:14px; background:linear-gradient(145deg,#fff,#f8fbf9); box-shadow:0 4px 15px rgba(27,55,38,.055); }
   button.enrolled-subject-card { width:100%; font:inherit; text-align:left; cursor:pointer; }
   button.enrolled-subject-card:hover { transform:translateY(-2px); border-color:var(--accent-line); box-shadow:0 9px 22px rgba(27,55,38,.1); }
@@ -200,7 +200,7 @@
   @media(max-width:640px){.exam-list-row{grid-template-columns:1fr}.exam-list-actions{justify-content:space-between}.exam-list-score{text-align:left}.review-answer-grid{grid-template-columns:1fr}}
   #exams-panel,#results-panel { position:relative; }
   #exams-panel > .role-table-tools,#results-panel > .role-table-tools { top:20px; right:20px; }
-  @media(max-width:760px){.subject-card-head{align-items:flex-start}.subject-exam-row:not(.result-exam-row){grid-template-columns:1fr;gap:8px}.subject-exam-row .btn-take-exam{width:100%}.subject-summary{max-width:125px}.subject-detail-grid{grid-template-columns:1fr}.subject-detail-exams{grid-column:auto}#exams-panel > .role-table-tools,#results-panel > .role-table-tools{position:relative;top:auto;right:auto;justify-content:flex-end;margin:-4px 0 16px}}
+  @media(max-width:760px){.enrolled-subject-grid{grid-template-columns:1fr}.subject-card-head{align-items:flex-start}.subject-exam-row:not(.result-exam-row){grid-template-columns:1fr;gap:8px}.subject-exam-row .btn-take-exam{width:100%}.subject-summary{max-width:125px}.subject-detail-grid{grid-template-columns:1fr}.subject-detail-exams{grid-column:auto}#exams-panel > .role-table-tools,#results-panel > .role-table-tools{position:relative;top:auto;right:auto;justify-content:flex-end;margin:-4px 0 16px}}
   @media(max-width:560px){.result-exam-row{grid-template-columns:1fr auto;gap:6px 12px}.result-exam-row>div:first-child{grid-column:1/-1}.result-exam-row>*:not(:first-child){white-space:normal}.result-exam-row>div:last-child{grid-column:1/-1}}
 
   /* The examination is a dedicated workspace, not a dialog. */
