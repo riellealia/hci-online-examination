@@ -367,9 +367,6 @@
       <h3>📌 Next up</h3>
       <div id="nextUp"></div>
     </div>
-    <div class="section-card" id="studentNotificationsCard" style="display:none;">
-      <h3>Report updates</h3><div id="studentNotifications"></div>
-    </div>
     <div class="section-card" id="calendarCard">
       <div class="calendar-head"><h3 id="calendarTitle">Monthly exam calendar</h3><div class="calendar-nav"><button type="button" onclick="changeCalendarMonth(-1)" aria-label="Previous month">‹</button><button type="button" onclick="changeCalendarMonth(1)" aria-label="Next month">›</button></div></div>
       <div class="calendar-scroll"><div id="examCalendar" class="exam-calendar" aria-labelledby="calendarTitle"></div></div>
@@ -2280,14 +2277,6 @@ function renderExamCalendar() {
   always.innerHTML = permanent.length ? '<strong>Always open:</strong>' + permanent.map(exam => `<button type="button" class="calendar-exam" data-open-exam="${escapeQuestionMedia(exam.id)}">${escapeQuestionMedia(exam.title)}</button>`).join('') : '';
 }
 
-function loadStudentNotifications() {
-  const notices = notificationsForStudent(currentStudent.id);
-  const card = document.getElementById('studentNotificationsCard');
-  const host = document.getElementById('studentNotifications');
-  card.style.display = notices.length ? 'block' : 'none';
-  host.innerHTML = notices.map(item => `<div class="nextup-row"><span class="nextup-tag soon">Instructor reply</span><span>${escapeQuestionMedia(item.message)}</span></div>`).join('');
-}
-
 const studentNav = mountSidebar({
   items: [
     { id: 'overview-panel', label: 'Overview',         icon: '🏠' },
@@ -2307,7 +2296,6 @@ loadResults();
 loadNextUpEnhanced();
 renderExamCalendar();
 startCountdown();
-loadStudentNotifications();
 window.addEventListener('storage', event => {
   if (event.key === 'exams' || event.key === 'studentSubmissions') {
     exams = DB.read('exams', []);

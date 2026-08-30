@@ -92,8 +92,7 @@ ok(r.w.createQuestionReport({studentId:'S1',examId:'e1',questionId:'q2',category
 r.w.close();
 
 r=load('student.html',{...s,studentNotifications:[notice],currentUser:{username:'S1',role:'student'}});
-ok(r.d.getElementById('studentNotificationsCard').style.display==='block','Student sees report-update card');
-ok(/answer key was corrected/.test(r.d.getElementById('studentNotifications').textContent),'Student sees Faculty resolution message');
+ok(!r.d.getElementById('studentNotificationsCard'),'Student dashboard does not duplicate mail notifications in a Report updates card');
 ok(/answer key was corrected/.test(r.d.querySelector('.header-inbox-panel')?.textContent||''),'Student header inbox includes the private report update');
 r.w.close();
 process.exit(0);
