@@ -1,5 +1,12 @@
 # Project Audit Log
 
+## 2026-08-30 — Simplified Enrolled Subjects tools
+
+- **Student:** Removed Group By from My Enrolled Subjects because its card grid is already organized as a concise subject collection.
+- **Retained:** Search, sort field, ascending/descending order, and grid/list view remain available.
+- **Scope:** Other pages keep grouping wherever it remains applicable.
+- **Verification:** Cross-role toolbar and Student subject-card checks pass.
+
 ## 2026-08-30 — Matching Faculty subject card and Course Page header
 
 - **Course Page:** Replaced the separate gradient hero design with the same card structure used on the Faculty subject list.

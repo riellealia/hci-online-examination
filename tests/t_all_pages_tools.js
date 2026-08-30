@@ -12,8 +12,7 @@ ok([...r.d.querySelectorAll('#studentSubjectCards .enrolled-subject-card')].filt
 input.value='';input.dispatchEvent(new r.w.Event('input',{bubbles:true}));
 const direction=subjectTools.querySelector('.table-direction');direction.click();
 ok(r.d.querySelector('#studentSubjectCards .enrolled-subject-card')?.dataset.subject==='SUB2','direction control reverses the visible card order');
-const group=subjectTools.querySelector('.group-field select');group.value='2';group.dispatchEvent(new r.w.Event('change',{bubbles:true}));
-ok(r.d.querySelectorAll('#studentSubjectCards .card-group-heading').length>0,'grouping creates visible card headings with counts');
+ok(!subjectTools.querySelector('.table-group-toggle')&&!subjectTools.querySelector('.group-field'),'Enrolled Subjects omits inapplicable grouping');
 r.w.close();
 
 seed=SEED(); seed.students.push({id:'S2',last:'Zulu',first:'Ana',sections:['A']}); seed.studentSubmissions=[{id:'sub2',studentId:'S2',examId:'e1',submittedAt:'2026-08-20T09:00:00Z',total:10,answers:[{awarded:7,needsManualGrading:false}]},{id:'sub-old',studentId:'S1',examId:'e1',submittedAt:'2026-08-19T10:00:00Z',total:10,answers:[{awarded:6,needsManualGrading:false}]},{id:'sub1',studentId:'S1',examId:'e1',submittedAt:'2026-08-20T10:00:00Z',total:10,answers:[{awarded:8,needsManualGrading:false}]}];

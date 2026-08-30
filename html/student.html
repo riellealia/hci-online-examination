@@ -2302,6 +2302,7 @@ loadStudentNotifications();
 AdminTableTools.mount('student-exams',document.getElementById('examTable'),document.getElementById('studentExamTools'));
 AdminTableTools.mount('student-results',document.getElementById('resultsTable'),document.getElementById('studentResultTools'));
 AdminTableTools.mount('student-subjects',document.getElementById('subjectsTable'),document.getElementById('studentSubjectTools'));
+document.getElementById('studentSubjectTools')?.querySelectorAll('.table-group-toggle,.group-field').forEach(control=>control.remove());
 StudentCardTools.mount({toolsHost:document.getElementById('studentExamTools'),container:document.getElementById('examSubjectCards'),cardSelector:'.exam-list-row',values:card=>[card.dataset.subject,card.querySelector('.exam-list-title')?.textContent||'',card.textContent,'']});
 StudentCardTools.mount({toolsHost:document.getElementById('studentResultTools'),container:document.getElementById('resultSubjectCards'),cardSelector:'.subject-card',values:card=>[card.dataset.subject,card.querySelector('.subject-card-title strong')?.textContent||'',card.textContent,'']});
 StudentCardTools.mount({toolsHost:document.getElementById('studentSubjectTools'),container:document.getElementById('studentSubjectCards'),cardSelector:'.enrolled-subject-card',values:card=>[card.dataset.subject,card.querySelector('h4')?.textContent||'',card.querySelector('.enrolled-subject-meta strong:nth-of-type(1)')?.textContent||card.textContent,card.querySelector('.enrolled-subject-meta div:nth-child(2) strong')?.textContent||'']});
