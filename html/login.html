@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Online Examination</title>
-  <link rel="stylesheet" href="../css/style.css?v=20260830-role-colors" />
-  <link rel="stylesheet" href="../css/shared-ui.css?v=20260830-role-colors" />
+  <link rel="stylesheet" href="../css/style.css?v=20260830-role-colors-2" />
+  <link rel="stylesheet" href="../css/shared-ui.css?v=20260830-role-colors-2" />
   <script src="../js/storage.js"></script>
   <script src="../js/audit-service.js"></script>
   <script src="../js/demo-data.js"></script>
@@ -259,6 +259,7 @@
   if (role && roleStyles[role]) {
     const rConfig = roleStyles[role];
     const label = rConfig.label;
+    document.body.dataset.role = role;
     
     loginRole.textContent = `${label} Login`;
     btn.classList.add(rConfig.class);

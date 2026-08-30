@@ -107,6 +107,12 @@ body {
 .btn.faculty { background: var(--role-faculty, #3A7D78); }
 .btn.student { background: var(--role-student, #487F53); }
 
+/* Role picker and role-specific login submit buttons mirror each dashboard. */
+body.login-bg .role-buttons .btn.admin { background: var(--role-admin, #4A6FA5) !important; }
+body.login-bg .role-buttons .btn.faculty { background: var(--role-faculty, #3A7D78) !important; }
+body.login-bg .role-buttons .btn.student { background: var(--role-student, #487F53) !important; }
+body.login-bg[data-role] #loginBtn { background: var(--accent) !important; }
+
 form {
   display: flex;
   flex-direction: column;
