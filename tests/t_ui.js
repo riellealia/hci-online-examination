@@ -41,6 +41,9 @@ ok(r.d.documentElement.dataset.theme==='light','second toggle restores light mod
 r.w.close();
 const darkReload=load('student.html',{...SEED(),currentUser:{username:'S1',role:'student'}},{raw:{'uiTheme:student:S1':'dark'}});
 ok(darkReload.d.documentElement.dataset.theme==='dark'&&/Light mode/.test(darkReload.d.getElementById('profileThemeBtn').textContent),'dark preference persists across page loads');
+darkReload.w.notify('Theme check','success');
+const darkToast=darkReload.d.querySelector('.toast');
+ok(darkReload.w.getComputedStyle(darkToast).backgroundColor!=='rgb(255, 255, 255)','dark-mode toast uses the themed surface instead of a hard-coded white background');
 darkReload.w.close();
 const otherAccount=load('student.html',{...SEED(),currentUser:{username:'S2',role:'student'}},{raw:{'uiTheme:student:S1':'dark'}});
 ok(otherAccount.d.documentElement.dataset.theme==='light','theme preference is isolated per account');

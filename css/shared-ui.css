@@ -692,14 +692,14 @@ table tr:last-child td {
   align-items: flex-start;
   gap: 11px;
   padding: 13px 14px;
-  background: #fff;
+  background: var(--toast-surface);
   border: 1px solid var(--line);
   border-left: 4px solid var(--ink-soft);
   border-radius: var(--r-md);
   box-shadow: var(--sh-md);
   font-size: 13.5px;
   line-height: 1.5;
-  color: var(--ink);
+  color: var(--toast-text);
   pointer-events: auto;
   opacity: 0;
   transform: translateX(14px);
