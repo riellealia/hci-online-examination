@@ -52,6 +52,11 @@
   --accent-soft: rgba(74, 111, 165, 0.10);
   --accent-line: rgba(74, 111, 165, 0.28);
 
+  /* Canonical role colors shared by the role picker, login, and dashboards. */
+  --role-admin: #4A6FA5;
+  --role-faculty: #3A7D78;
+  --role-student: #487F53;
+
   /* Semantic colours. Deliberately NOT the role accent: their meaning must
      stay identical across all three roles, per the project plan. */
   --action:   #4E6E8E;   /* neutral secondary action  */
@@ -88,20 +93,20 @@
 
 /* Muted role accents, per the project plan */
 body[data-role="admin"] {
-  --accent: #4A6FA5;                          /* muted blue */
+  --accent: var(--role-admin);                /* muted blue */
   --accent-soft: rgba(74, 111, 165, 0.10);
   --accent-line: rgba(74, 111, 165, 0.28);
 }
 
 body[data-role="faculty"] {
-  --accent: #3A7D78;      /* muted teal — 4.79:1 on white */
+  --accent: var(--role-faculty); /* muted teal — 4.79:1 on white */
   --accent-dark: #2E6663;
   --accent-soft: rgba(58, 125, 120, 0.10);
   --accent-line: rgba(58, 125, 120, 0.28);
 }
 
 body[data-role="student"] {
-  --accent: #487F53;      /* muted green — 4.73:1 on white */
+  --accent: var(--role-student); /* muted green — 4.73:1 on white */
   --accent-dark: #3A6743;
   --accent-soft: rgba(72, 127, 83, 0.10);
   --accent-line: rgba(72, 127, 83, 0.28);

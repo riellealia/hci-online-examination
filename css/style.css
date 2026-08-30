@@ -103,9 +103,9 @@ body {
 
 .btn:hover { opacity: 0.85; }
 
-.admin { background: #800000; }
-.faculty { background: #0B3C73; }
-.student { background: #6b4f4f; }
+.btn.admin { background: var(--role-admin, #4A6FA5); }
+.btn.faculty { background: var(--role-faculty, #3A7D78); }
+.btn.student { background: var(--role-student, #487F53); }
 
 form {
   display: flex;

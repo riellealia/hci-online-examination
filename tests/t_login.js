@@ -1,6 +1,11 @@
 const fs=require('fs'), {JSDOM,VirtualConsole}=require('jsdom');
 const DIR=require('path').join(__dirname,'..','html')+'/';
+const roleCss=fs.readFileSync(DIR+'../css/style.css','utf8');
+const sharedCss=fs.readFileSync(DIR+'../css/shared-ui.css','utf8');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
+
+ok(/\.btn\.admin\s*\{[^}]*--role-admin/.test(roleCss)&&/\.btn\.faculty\s*\{[^}]*--role-faculty/.test(roleCss)&&/\.btn\.student\s*\{[^}]*--role-student/.test(roleCss),'role picker and login buttons use the shared Admin, Faculty, and Student colors');
+ok(/--role-admin:\s*#4A6FA5/.test(sharedCss)&&/--role-faculty:\s*#3A7D78/.test(sharedCss)&&/--role-student:\s*#487F53/.test(sharedCss),'shared role color variables match the three signed-in sites');
 
 function openLogin(role,store={}){
   const mem={}; Object.entries(store).forEach(([k,v])=>mem[k]=JSON.stringify(v));
