@@ -35,6 +35,7 @@ ok(r.d.getElementById('facultySubjectWorkspace').classList.contains('is-section-
 ok(/Section preview/.test(r.d.querySelector('.preview-banner').textContent),'preview identifies the selected section');
 r.w.FacultySubjectWorkspace.openEditPrompt();
 ok(r.d.querySelectorAll('.subject-edit-dialog [data-edit-action]').length===4,'Edit prompt offers color, icon, exam-rule cells, and hero description options with icons');
+ok(!!r.d.querySelector('.subject-edit-dialog>.subject-dialog-close,.subject-edit-dialog>header>.subject-dialog-close'),'Edit prompt provides its dedicated top-right close control');
 r.d.querySelector('.subject-edit-dialog [data-edit-action="color"]').click();
 r.d.querySelector('.subject-color-options [data-color="#3576a8"]').click();
 ok(r.read('subjects').find(item=>item.code==='SUB1').workspaceColor==='#3576a8','Edit color saves the subject accent');
