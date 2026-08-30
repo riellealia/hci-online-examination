@@ -1,5 +1,15 @@
 # Project Audit Log
 
+## 2026-08-30 — Admin System Management
+
+- **Architecture:** Added System Management as a separate JavaScript and CSS module rather than expanding the existing Admin page logic into a monolith.
+- **Announcements:** Admin can create, edit, target, schedule, archive, restore, and delete notices; the shared Inbox omits future and archived notices.
+- **Maintenance and access:** Admin can pause Faculty/Student access, provide a maintenance message, set role access, and configure inactivity timeout.
+- **Academic period:** School year and semester are saved as shared prototype settings.
+- **Backup/restore:** Admin can download and restore a versioned JSON snapshot of the browser-stored application records with confirmation.
+- **Integrity:** The scanner reports orphaned enrollments, assignments, exams, questions, submissions, and missing login accounts.
+- **Verification:** New System Management coverage and existing authentication, navigation, Admin dashboard, login, and Inbox suites pass.
+
 ## 2026-08-30 — Simplified Enrolled Subjects tools
 
 - **Student:** Removed Group By from My Enrolled Subjects because its card grid is already organized as a concise subject collection.

@@ -1,6 +1,6 @@
 # Project Completion Checklist
 
-Last reviewed: 2026-08-27
+Last reviewed: 2026-08-30
 
 Status key: `[x]` complete, `[~]` partial or needs verification, `[ ]` not started.
 
@@ -18,6 +18,10 @@ assertions and one legacy-suite crash after recent UI restructuring; see
 - [x] Logout clears the current session
 - [x] Clear and accessible authentication error state
 - [x] Correct all HTML paths to shared CSS, JavaScript, logo, and background assets
+- [x] System Management page for announcements, maintenance mode, academic period, backup/restore, integrity checks, and account-access rules
+- [x] Enforce maintenance mode, paused role access, disabled accounts, and configurable inactive-session expiry at authentication boundaries
+- [x] Schedule, target, edit, archive, restore, and delete Admin announcements shown through the shared Inbox
+- [x] Export and restore the complete browser-storage prototype as a versioned JSON backup
 
 ## Module 1 — Faculty and subject creation
 

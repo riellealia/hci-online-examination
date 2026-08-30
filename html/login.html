@@ -273,7 +273,7 @@
   
   function validateLogin(username, password, role) {
     const currentUsers = JSON.parse(localStorage.getItem("users")) || [];
-    return currentUsers.find(u => u.username === username && u.password === password && u.role === role);
+    return currentUsers.find(u => u.username === username && u.password === password && u.role === role && u.disabled !== true);
   }
   
   const authError = document.getElementById("authError");
@@ -299,6 +299,12 @@
     passwordInput.removeAttribute("aria-invalid");
   }
 
+  const accessNotice = JSON.parse(localStorage.getItem('accessNotice') || '""');
+  if (accessNotice) {
+    showAuthError(accessNotice);
+    localStorage.removeItem('accessNotice');
+  }
+
   // Clear the error as soon as the person starts correcting it.
   [usernameInput, passwordInput].forEach(el =>
     el.addEventListener("input", clearAuthError));
@@ -316,6 +322,16 @@
       return;
     }
 
+    const access = JSON.parse(localStorage.getItem('systemSettings') || '{}');
+    if (role !== 'admin' && access.maintenance) {
+      showAuthError(access.maintenanceMessage || 'The portal is currently under maintenance.');
+      return;
+    }
+    if ((role === 'faculty' && access.allowFacultyLogin === false) || (role === 'student' && access.allowStudentLogin === false)) {
+      showAuthError(`${role === 'faculty' ? 'Faculty' : 'Student'} access is currently paused by the administrator.`);
+      return;
+    }
+
     const user = validateLogin(username, password, role);
 
     if (user) {
@@ -323,7 +339,9 @@
       // identity from here, not from the URL.
       localStorage.setItem("currentUser", JSON.stringify({
         username: user.username,
-        role: user.role
+        role: user.role,
+        signedInAt: Date.now(),
+        lastActivityAt: Date.now()
       }));
       AuditLog.record('login','session',user.username,{role:user.role},{username:user.username,role:user.role});
       window.location.href = `${role}.html`;

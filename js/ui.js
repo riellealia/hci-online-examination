@@ -489,7 +489,8 @@ function mountProfileMenu({ name, role, id, container }) {
   const exams = typeof DB !== 'undefined' ? DB.read('exams', []) : [];
   const emails = typeof DB !== 'undefined' ? DB.read('studentEmails', []) : [];
   const reportNotices = typeof DB !== 'undefined' ? DB.read('studentNotifications', []) : [];
-  let inboxItems = announcements.filter(item => !item.audience || item.audience === 'all' || item.audience === role)
+  const now = Date.now();
+  let inboxItems = announcements.filter(item => !item.archived && (!item.publishAt || new Date(item.publishAt).getTime() <= now) && (!item.audience || item.audience === 'all' || item.audience === role))
     .map(item => ({kind:'Announcement',title:item.title||'Admin announcement',text:item.message||'',at:item.createdAt,pending:!item.read}));
   if (role === 'faculty') {
     const owned = new Set(exams.filter(exam => exam.facultyId === id).map(exam => exam.id));

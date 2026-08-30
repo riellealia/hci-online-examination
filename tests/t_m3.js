@@ -45,9 +45,10 @@ console.log('\n=== DD. Reorder persists and renumbers the list ===');
 const listed=[...r.d.querySelectorAll('.question-text')].map(e=>e.textContent.trim());
 console.log('    rendered:',JSON.stringify(listed));
 ok(/^Q1: Third/.test(listed[0])&&/^Q2: First/.test(listed[1]),'display renumbered after move');
-const upBtns=[...r.d.querySelectorAll('.move-q-btn')];
+const upBtns=[...r.d.querySelectorAll('.question-more-menu button')].filter(button=>/Move up/.test(button.textContent));
+const downBtns=[...r.d.querySelectorAll('.question-more-menu button')].filter(button=>/Move down/.test(button.textContent));
 ok(upBtns[0].disabled,'first question cannot move up (button disabled)');
-ok(upBtns[upBtns.length-1].disabled,'last question cannot move down (button disabled)');
+ok(downBtns[downBtns.length-1].disabled,'last question cannot move down (button disabled)');
 r.w.close();
 
 console.log('\n=== EE. Exam preview ===');

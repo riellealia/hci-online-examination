@@ -1,7 +1,7 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 const pages=[
-  ['admin.html',  {username:'admin',role:'admin'},  7, 'Dashboard'],
+  ['admin.html',  {username:'admin',role:'admin'},  8, 'Dashboard'],
   ['faculty.html',{username:'F1',role:'faculty'},   4, 'My Subjects'],
   ['student.html',{username:'S1',role:'student'},   4, 'Overview']
 ];

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/shared-ui.css?v=20260829-themed-toasts">
     <link rel="stylesheet" href="../css/admin-modern.css">
+    <link rel="stylesheet" href="../css/system-management.css">
     <script src="../js/storage.js"></script>
     <script src="../js/demo-data.js"></script>
     <script src="../js/section-service.js"></script>
@@ -17,6 +18,7 @@
     <script src="../js/admin-table-tools.js"></script>
 <script src="../js/auth.js"></script>
     <script src="../js/ui.js"></script>
+    <script src="../js/system-management.js"></script>
 </head>
 
 <body data-role="admin">
@@ -80,6 +82,10 @@
       <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'sectionSection')" onkeydown="activateAdminCard(event,'sectionSection')" aria-label="Open Section Management">
         <div class="card-top"><div class="card-icon">▦</div><div class="card-count" id="countSections">0</div></div>
         <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Sections</div><div class="card-note">Programs and memberships</div></div><button class="plus-circle" onclick="event.stopPropagation();openSectionModal()" aria-label="Add section" title="Add section">＋</button></div>
+      </div>
+      <div class="card green admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'systemSection')" onkeydown="activateAdminCard(event,'systemSection')" aria-label="Open System Management">
+        <div class="card-top"><div class="card-icon">&#9881;</div><div class="card-count">6</div></div>
+        <div class="card-bottom green"><div class="card-copy"><div class="card-label">System management</div><div class="card-note">Announcements, access, and data tools</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
       </div>
     </div>
   </div>
@@ -161,6 +167,10 @@
       <button type="button" class="audit-tab" role="tab" aria-selected="false" data-audit-tab="login" onclick="setAuditTab('login')">Log in</button>
     </div>
     <h3 class="audit-events-title">Recorded activity</h3><div class="management-table-shell audit-table-shell"><div class="table-corner-actions" id="auditTableTools"><button class="corner-icon-btn export-action" onclick="exportTableCsv('auditTable','audit-log.csv')" aria-label="Export audit log CSV" title="Export audit log CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="auditTable"></table></div></div>
+  </div>
+
+  <div id="systemSection" class="panel">
+    <div id="systemManagementRoot"></div>
   </div>
 
   <!-- Modals -->
@@ -1299,7 +1309,8 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
       { id: 'sectionSection',        label: 'Section Management',        icon: '▦' },
       { id: 'subjectSection',        label: 'Subject Management',        icon: '📚' },
       { id: 'facultySubjectSection', label: 'Faculty–Subject Allotment', icon: '🎓' },
-      { id: 'auditSection',          label: 'Audit Log',                 icon: '◷' }
+      { id: 'auditSection',          label: 'Audit Log',                 icon: '◷' },
+      { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' }
     ],
     titleEl: null,
     onSelect(id) {
@@ -1307,6 +1318,7 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
       else stopMonitoring();
     }
   });
+  SystemManagement.mount();
 
   // Close modals when clicking outside
   window.addEventListener('click',function(e){
