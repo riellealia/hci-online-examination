@@ -1,5 +1,13 @@
 # Project Audit Log
 
+## 2026-08-30 — Matching Faculty subject card and Course Page header
+
+- **Course Page:** Replaced the separate gradient hero design with the same card structure used on the Faculty subject list.
+- **Visual identity:** Added the book icon, subject-specific accent tone, circular background motif, compact subject title, and section/exam count pills.
+- **Actions:** Retained the three-dot menu because the opened Course Page still contains Back and section-preview actions.
+- **Themes:** The shared surface, ink, border, and accent variables support both light and dark modes without a separate hard-coded banner.
+- **Verification:** Faculty Course Page and workspace regression checks pass; JavaScript syntax and whitespace validation pass.
+
 ## 2026-08-29 — Shared Back navigation
 
 - **All roles:** Admin, Faculty, and Student panel changes now create browser-history entries through the shared navigation component.
