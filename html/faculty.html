@@ -908,7 +908,7 @@
     .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20260830-dark-toast">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20260830-semantic-actions">
 <link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20260830-exam-list">
 <link rel="stylesheet" href="../css/report-status.css?v=20260829-1">
 <script src="../js/dates.js"></script>
@@ -2039,7 +2039,7 @@ function manageQuestions(examId) {
                                     <button onclick="moveQuestion('${q.id}',-1)" ${qIdx === 0 ? 'disabled' : ''}><span aria-hidden="true">&#8593;</span>Move up</button>
                                     <button onclick="moveQuestion('${q.id}',1)" ${qIdx === examQuestions.length - 1 ? 'disabled' : ''}><span aria-hidden="true">&#8595;</span>Move down</button>
                                     <button onclick="duplicateQuestion('${q.id}')"><span aria-hidden="true">&#10697;</span>Duplicate</button>
-                                    ${examReports.some(report=>report.questionId===q.id) ? `<button onclick="openQuestionReports('${q.id}')"><span aria-hidden="true">&#9873;</span>Reports (${examReports.filter(report=>report.questionId===q.id).length})</button>` : ''}
+                                    ${examReports.some(report=>report.questionId===q.id) ? `<button class="report-danger-action" onclick="openQuestionReports('${q.id}')"><span aria-hidden="true">&#9873;</span>Reports (${examReports.filter(report=>report.questionId===q.id).length})</button>` : ''}
                                     <button class="danger" onclick="deleteQuestion('${q.id}')"><span aria-hidden="true">&#128465;</span>Delete</button>
                                 </div>
                             </details>

@@ -220,7 +220,7 @@
   .q-head-actions { display:flex; align-items:center; gap:8px; }
   .icon-action { display:inline-grid; width:38px; height:38px; min-height:38px; place-items:center; padding:0; border:1px solid #dbe4df; border-radius:10px; background:#fff; color:#617068; cursor:pointer; font-size:17px; }
   .icon-action:hover { color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft); }
-  #takeExamModal .report-question-btn { display:inline-grid; width:38px; height:38px; min-height:38px; margin:0; padding:0; place-items:center; border:1px solid #dbe4df; border-radius:10px; background:#fff; color:#617068; text-decoration:none; }
+  #takeExamModal .report-question-btn { display:inline-flex; width:auto; height:38px; min-height:38px; margin:0; padding:0 11px; align-items:center; justify-content:center; gap:6px; border:1px solid #dbe4df; border-radius:10px; background:#fff; color:#617068; font-size:12px; font-weight:750; text-decoration:none; }
   #takeExamModal .options-wrap { display:grid; gap:10px; }
   #takeExamModal .opt-label { min-height:52px; margin:0; padding:13px 16px; border-color:#dfe6e2; border-radius:10px; }
   #takeExamModal .opt-label { justify-content:flex-start; text-align:left; }
@@ -234,7 +234,7 @@
   #takeExamModal .q-nav button { width:150px; min-height:42px; margin:0; }
   #takeExamModal .q-nav #prevQ { justify-self:start; }
   #takeExamModal .q-nav #nextQ { justify-self:end; }
-  #takeExamModal .flag-btn { display:inline-grid; width:38px; height:38px; min-height:38px; margin:0; padding:0; place-items:center; border-radius:10px; font-size:18px; }
+  #takeExamModal .flag-btn { display:inline-flex; width:auto; height:38px; min-height:38px; margin:0; padding:0 11px; align-items:center; justify-content:center; gap:6px; border-radius:10px; font-size:12px; }
   #takeExamModal .nav-handle { width:44px; min-height:48px; padding:0; overflow:hidden; line-height:1; }
   #takeExamModal .exam-timer.no-limit { flex-direction:row; align-items:center; justify-content:center; min-width:auto; }
   #takeExamModal .exam-timer.no-limit .timer-clock { display:none; }
@@ -292,7 +292,7 @@
   .scale-grid .fail { background:rgba(179,38,30,0.09); color:#b3261e; font-weight:600; }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20260830-dark-toast">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20260830-semantic-actions">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
 <script src="../js/grading.js"></script>
@@ -1448,8 +1448,8 @@ function questionMarkup(q, idx) {
       <div class="q-head">
         <span class="q-number">Question ${idx + 1}</span>
         <span class="q-head-actions"><span class="q-type">${typeLabel} &middot; ${q.points || 5} point(s)</span>
-          <button type="button" class="flag-btn ${isFlagged(activeAttempt, q.id) ? 'is-flagged' : ''}" id="flagQ" aria-pressed="${isFlagged(activeAttempt, q.id)}" aria-label="${isFlagged(activeAttempt, q.id) ? 'Remove flag' : 'Flag for review'}" title="${isFlagged(activeAttempt, q.id) ? 'Remove flag' : 'Flag for review'}">&#9873;</button>
-          <button type="button" class="icon-action report-question-btn" onclick="openQuestionReport('${q.id}')" aria-label="Report this question" title="Report this question">&#9888;</button>
+          <button type="button" class="flag-btn ${isFlagged(activeAttempt, q.id) ? 'is-flagged' : ''}" id="flagQ" aria-pressed="${isFlagged(activeAttempt, q.id)}" aria-label="${isFlagged(activeAttempt, q.id) ? 'Remove flag' : 'Flag for review'}" title="${isFlagged(activeAttempt, q.id) ? 'Remove flag' : 'Flag for review'}"><span aria-hidden="true">&#9873;</span><span>${isFlagged(activeAttempt, q.id) ? 'Unflag' : 'Flag'}</span></button>
+          <button type="button" class="icon-action report-question-btn" onclick="openQuestionReport('${q.id}')" aria-label="Report this question" title="Report this question"><span aria-hidden="true">&#9888;</span><span>Report</span></button>
         </span>
       </div>
       <div class="q-title" id="questionTitle${idx}">${q.text}</div>

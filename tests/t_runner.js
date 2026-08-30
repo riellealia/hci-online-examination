@@ -26,8 +26,8 @@ ok(/Answered/.test(r.d.querySelector('.nav-cell[data-index="0"]').getAttribute('
 
 r.d.getElementById('flagQ').click();
 ok(r.d.getElementById('flagQ').getAttribute('aria-pressed')==='true','flag button exposes pressed state');
-ok(!/Flag for review|Flagged/.test(r.d.getElementById('flagQ').textContent),'flag control is icon-only');
-ok(r.d.getElementById('flagQ').nextElementSibling?.classList.contains('report-question-btn'),'flag icon sits beside the report icon');
+ok(/Unflag/.test(r.d.getElementById('flagQ').textContent),'flag control shows its icon and visible action name');
+ok(r.d.getElementById('flagQ').nextElementSibling?.classList.contains('report-question-btn')&&/Report/.test(r.d.getElementById('flagQ').nextElementSibling.textContent),'flag and report actions both show icons and names');
 ok(r.d.querySelectorAll('.q-nav button').length===2,'question footer contains only uniform Previous and Next controls');
 ok(/Save & Submit Exam/.test(r.d.getElementById('examModalActions').textContent)&&!/Save Draft & Exit/.test(r.d.getElementById('examModalActions').textContent),'attempt footer uses one Save & Submit action instead of a competing draft-exit button');
 r.d.querySelector('#takeExamModal .exam-close').click();

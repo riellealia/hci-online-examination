@@ -1706,6 +1706,19 @@ body { overflow-x: hidden; }
   background:color-mix(in srgb,var(--danger) 16%,var(--surface)) !important;
 }
 
+/* Destructive, report, and flag actions share one semantic red treatment. */
+:is(button,a).danger,
+:is(button,a).report-danger-action,
+:is(button,a)[aria-label^="Delete"],
+:is(button,a)[aria-label^="Remove"],
+:is(button,a)[aria-label^="Report"],
+:is(button,a)[title^="Delete"],
+:is(button,a)[title^="Remove"],
+:is(button,a)[title^="Report"] { color:var(--danger)!important; }
+:is(button,a).danger :is(svg,span),
+:is(button,a).report-danger-action :is(svg,span) { color:inherit;fill:currentColor; }
+.tag-flagged,.nav-cell.is-flagged .cell-mark { color:var(--danger)!important; }
+
 /* Remaining legacy light surfaces found during the visual dark-mode pass. */
 :root[data-theme="dark"] :is(#sidebar,.subject-card-head,.subject-detail-exam,.answer-key-review) {
   background:var(--surface) !important;

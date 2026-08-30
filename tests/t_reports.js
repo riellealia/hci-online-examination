@@ -15,6 +15,7 @@ let r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
 r.w.startExam('e1');
 ok(!!r.d.querySelector('.report-question-btn'),'each rendered question offers Report question');
 ok(!!r.d.querySelector('.q-head .report-question-btn'),'report action is kept in the question toolbar');
+ok(/Report/.test(r.d.querySelector('.report-question-btn').textContent)&&/var\(--danger\)/.test(sharedCss),'report control has a visible name and shared semantic red color');
 r.w.openQuestionReport('q1');
 ok(r.d.getElementById('questionReportModal').classList.contains('active'),'report dialog opens for selected question');
 r.d.getElementById('questionReportCategory').value='wrong-answer';
