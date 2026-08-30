@@ -132,3 +132,6 @@
 /* The primary workspace tabs are an underline navigation, not a filled card. */
 #facultySubjectWorkspace>.workspace-tabs,
 :root[data-theme="dark"] body[data-role="faculty"] #facultySubjectWorkspace>.workspace-tabs{background:transparent!important}
+/* Examinations are a full-width list; weekly content keeps its own layout. */
+#facultySubjectWorkspace .student-facing-course .subject-detail-grid>.subject-info-cell:last-child>.subject-detail-exam-grid{grid-template-columns:minmax(0,1fr)}
+#facultySubjectWorkspace .student-facing-course .subject-detail-grid>.subject-info-cell:last-child .faculty-exam-cell{min-height:92px;padding:16px 18px}
