@@ -23,6 +23,13 @@ for(const [page,user,count,firstLabel] of pages){
   r.w.close();
 }
 
+const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
+const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
+ok(adminLinks.slice(0,3).join(',')==='dashboardSection,systemSection,auditSection','Admin places System Management and Audit Log directly below Dashboard');
+const adminDivider=adminNavPage.d.querySelector('#sidebar .sidebar-divider[role="separator"]');
+ok(adminDivider?.textContent.trim()==='School controls'&&adminDivider.nextElementSibling?.dataset.panel==='facultySection','Admin sidebar divider separates system controls from school controls');
+adminNavPage.w.close();
+
 console.log('\n=== BBB. Drawer opens, closes, and switches sections ===');
 let r=load('student.html',{...SEED(),currentUser:{username:'S1',role:'student'}});
 const bar=r.d.getElementById('sidebar'), btn=r.d.querySelector('.menu-btn');

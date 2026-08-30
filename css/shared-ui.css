@@ -429,6 +429,20 @@ textarea:focus-visible,
   font-size: 15px;
 }
 
+#sidebar .sidebar-divider {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:14px 16px 8px;
+  color:var(--ink-soft);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+#sidebar .sidebar-divider::before { content:""; height:1px; flex:1; background:var(--line-strong); }
+#sidebar .sidebar-divider span { flex:none; }
+
 .menu-btn {
   font-size: 24px;
   line-height: 1;

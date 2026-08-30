@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Online Examination</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/shared-ui.css?v=20260830-semantic-actions">
+    <link rel="stylesheet" href="../css/shared-ui.css?v=20260830-admin-groups">
     <link rel="stylesheet" href="../css/admin-modern.css">
     <link rel="stylesheet" href="../css/system-management.css">
     <script src="../js/storage.js"></script>
@@ -17,7 +17,7 @@
     <script src="../js/audit-service.js"></script>
     <script src="../js/admin-table-tools.js"></script>
 <script src="../js/auth.js"></script>
-    <script src="../js/ui.js"></script>
+    <script src="../js/ui.js?v=20260830-admin-groups"></script>
     <script src="../js/system-management.js"></script>
 </head>
 
@@ -1303,14 +1303,15 @@ document.getElementById('facultySubjectTable').innerHTML = `<tr><th>Subject</th>
 
   adminNav = mountSidebar({
     items: [
-      { id: 'dashboardSection',      label: 'Dashboard',                 icon: '🏠' },
-      { id: 'facultySection',        label: 'Faculty Management',        icon: '👤' },
-      { id: 'studentSection',        label: 'Student Management',        icon: '👥' },
-      { id: 'sectionSection',        label: 'Section Management',        icon: '▦' },
-      { id: 'subjectSection',        label: 'Subject Management',        icon: '📚' },
-      { id: 'facultySubjectSection', label: 'Faculty–Subject Allotment', icon: '🎓' },
-      { id: 'auditSection',          label: 'Audit Log',                 icon: '◷' },
-      { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' }
+      { id: 'dashboardSection',      label: 'Dashboard',                 icon: '&#8962;' },
+      { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' },
+      { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
+      { divider: true, label: 'School controls' },
+      { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
+      { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
+      { id: 'sectionSection',        label: 'Section Management',        icon: '&#9638;' },
+      { id: 'subjectSection',        label: 'Subject Management',        icon: '&#128218;' },
+      { id: 'facultySubjectSection', label: 'Faculty–Subject Allotment', icon: '&#127891;' }
     ],
     titleEl: null,
     onSelect(id) {

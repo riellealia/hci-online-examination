@@ -101,6 +101,8 @@ function mountSidebar({ items, panels, container = '.topbar-left',
                         titleEl = null, onSelect = null, startAt = null } = {}) {
   const host = typeof container === 'string' ? document.querySelector(container) : container;
   if (!host || !Array.isArray(items) || items.length === 0) return null;
+  const navItems = items.filter(item => item && item.id);
+  if (!navItems.length) return null;
 
   // Hamburger goes first in the header, before the logo.
   const menuBtn = document.createElement('button');
@@ -117,7 +119,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   bar.setAttribute('aria-label', 'Sections');
   bar.innerHTML = `
     <button type="button" class="close-x" aria-label="Close navigation">×</button>
-    ${items.map(it => `
+    ${items.map(it => it.divider ? `<div class="sidebar-divider" role="separator"${it.label?` aria-label="${it.label}"><span>${it.label}</span>`:'>'}</div>` : `
       <a id="link-${it.id}" href="#${it.id}" data-panel="${it.id}">
         <span class="nav-icon" aria-hidden="true">${it.icon || ''}</span>
         <span>${it.label}</span>
@@ -126,8 +128,8 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   `;
   document.body.appendChild(bar);
 
-  const known = panels || items.map(i => i.id);
-  const routePanels = new Set(items.map(item => item.id));
+  const known = panels || navItems.map(i => i.id);
+  const routePanels = new Set(navItems.map(item => item.id));
   const routeKey = `neu:last-panel:${location.pathname}`;
   const historyKey = `neu-panel:${location.pathname}`;
   let activePanel = null;
@@ -158,7 +160,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
     bar.querySelectorAll('a').forEach(a =>
       a.classList.toggle('active', a.dataset.panel === id));
 
-    const item = items.find(i => i.id === id);
+    const item = navItems.find(i => i.id === id);
     if (titleEl && item) {
       const t = typeof titleEl === 'string' ? document.querySelector(titleEl) : titleEl;
       if (t) t.textContent = item.label;
@@ -184,7 +186,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
     return true;
   }
 
-  function back(fallback = items[0].id) {
+  function back(fallback = navItems[0].id) {
     if (historyIndex > 0) {
       history.back();
       return true;
