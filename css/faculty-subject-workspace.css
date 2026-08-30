@@ -129,3 +129,6 @@
 :root[data-theme="dark"] body[data-role="faculty"] #facultySubjectWorkspace .workspace-hero{background:var(--surface)!important;border-color:var(--line-strong);border-left-color:var(--course-accent);color:var(--ink)}
 :root[data-theme="dark"] body[data-role="faculty"] #facultySubjectWorkspace .workspace-course-icon{background:color-mix(in srgb,var(--course-accent) 18%,var(--surface-soft))}
 :root[data-theme="dark"] body[data-role="faculty"] #facultySubjectWorkspace .workspace-course-meta span{background:color-mix(in srgb,var(--surface-soft) 82%,transparent);color:var(--ink-soft)!important}
+/* The primary workspace tabs are an underline navigation, not a filled card. */
+#facultySubjectWorkspace>.workspace-tabs,
+:root[data-theme="dark"] body[data-role="faculty"] #facultySubjectWorkspace>.workspace-tabs{background:transparent!important}
