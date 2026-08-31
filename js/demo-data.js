@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 21,
+  version: 22,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -109,6 +109,17 @@ const DemoData = {
     exams.push(practiceExam);for(let q=0;q<10;q++)questions.push(buildQuestion(practiceExam,q,practiceSubject));
     const mistakesExam={id:'DEMO-REVIEW-MISTAKES',facultyId:practiceOffer.facultyId,subjectCode:practiceSubject.code,title:'Human-Computer Interaction — Incorrect Answers Review Demo',desc:'A completed demonstration assessment containing both correct and incorrect responses.',date:isoDate(-1),start:'10:00',end:'11:00',durationMinutes:45,maxAttempts:1,passingPercent:70,materials:'No additional materials',questionLayout:'one',navigationMode:'free',status:'published',scoreRelease:'immediate',answerRelease:'immediate',showSubmittedAnswers:true,showFeedback:true,sections:['2BSCS-1']};
     exams.push(mistakesExam);for(let q=0;q<8;q++)questions.push(buildQuestion(mistakesExam,q,practiceSubject));
+    // Keep the demo useful after the August 31 presentation date: old sample
+    // schedules move to next week, with two completed expiries and two missed
+    // assessments intentionally retained for Student status testing.
+    const retainedPastExamIds=new Set(['DEMO-EXAM-004','DEMO-EXAM-005','DEMO-EXAM-006','DEMO-EXAM-007']);
+    const rescheduledExamIds=new Set();let nextWeekSlot=0;
+    exams.forEach(exam=>{
+      if(!exam.date||exam.date>'2026-08-31'||retainedPastExamIds.has(exam.id))return;
+      exam.date=isoDate(13+(nextWeekSlot++%7));
+      rescheduledExamIds.add(exam.id);
+    });
+    for(let index=studentSubmissions.length-1;index>=0;index--)if(rescheduledExamIds.has(studentSubmissions[index].examId))studentSubmissions.splice(index,1);
     // Give Maria a convincing history: every completed paper stores answers for
     // the actual questions, allowing the Results review to show choices,
     // responses, correct answers, and feedback instead of an aggregate score.
