@@ -1294,3 +1294,9 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - Replaced the direct cell trash button with a three-dot menu on every Edit Week cell.
 - Added icon-labeled Move up, Move down, and Delete cell actions; ordering is persisted by the existing Save changes flow.
 - Remapped the Edit Week Cancel control to shared surfaces and typography, including an explicit dark-theme rule.
+## 2026-09-01 — Planning baseline synchronized
+
+- **Changed:** Updated `plan.md`, the completion checklist, and the completion-rate dashboard to include Admin System Management, accessible access toggles, sidebar grouping, theme-safe feedback, course/cell menus, direct exam navigation, Student subject progress, two-column subject cards, Faculty examination lists, and demo-data version 22 scheduling.
+- **Schedule:** Moved stale demo examinations to September 7–13 while retaining exactly two completed expired and two missed Student examples.
+- **Verification:** Complete suite reports 929 passing and 6 failing assertions. Remaining failures are stale UI-structure expectations in `t_admin_modern.js` (1), `t_publish.js` (1), and `t_relationship_rules.js` (4). Focused rich-seed, Student, progress, System Management, authentication, and UI suites pass.
+- **Remaining:** Reconcile those six assertions, run representative usability sessions, capture final screenshots, and assemble the final report.

@@ -1,13 +1,14 @@
 # Project Completion Checklist
 
-Last reviewed: 2026-08-30
+Last reviewed: 2026-09-01
 
 Status key: `[x]` complete, `[~]` partial or needs verification, `[ ]` not started.
 
 Implementation items marked `[x]` are backed by focused browser-level tests and
-direct interface review. The 2026-08-27 complete-suite audit found four stale
-assertions and one legacy-suite crash after recent UI restructuring; see
-`audit-log.md`. Human usability findings are still not claimed from automation.
+direct interface review. The 2026-09-01 complete-suite run reports 929 passing
+and 6 failing assertions. The failures are stale UI-structure expectations in
+three suites; see `audit-log.md`. Human usability findings are still not claimed
+from automation.
 
 ## Foundation and authentication
 
@@ -22,6 +23,8 @@ assertions and one legacy-suite crash after recent UI restructuring; see
 - [x] Enforce maintenance mode, paused role access, disabled accounts, and configurable inactive-session expiry at authentication boundaries
 - [x] Schedule, target, edit, archive, restore, and delete Admin announcements shown through the shared Inbox
 - [x] Export and restore the complete browser-storage prototype as a versioned JSON backup
+- [x] Present maintenance and role-login access settings as accessible, theme-aware toggle switches
+- [x] Group Dashboard, System Management, and Audit Logs above a divider separating school controls
 
 ## Module 1 — Faculty and subject creation
 
@@ -162,13 +165,23 @@ assertions and one legacy-suite crash after recent UI restructuring; see
 - [x] Indefinite lock, scheduled opening, duration, and previous-cell prerequisite
 - [x] Locked Student cells expose only their title and lock state
 - [x] Three-dot week menu with labelled Edit and Remove actions
+- [x] Three-dot menu on every editable cell with icon-labelled Delete, Move up, and Move down actions
+- [x] Directly open examination details/questions by clicking an examination cell
 - [x] Members and activity use compact tables and subtabs
+
+## Student subject and examination presentation
+
+- [x] Use a two-column enrolled-subject grid without the Group by control
+- [x] Show exam completion progress derived from each subject's current exam count
+- [x] Use one examination per row in Faculty subject workspaces
+- [x] Retain exactly two completed expired and two missed Student demo exams
+- [x] Move other stale demo schedules into September 7–13 and migrate existing demo installations
 
 ## Repository and verification
 
 - [x] Git repository initialized and complete project snapshot pushed to `origin/main`
 - [x] `.env` included as requested
-- [~] Reconcile the five stale automated checks identified on 2026-08-27
+- [~] Reconcile six stale assertions identified by the 2026-09-01 full run: one in `t_admin_modern.js`, one in `t_publish.js`, and four in `t_relationship_rules.js`
 
 ## Final deliverables
 

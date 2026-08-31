@@ -1,6 +1,6 @@
 # Completion Rate Dashboard
 
-Last reviewed: 2026-08-27 (rev. 40)
+Last reviewed: 2026-09-01 (rev. 41)
 
 ## Scoring method
 
@@ -10,10 +10,10 @@ Only the required project scope is included in the headline rate. Optional and f
 - Partial or unverified item: 0.5 point
 - Not started item: 0 points
 
-Implementation figures use focused tests plus direct interface review. The former
-claim that 772 assertions were all passing is no longer current. The 2026-08-27
-audit found four stale assertions and one legacy suite crash following deliberate
-navigation, table, seed-data, and action-menu changes.
+Implementation figures use focused tests plus direct interface review. The
+2026-09-01 complete run reports 929 passing and 6 failing assertions. The six
+failures are stale UI-structure checks following deliberate dashboard,
+publication-action, and Faculty-roster changes.
 
 ## Current completion
 
@@ -41,7 +41,7 @@ points out of 79 required checklist points, rounded to 91%.
 
 The percentage is unchanged because recent work expands optional course-page
 behavior rather than adding a missing graded module. Verification confidence is
-temporarily partial until the five stale checks are reconciled.
+temporarily partial until the six stale assertions are reconciled.
 
 ## If the optional scope is included
 
@@ -73,8 +73,8 @@ graded.
 
 ## Supporting views
 
-- **Core implementation only:** 100% by feature checklist. Focused suites pass, but the complete regression suite currently needs maintenance in five checks.
-- **HCI documentation and final deliverables:** 76% — requirements, ERD, flowcharts, storyboards, interface/dialog designs, documented test cases, and a 772-assertion automated suite now exist. What remains genuinely cannot be produced from the code: usability findings from real participants, screenshots, and the assembled report.
+- **Core implementation only:** 100% by feature checklist. Focused suites pass, but six assertions in three complete-suite files need reconciliation.
+- **HCI documentation and final deliverables:** 76% — requirements, ERD, flowcharts, storyboards, interface/dialog designs, documented test cases, and a 929-passing-assertion automated baseline now exist. What remains genuinely cannot be produced from the code: usability findings from real participants, screenshots, and the assembled report.
 - **Shared visual/HCI polish:** 100% — one navigation model across all three roles, every save confirms itself, WCAG AA contrast throughout, and a completed small-screen pass.
 
 ## Interpretation
@@ -94,12 +94,11 @@ deliverables and regression-test reconciliation.
 
 ## Latest verification status
 
-- Focused Faculty workspace, authoring, navigation, timing, grading, Student, UI,
-  and course-page suites pass.
-- `t_publish.js`: one outdated action-location assertion.
-- `t_relationship_rules.js`: three outdated Faculty-roster/tab assertions.
-- `t_m3.js`: crashes after ten passing reorder checks because it expects the old
-  always-visible reorder buttons.
+- Full run: **929 passed, 6 failed**.
+- `t_admin_modern.js`: one outdated management-card description assertion.
+- `t_publish.js`: one outdated draft review/publish action assertion.
+- `t_relationship_rules.js`: four outdated management-description and Faculty-roster/tab assertions.
+- The former `t_m3.js` reorder-control crash is resolved; all 20 assertions pass.
 
 ## Update procedure
 

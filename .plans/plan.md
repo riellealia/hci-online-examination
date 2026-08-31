@@ -197,18 +197,28 @@ Already present:
 - CSV preview/import flows
 - Student exam access, submission, automatic MCQ scoring, and pending written-answer results
 
-Recently completed:
+Recently completed (updated 2026-09-01):
 
 - Shared paths, authentication, assets, role accents, and reusable UI components
 - Question reordering, exam preview, section eligibility, answer review, and duplicate-submission protection
 - Exact access-window enforcement and separate attempt-duration timing
 - Validation, empty, saving, success, error, and designed confirmation states
 - Course pages with weekly content, links, attachments, locking, scheduling, and prerequisites
+- Faculty week/cell editing with add, delete, move-up, and move-down actions
+- Direct subject-card and examination-cell navigation across Faculty and Student areas
+- Student exam review/submission flow, results routing, missed filters, and subject exam-progress bars
+- Two-column Student enrolled-subject cards and one-row Faculty examination lists
+- Status-colored report pills and matching card borders using shared light/dark theme variables
+- Theme-safe notifications, destructive icons, role-colored login buttons, and previous-page Back behavior
+- Admin System Management for announcements, maintenance mode, academic period, backup/restore, integrity checks, and account access
+- Accessible toggle switches for maintenance and Faculty/Student login access
+- Admin sidebar grouping for Dashboard, System Management, Audit Logs, and separated school controls
+- Demo schedules migrated to version 22: stale exams moved to September 7–13, with two completed expired and two missed examples retained
 - GitHub repository initialized and pushed to `origin/main`
 
 Still requiring verification or coursework:
 
-- Reconcile the five stale checks from the 2026-08-27 regression audit.
+- Reconcile six stale UI-structure assertions in `t_admin_modern.js`, `t_publish.js`, and `t_relationship_rules.js`; the 2026-09-01 full run reports 929 passing and 6 failing assertions.
 - Conduct representative usability sessions and record findings.
 - Capture final screenshots and assemble the final report.
 
