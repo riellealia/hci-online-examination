@@ -6,6 +6,8 @@ let seed=SEED();
 let page=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 ok(!!page.d.getElementById('systemSection')&&!!page.d.querySelector('#sidebar [data-panel="systemSection"]'),'System Management is one Admin page and navigation item');
 ok(page.d.querySelectorAll('#systemManagementRoot .system-card').length===6,'page contains the six requested tools');
+const switches=[...page.d.querySelectorAll('#systemManagementRoot .system-toggle-input[role="switch"]')];
+ok(switches.length===3&&switches.every(input=>input.nextElementSibling?.classList.contains('system-toggle-track')),'maintenance and account controls render as accessible toggles');
 
 page.d.getElementById('announcementTitle').value='Enrollment reminder';
 page.d.getElementById('announcementMessage').value='Check your assigned subjects.';
