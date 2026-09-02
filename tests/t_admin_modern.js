@@ -23,7 +23,7 @@ ok(triggers.every(button=>button.getAttribute('aria-label') && button.title),'ic
 const firstFacultyCell=r.d.querySelector('#facultyTable tr:nth-child(2) td');
 firstFacultyCell.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:80,clientY:90}));
 ok(firstFacultyCell.closest('tr').querySelector('.section-action-menu').classList.contains('open'),'right-clicking a table cell opens its settings menu');
-ok(r.d.querySelectorAll('.plus-circle').length===5 && [...r.d.querySelectorAll('.plus-circle')].every(button=>button.tagName==='BUTTON'),'dashboard add actions use semantic buttons');
+ok(r.d.querySelectorAll('.plus-circle').length===4 && [...r.d.querySelectorAll('.plus-circle')].every(button=>button.tagName==='BUTTON'),'remaining dashboard add actions use semantic buttons after removing the allotment shortcut');
 ok(/\.student-profile-page[^}]*height:calc\(100dvh - 36px\)[^}]*overflow-y:auto/.test(css),'profile page has a viewport-bound vertical scroll region');
 r.w.close();
 process.exit(0);

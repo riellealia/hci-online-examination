@@ -5,7 +5,8 @@ const r=load('login.html',{users:[],faculty:[],students:[],subjects:[],subjectAs
 const faculty=r.read('faculty'),students=r.read('students'),subjects=r.read('subjects'),sections=r.read('sections'),records=r.read('sectionSubjects'),enrollments=r.read('studentEnrollments');
 const offers=records.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId})));
 ok(faculty.length===28&&new Set(faculty.map(item=>item.id)).size===28&&faculty.every(item=>/^\d{2}-\d{5}-\d{3}$/.test(item.id)),'28 teachers use unique NN-NNNNN-NNN IDs');
-ok(subjects.length===24&&sections.length===15&&students.length===619,'three programs, 15 sections, and 619 students are seeded');
+ok(subjects.length===24&&sections.length===16&&students.length===620,'three programs, 16 sections, and 620 students are seeded');
+ok(sections.find(section=>section.id==='1BSCS-2')?.capacity===100&&sections.filter(section=>section.id!=='1BSCS-2').every(section=>section.capacity===50),'1BSCS-2 has a 100-student limit while every other section has 50');
 ok(students.every(item=>/^\d{4}-\d{5}$/.test(item.id)),'students use YYYY-NNNNN IDs');
 ok(subjects.every(item=>/^(CCS|CIT|CIS)\d{3}-\d{2}$/.test(item.code)),'subjects use program-prefixed codes');
 ok(new Set(offers.map(item=>item.id)).size===offers.length,'every section-subject offering has a unique ID');
@@ -19,7 +20,7 @@ ok(sections.every(section=>/^\d(?:BSCS|BSIT|BSIS)-\d+$/.test(section.id)),'secti
 r.w.close();
 const old={users:[{username:'admin',password:'admin123',role:'admin'}],faculty:[{id:'12-34567-890',last:'Reyes',first:'Maria'}],students:[{id:'2024-00001',last:'Dela Cruz',first:'Juan',sections:['BSCS-3A']}],subjects:[],demoCurriculumVersion:5,currentUser:{username:'admin',role:'admin'}};
 const direct=load('admin.html',old);
-ok(direct.read('students').length===619&&direct.d.getElementById('countStudents').textContent==='619','direct Admin refresh migrates and renders the latest demo data');
+ok(direct.read('students').length===620&&direct.d.getElementById('countStudents').textContent==='620','direct Admin refresh migrates and renders the latest demo data');
 ok(direct.d.querySelectorAll('#unassignedFacultyTable tr').length===6,'Admin lists the five professors without assigned subjects');
 const demoUsers=direct.read('users'),demoAudit=direct.read('applicationAuditLog'),demoSubs=direct.read('studentSubmissions');
 const demoExams=direct.read('exams'),demoQuestions=direct.read('questions'),demoEnrollments=direct.read('studentEnrollments');

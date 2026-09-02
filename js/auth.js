@@ -67,7 +67,7 @@ function requireRole(role) {
   // panel would leave their already-open session working indefinitely.
   const users = DB.read('users', []);
   const stillValid = users.some(
-    u => u.username === session.username && u.role === role
+    u => u.username === session.username && u.role === role && u.disabled !== true
   );
   if (!stillValid) {
     localStorage.removeItem('currentUser');

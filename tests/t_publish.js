@@ -13,7 +13,7 @@ r.w.close();
 
 r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
 r.w.manageQuestions('draft1');
-ok(/Review & Publish/.test(r.d.getElementById('publishExamBtn').textContent),'draft offers review and publish action');
+ok(r.d.getElementById('publishExamBtn').getAttribute('aria-label')==='Review and publish examination','draft offers an accessible review and publish action');
 ok(await r.w.reviewAndPublishExam('draft1')===false,'empty exam cannot be published');
 ok(r.read('exams').find(ex=>ex.id==='draft1').status==='draft','validation failure preserves draft status');
 const validQuestion={id:'dq1',examId:'draft1',type:'mcq',text:'Ready?',points:5,options:[{text:'Yes',isCorrect:true},{text:'No',isCorrect:false}]};

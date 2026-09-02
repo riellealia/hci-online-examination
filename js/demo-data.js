@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 22,
+  version: 23,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -43,11 +43,14 @@ const DemoData = {
       const yearLevel=yearIndex+1, sectionCount=yearLevel===2?2:1;
       const yearSubjects=names.map((name,index)=>{const code=`${prefixes[program]}${yearLevel}${11+index}-24`;subjects.push({code,name,program,yearLevel});return code;});
       for(let sectionIndex=0;sectionIndex<sectionCount;sectionIndex++){
-        const sectionNumber=sectionIndex+1,id=`${yearLevel}${program}-${sectionNumber}`;sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel});
+        const sectionNumber=sectionIndex+1,id=`${yearLevel}${program}-${sectionNumber}`;sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel,capacity:50});
         const assignments=yearSubjects.map(subjectCode=>{const number=offerNo++;return{id:`OFR-${String(number).padStart(3,'0')}`,subjectCode,facultyId:faculty[(number-1)%(faculty.length-3)].id};});
         sectionSubjects.push({sectionId:id,assignments});
       }
     }));
+    const firstYearBscsSource=sectionSubjects.find(record=>record.sectionId==='1BSCS-1');
+    sections.push({id:'1BSCS-2',name:'2',sectionNumber:2,program:'BSCS',yearLevel:1,capacity:100});
+    sectionSubjects.push({sectionId:'1BSCS-2',assignments:(firstYearBscsSource?.assignments||[]).map(item=>({id:`OFR-${String(offerNo++).padStart(3,'0')}`,subjectCode:item.subjectCode,facultyId:item.facultyId}))});
     // Give the named faculty demo account a varied teaching load and keep her
     // connected to several of Maria Santos's actual enrolled offerings.
     const mariaReyesLoad=[

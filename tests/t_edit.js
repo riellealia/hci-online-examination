@@ -1,21 +1,20 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
-const s=()=>{const x=SEED();
-  x.subjectAssignments=[{subjectCode:'SUB1',facultyIds:['F1','F2']},{subjectCode:'SUB2',facultyIds:['F2']}];
-  return x;};
 
-console.log('=== PP. Removed direct Student allotment workspace ===');
-let r=load('admin.html',{...s(),currentUser:{username:'admin',role:'admin'}});
-ok(!r.d.getElementById('allotmentSection'),'direct Student allotment page no longer exists');
-ok(!r.d.querySelector('#sidebar [data-panel="allotmentSection"]'),'direct Student allotment navigation no longer exists');
+console.log('=== FACULTY ASSIGNMENT EDITING. Uses the Faculty profile workflow ===');
+const seed=SEED();
+seed.sections=[{id:'A',name:'1',capacity:30},{id:'B',name:'2',capacity:30}];
+seed.sectionSubjects=[{sectionId:'A',assignments:[{id:'OA',subjectCode:'SUB1',facultyId:'F1'}]},{sectionId:'B',assignments:[{id:'OB',subjectCode:'SUB1',facultyId:'F2'}]}];
+const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 
-console.log('\n=== QQ. Edit faculty-subject assignment opens populated ===');
-r.w.editItem('subjectAssignments',0);
-const fs=r.d.getElementById('fsSubject');
-ok(fs.options.length>0,'subject dropdown populated (was blank)');
-ok(fs.value==='SUB1','current subject preselected');
-const chosen=r.d.getElementById('fsFaculty').value;
-ok(chosen==='F1','one existing professor is preselected');
-r.w.saveFacultySubject();
-ok(r.read('subjectAssignments').find(x=>x.subjectCode==='SUB1').facultyIds.length===1,'save normalizes the subject to one professor');
+ok(!r.d.getElementById('facultySubjectModal')&&!r.d.getElementById('facultySubjectTable'),'obsolete faculty-subject allotment screen remains removed');
+r.w.openFacultyProfile(0);
+ok(/SUB1/.test(r.d.querySelector('.faculty-handled-table').textContent),'Faculty profile shows the professor current subject assignment');
+r.w.openFacultySectionPicker('SUB1');
+const boxes=[...r.d.querySelectorAll('#facultySectionPickerOptions input')];
+boxes.forEach(input=>{input.checked=true;r.w.updateFacultySectionPicker(input)});
+r.w.stageFacultySubject();
+r.w.saveFacultyAssignmentBatch();
+const handled=r.read('sectionSubjects').flatMap(record=>(record.assignments||[]).filter(offer=>offer.subjectCode==='SUB1'&&offer.facultyId==='F1').map(()=>record.sectionId));
+ok(handled.includes('A')&&handled.includes('B'),'editing through the profile saves the selected subject across multiple sections');
 r.w.close(); process.exit(0);

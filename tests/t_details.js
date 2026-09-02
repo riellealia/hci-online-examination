@@ -85,7 +85,7 @@ ok(/opens on/i.test(r.d.querySelector('.brief-blocked').textContent),'and the re
 r.w.close();
 
 console.log('\n=== WWW. Starting the attempt runs the timer ===');
-r=stu();
+r=stu({durationMinutes:1});
 r.w.openExamDetails('e1');
 r.w.beginAttempt('e1');
 ok(r.d.getElementById('examBriefing').style.display==='none','briefing hidden once started');

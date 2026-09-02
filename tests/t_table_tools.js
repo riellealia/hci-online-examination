@@ -4,7 +4,7 @@ console.log('=== ADMIN TABLE TOOLS. Search, sort, group, direction, navigation =
 const seed=SEED(); seed.faculty.push({id:'F0',last:'Adams',first:'Zoe'});
 for(let i=3;i<=14;i++)seed.faculty.push({id:`F${i}`,last:`Person ${i}`,first:`Name ${i}`});
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
-ok(r.d.querySelectorAll('.table-tools').length===7,'tools are mounted for all seven Admin data views');
+ok(r.d.querySelectorAll('.table-tools').length===6,'tools are mounted for all six Admin data views');
 const tools=r.d.querySelector('[data-table-tools="faculty"]'), table=r.d.getElementById('facultyTable');
 ok(!!tools.querySelector('.table-search-toggle')&&!!tools.querySelector('.table-sort-toggle')&&!!tools.querySelector('.table-group-toggle'),'search, sort, and group icons exist');
 tools.querySelector('.table-search-toggle').click(); tools.querySelector('.table-sort-toggle').click();

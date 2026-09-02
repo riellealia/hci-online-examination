@@ -18,14 +18,25 @@ ok(u.password==='delacruz3','CSV student password is lowercase surname without s
 
 // Same person added through the modal must get the identical password.
 r.w.openStudentModal();
-r.d.getElementById('sID').value='2024-00099';
+r.d.getElementById('sYear').value='3';
+r.w.updateStudentIdPreview();
+const generatedId=r.d.getElementById('sID').value;
 r.d.getElementById('sLast').value='Dela Cruz';
 r.d.getElementById('sFirst').value='Ana';
-const sectionChoice=r.d.querySelector('#sSections input[name="studentSection"]');
-if(sectionChoice)sectionChoice.checked=true;
+r.d.getElementById('sMiddle').value='M';
 r.w.saveItem('students');
-const u2=r.read('users').find(x=>x.username==='2024-00099');
-ok(u2.password==='delacruz0','manual add uses lowercase surname plus the selected section year');
+const u2=r.read('users').find(x=>x.username===generatedId);
+ok(/^\d{4}-\d{5}$/.test(generatedId)&&u2.password==='delacruz3','manual add generates a read-only ID and uses the selected year level');
+
+r.w.openFacultyModal();
+const generatedFacultyId=r.d.getElementById('fID').value;
+r.d.getElementById('fLast').value='Lopez';
+r.d.getElementById('fFirst').value='Rina';
+r.d.getElementById('fMiddle').value='Q';
+r.w.saveItem('faculty');
+const generatedFaculty=r.read('faculty').find(x=>x.id===generatedFacultyId);
+const generatedFacultyUser=r.read('users').find(x=>x.username===generatedFacultyId);
+ok(/^\d{2}-\d{5}-\d{3}$/.test(generatedFacultyId)&&r.d.getElementById('fID').readOnly&&generatedFaculty.middle==='Q'&&generatedFacultyUser.password==='lopez0','manual faculty add generates a read-only ID and stores the optional middle initial');
 
 await upload('faculty','12-34567-890,Reyes,Maria\n');
 r.w.confirmUpload();

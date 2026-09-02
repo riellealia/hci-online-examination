@@ -2,13 +2,21 @@
 const StudentProfileService = {
   build(student, data) {
     const subjectCodes = SectionService.subjectCodesForStudent(student, data.allotments, data.sectionSubjects);
+    const enrollments = (data.studentEnrollments || (typeof DB !== 'undefined' ? DB.read('studentEnrollments', []) : []))
+      .filter(item => item.studentId === student.id);
+    const offerings = SectionService.offerings(data.sectionSubjects);
     const subjectRows = subjectCodes.map(code => {
       const subject = data.subjects.find(item => item.code === code);
       const direct = data.allotments.find(item => item.studentId === student.id && item.subjectCode === code);
       const assignment = data.subjectAssignments.find(item => item.subjectCode === code);
-      const facultyIds = direct ? [direct.facultyId] : (assignment?.facultyIds || (assignment?.facultyId ? [assignment.facultyId] : []));
+      const enrolledSections = enrollments.filter(item => item.subjectCode === code).map(item => item.sectionId).filter(Boolean);
+      const directSections = direct?.sectionId ? [direct.sectionId] : [];
+      const inheritedSections = (student.sections || []).filter(sectionId => offerings.some(offer => offer.sectionId === sectionId && offer.subjectCode === code));
+      const sections = [...new Set(enrolledSections.length ? enrolledSections : directSections.length ? directSections : inheritedSections)];
+      const offeringFacultyIds = offerings.filter(offer => offer.subjectCode === code && sections.includes(offer.sectionId)).map(offer => offer.facultyId).filter(Boolean);
+      const facultyIds = [...new Set(offeringFacultyIds.length ? offeringFacultyIds : direct ? [direct.facultyId] : (assignment?.facultyIds || (assignment?.facultyId ? [assignment.facultyId] : [])))];
       const professors = facultyIds.map(id => data.faculty.find(item => item.id === id)).filter(Boolean);
-      return { code, name: subject?.name || 'Unknown subject', professors };
+      return { code, name: subject?.name || 'Unknown subject', sections, professors };
     });
     const submissions = data.submissions.filter(item => item.studentId === student.id)
       .sort((a,b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));

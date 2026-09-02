@@ -113,6 +113,10 @@ body[data-role="admin"] .modal h3 { margin-bottom: 18px; font-size: 20px; }
 body[data-role="admin"] .modal input, body[data-role="admin"] .modal select { min-height: 44px; border-color: #d8e0ea; border-radius: 10px; }
 body[data-role="admin"] .modal button { min-height: 44px; border-radius: 10px; background: #315f8d; }
 body[data-role="admin"] .modal .cancel { background: #eef1f5; color: #455468; }
+body[data-role="admin"] .student-form-field { display:grid; gap:6px; margin-bottom:11px; color:var(--ink-soft); font-size:12px; font-weight:750; }
+body[data-role="admin"] .student-form-field>span small { font-weight:500; }
+body[data-role="admin"] :is(#sID,#fID)[readonly] { border-color:var(--accent-line); background:var(--accent-soft); color:var(--accent); font-weight:850; letter-spacing:.03em; cursor:default; }
+body[data-role="admin"] #studentYearHelp { display:block; margin:-2px 0 14px; color:var(--ink-soft); line-height:1.45; }
 body[data-role="admin"] .section-subject-picker { margin: 12px 0 18px; padding: 0; border: 0; }
 body[data-role="admin"] .section-subject-picker legend { margin-bottom: 9px; color: #455468; font-size: 13px; font-weight: 750; }
 body[data-role="admin"] .section-subject-options { display: grid; gap: 8px; max-height: 330px; overflow: auto; padding: 3px; }
@@ -218,7 +222,19 @@ body[data-role="admin"] .profile-close { width:44px; height:44px; padding:0; bor
 body[data-role="admin"] .profile-tabs { display:flex; gap:6px; padding:14px 32px 0; background:#fff; border-bottom:1px solid #e6ebf1; }
 body[data-role="admin"] .profile-tab { padding:12px 18px; border:0; border-bottom:3px solid transparent; border-radius:8px 8px 0 0; background:transparent; color:#66758a; font-weight:750; }
 body[data-role="admin"] .profile-tab.active { border-bottom-color:#315f8d; color:#315f8d; }
-body[data-role="admin"] #studentProfileContent { padding:28px 32px; }
+body[data-role="admin"] #studentProfileContent,
+body[data-role="admin"] #studentEnrollmentContent { padding:28px 32px; }
+#facultyProfileContent { padding:28px 32px; }
+body[data-role="admin"] .student-enrollment-head-actions { display:flex; align-items:flex-start; gap:9px; }
+body[data-role="admin"] .student-command-menu { position:relative; }
+body[data-role="admin"] .student-command-menu>summary { display:grid; width:44px; height:44px; place-items:center; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--accent); cursor:pointer; font-size:26px; font-weight:800; list-style:none; }
+body[data-role="admin"] .student-command-menu>summary::-webkit-details-marker { display:none; }
+body[data-role="admin"] .student-command-menu>nav { position:absolute; z-index:10; top:52px; right:0; display:grid; width:230px; gap:3px; padding:7px; border:1px solid var(--line); border-radius:13px; background:var(--surface); box-shadow:0 16px 38px rgba(20,35,54,.2); }
+body[data-role="admin"] .student-command-menu>nav button { display:flex; width:100%; min-height:42px; align-items:center; gap:11px; margin:0; padding:9px 11px; border:0; border-radius:8px; background:transparent; color:var(--ink); text-align:left; }
+body[data-role="admin"] .student-command-menu>nav button:hover { background:var(--accent-soft); color:var(--accent); }
+body[data-role="admin"] .student-command-menu>nav button.danger { color:#b62f37; }
+body[data-role="admin"] .student-command-menu>nav button.danger:hover { background:#fff0f1; color:#a31f28; }
+body[data-role="admin"] .student-command-menu>nav button>span:first-child { display:grid; width:20px; place-items:center; font-size:17px; }
 body[data-role="admin"] .profile-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
 body[data-role="admin"] .profile-stat-grid div, body[data-role="admin"] .profile-columns article { padding:20px; border:1px solid #e2e8f0; border-radius:16px; background:#fff; }
 body[data-role="admin"] .profile-stat-grid strong { display:block; color:#20334a; font-size:28px; }
@@ -226,9 +242,71 @@ body[data-role="admin"] .profile-stat-grid span, body[data-role="admin"] .profil
 body[data-role="admin"] .profile-columns { display:grid; grid-template-columns:minmax(240px,.8fr) minmax(320px,1.4fr); gap:18px; }
 body[data-role="admin"] .profile-columns h3 { margin:0 0 14px; }
 body[data-role="admin"] .profile-list-row { display:flex; flex-direction:column; gap:4px; padding:13px 0; border-bottom:1px solid #edf0f4; }
+body[data-role="admin"] .profile-relationship-card { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+body[data-role="admin"] .profile-relationship-card h3 { margin:0; padding:20px 22px; border-bottom:1px solid var(--line); }
+body[data-role="admin"] .profile-relationship-table { width:100%; min-width:680px; border-collapse:collapse; }
+body[data-role="admin"] .profile-relationship-table th { padding:13px 18px; background:var(--surface-soft); color:var(--ink-soft); font-size:11px; letter-spacing:.05em; text-align:left; text-transform:uppercase; }
+body[data-role="admin"] .profile-relationship-table td { padding:15px 18px; border-top:1px solid var(--line); color:var(--ink); vertical-align:top; }
+body[data-role="admin"] .student-enrollment-manager { display:grid; gap:18px; }
+body[data-role="admin"] .student-enrollment-manager>header h3,body[data-role="admin"] .available-subjects strong { margin:0; color:var(--ink); }
+body[data-role="admin"] .student-enrollment-manager>header p { margin:4px 0 0; color:var(--ink-soft); }
+body[data-role="admin"] .student-enrollment-manager>.table-scroll,body[data-role="admin"] .available-subjects { overflow:hidden; border:1px solid var(--line); border-radius:15px; background:var(--surface); }
+body[data-role="admin"] .student-enrollment-manager table { width:100%; min-width:620px; }
+body[data-role="admin"] .student-enrollment-manager th,body[data-role="admin"] .student-enrollment-manager td { padding:13px 15px; text-align:left; }
+body[data-role="admin"] .student-enrollment-manager th { color:var(--ink-soft); font-size:11px; text-transform:uppercase; }
+body[data-role="admin"] .student-enrollment-manager td small { color:var(--ink-soft); }
+body[data-role="admin"] .available-subjects>summary { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 18px; cursor:pointer; list-style:none; }
+body[data-role="admin"] .available-subjects>summary::-webkit-details-marker { display:none; }
+body[data-role="admin"] .available-subjects>summary span:first-child { display:grid; gap:3px; }
+body[data-role="admin"] .available-subjects>summary small { color:var(--ink-soft); font-weight:500; }
+body[data-role="admin"] .available-chevron { color:var(--accent); font-size:22px; transition:transform .18s ease; }
+body[data-role="admin"] .available-subjects[open] .available-chevron { transform:rotate(180deg); }
+body[data-role="admin"] .available-subject-body { padding:0 16px 16px; border-top:1px solid var(--line); }
+body[data-role="admin"] .student-available-table tr[role="button"] { cursor:pointer; }
+body[data-role="admin"] .student-available-table tr[role="button"]:hover,body[data-role="admin"] .student-available-table tr.selected { background:var(--accent-soft); }
+body[data-role="admin"] .student-enrollment-actions { display:flex; justify-content:flex-end; gap:9px; padding-top:14px; }
+body[data-role="admin"] .student-enrollment-actions button { width:auto; min-width:110px; margin:0; }
+body[data-role="admin"] .subject-only-table td { position:relative; padding-right:52px; }
+body[data-role="admin"] .subject-only-table tr[role="button"]:hover { background:var(--accent-soft); }
+body[data-role="admin"] .subject-row-arrow { position:absolute; top:50%; right:18px; color:var(--accent); font-size:20px; transform:translateY(-50%); }
+body[data-role="admin"] .pending-subject-row { background:var(--accent-soft); }
+body[data-role="admin"] .pending-subject-row td { border-left:4px solid var(--accent); }
+body[data-role="admin"] .pending-subject-meta { display:block; margin-top:7px; color:var(--accent); font-size:11px; font-weight:750; }
+body[data-role="admin"] .subject-capacity-meta { display:block; margin-top:7px; font-size:11px; font-weight:750; }
+body[data-role="admin"] :is(.subject-capacity-meta,.subject-picker-capacity).has-seats { color:#267449; }
+body[data-role="admin"] :is(.subject-capacity-meta,.subject-picker-capacity).is-full { color:#b62f37; }
+body[data-role="admin"] .batch-enrollment-actions { padding:14px 0 0; border-top:1px solid var(--line); }
+body[data-role="admin"] .batch-enrollment-actions .auto-subject-btn { margin-right:auto; border:1px solid var(--accent-line); background:var(--accent-soft); color:var(--accent); }
+body[data-role="admin"] .batch-enrollment-actions .auto-subject-btn span { margin-right:6px; }
+body[data-role="admin"] .batch-enrollment-actions .batch-save-btn { display:inline-flex; min-width:165px; min-height:46px; align-items:center; justify-content:center; gap:10px; padding:10px 14px 10px 18px; border:1px solid var(--accent); border-radius:11px; background:var(--accent); color:var(--on-accent,#fff); box-shadow:0 6px 14px color-mix(in srgb,var(--accent) 22%,transparent); font:inherit; font-weight:800; cursor:pointer; transition:transform .16s ease,box-shadow .16s ease,opacity .16s ease; }
+body[data-role="admin"] .batch-enrollment-actions .batch-save-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 9px 18px color-mix(in srgb,var(--accent) 28%,transparent); }
+body[data-role="admin"] .batch-enrollment-actions .batch-save-btn:disabled { border-color:var(--line-strong); background:var(--surface-soft); color:var(--ink-muted); box-shadow:none; cursor:not-allowed; opacity:.72; }
+body[data-role="admin"] .batch-save-count { display:grid; min-width:25px; height:25px; place-items:center; padding:0 6px; border-radius:999px; background:color-mix(in srgb,#fff 20%,transparent); color:inherit; font-size:11px; line-height:1; }
+body[data-role="admin"] .student-section-picker-modal { position:relative; width:min(540px,calc(100vw - 28px)); }
+body[data-role="admin"] .student-picker-close { position:absolute; top:17px; right:17px; width:40px; min-height:40px!important; padding:0; border:1px solid var(--line)!important; background:var(--surface-soft)!important; color:var(--ink-soft)!important; font-size:23px; }
+body[data-role="admin"] .student-picker-subject { display:grid; gap:3px; margin:-8px 0 17px; color:var(--ink-soft); }
+body[data-role="admin"] .student-picker-subject strong { color:var(--accent); font-size:16px; }
+body[data-role="admin"] .subject-picker-capacity { margin-top:5px; font-weight:750; }
+body[data-role="admin"] .student-section-options { display:grid; gap:8px; max-height:min(440px,50vh); overflow:auto; }
+body[data-role="admin"] .student-section-choice { display:grid!important; grid-template-columns:28px minmax(0,1fr); align-items:center; gap:11px; width:100%; margin:0; padding:12px!important; border:1px solid var(--line)!important; background:var(--surface)!important; color:var(--ink)!important; text-align:left; }
+body[data-role="admin"] .student-section-choice:hover,body[data-role="admin"] .student-section-choice.selected { border-color:var(--accent)!important; background:var(--accent-soft)!important; }
+body[data-role="admin"] .student-section-choice:disabled { border-color:var(--line)!important; background:var(--surface-soft)!important; color:var(--ink-muted)!important; cursor:not-allowed; opacity:.72; }
+body[data-role="admin"] .student-section-choice .section-choice-mark { display:grid; width:22px; height:22px; place-items:center; border:2px solid var(--line-strong); border-radius:50%; color:var(--on-accent); font-size:13px; }
+body[data-role="admin"] .student-section-choice.selected .section-choice-mark { border-color:var(--accent); background:var(--accent); }
+body[data-role="admin"] .student-section-choice strong,body[data-role="admin"] .student-section-choice small { display:block; }
+body[data-role="admin"] .student-section-choice small { margin-top:3px; color:var(--ink-soft); }
+body[data-role="admin"] .faculty-multi-section-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+body[data-role="admin"] .faculty-multi-section-options .student-section-choice { grid-template-columns:24px minmax(0,1fr); cursor:pointer; }
+body[data-role="admin"] .faculty-multi-section-options input { width:18px; height:18px; margin:0; accent-color:var(--accent); }
+body[data-role="admin"] .student-picker-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; }
+body[data-role="admin"] .student-picker-actions button { width:auto; min-width:130px; margin:0; }
+@media(max-width:560px){body[data-role="admin"] .faculty-multi-section-options{grid-template-columns:1fr}}
 body[data-role="admin"] .profile-empty { padding:28px; border:1px dashed #cbd5e1; border-radius:14px; color:#718096; text-align:center; }
 body[data-role="admin"] .profile-row { cursor:pointer; }
 body[data-role="admin"] .profile-row:focus-visible { outline:3px solid rgba(49,95,141,.28); outline-offset:-3px; }
+body[data-role="admin"] .student-name-link { display:inline; width:auto; min-height:0; margin:0; padding:0; border:0; border-radius:0; background:transparent; color:var(--accent); font:inherit; font-weight:750; text-align:left; cursor:pointer; }
+body[data-role="admin"] .student-name-link:hover { background:transparent; color:var(--accent-dark); text-decoration:underline; text-underline-offset:3px; }
+body[data-role="admin"] .student-name-link:focus-visible { outline:3px solid var(--accent-line); outline-offset:3px; }
 body[data-role="admin"] .profile-identity { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
 body[data-role="admin"] .profile-identity div { display:flex; flex-direction:column; gap:4px; padding:16px 18px; border:1px solid #e2e8f0; border-radius:14px; background:#fff; }
 body[data-role="admin"] .profile-identity span { color:#718096; font-size:12px; font-weight:750; text-transform:uppercase; }
@@ -245,7 +323,7 @@ body[data-role="admin"] .performance-track span { display:block; height:100%; bo
 body[data-role="admin"] .profile-target-row { animation:profileTarget 1.8s ease; }
 @keyframes profileTarget { 0%,55%{background:#dcecff}100%{background:transparent} }
 @media(max-width:650px){body[data-role="admin"] .profile-identity{grid-template-columns:1fr}}
-@media(max-width:720px){body[data-role="admin"] .student-profile-bg{padding:0}body[data-role="admin"] .student-profile-page{height:100vh;height:100dvh;min-height:0;border-radius:0}body[data-role="admin"] .student-profile-head,body[data-role="admin"] #studentProfileContent{padding:20px}body[data-role="admin"] .profile-avatar{width:50px;height:50px;flex-basis:50px;font-size:16px}body[data-role="admin"] .profile-tabs{padding-left:14px;overflow-x:auto}body[data-role="admin"] .profile-stat-grid{grid-template-columns:repeat(2,1fr)}body[data-role="admin"] .profile-columns{grid-template-columns:1fr}}
+@media(max-width:720px){body[data-role="admin"] .student-profile-bg{padding:0}body[data-role="admin"] .student-profile-page{height:100vh;height:100dvh;min-height:0;border-radius:0}body[data-role="admin"] .student-profile-head,body[data-role="admin"] #studentProfileContent,body[data-role="admin"] #studentEnrollmentContent,body[data-role="admin"] #facultyProfileContent{padding:20px}body[data-role="admin"] .profile-avatar{width:50px;height:50px;flex-basis:50px;font-size:16px}body[data-role="admin"] .profile-tabs{padding-left:14px;overflow-x:auto}body[data-role="admin"] .profile-stat-grid{grid-template-columns:repeat(2,1fr)}body[data-role="admin"] .profile-columns{grid-template-columns:1fr}}
 
 @media (max-width: 1180px) { body[data-role="admin"] .card-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
 @media (max-width: 760px) {

@@ -1,7 +1,7 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 console.log('=== FACULTY PROFILE. Relationships, performance, activity, and navigation ===');
-const seed=SEED(); seed.sections=[{id:'A',name:'Section A'}]; seed.sectionSubjects=[{sectionId:'A',subjectCodes:['SUB1']}];
+const seed=SEED(); seed.sections=[{id:'A',name:'Section A'},{id:'B',name:'Section B'}]; seed.sectionSubjects=[{sectionId:'A',assignments:[{id:'OA1',subjectCode:'SUB1',facultyId:'F1'},{id:'OA2',subjectCode:'SUB2',facultyId:'F2'}]},{sectionId:'B',assignments:[{id:'OB2',subjectCode:'SUB2',facultyId:'F2'}]}];
 seed.studentSubmissions=[{id:'sub1',studentId:'S1',examId:'e1',submittedAt:'2026-08-20T10:00:00Z',total:10,answers:[{awarded:8,needsManualGrading:false}]}];
 seed.applicationAuditLog=[{id:'a1',at:'2026-08-20T08:00:00Z',actorId:'F1',actorRole:'faculty',action:'login',entityType:'session',entityId:'F1'},{id:'a2',at:'2026-08-20T09:00:00Z',actorId:'F1',actorRole:'faculty',action:'create',entityType:'exam',entityId:'e1'}];
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
@@ -10,6 +10,17 @@ ok(!!row&&row.tabIndex===0,'Faculty ID and name row is clickable and keyboard ac
 row.querySelector('td').click();
 ok(r.d.getElementById('facultyProfileName').textContent==='Maria Reyes','hero identifies the selected professor');
 ok(r.d.getElementById('facultyProfileAvatar').textContent==='MR','faculty profile shows a circular initials avatar');
+const adminCss=require('fs').readFileSync(require('path').join(__dirname,'..','css','admin-modern.css'),'utf8');
+ok(/#facultyProfileContent\s*\{\s*padding:28px 32px/.test(adminCss),'Faculty profile content keeps text away from the modal edge');
+ok(/Handled subjects and sections/.test(r.d.getElementById('facultyProfileContent').textContent)&&/SUB1/.test(r.d.querySelector('.faculty-handled-table').textContent),'faculty page opens with its assignment table');
+r.d.querySelector('.available-subjects').open=true;
+[...r.d.querySelectorAll('.subject-only-table tr[role="button"]')].find(item=>/SUB2/.test(item.textContent)).click();
+const choices=[...r.d.querySelectorAll('#facultySectionPickerOptions input')]; choices.forEach(input=>{input.checked=true;r.w.updateFacultySectionPicker(input)});
+r.w.stageFacultySubject();
+ok(/Ready to save/.test(r.d.querySelector('.subject-only-table tbody tr:first-child').textContent),'subject with many selected sections is staged in table two');
+r.w.saveFacultyAssignmentBatch();
+ok(/SUB2/.test(r.d.querySelector('.faculty-handled-table').textContent)&&/A, B/.test(r.d.querySelector('.faculty-handled-table').textContent),'batch save moves the subject and all selected sections into table one');
+r.w.showFacultyProfileTab('overview');
 ok(/SUB1/.test(r.d.getElementById('facultyProfileContent').textContent)&&/Section A/.test(r.d.getElementById('facultyProfileContent').textContent),'overview shows subjects and their sections');
 r.w.showFacultyProfileTab('performance');
 ok(!!r.d.querySelector('.performance-track span')&&/average|No graded/.test(r.d.getElementById('facultyProfileContent').textContent),'section performance uses a bar graph and grading state');
