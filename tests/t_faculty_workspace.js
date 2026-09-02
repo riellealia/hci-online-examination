@@ -40,6 +40,8 @@ ok(!!r.d.querySelector('.subject-edit-dialog>.subject-dialog-close,.subject-edit
 r.d.querySelector('.subject-edit-dialog [data-edit-action="color"]').click();
 r.d.querySelector('.subject-color-options [data-color="#3576a8"]').click();
 ok(r.read('subjects').find(item=>item.code==='SUB1').workspaceColor==='#3576a8','Edit color saves the subject accent');
+ok(r.d.querySelector('#subjectList .sub-card').style.getPropertyValue('--course-accent')==='#3576a8','saved color immediately updates the Faculty subject card');
+ok(r.d.querySelector('#facultySubjectWorkspace>.workspace-hero').style.getPropertyValue('--course-accent')==='#3576a8','saved color applies to the Faculty subject-page hero');
 r.w.FacultySubjectWorkspace.openEditPrompt();
 r.d.querySelector('.subject-edit-dialog [data-edit-action="icon"]').click();
 r.d.querySelector('.subject-icon-options [data-icon="code"]').click();
