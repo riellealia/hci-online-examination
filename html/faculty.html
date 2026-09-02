@@ -1193,6 +1193,11 @@
             </aside>
         </div>
 
+        <aside id="facultyQuestionNavigator" class="exam-navigator faculty-question-navigator" style="display:none" aria-label="Question navigator">
+            <button type="button" class="nav-handle" onclick="if(this.dataset.dragged){delete this.dataset.dragged}else{toggleFacultyQuestionNavigator()}" aria-expanded="false" aria-controls="facultyQuestionNavPanel" title="Drag to move; click to open"><span aria-hidden="true">&#9776;</span><span class="sr-only">Open question navigator</span></button>
+            <div id="facultyQuestionNavPanel" class="nav-panel"><div class="nav-head"><strong>Questions</strong><button type="button" class="nav-close" onclick="closeFacultyQuestionNavigator()" aria-label="Close question navigator">&times;</button></div><div class="nav-cells"></div></div>
+        </aside>
+
         <nav class="authoring-mobile-bar" aria-label="Question editor actions">
             <button type="button" onclick="closeQuestionModal()"><span aria-hidden="true">&larr;</span><span>Back</span></button>
             <button type="button" onclick="toggleQuestionInspector()"><span aria-hidden="true">&#9881;</span><span>Settings</span></button>
@@ -2192,6 +2197,7 @@ function editQuestion(questionId) {
     renderQuestionImagePickerPreview();
     document.getElementById('questionModal').classList.remove('choosing-type');
     document.getElementById('questionModal').classList.add('active');
+    renderFacultyQuestionNavigator();
 }
 
 function closeQuestionModal() {
@@ -2203,6 +2209,8 @@ function closeQuestionModal() {
     document.getElementById('questionModal').classList.remove('active');
     document.getElementById('questionModal').classList.remove('choosing-type');
     document.getElementById('reportedQuestionContext').hidden=true;
+    document.getElementById('facultyQuestionNavigator').style.display='none';
+    closeFacultyQuestionNavigator();
     closeQuestionInspector();
     currentEditingQuestionId = null;
     if (returnPanel) switchTab(returnPanel);
@@ -2724,6 +2732,36 @@ function saveQuestion(addAnother = false) {
     notify(wasEdit ? 'Question updated.' : 'Question added.', 'success');
     if (!returnPanel) manageQuestions(currentEditingExamForQuestions);
     if (addAnother) openQuestionModal();
+}
+
+function placeFacultyQuestionNavigator(x,y,remember=true){
+    const nav=document.getElementById('facultyQuestionNavigator');if(!nav)return;
+    const width=44,height=48,edge=8,left=Math.max(edge,Math.min(Number(x)||edge,window.innerWidth-width-edge)),top=Math.max(edge,Math.min(Number(y)||edge,window.innerHeight-height-edge));
+    nav.classList.add('is-positioned');nav.style.left=`${left}px`;nav.style.top=`${top}px`;
+    if(remember)localStorage.setItem('facultyQuestionNavigatorPosition',JSON.stringify({left,top}));
+}
+function positionFacultyQuestionPanel(){
+    const nav=document.getElementById('facultyQuestionNavigator'),panel=nav?.querySelector('.nav-panel');if(!nav||!panel)return;
+    const edge=8,gap=8,handleWidth=44,handleHeight=48,left=parseFloat(nav.style.left)||edge,top=parseFloat(nav.style.top)||edge,panelWidth=Math.min(300,window.innerWidth-36),panelHeight=Math.min(panel.scrollHeight||560,window.innerHeight*.7,560);
+    let panelLeft=left+handleWidth+gap;if(panelLeft+panelWidth>window.innerWidth-edge)panelLeft=left-panelWidth-gap;
+    panelLeft=Math.max(edge,Math.min(panelLeft,window.innerWidth-panelWidth-edge));
+    panel.style.left=`${panelLeft}px`;panel.style.top=`${Math.max(edge,Math.min(top+(handleHeight-panelHeight)/2,window.innerHeight-panelHeight-edge))}px`;
+}
+function toggleFacultyQuestionNavigator(){const nav=document.getElementById('facultyQuestionNavigator');if(!nav)return;nav.classList.toggle('open');nav.querySelector('.nav-handle').setAttribute('aria-expanded',String(nav.classList.contains('open')));if(nav.classList.contains('open'))positionFacultyQuestionPanel()}
+function closeFacultyQuestionNavigator(){const nav=document.getElementById('facultyQuestionNavigator');if(!nav)return;nav.classList.remove('open');nav.querySelector('.nav-handle').setAttribute('aria-expanded','false')}
+function renderFacultyQuestionNavigator(){
+    const nav=document.getElementById('facultyQuestionNavigator'),examQuestions=questions.filter(question=>question.examId===currentEditingExamForQuestions);if(!nav||!currentEditingQuestionId||!examQuestions.length){if(nav)nav.style.display='none';return}
+    nav.style.display='block';nav.querySelector('.nav-cells').innerHTML=examQuestions.map((question,index)=>`<button type="button" class="nav-cell${question.id===currentEditingQuestionId?' is-current':''}" data-question-id="${question.id}" ${question.id===currentEditingQuestionId?'aria-current="step"':''} aria-label="Edit question ${index+1}"><span class="cell-num">${index+1}</span></button>`).join('');
+    nav.querySelectorAll('.nav-cell').forEach(button=>button.onclick=()=>{closeFacultyQuestionNavigator();editQuestion(button.dataset.questionId)});
+    if(!nav.classList.contains('is-positioned')){try{const saved=JSON.parse(localStorage.getItem('facultyQuestionNavigatorPosition')||'null');saved?placeFacultyQuestionNavigator(saved.left,saved.top,false):placeFacultyQuestionNavigator(8,Math.max(8,(window.innerHeight-48)/2),false)}catch(_){placeFacultyQuestionNavigator(8,Math.max(8,(window.innerHeight-48)/2),false)}}
+    enableFacultyQuestionNavigatorDrag();
+}
+function enableFacultyQuestionNavigatorDrag(){
+    const nav=document.getElementById('facultyQuestionNavigator'),handle=nav?.querySelector('.nav-handle');if(!nav||!handle||handle.dataset.dragWired)return;handle.dataset.dragWired='true';let drag=null;
+    handle.addEventListener('pointerdown',event=>{const rect=handle.getBoundingClientRect();drag={dx:event.clientX-rect.left,dy:event.clientY-rect.top,startX:event.clientX,startY:event.clientY,moved:false};handle.setPointerCapture?.(event.pointerId)});
+    handle.addEventListener('pointermove',event=>{if(!drag)return;if(Math.abs(event.clientX-drag.startX)+Math.abs(event.clientY-drag.startY)>3)drag.moved=true;if(!drag.moved)return;nav.classList.add('is-dragging');placeFacultyQuestionNavigator(event.clientX-drag.dx,event.clientY-drag.dy,false);event.preventDefault()});
+    const finish=event=>{if(!drag)return;handle.releasePointerCapture?.(event.pointerId);nav.classList.remove('is-dragging');if(drag.moved){handle.dataset.dragged='true';localStorage.setItem('facultyQuestionNavigatorPosition',JSON.stringify({left:parseFloat(nav.style.left),top:parseFloat(nav.style.top)}))}drag=null};handle.addEventListener('pointerup',finish);handle.addEventListener('pointercancel',finish);
+    window.addEventListener('resize',()=>{if(nav.classList.contains('is-positioned'))placeFacultyQuestionNavigator(parseFloat(nav.style.left),parseFloat(nav.style.top),false);if(nav.classList.contains('open'))positionFacultyQuestionPanel()});
 }
 
 function navigateQuestion(direction) {

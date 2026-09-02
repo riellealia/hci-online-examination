@@ -275,7 +275,8 @@
   #takeExamModal .exam-navigator.is-positioned { right:auto; transform:none; }
   #takeExamModal .exam-navigator.is-positioned .nav-handle { left:0; right:auto; top:0; transform:none; touch-action:none; cursor:grab; }
   #takeExamModal .exam-navigator.is-dragging .nav-handle { cursor:grabbing; }
-  #takeExamModal .exam-navigator.open { left:auto!important; right:0!important; top:50%!important; transform:translateY(-50%)!important; }
+  #takeExamModal .exam-navigator.is-positioned .nav-panel { position:fixed; left:0; top:0; transform:none; visibility:hidden; opacity:0; transition:opacity 160ms ease; }
+  #takeExamModal .exam-navigator.is-positioned.open .nav-panel { visibility:visible; opacity:1; }
   #examModalActions { position:fixed; right:max(24px,calc((100vw - 1040px)/2)); bottom:20px; z-index:21; padding:8px; border:1px solid #e0e7e3; border-radius:13px; background:rgba(255,255,255,.96); box-shadow:0 7px 22px rgba(20,45,29,.12); }
   #questionReportModal { z-index:400; }
   #questionReportModal .modal { width:min(520px,calc(100vw - 32px)); padding:26px; border-radius:16px; }
@@ -1702,6 +1703,7 @@ function enableNavigatorDrag() {
   try {
     const saved = JSON.parse(localStorage.getItem('studentExamNavigatorPosition') || 'null');
     if (saved) placeNavigatorHandle(saved.left, saved.top, false);
+    else placeNavigatorHandle(8, Math.max(8,(window.innerHeight-48)/2), false);
   } catch (_) {}
   let drag = null;
   handle.addEventListener('pointerdown', event => {
@@ -1731,14 +1733,30 @@ function enableNavigatorDrag() {
   handle.addEventListener('pointerup', finish);
   handle.addEventListener('pointercancel', finish);
   window.addEventListener('resize', () => {
-    if (nav.classList.contains('is-positioned')) placeNavigatorHandle(parseFloat(nav.style.left), parseFloat(nav.style.top), false);
+    if (nav.classList.contains('is-positioned')) {
+      placeNavigatorHandle(parseFloat(nav.style.left), parseFloat(nav.style.top), false);
+      if (nav.classList.contains('open')) positionNavigatorPanel();
+    }
   });
+}
+
+function positionNavigatorPanel() {
+  const nav=document.getElementById('examNavigator'),panel=nav?.querySelector('.nav-panel');
+  if (!nav||!panel) return;
+  const gap=8,edge=8,handleWidth=44,handleHeight=48,left=parseFloat(nav.style.left)||edge,top=parseFloat(nav.style.top)||edge;
+  const panelWidth=Math.min(300,window.innerWidth-36),panelHeight=Math.min(panel.scrollHeight||560,window.innerHeight*.7,560);
+  let panelLeft=left+handleWidth+gap;
+  if(panelLeft+panelWidth>window.innerWidth-edge)panelLeft=left-panelWidth-gap;
+  panelLeft=Math.max(edge,Math.min(panelLeft,window.innerWidth-panelWidth-edge));
+  const panelTop=Math.max(edge,Math.min(top+(handleHeight-panelHeight)/2,window.innerHeight-panelHeight-edge));
+  panel.style.left=`${panelLeft}px`;panel.style.top=`${panelTop}px`;
 }
 
 function toggleNavigator() {
   const nav = document.getElementById('examNavigator');
   if (!nav) return;
   nav.classList.toggle('open');
+  if(nav.classList.contains('open'))positionNavigatorPanel();
   nav.querySelector('.nav-handle').setAttribute('aria-expanded', String(nav.classList.contains('open')));
 }
 

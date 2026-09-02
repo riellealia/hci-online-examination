@@ -1391,6 +1391,11 @@ table tr:last-child td {
 
 .exam-navigator.open .nav-panel { transform: translateX(0); }
 .exam-navigator.open .nav-handle { display: none; }
+.faculty-question-navigator.is-positioned { right:auto; transform:none; }
+.faculty-question-navigator.is-positioned .nav-handle { left:0; right:auto; top:0; transform:none; touch-action:none; cursor:grab; }
+.faculty-question-navigator.is-dragging .nav-handle { cursor:grabbing; }
+.faculty-question-navigator.is-positioned .nav-panel { position:fixed; left:0; top:0; transform:none; visibility:hidden; opacity:0; transition:opacity 160ms ease; }
+.faculty-question-navigator.is-positioned.open .nav-panel { visibility:visible; opacity:1; }
 
 .nav-head {
   display: flex;

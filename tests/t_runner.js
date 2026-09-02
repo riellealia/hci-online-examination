@@ -35,6 +35,10 @@ ok(/Save draft and leave/.test(r.d.querySelector('.confirm-box')?.textContent||'
 r.d.querySelector('.confirm-box .confirm-cancel').click();
 r.w.placeNavigatorHandle(120,90,false);
 ok(r.d.getElementById('examNavigator').classList.contains('is-positioned')&&r.d.getElementById('examNavigator').style.left==='120px'&&r.d.getElementById('examNavigator').style.top==='90px','question navigator handle can be repositioned');
+r.w.toggleNavigator();
+const studentNavPanel=r.d.getElementById('questionNavPanel'),studentPanelLeft=parseFloat(studentNavPanel.style.left),studentPanelTop=parseFloat(studentNavPanel.style.top);
+ok(studentPanelLeft>=8&&studentPanelTop>=8&&studentPanelLeft+Math.min(300,r.w.innerWidth-36)<=r.w.innerWidth-8,'Student question panel opens beside the dragged handle without leaving the viewport');
+r.w.closeNavigator();
 ok(/flagged/i.test(r.d.querySelector('.nav-cell[data-index="0"]').getAttribute('aria-label')),'navigator announces flag');
 
 r.w.goToQuestion(1);
