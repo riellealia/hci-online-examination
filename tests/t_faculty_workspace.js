@@ -23,6 +23,7 @@ r.w.RoleProfileViewer?.close?.();
 r.w.FacultySubjectWorkspace.open('SUB1');
 ok(r.d.getElementById('subject-workspace-tab').style.display==='block','subject opens its own workspace page');
 ok(r.d.querySelectorAll('.workspace-tab').length===4,'Main, Members, Grades, and Logs tabs are present');
+ok(r.d.querySelector('#facultySubjectWorkspace>.workspace-hero')?.nextElementSibling?.classList.contains('workspace-tabs'),'subject tabs render directly below the hero card');
 ok(!r.d.querySelector('.workspace-rail'),'large student preview rail is removed');
 ok(!!r.d.querySelector('.workspace-menu-trigger'),'hero uses a three-dot options menu');
 r.d.querySelector('.workspace-menu-trigger').click();
