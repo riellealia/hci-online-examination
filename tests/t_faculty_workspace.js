@@ -1,7 +1,12 @@
 const {load,SEED}=require('./harness');
+const fs=require('fs'),path=require('path');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 
 console.log('=== FACULTY SUBJECT WORKSPACE. Course-level authoring and oversight ===');
+const sharedCss=fs.readFileSync(path.join(__dirname,'..','css','shared-ui.css'),'utf8');
+const workspaceCss=fs.readFileSync(path.join(__dirname,'..','css','faculty-subject-workspace.css'),'utf8');
+ok(/\.sub-card\s*\{\s*border-left:\s*5px solid var\(--course-accent,\s*var\(--accent\)\)/.test(sharedCss),'Faculty subject-card trim follows its selected course color');
+ok(/body\[data-role="faculty"\] \.sub-card\{[^}]*border-left-color:var\(--course-accent\)!important/.test(workspaceCss),'dark mode preserves the selected course-color trim');
 let seed=SEED();
 seed.sections=[{id:'A',name:'A',yearLevel:'1',program:'BSCS',sectionNumber:'1'}];
 seed.sectionSubjects=[{sectionId:'A',assignments:[{subjectCode:'SUB1',facultyId:'F1'}]}];

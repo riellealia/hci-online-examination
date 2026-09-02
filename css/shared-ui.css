@@ -492,7 +492,7 @@ table tr:last-child td {
 }
 
 .sub-card {
-  border-left: 5px solid var(--accent);
+  border-left: 5px solid var(--course-accent, var(--accent));
 }
 
 .stat-card {
