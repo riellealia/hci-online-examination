@@ -65,7 +65,9 @@
   .review-head { background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:14px 16px; margin-bottom:16px; }
   .review-head h3 { font-size:16px; color:var(--accent); margin-bottom:6px; }
   .review-head p { font-size:14px; color:var(--ink-soft); }
-  .review-item { border:1px solid #e2e8f0; border-left:4px solid #a5d6a7; border-radius:8px; padding:14px 16px; margin-bottom:10px; background:#fafafa; }
+  .review-item { display:block; width:100%; border:1px solid #e2e8f0; border-left:4px solid #a5d6a7; border-radius:8px; padding:14px 16px; margin-bottom:10px; background:#fafafa; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+  .review-item:hover { border-color:var(--accent); box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 14%,transparent); }
+  .review-item:focus-visible { outline:3px solid var(--accent-line); outline-offset:2px; }
   .review-item.unanswered { border-left-color:#e57373; background:#fff5f5; }
   .review-q { font-weight:600; font-size:14px; margin-bottom:6px; color:#333; }
   .review-a { font-size:14px; color:var(--accent); word-break:break-word; white-space:pre-wrap; }
@@ -1441,7 +1443,7 @@ function questionMarkup(q, idx) {
   const saved = getAnswer(activeAttempt, q.id);
   const typeLabel = questionTypeLabel(q.type);
   return `
-    <section class="q-item" aria-labelledby="questionTitle${idx}">
+    <section class="q-item" tabindex="-1" aria-labelledby="questionTitle${idx}">
       <div class="q-head">
         <span class="q-number">Question ${idx + 1}</span>
         <span class="q-head-actions"><span class="q-type">${typeLabel} &middot; ${q.points || 5} point(s)</span>
@@ -1765,7 +1767,7 @@ function reviewAnswers() {
       <p style="margin-top:6px;">Submission is final and cannot be undone.</p>
     </div>
     ${entries.map(e => `
-      <div class="review-item ${e.answered ? '' : 'unanswered'}">
+      <button type="button" class="review-item ${e.answered ? '' : 'unanswered'}" onclick="openQuestionFromReview(${e.idx})" aria-label="Return to question ${e.idx + 1}">
         <div class="review-q">
           Question ${e.idx + 1}: ${e.q.text}
           <span class="review-tag ${e.answered ? 'tag-answered' : 'tag-missing'}">
@@ -1776,7 +1778,7 @@ function reviewAnswers() {
         <div class="review-a ${e.answered ? '' : 'none'}">
           ${e.answered ? e.display : 'No answer given'}
         </div>
-      </div>
+      </button>
     `).join('')}
   `;
 
@@ -1799,6 +1801,23 @@ function backToQuestions() {
     <button class="btn-take-exam" onclick="reviewAnswers()">Save &amp; Submit Exam</button>
   `;
   renderCurrentQuestion();
+}
+
+/* A review card is a direct return path to that question. Review is the
+   student's final opportunity to correct an answer before submission, so
+   this explicit choice is allowed even when ordinary navigation is forward-only. */
+function openQuestionFromReview(index) {
+  if (!activeAttempt || index < 0 || index >= currentExamQuestions.length) return false;
+  activeAttempt.currentIndex = index;
+  activeAttempt.maxVisited = Math.max(activeAttempt.maxVisited || 0, index);
+  persistAttempt();
+  backToQuestions();
+  const question = allOnOnePage
+    ? document.querySelectorAll('#examQuestionsContainer .q-item')[index]
+    : document.querySelector('#examQuestionsContainer .q-item');
+  question?.scrollIntoView?.({block:'start'});
+  question?.focus();
+  return true;
 }
 
 async function submitExamAnswers(opts = {}) {

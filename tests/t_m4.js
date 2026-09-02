@@ -29,10 +29,14 @@ ok(rev.querySelectorAll('.review-item.unanswered').length===1,'blank question vi
 ok(/Not answered/.test(rev.querySelector('.review-item.unanswered').textContent),'non-colour indicator (text tag) present');
 const answered=[...rev.querySelectorAll('.review-item')].find(x=>!x.classList.contains('unanswered'));
 ok(/A/.test(answered.querySelector('.review-a').textContent),'chosen MCQ option echoed back');
+rev.querySelector('.review-item.unanswered').click();
+ok(r.d.getElementById('examQuestionsContainer').style.display==='block'&&/Question 2 of 2/.test(r.d.getElementById('examProgress').textContent),'clicking a review cell returns directly to that question');
+r.w.reviewAnswers();
 
 console.log('\n=== Z. Back to questions preserves answers ===');
 r.w.backToQuestions();
 ok(r.d.getElementById('examQuestionsContainer').style.display==='block','returned to questions');
+r.w.goToQuestion(0);
 ok(r.d.querySelector('input[name="q_q1"]').checked===true,'MCQ answer preserved');
 r.w.goToQuestion(1);
 r.d.querySelector('.short-ans-input[data-qid="q2"]').value='Now answered';
