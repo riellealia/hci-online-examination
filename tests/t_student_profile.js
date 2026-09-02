@@ -11,9 +11,9 @@ seed.studentSubmissions=[{studentId:'S1',examId:'e1',submittedAt:'2026-08-20T10:
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 const link=[...r.d.querySelectorAll('#studentTable tr')].find(row=>/Cruz, Juan/.test(row.textContent));
 ok(!!link&&!/Sections/.test(r.d.querySelector('#studentTable tr').textContent),'student table removes the Sections column');
-const nameLink=link.querySelector('.student-name-link');
-ok(nameLink?.getAttribute('aria-label')==='Manage Juan Cruz','student name cell is an accessible Manage student link');
-nameLink.click();
+const nameCell=link.querySelector('.student-name-cell');
+ok(nameCell?.getAttribute('role')==='button'&&nameCell.tabIndex===0&&nameCell.getAttribute('aria-label')==='Manage Juan Cruz'&&!nameCell.querySelector('a,button'),'student name is an accessible clickable table cell, not a hyperlink');
+nameCell.click();
 ok(r.d.getElementById('studentEnrollmentModal').style.display==='flex'&&r.d.getElementById('studentEnrollmentName').textContent==='Juan Cruz','clicking the student name opens Manage student');
 r.w.closeModal('studentEnrollmentModal');
 link.querySelector('.section-action-trigger').click();
