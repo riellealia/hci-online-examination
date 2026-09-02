@@ -120,6 +120,15 @@
   .review-page-head { display:flex; align-items:flex-start; gap:14px; margin-bottom:18px; }
   .review-page-head h2 { margin:0 0 4px; color:#26384c; font-size:21px; }
   .review-page-head p { margin:0; color:#708078; font-size:13px; }
+  .review-result-summary { display:flex; align-items:center; justify-content:space-between; gap:18px; margin:0 0 20px; padding:0 0 18px; border-bottom:1px solid var(--line); }
+  .review-result-status { display:flex; align-items:center; gap:11px; min-width:0; }
+  .review-result-check { display:grid; place-items:center; width:34px; height:34px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-size:18px; font-weight:900; }
+  .review-result-status strong,.review-result-status small { display:block; }
+  .review-result-status strong { color:var(--ink); font-size:15px; }
+  .review-result-status small { margin-top:2px; color:var(--ink-soft); font-size:12px; }
+  .review-result-score { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; text-align:right; }
+  .review-result-score>strong { color:var(--accent); font-size:20px; line-height:1; }
+  .review-result-score>span:not(.grade-chip) { color:var(--ink-soft); font-size:12px; }
   #studentReviewContent { display:grid; gap:12px; }
   .review-question-card { padding:16px; border:1px solid #e1e8e4; border-radius:11px; background:#fff; }
   .review-question-card.is-correct { border-left:4px solid #3f8a52; }
@@ -202,7 +211,7 @@
   .exam-list-actions { display:flex; align-items:center; justify-content:flex-end; gap:9px; }
   .exam-list-score { min-width:70px; color:var(--accent); font-size:13px; font-weight:800; text-align:right; }
   .exam-feedback-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:#fff0cf; color:#815600; font-size:11px; font-weight:800; white-space:nowrap; }
-  @media(max-width:640px){.exam-list-row{grid-template-columns:1fr}.exam-list-actions{justify-content:space-between}.exam-list-score{text-align:left}.review-answer-grid,.review-match-row{grid-template-columns:1fr}}
+  @media(max-width:640px){.exam-list-row{grid-template-columns:1fr}.exam-list-actions{justify-content:space-between}.exam-list-score{text-align:left}.review-answer-grid,.review-match-row{grid-template-columns:1fr}.review-result-summary{align-items:flex-start;flex-direction:column}.review-result-score{justify-content:flex-start;text-align:left}}
   #exams-panel,#results-panel { position:relative; }
   #exams-panel > .role-table-tools,#results-panel > .role-table-tools { top:20px; right:20px; }
   @media(max-width:760px){.enrolled-subject-grid{grid-template-columns:1fr}.subject-card-head{align-items:flex-start}.subject-exam-row:not(.result-exam-row){grid-template-columns:1fr;gap:8px}.subject-exam-row .btn-take-exam{width:100%}.subject-summary{max-width:125px}.subject-detail-grid{grid-template-columns:1fr}.subject-detail-exams{grid-column:auto}#exams-panel > .role-table-tools,#results-panel > .role-table-tools{position:relative;top:auto;right:auto;justify-content:flex-end;margin:-4px 0 16px}}
@@ -755,11 +764,12 @@ function openResultReviewPage(submissionId) {
   document.getElementById('studentReviewTitle').textContent = exam.title || 'Exam review';
   document.getElementById('studentReviewMeta').textContent = `${exam.subjectCode} · Submitted ${new Date(submission.submittedAt).toLocaleString()}`;
   document.getElementById('studentReviewFeedback').innerHTML = `
-    <div class="score-box result-page-score">
-      <strong>Submission recorded</strong>
-      <span>${visibility.showScore ? `${awarded} / ${submission.total}${pending.length ? ' so far' : ''}` : 'Score hidden by your professor'}</span>
-      ${grade ? `<span class="grade-chip ${grade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${grade.rating}</span><span class="grade-sub">${grade.percentText}% · ${grade.remark}</span></span>` : ''}
-      ${pending.length ? `<small>${pending.length} answer${pending.length === 1 ? '' : 's'} awaiting marking</small>` : ''}
+    <div class="review-result-summary">
+      <div class="review-result-status"><span class="review-result-check" aria-hidden="true">✓</span><div><strong>Submission recorded</strong><small>${pending.length ? `${pending.length} answer${pending.length === 1 ? '' : 's'} awaiting marking` : 'Final result available'}</small></div></div>
+      <div class="review-result-score">
+        ${visibility.showScore ? `<strong>${awarded} / ${submission.total}</strong>${pending.length?'<span>so far</span>':''}` : '<span>Score hidden by your professor</span>'}
+        ${grade ? `<span class="grade-chip ${grade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${grade.rating}</span><span class="grade-sub">${grade.percentText}% · ${grade.remark}</span></span>` : ''}
+      </div>
     </div>
     ${submission.remarks ? `<div class="remark-box"><strong>Professor feedback</strong><p>${escapeQuestionMedia(submission.remarks)}</p></div>` : ''}`;
   document.getElementById('studentReviewContent').innerHTML = source.innerHTML;
