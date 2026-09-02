@@ -22,6 +22,8 @@ ok(/Prof\.|To be assigned/.test(studentCourseCard.querySelector('.student-course
 ok(r.d.getElementById('subjectsTable').classList.contains('compat-table')||r.d.getElementById('subjectsTable').closest('.compat-table'),'the old subject table is not part of the visible interface');
 r.d.querySelector('#studentSubjectCards .enrolled-subject-card').click();
 ok(r.d.getElementById('subject-detail-panel').style.display==='block','clicking a subject card opens its subject page');
+const subjectTabs=[...r.d.querySelectorAll('#studentSubjectDetail .subject-detail-tab')];
+ok(subjectTabs.map(tab=>tab.textContent.trim()).join('|')==='Main|Class'&&subjectTabs[0].classList.contains('active'),'subject page opens with underlined Main and Class tabs below the hero');
 ok(r.d.querySelectorAll('#studentSubjectDetail .subject-info-cell').length>=5,'subject page separates details, professor, rules, schedule, and exams into cells');
 const subjectExamCell=r.d.querySelector('#studentSubjectDetail [data-open-exam]');
 ok(!!subjectExamCell,'subject page renders examinations as shared interactive exam cells');
@@ -32,6 +34,9 @@ ok(!r.d.querySelector('#sidebar [data-panel="subject-detail-panel"]'),'redundant
 ok(/Handles:/.test(r.d.querySelector('#studentSubjectDetail').textContent),'professor listing identifies handled sections');
 const classmate=r.d.querySelector('#studentSubjectDetail .classmate-row');
 ok(!!classmate,'subject page lists classmates as clickable limited profiles');
+ok(!classmate.closest('.student-subject-tab-panel').classList.contains('active'),'classmates are kept out of the Main tab');
+subjectTabs[1].click();
+ok(classmate.closest('.student-subject-tab-panel').classList.contains('active')&&!r.d.querySelector('[data-subject-tab-panel="main"]').classList.contains('active'),'Class tab shows classmates and hides Main cells');
 classmate.click();
 ok(/Limited public information/.test(r.d.getElementById('roleProfileOverlay').textContent)&&/private information are hidden/.test(r.d.querySelector('.role-profile-content').textContent)&&!r.d.querySelector('.role-profile-tabs'),'fellow-student profile hides academic and account details');
 r.w.RoleProfileViewer.close();
