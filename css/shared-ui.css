@@ -440,7 +440,7 @@ textarea:focus-visible,
   letter-spacing:.08em;
   text-transform:uppercase;
 }
-#sidebar .sidebar-divider::before { content:""; height:1px; flex:1; background:var(--line-strong); }
+#sidebar .sidebar-divider::after { content:""; height:1px; flex:1; background:var(--line-strong); }
 #sidebar .sidebar-divider span { flex:none; }
 
 .menu-btn {
