@@ -1300,3 +1300,13 @@ This file records meaningful changes to the plan, implementation, testing, and d
 - **Schedule:** Moved stale demo examinations to September 7–13 while retaining exactly two completed expired and two missed Student examples.
 - **Verification:** Complete suite reports 929 passing and 6 failing assertions. Remaining failures are stale UI-structure expectations in `t_admin_modern.js` (1), `t_publish.js` (1), and `t_relationship_rules.js` (4). Focused rich-seed, Student, progress, System Management, authentication, and UI suites pass.
 - **Remaining:** Reconcile those six assertions, run representative usability sessions, capture final screenshots, and assemble the final report.
+
+## 2026-09-02 — Cross-role course, question, and navigation polish
+
+- **Area:** Faculty and Student course pages, question authoring, and shared navigation.
+- **Changed:** Propagated Faculty-selected subject colors and icons across role cards and course heroes; moved course tabs below hero profiles; added Question Bank exam settings; removed redundant settings actions and empty report context; added draggable, viewport-clamped Student and Faculty question navigators; kept Faculty navigation free of Student answer-state labels; and made Back return to the actual previous screen for Admin, Faculty, Student, and nested detail pages.
+- **Reason:** Preserve visual identity across views, reduce redundant controls, and make navigation predictable regardless of role or entry path.
+- **Files:** `html/faculty.html`, `html/student.html`, `css/shared-ui.css`, `css/faculty-subject-workspace.css`, `js/faculty-subject-workspace.js`, `js/ui.js`, and related test suites.
+- **Verification:** The September 2 complete suite reports **964 passed and 6 failed**. The six failures are the same documented stale UI-structure assertions in `t_admin_modern.js`, `t_publish.js`, and `t_relationship_rules.js`; focused navigation, Faculty workspace, Student, runner, catalogue, authoring, reports, UI, and responsive suites pass.
+- **Result:** Complete for the described interface changes.
+- **Remaining:** Reconcile the six stale assertions, conduct human usability sessions, capture screenshots, and assemble the final report.

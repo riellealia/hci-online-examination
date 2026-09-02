@@ -197,7 +197,7 @@ Already present:
 - CSV preview/import flows
 - Student exam access, submission, automatic MCQ scoring, and pending written-answer results
 
-Recently completed (updated 2026-09-01):
+Recently completed (updated 2026-09-02):
 
 - Shared paths, authentication, assets, role accents, and reusable UI components
 - Question reordering, exam preview, section eligibility, answer review, and duplicate-submission protection
@@ -214,11 +214,16 @@ Recently completed (updated 2026-09-01):
 - Accessible toggle switches for maintenance and Faculty/Student login access
 - Admin sidebar grouping for Dashboard, System Management, Audit Logs, and separated school controls
 - Demo schedules migrated to version 22: stale exams moved to September 7–13, with two completed expired and two missed examples retained
+- Faculty-selected subject colors and icons carried consistently through Faculty cards, Student cards, and both course-page hero profiles
+- Course-page tabs placed directly below their hero cards, with Student classmates isolated under the Class tab
+- Question Bank settings access, simplified Save/Cancel settings actions, and hidden empty report context during ordinary question editing
+- Draggable, viewport-clamped question navigators for Student attempts and Faculty editing; Faculty navigation remains status-free
+- Shared in-app history for Admin, Faculty, Student, and nested detail pages so Back returns to the actual previous screen
 - GitHub repository initialized and pushed to `origin/main`
 
 Still requiring verification or coursework:
 
-- Reconcile six stale UI-structure assertions in `t_admin_modern.js`, `t_publish.js`, and `t_relationship_rules.js`; the 2026-09-01 full run reports 929 passing and 6 failing assertions.
+- Reconcile six stale UI-structure assertions in `t_admin_modern.js`, `t_publish.js`, and `t_relationship_rules.js`; the 2026-09-02 full run reports 964 passing and 6 failing assertions.
 - Conduct representative usability sessions and record findings.
 - Capture final screenshots and assemble the final report.
 

@@ -8,7 +8,17 @@ The project does not use a database. CSV files and browser storage are used for 
 
 Some interface elements may appear large or slightly over-scaled. This is manageable for the current prototype because the priority has been consistent formatting and a clear demonstration of the workflows rather than complete responsiveness and production scaling.
 
-Most pages and workflows are connected and functional. Some parts of the Faculty interface are still being refined and may not be fully connected or complete.
+The Admin, Faculty, and Student workflows are connected and functional. Current polish includes role-aware light/dark themes, course pages, question authoring, exam attempts, grading, reports, System Management, and history-based navigation. The prototype remains browser-storage based and is not intended as a production deployment.
+
+## Current verification
+
+Run the automated browser-level suite with:
+
+```powershell
+node tests/run-all.js
+```
+
+The latest complete run on September 2, 2026 reports **964 passing and 6 failing assertions**. The six failures are known stale UI-structure expectations in three older test files; focused tests for the current interfaces pass. See [completion-rate.md](.plans/progress/completion-rate.md) for the exact breakdown.
 
 Most planning notes, requirements, progress records, and design decisions are available in the [`.plans`](.plans) folder.
 
@@ -62,4 +72,3 @@ Changes and improvements are welcome. Before changing an existing workflow, desi
 Claude also generated an artifact that may be useful as a reference:
 
 [Claude Code artifact](https://claude.ai/code/artifact/be825174-06bb-4d64-94d2-288611377b01)
-

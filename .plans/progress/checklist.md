@@ -1,11 +1,11 @@
 # Project Completion Checklist
 
-Last reviewed: 2026-09-01
+Last reviewed: 2026-09-02
 
 Status key: `[x]` complete, `[~]` partial or needs verification, `[ ]` not started.
 
 Implementation items marked `[x]` are backed by focused browser-level tests and
-direct interface review. The 2026-09-01 complete-suite run reports 929 passing
+direct interface review. The 2026-09-02 complete-suite run reports 964 passing
 and 6 failing assertions. The failures are stale UI-structure expectations in
 three suites; see `audit-log.md`. Human usability findings are still not claimed
 from automation.
@@ -107,6 +107,7 @@ from automation.
 - [x] Non-color indicators for all statuses — every status carries an icon or word alongside its colour
 - [x] Consistent soft-rounded controls
 - [x] One shared navigation model across all three roles
+- [x] History-based Back behavior returns every role and nested detail page to the immediately previous screen
 - [x] Success confirmation for every save action
 - [x] Designed empty, success, validation, error and confirmation states — toasts, inline field errors and a designed confirm dialog replace every `alert()`/`confirm()`
 
@@ -125,6 +126,8 @@ from automation.
 - [x] Save/Discard/Continue prompt for unsaved general settings
 - [~] Impact confirmation for changes affecting submitted attempts; publishing and active-draft coverage remain
 - [x] Previous/Next navigation, question navigator, and Faculty navigation policy
+- [x] Draggable Student and Faculty question navigators open beside the handle and remain inside viewport bounds
+- [x] Faculty question navigation is status-free while Student navigation retains answered and flagged states
 - [~] Autosave, refresh recovery, and visible save state implemented; offline warning/retry remains
 - [x] Separate availability window and attempt-duration timer
 - [x] Flagged-question workflow
@@ -168,6 +171,8 @@ from automation.
 - [x] Three-dot menu on every editable cell with icon-labelled Delete, Move up, and Move down actions
 - [x] Directly open examination details/questions by clicking an examination cell
 - [x] Members and activity use compact tables and subtabs
+- [x] Faculty-selected subject color and icon propagate to Faculty/Student cards and course-page hero profiles
+- [x] Faculty and Student course-page tabs render directly below their hero profile
 
 ## Student subject and examination presentation
 
@@ -181,7 +186,7 @@ from automation.
 
 - [x] Git repository initialized and complete project snapshot pushed to `origin/main`
 - [x] `.env` included as requested
-- [~] Reconcile six stale assertions identified by the 2026-09-01 full run: one in `t_admin_modern.js`, one in `t_publish.js`, and four in `t_relationship_rules.js`
+- [~] Reconcile six stale assertions identified by the 2026-09-02 full run (964 passing): one in `t_admin_modern.js`, one in `t_publish.js`, and four in `t_relationship_rules.js`
 
 ## Final deliverables
 

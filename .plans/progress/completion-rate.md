@@ -1,6 +1,6 @@
 # Completion Rate Dashboard
 
-Last reviewed: 2026-09-01 (rev. 41)
+Last reviewed: 2026-09-02 (rev. 42)
 
 ## Scoring method
 
@@ -11,7 +11,7 @@ Only the required project scope is included in the headline rate. Optional and f
 - Not started item: 0 points
 
 Implementation figures use focused tests plus direct interface review. The
-2026-09-01 complete run reports 929 passing and 6 failing assertions. The six
+2026-09-02 complete run reports 964 passing and 6 failing assertions. The six
 failures are stale UI-structure checks following deliberate dashboard,
 publication-action, and Faculty-roster changes.
 
@@ -39,9 +39,10 @@ publication-action, and Faculty-roster changes.
 Calculation: 68 complete points + 7 partial items at 0.5 point each = 71.5 weighted
 points out of 79 required checklist points, rounded to 91%.
 
-The percentage is unchanged because recent work expands optional course-page
-behavior rather than adding a missing graded module. Verification confidence is
-temporarily partial until the six stale assertions are reconciled.
+The percentage is unchanged because the latest work strengthens shared
+navigation, course-page consistency, and question-authoring usability rather
+than adding a missing graded module. Verification confidence remains partial
+until the six stale assertions are reconciled.
 
 ## If the optional scope is included
 
@@ -74,7 +75,7 @@ graded.
 ## Supporting views
 
 - **Core implementation only:** 100% by feature checklist. Focused suites pass, but six assertions in three complete-suite files need reconciliation.
-- **HCI documentation and final deliverables:** 76% — requirements, ERD, flowcharts, storyboards, interface/dialog designs, documented test cases, and a 929-passing-assertion automated baseline now exist. What remains genuinely cannot be produced from the code: usability findings from real participants, screenshots, and the assembled report.
+- **HCI documentation and final deliverables:** 76% — requirements, ERD, flowcharts, storyboards, interface/dialog designs, documented test cases, and a 964-passing-assertion automated baseline now exist. What remains genuinely cannot be produced from the code: usability findings from real participants, screenshots, and the assembled report.
 - **Shared visual/HCI polish:** 100% — one navigation model across all three roles, every save confirms itself, WCAG AA contrast throughout, and a completed small-screen pass.
 
 ## Interpretation
@@ -94,7 +95,7 @@ deliverables and regression-test reconciliation.
 
 ## Latest verification status
 
-- Full run: **929 passed, 6 failed**.
+- Full run: **964 passed, 6 failed**.
 - `t_admin_modern.js`: one outdated management-card description assertion.
 - `t_publish.js`: one outdated draft review/publish action assertion.
 - `t_relationship_rules.js`: four outdated management-description and Faculty-roster/tab assertions.
