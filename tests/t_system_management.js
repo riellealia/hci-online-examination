@@ -15,6 +15,7 @@ page.d.getElementById('announcementAudience').value='student';
 page.w.SystemManagement.saveAnnouncement();
 ok(page.read('adminAnnouncements').some(item=>item.title==='Enrollment reminder'&&item.audience==='student'),'Admin can publish a targeted announcement');
 ok(page.read('adminAnnouncements').find(item=>item.title==='Enrollment reminder').publishAt===''&&page.d.getElementById('announcementPublishAt').hidden,'Publish immediately is the default and does not store a future date');
+ok(!page.d.querySelector('.header-inbox-list')?.textContent.includes('Enrollment reminder'),'role-targeted announcement stays out of the Admin Inbox');
 const announcementMenu=page.d.querySelector('.announcement-row .announcement-actions-menu');
 ok(!!announcementMenu&&announcementMenu.querySelector('summary')?.textContent.trim()==='⋮','each announcement uses one three-dot action menu');
 ok([...announcementMenu.querySelectorAll('nav button')].map(button=>button.textContent.trim()).join('|')==='Edit|Archive|Delete','announcement menu shows icon-labelled Edit, Archive, and Delete actions');
@@ -26,6 +27,11 @@ page.w.SystemManagement.setAnnouncementTiming('scheduled');
 page.d.getElementById('announcementPublishAt').value='2026-09-10T08:00';
 page.w.SystemManagement.saveAnnouncement();
 ok(!!page.read('adminAnnouncements').find(item=>item.title==='Future notice')?.publishAt,'Admin can choose Schedule for later and save a publishing date');
+
+page.d.getElementById('announcementTitle').value='Immediate system notice';
+page.d.getElementById('announcementMessage').value='Visible without reloading.';
+page.w.SystemManagement.saveAnnouncement();
+ok(page.d.querySelector('.header-inbox-list')?.textContent.includes('Immediate system notice'),'publishing immediately refreshes the matching open-page Inbox');
 
 page.d.getElementById('systemMaintenance').checked=true;
 page.d.getElementById('maintenanceMessage').value='Scheduled maintenance';

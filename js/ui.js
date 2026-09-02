@@ -643,6 +643,12 @@ function mountProfileMenu({ name, role, id, container }) {
   wrap.querySelector('#profileThemeBtn').addEventListener('click', () => {
     applyInterfaceTheme(currentInterfaceTheme() === 'dark' ? 'light' : 'dark');
   });
+  window.refreshSharedInbox=()=>{
+    const keepOpen=inboxPanel.classList.contains('open');
+    wrap.remove();
+    mountProfileMenu({name,role,id,container:host});
+    if(keepOpen)host.querySelector('.header-inbox-btn')?.click();
+  };
 }
 
 /* Minimal settings dialog: read-only account details. Preferences are
