@@ -30,6 +30,17 @@ ok(/Correct answer/.test(r.d.getElementById('resultsRemarks').textContent)&&/A/.
 r.w.close();
 
 s=SEED();
+s.exams=[{...s.exams[0],scoreRelease:'immediate',answerRelease:'immediate',showSubmittedAnswers:true,showFeedback:true}];
+s.questions=[...s.questions,{id:'qm',examId:'e1',type:'matching',text:'Match each item',points:2,pairs:[{left:'One',right:'First'},{left:'Two',right:'Second'}]}];
+s.studentSubmissions=[{id:'wrong-review',studentId:'S1',examId:'e1',score:0,total:12,submittedAt:new Date().toISOString(),answers:[{questionId:'q2',response:'Incorrect response',needsManualGrading:true,awarded:0,points:10},{questionId:'qm',matches:[1,0],isCorrect:false,needsManualGrading:false,awarded:0,points:2}]}];
+r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
+const wrongReview=r.d.getElementById('resultsRemarks');
+ok(wrongReview.querySelectorAll('.review-match-row').length===2,'matching review renders one match cell row per pair');
+ok(wrongReview.querySelectorAll('.review-match-row .review-answer-cell.is-wrong').length===2&&/Wrong/.test(wrongReview.textContent),'incorrect matches are individually labelled Wrong and styled red');
+ok([...wrongReview.querySelectorAll('.review-question-card')].some(card=>card.classList.contains('is-wrong')&&/Incorrect response/.test(card.textContent)&&/Wrong/.test(card.textContent)),'zero-awarded written response is labelled Wrong instead of Pending');
+r.w.close();
+
+s=SEED();
 s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59',scoreRelease:'never',answerRelease:'immediate',showSubmittedAnswers:true}];
 r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
 r.w.startExam('e1');

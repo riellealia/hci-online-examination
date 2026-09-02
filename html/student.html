@@ -131,12 +131,15 @@
   .review-answer-cell span { display:block; margin-bottom:3px; color:#7a8780; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
   .review-answer-cell.is-correct { background:#eaf5ed; color:#285f37; }
   .review-answer-cell.is-wrong { background:#fff0ef; color:#982c26; }
+  .review-match-list { display:grid; gap:8px; margin-top:11px; }
+  .review-match-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
   .review-feedback { display:flex; gap:9px; margin-top:12px; padding:11px 12px; border-left:3px solid #d4972d; border-radius:8px; background:#fff7e7; color:#684b17; font-size:13px; line-height:1.5; }
   .review-feedback strong { flex:none; }
   .review-choice { display:flex; gap:8px; margin:5px 0; padding:7px 9px; border-radius:7px; background:#f5f7f6; color:#64736b; font-size:13px; }
   .review-choice.is-student { border:1px solid var(--accent-line); color:var(--accent); }
   .review-choice.is-student:not(.is-correct) { border-color:rgba(179,38,30,.35); background:rgba(179,38,30,.08); color:var(--danger); }
   .review-choice.is-correct { background:#e8f5e9; color:#2f6b3c; font-weight:700; }
+  .review-answer-state { font-weight:800; }
   #resultsRemarks { display:none; }
   .subject-empty { padding:28px; color:#78857e; text-align:center; }
   .enrolled-subject-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
@@ -199,7 +202,7 @@
   .exam-list-actions { display:flex; align-items:center; justify-content:flex-end; gap:9px; }
   .exam-list-score { min-width:70px; color:var(--accent); font-size:13px; font-weight:800; text-align:right; }
   .exam-feedback-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:#fff0cf; color:#815600; font-size:11px; font-weight:800; white-space:nowrap; }
-  @media(max-width:640px){.exam-list-row{grid-template-columns:1fr}.exam-list-actions{justify-content:space-between}.exam-list-score{text-align:left}.review-answer-grid{grid-template-columns:1fr}}
+  @media(max-width:640px){.exam-list-row{grid-template-columns:1fr}.exam-list-actions{justify-content:space-between}.exam-list-score{text-align:left}.review-answer-grid,.review-match-row{grid-template-columns:1fr}}
   #exams-panel,#results-panel { position:relative; }
   #exams-panel > .role-table-tools,#results-panel > .role-table-tools { top:20px; right:20px; }
   @media(max-width:760px){.enrolled-subject-grid{grid-template-columns:1fr}.subject-card-head{align-items:flex-start}.subject-exam-row:not(.result-exam-row){grid-template-columns:1fr;gap:8px}.subject-exam-row .btn-take-exam{width:100%}.subject-summary{max-width:125px}.subject-detail-grid{grid-template-columns:1fr}.subject-detail-exams{grid-column:auto}#exams-panel > .role-table-tools,#results-panel > .role-table-tools{position:relative;top:auto;right:auto;justify-content:flex-end;margin:-4px 0 16px}}
@@ -584,26 +587,26 @@ document.getElementById('statSubjects').textContent = studentSubjectCodes.length
 
 /* Score and grade history. Written answers stay visibly pending until the
    instructor marks them, so a partial score is never mistaken for a final one. */
-function answerReviewMarkup(answers, questionSet, showCorrect = true) {
+function answerReviewMarkup(answers, questionSet, showCorrect = true, showFeedback = true) {
   return (answers || []).map(answer => {
     const question = questionSet.find(q => q.id === answer.questionId);
     if (!question) return '<article class="review-question-card is-pending"><h4>Question removed</h4></article>';
-    const pending = answer.awarded === null || answer.needsManualGrading;
+    const pending = answer.needsManualGrading && answer.awarded === null;
     const correctState = !pending && (answer.isCorrect === true || Number(answer.awarded) >= Number(answer.points || question.points || 0));
     const stateClass = pending ? 'is-pending' : correctState ? 'is-correct' : 'is-wrong';
+    const stateLabel = pending ? 'Pending' : correctState ? 'Correct' : 'Wrong';
     let body = '';
     if (isChoiceQuestion(question) && Array.isArray(question.options)) {
-      body = question.options.map((option,index) => `<div class="review-choice${answer.selectedIndex===index?' is-student':''}${showCorrect&&option.isCorrect?' is-correct':''}"><span>${answer.selectedIndex===index?'&#9679;':'&#9675;'}</span><span>${escapeQuestionMedia(option.text)}${answer.selectedIndex===index?' · Your answer':''}${showCorrect&&option.isCorrect?' · Correct answer':''}</span></div>`).join('');
+      body = question.options.map((option,index) => `<div class="review-choice${answer.selectedIndex===index?' is-student':''}${showCorrect&&option.isCorrect?' is-correct':''}"><span>${answer.selectedIndex===index?'&#9679;':'&#9675;'}</span><span>${escapeQuestionMedia(option.text)}${answer.selectedIndex===index?` · Your answer · ${option.isCorrect?'Correct':'Wrong'}`:''}${showCorrect&&option.isCorrect?' · Correct answer':''}</span></div>`).join('');
     } else if (question.type === 'matching' && Array.isArray(question.pairs)) {
-      const given = question.pairs.map((pair,index) => `${pair.left} → ${question.pairs[answer.matches?.[index]]?.right || 'No answer'}`).join('; ');
-      const correct = question.pairs.map(pair => `${pair.left} → ${pair.right}`).join('; ');
-      body = `<div class="review-answer-grid"><div class="review-answer-cell ${correctState?'is-correct':'is-wrong'}"><span>Your matches</span>${escapeQuestionMedia(given)}</div>${showCorrect?`<div class="review-answer-cell is-correct"><span>Correct matches</span>${escapeQuestionMedia(correct)}</div>`:''}</div>`;
+      body = `<div class="review-match-list">${question.pairs.map((pair,index)=>{const selected=answer.matches?.[index],selectedPair=question.pairs[selected],pairCorrect=selected===index;return `<div class="review-match-row"><div class="review-answer-cell ${pairCorrect?'is-correct':'is-wrong'}"><span>Your match · <b class="review-answer-state">${pairCorrect?'Correct':'Wrong'}</b></span>${escapeQuestionMedia(pair.left)} → ${escapeQuestionMedia(selectedPair?.right||'No answer')}</div>${showCorrect?`<div class="review-answer-cell is-correct"><span>Correct match</span>${escapeQuestionMedia(pair.left)} → ${escapeQuestionMedia(pair.right)}</div>`:''}</div>`}).join('')}</div>`;
     } else {
       const given = answer.response ?? answer.selectedText ?? 'No answer';
       const correct = question.type === 'number' ? `${question.acceptedValue} ± ${question.tolerance || 0}` : question.expectedAnswer || 'Marked by instructor';
-      body = `<div class="review-answer-grid"><div class="review-answer-cell ${pending?'':correctState?'is-correct':'is-wrong'}"><span>Your answer</span>${escapeQuestionMedia(given)}</div>${showCorrect?`<div class="review-answer-cell is-correct"><span>Correct answer</span>${escapeQuestionMedia(correct)}</div>`:''}</div>`;
+      body = `<div class="review-answer-grid"><div class="review-answer-cell ${pending?'':correctState?'is-correct':'is-wrong'}"><span>Your answer · <b class="review-answer-state">${stateLabel}</b></span>${escapeQuestionMedia(given)}</div>${showCorrect?`<div class="review-answer-cell is-correct"><span>Correct answer</span>${escapeQuestionMedia(correct)}</div>`:''}</div>`;
     }
-    return `<article class="review-question-card ${stateClass}"><h4>${escapeQuestionMedia(question.text || 'Question')}</h4>${body}</article>`;
+    const feedback = answer.remark && showFeedback ? `<div class="review-feedback"><strong>Professor’s note</strong><span>${escapeQuestionMedia(answer.remark)}</span></div>` : '';
+    return `<article class="review-question-card ${stateClass}"><h4>${escapeQuestionMedia(question.text || 'Question')} · <span class="review-answer-state">${stateLabel}</span></h4>${body}${feedback}</article>`;
   }).join('');
 }
 
@@ -664,7 +667,7 @@ function loadResults() {
     if (visibility.showSubmittedAnswers || visibility.showCorrectAnswers) {
       const review = document.createElement('details');
       review.className = 'remark-box answer-key-review';
-      review.innerHTML = `<summary>Answer review — ${escapeQuestionMedia(ex.title)}</summary>${answerReviewMarkup(answers, questions, visibility.showCorrectAnswers)}`;
+      review.innerHTML = `<summary>Answer review — ${escapeQuestionMedia(ex.title)}</summary>${answerReviewMarkup(answers, questions, visibility.showCorrectAnswers, visibility.showFeedback)}`;
       remarksBox.appendChild(review);
     }
 
@@ -709,26 +712,7 @@ function renderResultSubjectCards(mine) {
       const grade = fullyGraded && visibility.showScore ? gradeFor(awarded, submission.total) : null;
       if (grade) { subjectAwarded += awarded; subjectTotal += submission.total; gradedCount += 1; }
       const reviewAllowed = visibility.showSubmittedAnswers || visibility.showCorrectAnswers;
-      const reviewQuestions = answers.map(answer => {
-        const question = questions.find(item => item.id === answer.questionId);
-        if (!question) return '';
-        const selected = Number.isInteger(answer.selectedIndex) ? answer.selectedIndex : null;
-        const answerText = answer.selectedText ?? answer.response ?? (answer.matches ? answer.matches.join(', ') : 'No answer');
-        let answerView;
-        if (Array.isArray(question.options)) {
-          answerView = `<div>${question.options.map((option,index) => `<div class="review-choice${selected===index?' is-student':''}${visibility.showCorrectAnswers&&option.isCorrect?' is-correct':''}"><span>${selected===index?'&#9679;':'&#9675;'}</span><span>${escapeQuestionMedia(option.text)}${selected===index?' · Your answer':''}${visibility.showCorrectAnswers&&option.isCorrect?' · Correct answer':''}</span></div>`).join('')}</div>`;
-        } else if (question.type === 'matching' && Array.isArray(question.pairs)) {
-          const selectedPairs = question.pairs.map((pair,index) => `${pair.left} → ${question.pairs[answer.matches?.[index]]?.right || 'No answer'}`).join('; ');
-          const correctPairs = question.pairs.map(pair => `${pair.left} → ${pair.right}`).join('; ');
-          answerView = `<div class="review-answer-grid"><div class="review-answer-cell"><span>Your matches</span>${escapeQuestionMedia(selectedPairs)}</div>${visibility.showCorrectAnswers?`<div class="review-answer-cell is-correct"><span>Correct matches</span>${escapeQuestionMedia(correctPairs)}</div>`:''}</div>`;
-        } else {
-          const answerLabel = question.type === 'fillblank' ? 'Your filled answer' : 'Your answer';
-          const correct = question.type === 'number' ? `${question.acceptedValue} ± ${question.tolerance || 0}` : (question.expectedAnswer ?? 'Instructor graded');
-          answerView = `<div class="review-answer-grid"><div class="review-answer-cell"><span>${answerLabel}</span>${escapeQuestionMedia(answerText)}</div>${visibility.showCorrectAnswers?`<div class="review-answer-cell is-correct"><span>Correct answer</span>${escapeQuestionMedia(correct)}</div>`:''}</div>`;
-        }
-        const feedback = answer.remark && visibility.showFeedback ? `<div class="review-feedback"><strong>Professor’s note</strong><span>${escapeQuestionMedia(answer.remark)}</span></div>` : '';
-        return `<article class="review-question-card"><h4>${escapeQuestionMedia(question.text || 'Question')}</h4>${answerView}${feedback}</article>`;
-      }).join('');
+      const reviewQuestions = answerReviewMarkup(answers, questions, visibility.showCorrectAnswers, visibility.showFeedback);
       const schedule = exam?.date ? `${exam.date} · ${exam.start || '09:00'}–${exam.end || '23:59'}` : 'Always open';
       return `<details class="result-exam-disclosure" data-submission="${submission.id}"><summary class="subject-exam-row result-exam-row">
         <div><div class="subject-exam-name">${escapeQuestionMedia(exam?.title || 'Removed examination')}</div><div class="subject-exam-meta">${new Date(submission.submittedAt).toLocaleString()}</div></div>
