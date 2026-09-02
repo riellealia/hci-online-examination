@@ -10,6 +10,7 @@ const headerActions=[...r.d.querySelectorAll('.question-catalog-actions .catalog
 ok(headerActions[0]?.classList.contains('exam-settings-btn')&&headerActions[0].getAttribute('aria-label')==='Exam settings','Exam settings is the leftmost labelled Question Bank action');
 headerActions[0].click();
 ok(r.d.getElementById('examModal').classList.contains('active')&&r.d.getElementById('examModalTitle').textContent==='Edit Exam','settings icon opens the current examination settings');
+ok([...r.d.querySelectorAll('#examModal .modal-buttons button')].map(button=>button.textContent.trim()).join('|')==='Save Exam|Cancel','Exam Settings footer only offers Save Exam and Cancel');
 r.w.closeExamModal(true);
 ok(/2.*question/.test(total.textContent) && /20.*point/.test(total.textContent),'continuous total shows question count and points');
 ok(!!r.d.getElementById('questionSearch') && !!r.d.getElementById('questionTypeFilter'),'search and type controls are present');

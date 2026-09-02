@@ -1033,7 +1033,6 @@
             <div class="checkbox-stack"><label><input type="checkbox" id="examShowSubmittedAnswers"> Show the student's submitted answers</label><label><input type="checkbox" id="examShowFeedback" checked> Show Faculty feedback</label></div>
         </fieldset>
         <div class="modal-buttons">
-            <button id="editExamQuestionsBtn" class="cancel-btn" type="button" onclick="openQuestionsFromExamEditor()" hidden aria-label="Open questions">&#9776; Open questions</button>
             <button class="save-btn" onclick="saveExam()">Save Exam</button>
             <button class="cancel-btn" onclick="closeExamModal()">Cancel</button>
         </div>
@@ -1597,8 +1596,6 @@ function openExamModal(subjectCode = null) {
     ).join('');
     subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
     renderExamSectionChoices(subjectSelect.value);
-    document.getElementById('editExamQuestionsBtn').hidden = true;
-
     document.getElementById('examModal').classList.add('active');
     beginExamFormSession();
 }
@@ -1633,22 +1630,8 @@ function editExam(examId) {
     ).join('');
     subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
     renderExamSectionChoices(exam.subjectCode, Array.isArray(exam.sections) && exam.sections.length ? exam.sections : null);
-    document.getElementById('editExamQuestionsBtn').hidden = false;
-
     document.getElementById('examModal').classList.add('active');
     beginExamFormSession();
-}
-
-async function openQuestionsFromExamEditor() {
-    const examId = currentEditingExamId;
-    if (!examId) return;
-    if (examFormDirty && !(await confirmDialog({
-        title: 'Open question editor?',
-        message: 'Save the exam changes first, or they will be discarded.',
-        confirmLabel: 'Discard and open'
-    }))) return;
-    await closeExamModal(true);
-    manageQuestions(examId);
 }
 
 async function closeExamModal(force = false) {
