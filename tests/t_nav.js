@@ -53,6 +53,25 @@ ok(r.d.getElementById('pageTitle').textContent==='NEW ERA UNIVERSITY','site head
 ok(bar.style.width!=='260px','drawer closes after choosing');
 ok(r.d.querySelector('#sidebar a[data-panel="results-panel"]').classList.contains('active'),'chosen link marked active');
 
+console.log('\n--- Back returns to the actual previous screen ---');
+r.w.eval("studentNav.show('subjects-panel')");
+r.d.querySelector('#studentSubjectCards .enrolled-subject-card')?.click();
+ok(panel('subject-detail-panel')==='block','Student opens a nested subject page');
+r.d.querySelector('#studentSubjectDetail [aria-label="Go back"]')?.click();
+ok(panel('subjects-panel')==='block','Student detail Back returns to the immediately previous subject list');
+r.w.eval('studentNav.back()');
+ok(panel('results-panel')==='block','a second Student Back returns to the screen visited before the subject list');
+
+const facultyHistory=load('faculty.html',{...SEED(),currentUser:{username:'F1',role:'faculty'}});
+facultyHistory.w.eval("facultyNav.show('exams-tab');facultyNav.show('reports-tab');facultyNav.back()");
+ok(facultyHistory.d.getElementById('exams-tab').style.display==='block','Faculty Back returns to the immediately previous page');
+facultyHistory.w.close();
+
+const adminHistory=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
+adminHistory.w.eval("adminNav.show('facultySection');adminNav.show('systemSection');adminNav.back()");
+ok(adminHistory.d.getElementById('facultySection').style.display==='block','Admin Back returns to the immediately previous page');
+adminHistory.w.close();
+
 console.log('\n=== CCC. Student Overview surfaces what needs attention ===');
 ok(!!r.d.getElementById('nextUp'),'Next up panel exists');
 ok(/Nothing needs your attention|Open now|Next|Awaiting/.test(r.d.getElementById('nextUp').textContent),'Next up has content');

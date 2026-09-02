@@ -134,6 +134,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   const historyKey = `neu-panel:${location.pathname}`;
   let activePanel = null;
   let historyIndex = 0;
+  const panelHistory = [];
 
   function savedPanel() {
     const hashPanel = decodeURIComponent(location.hash.replace(/^#/, '').split('/')[0] || '');
@@ -153,6 +154,9 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   function show(id, options = {}) {
     if (!known.includes(id)) return false;
     const changed = activePanel !== id;
+    if (changed && activePanel !== null && !options.fromHistory && !options.fromBack) {
+      panelHistory.push(activePanel);
+    }
     known.forEach(p => {
       const el = document.getElementById(p);
       if (el) el.style.display = (p === id) ? 'block' : 'none';
@@ -170,7 +174,7 @@ function mountSidebar({ items, panels, container = '.topbar-left',
       try { sessionStorage.setItem(routeKey, id); } catch (_) {}
       if (options.syncUrl !== false) {
         const state = { neuPanelKey: historyKey, panel: id, index: historyIndex };
-        if (options.fromHistory) {
+        if (options.fromHistory || options.fromBack) {
           history.replaceState(state, '', `#${encodeURIComponent(id)}`);
         } else if (changed && activePanel !== null) {
           historyIndex += 1;
@@ -187,6 +191,13 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   }
 
   function back(fallback = navItems[0].id) {
+    while (panelHistory.length) {
+      const previous = panelHistory.pop();
+      if (known.includes(previous) && previous !== activePanel) {
+        if (routePanels.has(previous)) historyIndex = Math.max(0, historyIndex - 1);
+        return show(previous, { fromBack: true });
+      }
+    }
     if (historyIndex > 0) {
       history.back();
       return true;
