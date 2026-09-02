@@ -15,6 +15,7 @@ r.w.closeExamModal(true);
 r.w.editQuestion('q1');
 const facultyNavigator=r.d.getElementById('facultyQuestionNavigator');
 ok(facultyNavigator.style.display==='block'&&facultyNavigator.querySelectorAll('.nav-cell').length===2,'Faculty question editor has a question-cell navigator');
+ok(!facultyNavigator.querySelector('.nav-legend')&&!/Answered|Flagged/.test(facultyNavigator.textContent),'Faculty navigator contains navigation only, without Student answer-state labels');
 r.w.placeFacultyQuestionNavigator(r.w.innerWidth-52,8,false);r.w.toggleFacultyQuestionNavigator();
 const facultyPanel=r.d.getElementById('facultyQuestionNavPanel'),facultyPanelLeft=parseFloat(facultyPanel.style.left),facultyPanelTop=parseFloat(facultyPanel.style.top);
 ok(facultyPanelLeft>=8&&facultyPanelTop>=8&&facultyPanelLeft+Math.min(300,r.w.innerWidth-36)<=r.w.innerWidth-8,'Faculty question panel follows the dragged handle and stays inside the viewport');

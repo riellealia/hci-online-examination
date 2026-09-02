@@ -1396,6 +1396,7 @@ table tr:last-child td {
 .faculty-question-navigator.is-dragging .nav-handle { cursor:grabbing; }
 .faculty-question-navigator.is-positioned .nav-panel { position:fixed; left:0; top:0; transform:none; visibility:hidden; opacity:0; transition:opacity 160ms ease; }
 .faculty-question-navigator.is-positioned.open .nav-panel { visibility:visible; opacity:1; }
+.faculty-question-navigator .nav-legend { display:none!important; }
 
 .nav-head {
   display: flex;
