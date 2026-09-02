@@ -14,6 +14,15 @@ page.d.getElementById('announcementMessage').value='Check your assigned subjects
 page.d.getElementById('announcementAudience').value='student';
 page.w.SystemManagement.saveAnnouncement();
 ok(page.read('adminAnnouncements').some(item=>item.title==='Enrollment reminder'&&item.audience==='student'),'Admin can publish a targeted announcement');
+ok(page.read('adminAnnouncements').find(item=>item.title==='Enrollment reminder').publishAt===''&&page.d.getElementById('announcementPublishAt').hidden,'Publish immediately is the default and does not store a future date');
+
+page.d.getElementById('announcementTitle').value='Future notice';
+page.d.getElementById('announcementMessage').value='This notice opens later.';
+page.d.getElementById('announcementTiming').value='scheduled';
+page.w.SystemManagement.setAnnouncementTiming('scheduled');
+page.d.getElementById('announcementPublishAt').value='2026-09-10T08:00';
+page.w.SystemManagement.saveAnnouncement();
+ok(!!page.read('adminAnnouncements').find(item=>item.title==='Future notice')?.publishAt,'Admin can choose Schedule for later and save a publishing date');
 
 page.d.getElementById('systemMaintenance').checked=true;
 page.d.getElementById('maintenanceMessage').value='Scheduled maintenance';
