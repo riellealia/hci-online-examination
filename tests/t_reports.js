@@ -8,6 +8,7 @@ console.log('=== QUESTION REPORTS. Student report to scoped Faculty resolution =
 const sharedCss=fs.readFileSync(path.join(__dirname,'..','css','shared-ui.css'),'utf8');
 const reportCss=fs.readFileSync(path.join(__dirname,'..','css','report-status.css'),'utf8');
 ok(/--status-pending:\s*#EDC27B/.test(sharedCss)&&/#reportsView \.question-report\.pending,[\s\S]*border-color: var\(--status-pending\) !important/.test(reportCss),'Reports page binds its dark-mode Pending border directly to the shared orange token');
+ok(/\.reported-question-context\[hidden\]\s*\{\s*display:none!important\s*\}/.test(sharedCss),'empty report context stays hidden during normal question editing');
 ok(!/#[0-9a-f]{3,8}\b/i.test(reportCss),'report component contains no hard-coded colors');
 let s=SEED();
 s.exams=[{...s.exams[0],date:today,start:'00:01',end:'23:59'}];
