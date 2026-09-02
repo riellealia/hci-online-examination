@@ -15,6 +15,9 @@ page.d.getElementById('announcementAudience').value='student';
 page.w.SystemManagement.saveAnnouncement();
 ok(page.read('adminAnnouncements').some(item=>item.title==='Enrollment reminder'&&item.audience==='student'),'Admin can publish a targeted announcement');
 ok(page.read('adminAnnouncements').find(item=>item.title==='Enrollment reminder').publishAt===''&&page.d.getElementById('announcementPublishAt').hidden,'Publish immediately is the default and does not store a future date');
+const announcementMenu=page.d.querySelector('.announcement-row .announcement-actions-menu');
+ok(!!announcementMenu&&announcementMenu.querySelector('summary')?.textContent.trim()==='⋮','each announcement uses one three-dot action menu');
+ok([...announcementMenu.querySelectorAll('nav button')].map(button=>button.textContent.trim()).join('|')==='Edit|Archive|Delete','announcement menu shows icon-labelled Edit, Archive, and Delete actions');
 
 page.d.getElementById('announcementTitle').value='Future notice';
 page.d.getElementById('announcementMessage').value='This notice opens later.';
