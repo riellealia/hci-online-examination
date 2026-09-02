@@ -14,14 +14,18 @@ ok(!/SUB2/.test(r.d.querySelector('#examTable tbody').textContent),'no unrelated
 r.w.close();
 
 console.log('\n=== K2. Enrolled subjects use cards ===');
-s=SEED(); s.students.push({id:'S2',last:'Reyes',first:'Ana',sections:['A']}); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'},{studentId:'S2',subjectCode:'SUB1',sectionId:'A'}]; s.sectionSubjects=[{sectionId:'A',assignments:[{subjectCode:'SUB1',facultyId:'F1'}]}]; r=stu(s);
+s=SEED(); Object.assign(s.subjects.find(subject=>subject.code==='SUB1'),{workspaceColor:'#7560ad',workspaceIcon:'code'}); s.students.push({id:'S2',last:'Reyes',first:'Ana',sections:['A']}); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'},{studentId:'S2',subjectCode:'SUB1',sectionId:'A'}]; s.sectionSubjects=[{sectionId:'A',assignments:[{subjectCode:'SUB1',facultyId:'F1'}]}]; r=stu(s);
 ok(r.d.querySelectorAll('#studentSubjectCards .enrolled-subject-card').length>0,'each enrolled subject is rendered as a card');
 const studentCourseCard=r.d.querySelector('#studentSubjectCards .student-course-card');
 ok(!!studentCourseCard.querySelector('.student-course-icon')&&!!studentCourseCard.querySelector('.student-course-arrow'),'Student subject card matches the Faculty course-card structure');
+ok(studentCourseCard.style.getPropertyValue('--course-accent')==='#7560ad','Student subject card uses the color saved by Faculty');
 ok(/Prof\.|To be assigned/.test(studentCourseCard.querySelector('.student-course-professor')?.textContent||'')&&!/Section/i.test(studentCourseCard.querySelector('.student-course-meta')?.textContent||''),'card metadata shows the professor instead of the section');
 ok(r.d.getElementById('subjectsTable').classList.contains('compat-table')||r.d.getElementById('subjectsTable').closest('.compat-table'),'the old subject table is not part of the visible interface');
 r.d.querySelector('#studentSubjectCards .enrolled-subject-card').click();
 ok(r.d.getElementById('subject-detail-panel').style.display==='block','clicking a subject card opens its subject page');
+const subjectProfile=r.d.querySelector('#studentSubjectDetail .student-subject-profile');
+ok(subjectProfile.style.getPropertyValue('--course-accent')==='#7560ad'&&subjectProfile.querySelector('.student-course-icon path').getAttribute('d')===studentCourseCard.querySelector('.student-course-icon path').getAttribute('d'),'subject hero matches the course cell and inherits Faculty color and icon settings');
+ok(!!subjectProfile.querySelector('.student-subject-profile-meta')&&!!subjectProfile.querySelector('.student-course-progress'),'subject hero includes professor, exam count, and exam progress');
 const subjectTabs=[...r.d.querySelectorAll('#studentSubjectDetail .subject-detail-tab')];
 ok(subjectTabs.map(tab=>tab.textContent.trim()).join('|')==='Main|Class'&&subjectTabs[0].classList.contains('active'),'subject page opens with underlined Main and Class tabs below the hero');
 ok(r.d.querySelectorAll('#studentSubjectDetail .subject-info-cell').length>=5,'subject page separates details, professor, rules, schedule, and exams into cells');
