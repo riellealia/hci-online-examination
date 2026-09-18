@@ -13,7 +13,7 @@ student = takes exam
     - remove admin and faulty from log ins
     - log in should immedietly open (username, password, log in)
     - admin log in should be same
-    log in according to credentials no more buttons if u are an adin or a faculty
+    log in according to credentials no more buttons if u are an adim or a faculty
 
 
 ## admin
@@ -31,23 +31,48 @@ student = takes exam
 - add a course curriculum per college
     - per year and per sem until graduation
     - assign the date of semester starts
+    - assign a load per subject
+    - add a load limit per semester
 
 ## dean pages
 - log in
 - dashboard
 - member lists (filterable by faculty/ professors)
     - clicking a cell in lists opens ups the profile like in admin
-- assign a prof as a faculty (much better if they can actually set permissions)
+- assign a prof as a faculty/ hire (add someone
+    - cannot assign subjects, faculty should handle that
+) as a faculty (much better if they can actually set permissions)
 - statistics of a professor and faculty should be accesible here
     - optional but every survey or quetionaire after a semester should be seenable by dean
+- add an account that would be used as a demo
+
 
 optional: announcement to faculty, student and professor? can be per group or everyone
 could mail? (reusing the announcement on the admin is fine)
 
+**__ note:__** this part is kind of hazy to me
+so far the current must have is a
+- dashboard
+- management
+- logs
+- approval page seperated by tabs 
+
+management, logs and approval page should be filteraable
+
 ## faculty
+### changes
 - move assignment of subjects to professor here
     - make the dean approve of this
 - move the managing of subjects to students here
+### add ons
+- add schedule to the subjects, (m,t,w.th.f,sat,sun format + time)
+- add a limiter
+    - professors cannot assign an exam outside the subject
+    - professor and students cannot be assigned to same schedule
+    - can change a students load
+        - overload should require approval from admin
+- any move made by the faulty should be logged, seenable, and accesible by same rank and above
+
 
 ## general changes that is shared
 the profile overview when a name is clicked
@@ -59,6 +84,8 @@ both should have red acent cell
 - should have colored pill in each cell on availability, red for none, yellow for low, green for high availability 
 low availitbity should start at 5 and below, it would then reflect on border accent outside the subject
 - availability of a subject and section should be able to be filter and grouped by, year, section (cs, is, it, game dev and animation)
+- add an account that would be used as a demo
+- add an account that would be used as a filler
 
 
 
