@@ -1,108 +1,128 @@
-## overview
-**admin > dean > faculty > professor > students**
-__scopes and fuctions__
+# Planned System Changes
 
-admin = system overview / server maintenance / approval to join course
-dean = approval
-faculty = assigns professor / student for quizzes > goes to dean for approval
-professor = handles exam and grading
-student = takes exam
+This document is the short overview for the next development phase of the Online Examination System. It explains the main direction and links to the detailed requirements. Read the detailed plan for a feature before changing its code.
 
-## log in details
-- seperate log in dash board 
-    - remove admin and faulty from log ins
-    - log in should immedietly open (username, password, log in)
-    - admin log in should be same
-    log in according to credentials no more buttons if u are an adim or a faculty
+> Planning status: proposed requirements for team review. Items marked **Needs confirmation** must be settled before implementation.
 
+## Documents
 
-## admin
-- dashboard, statistics
-- information logs (current log in logs only)
-### add on changes 
-- add logs when clicking profile, actions taken, actions other took, log in details filterable
-### change 
-- make add students and faculty different from managing
-- move managing into the faculty 
-    - should have no destructive commands, no changing basic details, faculty should just move the things
-- change "delete students" to "archive and deactivate" 
-- have a list/ page of archived student
-- have a command that changes the school year and hides, and reset the pages. it should be seperated between, 1st sem, 2nd sem, summer, additionals
-- add a course curriculum per college
-    - per year and per sem until graduation
-    - assign the date of semester starts
-    - assign a load per subject
-    - add a load limit per semester
+- [Claim or review work](.claim-work.md)
+- [Role hierarchy and terminology](overview/heirarchy.md)
+- [System relationships](overview/relationship-diagram.md)
+- [Admin detailed plan](extended-detailed.plans/admin-extended-plan.md)
+- [Dean detailed plan](extended-detailed.plans/dean-extended-plan.md)
+- [Faculty Coordinator detailed plan](extended-detailed.plans/faculty-extended-plan.md)
+- [Shared features and rules](extended-detailed.plans/shared-extended-plan.md)
+- [Optional extensions](extended-detailed.plans/optional-extended-plan.md)
 
-## dean pages
-- log in
-- dashboard
-- member lists (filterable by faculty/ professors)
-    - clicking a cell in lists opens ups the profile like in admin
-- assign a prof as a faculty/ hire (add someone
-    - cannot assign subjects, faculty should handle that
-) as a faculty (much better if they can actually set permissions)
-- statistics of a professor and faculty should be accesible here
-    - optional but every survey or quetionaire after a semester should be seenable by dean
-- add an account that would be used as a demo
+## Main change
 
+The current system has Admin, Faculty, and Student accounts. The planned system separates academic coordination from teaching and uses five roles:
 
-optional: announcement to faculty, student and professor? can be per group or everyone
-could mail? (reusing the announcement on the admin is fine)
+1. **Admin** — manages the system, accounts, permissions, academic periods, curricula, archives, limits, and system-wide logs.
+2. **Dean** — supervises the college, manages Faculty Coordinators and Professors, reviews assignment requests, and views college statistics and logs.
+3. **Faculty Coordinator** — manages subject offerings, sections, schedules, Professor assignments, Student enrollment, and academic loads within the college.
+4. **Professor** — creates examinations and grades Students only for assigned subject offerings.
+5. **Student** — views enrolled subjects and takes assigned examinations.
 
-**__ note:__** this part is kind of hazy to me
-so far the current must have is a
-- dashboard
-- management
-- logs
-- approval page seperated by tabs 
+“Faculty” in the earlier notes means **Faculty Coordinator** in these plans. Professor and Faculty Coordinator are separate system roles.
 
-management, logs and approval page should be filteraable
+## Required changes
 
-## faculty
-### changes
-- move assignment of subjects to professor here
-    - make the dean approve of this
-- move the managing of subjects to students here
-### add ons
-- add schedule to the subjects, (m,t,w.th.f,sat,sun format + time)
-- add a limiter
-    - professors cannot assign an exam outside the subject
-    - professor and students cannot be assigned to same schedule
-    - can change a students load
-        - overload should require approval from admin
-- any move made by the faulty should be logged, seenable, and accesible by same rank and above
+### Shared login and access
 
+- Use one login page with username, password, and Login controls.
+- Remove role-selection buttons from the login flow.
+- Detect the role from the authenticated account and open the correct dashboard.
+- Give every role its own permissions, limits, and protected pages.
+- Admin can configure role permissions and limits on a dedicated page.
 
-## general changes that is shared
-the profile overview when a name is clicked
-- each profile should have its own hidden per student per permission
-     ex. students should not be able to see the ligs and manging command, only the overview of the student
-- Adding a section to a student an adding a subject to a prof
-both should have red acent cell
-- the list of section should be a list of cell on a grid type cell
-- should have colored pill in each cell on availability, red for none, yellow for low, green for high availability 
-low availitbity should start at 5 and below, it would then reflect on border accent outside the subject
-- availability of a subject and section should be able to be filter and grouped by, year, section (cs, is, it, game dev and animation)
-- add an account that would be used as a demo
-- add an account that would be used as a filler
+### Admin
 
+- Retain the dashboard, statistics, system monitoring, maintenance, and audit functions.
+- Separate account creation from academic management.
+- Create and manage the role and permission configuration page.
+- Replace ordinary Student deletion with deactivate, archive, restore, and lifecycle-status controls.
+- Add filterable active and archived account lists and log every lifecycle change.
+- Manage school years, terms, start/end dates, curriculum versions, subject units, and load limits.
+- Closing a term archives its active records; it must not erase historical records.
+- Review exceptional requests such as Student overloads.
 
+### Dean
 
-## optional
-- editing the students details, such as profile picture
-and it in turn it would show in the lists when being managed. useful for identifying annoying to code
-- changing csv to sql lite (i thougght we are only gonna progess on the ui and ux importance so i didnt really think about it. but atp they gonna make us face professors for the upcoming shie. csv is kinda shiet)
+- Add a separate Dean login destination and dashboard.
+- Add filterable Faculty Coordinator and Professor lists with profile pages.
+- Allow the Dean to add or hire Professors and appoint Faculty Coordinators.
+- Add filterable approval, activity-log, and statistics pages.
+- Let the Dean approve or reject Professor-to-subject-offering assignments proposed by Faculty Coordinators.
 
+### Faculty Coordinator
 
-## note
-professor and students should have no further changes for now
-at most special reports but it is optional such as 
-- questionaire
-- report a profesor, faculty (goes into dean)
-- professor pop out announcement
-- and announcement column for prof and students
-- special actions against a student
-- regular or irregular filter
+- Move Professor subject/section assignment and Student enrollment management from Admin to the Faculty Coordinator.
+- Do not allow the Faculty Coordinator to delete accounts or change protected identity fields.
+- Add subject-offering schedules using weekday checkboxes and start/end time controls.
+- Check Professor, Student, Section, and optional Room schedule conflicts.
+- Calculate Professor teaching load and Student academic load.
+- Send Professor assignment requests to the Dean.
+- Send Student overload requests to Admin.
+- Log every assignment, transfer, schedule, and load change.
 
-please pick things you would develop and tell, so i could manage the rest and you guys would have somethig if a professor asked u a question on what u did.
+### Professor and Student
+
+- Preserve the current examination and grading workflows unless a shared permission or assignment change requires an adjustment.
+- Professors may create examinations only for their approved subject offerings.
+- Students may access examinations only through active enrollments and permitted sections.
+
+## Shared interface rules
+
+- Clicking a person opens a permission-aware profile.
+- Tabs and commands that the viewer cannot use must not be shown.
+- Lists must support relevant search, filters, sorting, and clear empty states.
+- Section and subject-offering choices use grid cards where practical.
+- Remaining Student slots use labeled availability states:
+  - **Full** — 0 places, red.
+  - **Low availability** — 1–5 places, yellow.
+  - **Available** — 6 or more places, green.
+- Color must not be the only status indicator.
+- Filters may group results by program, year level, section, and availability.
+- Important actions, approvals, profile access, logins, and account-status changes are auditable.
+- Provide clearly labeled demo accounts and separate filler records for realistic lists.
+
+## Approval summary
+
+- **Assign or replace a Professor for a subject offering**
+  - Submitted by: Faculty Coordinator
+  - Reviewed by: Dean
+- **Student enrollment within the normal load**
+  - Submitted by: Faculty Coordinator
+  - Reviewed by: No additional approval by default
+- **Student overload**
+  - Submitted by: Faculty Coordinator
+  - Reviewed by: Admin
+- **Appoint a Professor as Faculty Coordinator**
+  - Submitted by: Dean
+  - Reviewed by: Admin by default
+
+All approval records use Pending, Approved, Rejected, Cancelled, or Withdrawn status and retain reviewer remarks and timestamps.
+
+## Priority
+
+1. Confirm terminology, permissions, and approval ownership.
+2. Implement shared authentication, roles, permissions, audit records, and academic periods.
+3. Implement Admin account, lifecycle, curriculum, and limit controls.
+4. Implement Dean personnel and approval workflows.
+5. Implement Faculty Coordinator assignments, schedules, enrollment, and load checks.
+6. Integrate the existing Professor and Student examination workflows.
+7. Consider optional features only after the required workflows work across roles.
+
+## Needs confirmation
+
+- Whether appointing a Faculty Coordinator requires Admin approval or takes effect immediately.
+- Whether normal Student enrollment requires approval; the current proposal requires approval only for overloads.
+- Whether room scheduling is part of the prototype.
+- Whether the term called “Additionals” should be named “Additional Term” or “Special Term.”
+- Exact Student and Professor load limits and whether laboratory units count differently.
+
+## Team coordination
+
+Before starting work, add the task to [`.claim-work.md`](.claim-work.md). Keep one primary owner per task, record whether the rest of the team has reviewed it, and coordinate before changing shared authentication, storage, or permission code.
