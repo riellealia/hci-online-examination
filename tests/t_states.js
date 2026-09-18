@@ -94,7 +94,7 @@ ok(err.classList.contains('show')&&/enter both/i.test(err.textContent),'empty fo
 d.getElementById('username').value='admin';
 d.getElementById('password').value='wrong';
 submit();
-ok(/do not match a admin account/i.test(err.textContent),'wrong password explained without leaking which field');
+ok(/do not match an active account/i.test(err.textContent),'wrong password explained without leaking which field or role');
 ok(d.getElementById('username').getAttribute('aria-invalid')==='true','fields marked invalid');
 
 d.getElementById('password').dispatchEvent(new w.Event('input',{bubbles:true}));

@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Online Examination</title>
-  <link rel="stylesheet" href="../css/style.css?v=20260830-role-colors-2">
-  <link rel="stylesheet" href="../css/shared-ui.css?v=20260830-role-colors-2">
+  <title>Opening Sign In | Online Examination</title>
+  <meta http-equiv="refresh" content="0; url=login.html">
+  <link rel="stylesheet" href="../css/style.css?v=20260919-unified-login">
+  <link rel="stylesheet" href="../css/shared-ui.css?v=20260919-unified-login">
 </head>
 
 <body class="login-bg">
@@ -22,17 +23,12 @@
     
     <p class="subtitle">Online Examination System</p>
     
-    <div class="role-buttons">
-      <button onclick="goToLogin('admin')" class="btn admin">ADMIN</button>
-      <button onclick="goToLogin('faculty')" class="btn faculty">FACULTY</button>
-      <button onclick="goToLogin('student')" class="btn student">STUDENT</button>
-    </div>
+    <p>Opening the secure sign-in page…</p>
+    <a class="btn admin" href="login.html">CONTINUE TO SIGN IN</a>
   </div>
   
   <script>
-    function goToLogin(role) {
-      window.location.href = `login.html?role=${role}`;
-    }
+    window.location.replace("login.html");
   </script>
 
 </body>
