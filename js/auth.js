@@ -38,6 +38,14 @@ function requireRole(role) {
     return null;
   }
 
+  const dashboardPermission = `dashboard.${role}.view`;
+  if (typeof PermissionService !== 'undefined' && !PermissionService.can(dashboardPermission, { actor: session })) {
+    DB.write('accessNotice', 'Your account does not have permission to open that workspace.');
+    DB.remove('currentUser');
+    window.location.replace('index.html');
+    return null;
+  }
+
   const access = DB.read('systemSettings', {});
   const roleAllowed = role === 'faculty' ? access.allowFacultyLogin !== false
     : role === 'student' ? access.allowStudentLogin !== false : true;

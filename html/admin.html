@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../css/shared-ui.css?v=20260902-left-divider">
     <link rel="stylesheet" href="../css/admin-modern.css">
     <link rel="stylesheet" href="../css/system-management.css?v=20260902-announcement-menu-right">
+    <link rel="stylesheet" href="../css/role-dashboard.css">
     <script src="../js/storage.js"></script>
     <script src="../js/demo-data.js"></script>
     <script src="../js/section-service.js"></script>
@@ -15,6 +16,9 @@
     <script src="../js/student-profile.js"></script>
     <script src="../js/faculty-profile.js"></script>
     <script src="../js/audit-service.js"></script>
+    <script src="../js/permission-service.js"></script>
+    <script src="../js/approval-service.js"></script>
+    <script src="../js/academic-workflow-service.js"></script>
     <script src="../js/admin-table-tools.js"></script>
 <script src="../js/auth.js"></script>
     <script src="../js/ui.js?v=20260830-admin-groups"></script>
@@ -149,6 +153,13 @@
       <button type="button" class="audit-tab" role="tab" aria-selected="false" data-audit-tab="login" onclick="setAuditTab('login')">Log in</button>
     </div>
     <h3 class="audit-events-title">Recorded activity</h3><div class="management-table-shell audit-table-shell"><div class="table-corner-actions" id="auditTableTools"><button class="corner-icon-btn export-action" onclick="exportTableCsv('auditTable','audit-log.csv')" aria-label="Export audit log CSV" title="Export audit log CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="auditTable"></table></div></div>
+  </div>
+
+  <div id="overloadApprovalSection" class="panel">
+    <h3>Student Overload Approvals</h3>
+    <p class="panel-help">Review Faculty Coordinator requests that exceed the configured normal Student load.</p>
+    <div class="role-filter-bar"><input id="adminOverloadSearch" type="search" placeholder="Search overload requests"><select id="adminOverloadStatus"><option value="">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="withdrawn">Withdrawn</option><option value="cancelled">Cancelled</option></select></div>
+    <div class="role-workflow-list"><div id="adminOverloadApprovalList" class="role-request-list"></div></div>
   </div>
 
   <div id="systemSection" class="panel">
@@ -1359,6 +1370,15 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
     container: '#topbarRight'
   });
 
+  const adminApprovalEsc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  function renderAdminOverloadApprovals(){
+    const status=document.getElementById('adminOverloadStatus').value,text=document.getElementById('adminOverloadSearch').value.trim().toLowerCase(),requests=ApprovalService.queryFor(session,{type:'student-overload',status}).filter(item=>!text||JSON.stringify(item).toLowerCase().includes(text)),host=document.getElementById('adminOverloadApprovalList');
+    host.innerHTML=requests.map(request=>`<article class="role-request-card" data-status="${adminApprovalEsc(request.status)}"><div class="role-request-head"><strong>${adminApprovalEsc(request.proposedChange?.studentId||request.targetId)}</strong><span class="role-request-status">${adminApprovalEsc(request.status)}</span></div><p>${adminApprovalEsc(request.reason)}</p><div class="role-request-meta"><span>Offering: ${adminApprovalEsc(request.proposedChange?.offeringId||'')}</span><span>Load: ${adminApprovalEsc(request.proposedChange?.proposedUnits||'')} / normal ${adminApprovalEsc(request.proposedChange?.normalLimit||'')}</span><span>Requester: ${adminApprovalEsc(request.requesterId)}</span></div><details class="role-history"><summary>Request history (${(request.history||[]).length})</summary><ol>${(request.history||[]).map(item=>`<li>${adminApprovalEsc(item.status)} · ${adminApprovalEsc(new Date(item.at).toLocaleString())} · ${adminApprovalEsc(item.actorId)}${item.remarks?` — ${adminApprovalEsc(item.remarks)}`:''}</li>`).join('')}</ol></details>${request.status==='pending'?`<div class="role-request-actions"><textarea id="admin-remarks-${adminApprovalEsc(request.id)}" placeholder="Reviewer remarks"></textarea><button type="button" onclick="reviewOverload('${adminApprovalEsc(request.id)}','approved')">Approve</button><button type="button" class="reject" onclick="reviewOverload('${adminApprovalEsc(request.id)}','rejected')">Reject</button></div>`:request.reviewerRemarks?`<p>Decision remarks: ${adminApprovalEsc(request.reviewerRemarks)}</p>`:''}</article>`).join('')||'<div class="role-empty">No matching Student overload requests.</div>';
+  }
+  function reviewOverload(id,decision){const remarks=document.getElementById(`admin-remarks-${id}`)?.value||'';try{if(decision==='approved')ApprovalService.approve(id,remarks,session);else ApprovalService.reject(id,remarks,session);renderAdminOverloadApprovals();loadAll();notify(`Overload request ${decision}.`,'success')}catch(error){notify(error.message,'error')}}
+  document.getElementById('adminOverloadSearch').addEventListener('input',renderAdminOverloadApprovals);
+  document.getElementById('adminOverloadStatus').addEventListener('change',renderAdminOverloadApprovals);
+
   /* ===== Init ===== */
   loadAll();
   initializeDashboardOverview();
@@ -1368,6 +1388,7 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
       { id: 'dashboardSection',      label: 'Dashboard',                 icon: '&#8962;' },
       { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' },
       { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
+      { id: 'overloadApprovalSection', label: 'Overload Approvals',      icon: '&#10003;' },
       { divider: true, label: 'School controls' },
       { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
       { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
@@ -1381,6 +1402,7 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
     }
   });
   SystemManagement.mount();
+  renderAdminOverloadApprovals();
 
   // Close modals when clicking outside
   window.addEventListener('click',function(e){

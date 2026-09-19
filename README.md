@@ -15,6 +15,7 @@ The prototype currently includes:
 - unified login and automatic role routing;
 - separate Admin, Dean, Faculty Coordinator, Professor, and Student dashboards;
 - password visibility controls and prototype account-recovery verification;
+- shared permission enforcement, approval lifecycle, notifications, and structured audit services;
 - subject, section, enrollment, examination, submission, grading, reporting, and audit data;
 - light and dark interface themes;
 - SQLite as the primary data source when the Node server is running; and
@@ -111,7 +112,7 @@ The Node server provides:
 
 ## Tests
 
-The repository currently contains 47 automated test files. The latest complete verification passed all 47 files, including SQLite persistence, source-of-truth migration, HTTP routes, and CSV import/export.
+The repository currently contains 50 automated test files. The latest complete verification passed all 50 files, including cross-role approval UI, permissions, approval transitions, stale-request protection, approved academic changes, audit records, SQLite persistence, source-of-truth migration, HTTP routes, and CSV import/export.
 
 Run the SQLite tests without installing additional packages:
 
