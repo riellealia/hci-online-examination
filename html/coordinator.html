@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Faculty Coordinator Dashboard | New Era University</title>
+  <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/shared-ui.css"><link rel="stylesheet" href="../css/role-dashboard.css">
+  <script src="../js/storage.js"></script><script src="../js/demo-data.js"></script><script src="../js/auth.js"></script><script src="../js/ui.js"></script>
+</head>
+<body data-role="coordinator">
+  <div class="topbar"><div class="topbar-left"><img src="../assets/logo.PNG" alt="NEU Logo" class="logo"><div class="page-title">NEW ERA UNIVERSITY</div></div><div class="topbar-right" id="topbarRight"></div></div>
+  <main id="dashboardSection" class="role-dashboard-page">
+    <header class="role-dashboard-head"><div><p class="role-dashboard-eyebrow">Faculty Coordinator workspace</p><h2>Academic coordination</h2><p>Manage offerings, schedules, assignments, enrollment, and academic loads.</p></div><div class="role-context"><i aria-hidden="true"></i>Active college workspace</div></header>
+    <section class="role-stat-grid" aria-label="Coordinator statistics">
+      <article class="role-stat-card"><span>Subject offerings</span><strong id="offeringCount">0</strong><small>Section-subject combinations</small></article>
+      <article class="role-stat-card"><span>Professors</span><strong id="professorCount">0</strong><small>Available personnel</small></article>
+      <article class="role-stat-card"><span>Students</span><strong id="studentCount">0</strong><small>College student records</small></article>
+      <article class="role-stat-card"><span>Pending requests</span><strong id="requestCount">0</strong><small>Assignments and overloads</small></article>
+    </section>
+    <section class="role-action-grid" aria-label="Coordinator dashboard actions">
+      <button class="role-action-card" onclick="coordinatorNav.show('offeringsSection')"><span class="role-action-icon">&#9638;</span><strong>Subject offerings</strong><span>Connect subjects, sections, schedules, capacity, and status.</span></button>
+      <button class="role-action-card" onclick="coordinatorNav.show('assignmentsSection')"><span class="role-action-icon">&#8644;</span><strong>Professor assignments</strong><span>Prepare assignments and send requests to the Dean.</span></button>
+      <button class="role-action-card" onclick="coordinatorNav.show('enrollmentSection')"><span class="role-action-icon">&#10010;</span><strong>Student enrollment</strong><span>Enroll or transfer Students with capacity and load checks.</span></button>
+      <button class="role-action-card" onclick="coordinatorNav.show('schedulesSection')"><span class="role-action-icon">&#9716;</span><strong>Schedules and conflicts</strong><span>Manage weekdays and times while detecting overlaps.</span></button>
+      <button class="role-action-card" onclick="coordinatorNav.show('logsSection')"><span class="role-action-icon">&#9719;</span><strong>Coordinator logs</strong><span>Review assignment, enrollment, schedule, and load actions.</span></button>
+    </section>
+  </main>
+  <section id="offeringsSection" class="role-workspace"><h2>Subject offerings</h2><p>Academic-period offerings managed within the college.</p><div class="role-placeholder-list"><article><strong>Offering workspace prepared</strong><span>Subject, Section, schedule, capacity, Professor, and status controls will be implemented here.</span></article></div></section>
+  <section id="assignmentsSection" class="role-workspace"><h2>Professor assignments</h2><p>Propose Professors for eligible subject offerings.</p><div class="role-placeholder-list"><article><strong>Assignment workflow prepared</strong><span>Availability and load checks will precede submission to the Dean.</span></article></div></section>
+  <section id="enrollmentSection" class="role-workspace"><h2>Student enrollment</h2><p>Enroll, transfer, and withdraw Students within permitted limits.</p><div class="role-placeholder-list"><article><strong>Enrollment workspace prepared</strong><span>Capacity, duplicate, prerequisite, schedule, and load validation will be connected here.</span></article></div></section>
+  <section id="schedulesSection" class="role-workspace"><h2>Schedules and conflicts</h2><p>Weekday and time controls for subject offerings.</p><div class="role-placeholder-list"><article><strong>Schedule editor prepared</strong><span>Professor, Student, Section, and optional Room conflict checks will be implemented here.</span></article></div></section>
+  <section id="logsSection" class="role-workspace"><h2>Faculty Coordinator logs</h2><p>Filterable coordination activity.</p><div class="role-placeholder-list"><article><strong>Log workspace prepared</strong><span>Offering, assignment, enrollment, transfer, schedule, capacity, and load actions will appear here.</span></article></div></section>
+  <script>
+    const session=requireRole('coordinator'); if(!session) throw new Error('Not authorised — redirecting to login.');
+    if(typeof DemoData!=='undefined') DemoData.install();
+    const read=(key)=>DB.read(key,[]); const offerings=read('sectionSubjects').reduce((sum,item)=>sum+(item.assignments?.length||item.subjectCodes?.length||0),0);
+    offeringCount.textContent=offerings; professorCount.textContent=read('faculty').length; studentCount.textContent=read('students').length;
+    requestCount.textContent=read('approvalRequests').filter(item=>item.status==='pending').length;
+    mountProfileMenu({name:'Faculty Coordinator',role:'coordinator',id:session.username,container:'#topbarRight'});
+    const coordinatorNav=mountSidebar({items:[{id:'dashboardSection',label:'Dashboard',icon:'&#8962;'},{id:'offeringsSection',label:'Offerings',icon:'&#9638;'},{id:'assignmentsSection',label:'Assignments',icon:'&#8644;'},{id:'enrollmentSection',label:'Enrollment',icon:'&#10010;'},{id:'schedulesSection',label:'Schedules',icon:'&#9716;'},{id:'logsSection',label:'Logs',icon:'&#9719;'}]});
+  </script>
+</body>
+</html>

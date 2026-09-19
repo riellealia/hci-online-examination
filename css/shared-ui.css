@@ -867,12 +867,13 @@ table tr:last-child td {
   gap: 9px;
   margin-top: 14px;
   padding: 11px 13px;
-  background: rgba(179, 38, 30, 0.07);
-  border: 1px solid rgba(179, 38, 30, 0.28);
+  background: #fff0ef;
+  border: 1px solid #d89a96;
   border-radius: var(--r-md);
   font-size: 13px;
   font-weight: 600;
   color: #8f1d17;
+  box-shadow: 0 8px 20px rgba(64, 13, 10, 0.18);
   text-align: left;
   line-height: 1.5;
 }

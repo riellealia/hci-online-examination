@@ -41,8 +41,8 @@ ok(r.d.getElementById('username').value==='admin','default demo account is pre-f
 ok(r.d.getElementById('password').value==='admin123','demo password is pre-filled in the masked field');
 const professorDemoButton=r.d.querySelector('[data-demo-account="professor"]');
 professorDemoButton.click();
-ok(r.d.getElementById('username').value==='2025-00002'&&r.d.getElementById('password').value==='santos2025','Professor demo control fills credentials without selecting a login role');
-const demoCases=[['dean','dean.demo','dean123'],['coordinator','coordinator.demo','coord123'],['student','23-32534-345','reyes23']];
+ok(r.d.getElementById('username').value==='23-32534-345'&&r.d.getElementById('password').value==='reyes23','Professor demo control fills credentials without selecting a login role');
+const demoCases=[['dean','dean.demo','dean123'],['coordinator','coordinator.demo','coord123'],['student','2025-00002','santos2025']];
 demoCases.forEach(([key,username,password])=>{r.d.querySelector(`[data-demo-account="${key}"]`).click();ok(r.d.getElementById('username').value===username&&r.d.getElementById('password').value===password,`${key} demo control fills its credentials`);});
 const adminDemoButton=r.d.querySelector('[data-demo-account="admin"]');
 adminDemoButton.click();
@@ -96,6 +96,16 @@ r.submit('2024-00001','delacruz3');
 cu=r.read('currentUser');
 ok(cu&&cu.role==='student','Student credentials create a Student session without role selection');
 
+r=openLogin({users:[{username:'legacy.dean',password:'dean',role:'College Dean'}]});
+r.submit('legacy.dean','dean');
+cu=r.read('currentUser');
+ok(cu&&cu.role==='dean','legacy Dean role labels normalize to the Dean workspace role');
+
+r=openLogin({users:[{username:'legacy.coordinator',password:'coord',role:'Faculty Coordinator'}]});
+r.submit('legacy.coordinator','coord');
+cu=r.read('currentUser');
+ok(cu&&cu.role==='coordinator','legacy Faculty Coordinator role labels normalize to the Coordinator workspace role');
+
 console.log('\n=== V. Access controls use the detected account role ===');
 r=openLogin({systemSettings:{maintenance:true,maintenanceMessage:'Maintenance test'}});
 r.submit('2024-00001','delacruz3');
@@ -103,6 +113,6 @@ ok(r.read('currentUser')===null&&/Maintenance test/.test(r.d.getElementById('aut
 
 r=openLogin({systemSettings:{allowFacultyLogin:false}});
 r.submit('12-34567-890','reyes0');
-ok(r.read('currentUser')===null&&/Faculty access is currently paused/.test(r.d.getElementById('authError').textContent),'Faculty access toggle blocks detected Faculty account');
+ok(r.read('currentUser')===null&&/Professor access is currently paused/.test(r.d.getElementById('authError').textContent),'Professor access toggle blocks detected Professor account');
 
 process.exit(0);

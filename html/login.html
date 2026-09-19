@@ -48,8 +48,8 @@
             <button type="button" data-demo-account="admin"><span class="saved-avatar">AD</span><span><strong>System Administrator</strong><small>Admin demonstration account</small></span></button>
             <button type="button" data-demo-account="dean"><span class="saved-avatar">DN</span><span><strong>College Dean</strong><small>Dean account · workspace planned</small></span></button>
             <button type="button" data-demo-account="coordinator"><span class="saved-avatar">FC</span><span><strong>Faculty Coordinator</strong><small>Coordinator account · workspace planned</small></span></button>
-            <button type="button" data-demo-account="professor"><span class="saved-avatar">PR</span><span><strong>Professor Demo</strong><small>Professor demonstration account</small></span></button>
-            <button type="button" data-demo-account="student"><span class="saved-avatar">ST</span><span><strong>Student Demo</strong><small>Student demonstration account</small></span></button>
+            <button type="button" data-demo-account="professor"><span class="saved-avatar">MR</span><span><strong>Maria Reyes</strong><small>Professor demonstration account</small></span></button>
+            <button type="button" data-demo-account="student"><span class="saved-avatar">MS</span><span><strong>Maria Santos</strong><small>Student demonstration account</small></span></button>
             <small class="saved-account-note">Choose an account to fill its username and password.</small>
           </div>
         </div>
@@ -311,20 +311,20 @@
   faculty = readLoginRecords('faculty', faculty);
   users = readLoginRecords('users', users);
   students = readLoginRecords('students', students);
-  if (!faculty.some(person => person.id === '2025-00002')) {
-    faculty.push({ id: '2025-00002', last: 'Santos', first: 'Demo' });
+  if (!faculty.some(person => person.id === '23-32534-345')) {
+    faculty.push({ id: '23-32534-345', last: 'Reyes', first: 'Maria' });
     writeLoginRecords('faculty', faculty);
   }
-  if (!students.some(person => person.id === '23-32534-345')) {
-    students.push({ id: '23-32534-345', last: 'Student', first: 'Demo', sections: ['BSCS-3A'] });
+  if (!students.some(person => person.id === '2025-00002')) {
+    students.push({ id: '2025-00002', last: 'Santos', first: 'Maria', sections: ['2BSCS-1'] });
     writeLoginRecords('students', students);
   }
   const requiredDemoAccounts = [
     { username: 'admin', password: 'admin123', role: 'admin' },
     { username: 'dean.demo', password: 'dean123', role: 'dean' },
     { username: 'coordinator.demo', password: 'coord123', role: 'coordinator' },
-    { username: '2025-00002', password: 'santos2025', role: 'faculty' },
-    { username: '23-32534-345', password: 'reyes23', role: 'student' }
+    { username: '23-32534-345', password: 'reyes23', role: 'faculty' },
+    { username: '2025-00002', password: 'santos2025', role: 'student' }
   ];
   requiredDemoAccounts.forEach(account => {
     const existing = users.find(user => user.username === account.username);
@@ -339,9 +339,15 @@
 
   const roleRoutes = {
     admin: "admin.html",
+    dean: "dean.html",
+    coordinator: "coordinator.html",
     faculty: "faculty.html",
     student: "student.html"
   };
+  function normalizeLoginRole(role) {
+    const key = String(role || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+    return ({admin:'admin',administrator:'admin',dean:'dean',collegedean:'dean',facultycoordinator:'coordinator',coordinator:'coordinator',faculty:'faculty',professor:'faculty',student:'student'})[key] || key;
+  }
 
   function validateLogin(username, password) {
     const currentUsers = JSON.parse(localStorage.getItem("users")) || [];
@@ -361,8 +367,8 @@
     admin: currentAccounts.find(user => user.username === 'admin' && user.role === 'admin'),
     dean: currentAccounts.find(user => user.username === 'dean.demo' && user.role === 'dean'),
     coordinator: currentAccounts.find(user => user.username === 'coordinator.demo' && user.role === 'coordinator'),
-    professor: currentAccounts.find(user => user.username === '2025-00002' && user.role === 'faculty'),
-    student: currentAccounts.find(user => user.username === '23-32534-345' && user.role === 'student')
+    professor: currentAccounts.find(user => user.username === '23-32534-345' && user.role === 'faculty'),
+    student: currentAccounts.find(user => user.username === '2025-00002' && user.role === 'student')
   };
   document.querySelectorAll('[data-demo-account]').forEach(button => {
     button.addEventListener('click', () => {
@@ -565,30 +571,31 @@
       return;
     }
 
-    const route = roleRoutes[user.role];
+    const effectiveRole = normalizeLoginRole(user.role);
+    const route = roleRoutes[effectiveRole];
     if (!route) {
       showAuthError("This account role does not have an available workspace yet. Contact the administrator.");
       return;
     }
 
     const access = JSON.parse(localStorage.getItem('systemSettings') || '{}');
-    if (user.role !== 'admin' && access.maintenance) {
+    if (effectiveRole !== 'admin' && access.maintenance) {
       showAuthError(access.maintenanceMessage || 'The portal is currently under maintenance.');
       return;
     }
-    if ((user.role === 'faculty' && access.allowFacultyLogin === false) || (user.role === 'student' && access.allowStudentLogin === false)) {
-      showAuthError(`${user.role === 'faculty' ? 'Faculty' : 'Student'} access is currently paused by the administrator.`);
+    if ((effectiveRole === 'faculty' && access.allowFacultyLogin === false) || (effectiveRole === 'student' && access.allowStudentLogin === false)) {
+      showAuthError(`${effectiveRole === 'faculty' ? 'Professor' : 'Student'} access is currently paused by the administrator.`);
       return;
     }
 
     // Store only what identifies the session. Dashboards read identity here.
     localStorage.setItem("currentUser", JSON.stringify({
       username: user.username,
-      role: user.role,
+      role: effectiveRole,
       signedInAt: Date.now(),
       lastActivityAt: Date.now()
     }));
-    AuditLog.record('login','session',user.username,{role:user.role},{username:user.username,role:user.role});
+    AuditLog.record('login','session',user.username,{role:effectiveRole},{username:user.username,role:effectiveRole});
     window.location.href = route;
   });
 </script>

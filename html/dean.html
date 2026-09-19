@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dean Dashboard | New Era University</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/shared-ui.css">
+  <link rel="stylesheet" href="../css/role-dashboard.css">
+  <script src="../js/storage.js"></script><script src="../js/demo-data.js"></script><script src="../js/auth.js"></script><script src="../js/ui.js"></script>
+</head>
+<body data-role="dean">
+  <div class="topbar"><div class="topbar-left"><img src="../assets/logo.PNG" alt="NEU Logo" class="logo"><div class="page-title">NEW ERA UNIVERSITY</div></div><div class="topbar-right" id="topbarRight"></div></div>
+  <main id="dashboardSection" class="role-dashboard-page">
+    <header class="role-dashboard-head"><div><p class="role-dashboard-eyebrow">Dean workspace</p><h2>College overview</h2><p>Review personnel, approvals, activity, and academic indicators.</p></div><div class="role-context"><i aria-hidden="true"></i>College of Information and Computer Studies</div></header>
+    <section class="role-stat-grid" aria-label="Dean statistics">
+      <article class="role-stat-card"><span>Professors</span><strong id="professorCount">0</strong><small>College personnel records</small></article>
+      <article class="role-stat-card"><span>Coordinators</span><strong id="coordinatorCount">0</strong><small>Active coordinator accounts</small></article>
+      <article class="role-stat-card"><span>Pending approvals</span><strong id="approvalCount">0</strong><small>Requests awaiting review</small></article>
+      <article class="role-stat-card"><span>Sections</span><strong id="sectionCount">0</strong><small>Current academic sections</small></article>
+    </section>
+    <section class="role-action-grid" aria-label="Dean dashboard actions">
+      <button class="role-action-card" onclick="deanNav.show('membersSection')"><span class="role-action-icon">&#9786;</span><strong>Member management</strong><span>Browse Faculty Coordinators and Professors in the college.</span></button>
+      <button class="role-action-card" onclick="deanNav.show('approvalsSection')"><span class="role-action-icon">&#10003;</span><strong>Assignment approvals</strong><span>Review Professor assignment requests submitted by Coordinators.</span></button>
+      <button class="role-action-card" onclick="deanNav.show('statisticsSection')"><span class="role-action-icon">&#8645;</span><strong>College statistics</strong><span>Inspect personnel, teaching-load, examination, and grading summaries.</span></button>
+      <button class="role-action-card" onclick="deanNav.show('logsSection')"><span class="role-action-icon">&#9719;</span><strong>Activity logs</strong><span>Review college-relevant personnel and approval activity.</span></button>
+    </section>
+  </main>
+  <section id="membersSection" class="role-workspace"><h2>Member management</h2><p>Faculty Coordinator and Professor records for this college.</p><div class="role-placeholder-list"><article><strong>Professor directory</strong><span>Filterable personnel list and profile access will be implemented here.</span></article><article><strong>Faculty Coordinator appointments</strong><span>Appointment and permission controls remain part of the Dean management task.</span></article></div></section>
+  <section id="approvalsSection" class="role-workspace"><h2>Professor-assignment approvals</h2><p>Requests from Faculty Coordinators will appear here.</p><div class="role-placeholder-list"><article><strong>No pending requests</strong><span>Approval records will support approve, reject, remarks, and retained decision history.</span></article></div></section>
+  <section id="statisticsSection" class="role-workspace"><h2>College statistics</h2><p>Role-relevant academic and personnel summaries.</p><div class="role-placeholder-list"><article><strong>Statistics workspace prepared</strong><span>Teaching load, examination creation, grading, and participation indicators will be connected here.</span></article></div></section>
+  <section id="logsSection" class="role-workspace"><h2>Dean activity logs</h2><p>Filterable college-relevant events.</p><div class="role-placeholder-list"><article><strong>Log workspace prepared</strong><span>Personnel, Coordinator activity, approvals, and academic events will be listed here.</span></article></div></section>
+  <script>
+    const session=requireRole('dean'); if(!session) throw new Error('Not authorised — redirecting to login.');
+    if(typeof DemoData!=='undefined') DemoData.install();
+    const read=(key)=>DB.read(key,[]); const users=read('users');
+    professorCount.textContent=read('faculty').length;
+    coordinatorCount.textContent=users.filter(user=>user.role==='coordinator'&&user.disabled!==true).length;
+    approvalCount.textContent=read('approvalRequests').filter(item=>item.status==='pending').length;
+    sectionCount.textContent=read('sections').length;
+    mountProfileMenu({name:'College Dean',role:'dean',id:session.username,container:'#topbarRight'});
+    const deanNav=mountSidebar({items:[{id:'dashboardSection',label:'Dashboard',icon:'&#8962;'},{id:'membersSection',label:'Members',icon:'&#9786;'},{id:'approvalsSection',label:'Approvals',icon:'&#10003;'},{id:'statisticsSection',label:'Statistics',icon:'&#8645;'},{id:'logsSection',label:'Logs',icon:'&#9719;'}]});
+  </script>
+</body>
+</html>
