@@ -4,7 +4,27 @@
 
 This is a Human–Computer Interaction (HCI) school project for an online examination system. The project focuses on the interface, user experience, formatting, navigation, and interactive prototype rather than on production-level backend performance.
 
-The project does not use a database. CSV files and browser storage are used for the demonstration data because the main objective is to present a working HCI interface.
+The project includes a local SQLite persistence server. The browser keeps a synchronous read cache because the existing interface was originally written around `localStorage`; when run through `npm start`, SQLite is the primary source of truth. Server values win during startup, and a write must succeed in SQLite before the browser cache is changed. CSV remains available as an import/export format, not as the primary database.
+
+## Run with SQLite
+
+Requirements: Node.js 22.5 or newer.
+
+```bash
+npm start
+```
+
+Open `http://localhost:3000`. The database is created at `data/neu-examination.sqlite`. On the first server-backed run, existing browser collections are migrated automatically when the database is empty. Database files and SQLite WAL files are excluded from Git.
+
+The local server provides:
+
+- `GET /api/health` for storage status.
+- `GET /api/storage` and collection-level storage endpoints.
+- `POST /api/migrate` for transactional browser-data migration.
+- `POST /api/csv/:collection/import` for validated CSV uploads.
+- `GET /api/csv/:collection/export` for safe CSV downloads.
+
+CSV parsing supports UTF-8 BOM files, quoted commas, escaped quotes, and embedded line breaks. Imports reject malformed rows, blank or duplicate headers, oversized request bodies, and unsupported collection names.
 
 Some interface elements may appear large or slightly over-scaled. This is manageable for the current prototype because the priority has been consistent formatting and a clear demonstration of the workflows rather than complete responsiveness and production scaling.
 

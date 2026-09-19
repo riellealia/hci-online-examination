@@ -1,0 +1,11 @@
+{
+  "name": "neu-online-examination",
+  "version": "1.0.0",
+  "private": true,
+  "description": "New Era University examination and learning environment prototype",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/t_sqlite_backend.js"
+  },
+  "engines": { "node": ">=22.5.0" }
+}

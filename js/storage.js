@@ -15,6 +15,63 @@
    collections — so an identical message is shown once per short window
    rather than five times in a row. */
 const _storageSeen = new Map();
+const SQLITE_BACKEND_ACTIVE = typeof location !== 'undefined'
+  && /^https?:$/.test(location.protocol) && location.port === '3000';
+const SQLITE_LOCAL_ONLY = new Set(['currentUser','accessNotice']);
+
+/* The current UI is synchronous, so SQLite data is hydrated into a browser
+   cache before page scripts execute. When served by server.js, writes must
+   succeed in SQLite before the compatibility cache is changed. */
+function sqliteBootstrap() {
+  if (!SQLITE_BACKEND_ACTIVE || typeof XMLHttpRequest === 'undefined') return;
+  try {
+    const request = new XMLHttpRequest();
+    request.open('GET', '/api/storage', false);
+    request.send();
+    if (request.status !== 200) throw new Error(`SQLite bootstrap returned ${request.status}.`);
+    const records = JSON.parse(request.responseText || '{}').records || {};
+    const keys = Object.keys(records);
+    const local = {};
+    for (let index = 0; index < localStorage.length; index++) {
+      const key = localStorage.key(index);
+      if (!key || SQLITE_LOCAL_ONLY.has(key)) continue;
+      try { local[key] = JSON.parse(localStorage.getItem(key)); } catch (_) {}
+    }
+    if (keys.length) {
+      keys.forEach(key => { if (!SQLITE_LOCAL_ONLY.has(key)) localStorage.setItem(key, JSON.stringify(records[key])); });
+    }
+    const migrationRecords = keys.length
+      ? Object.fromEntries(Object.entries(local).filter(([key]) => !Object.hasOwn(records, key)))
+      : local;
+    if (Object.keys(migrationRecords).length) {
+      const migration = new XMLHttpRequest();
+      migration.open('POST', '/api/migrate', false);
+      migration.setRequestHeader('Content-Type', 'application/json');
+      migration.send(JSON.stringify({ records: migrationRecords, missingOnly: keys.length > 0 }));
+      if (migration.status !== 200) throw new Error(`SQLite migration returned ${migration.status}.`);
+    }
+  } catch (error) {
+    console.warn('[storage] SQLite unavailable; continuing with browser cache.', error);
+  }
+}
+
+function writeSqliteSync(method, key, value) {
+  if (!SQLITE_BACKEND_ACTIVE || SQLITE_LOCAL_ONLY.has(key)) return true;
+  try {
+    const request = new XMLHttpRequest();
+    request.open(method, `/api/storage/${encodeURIComponent(key)}`, false);
+    if (method === 'PUT') request.setRequestHeader('Content-Type', 'application/json');
+    request.send(method === 'PUT' ? JSON.stringify({ value }) : null);
+    if (request.status < 200 || request.status >= 300) throw new Error(`SQLite returned ${request.status}.`);
+    return true;
+  } catch (error) {
+    storageNotify(`SQLite could not save "${key}". Nothing was changed.`, 'error');
+    console.error('[storage] SQLite write failed', key, error);
+    return false;
+  }
+}
+
+sqliteBootstrap();
 
 function storageNotify(message, type) {
   const now = (typeof performance !== 'undefined' && performance.now)
@@ -80,6 +137,7 @@ const DB = {
     }
 
     try {
+      if (!writeSqliteSync('PUT', key, value)) return false;
       localStorage.setItem(key, payload);
       return true;
     } catch (e) {
@@ -99,6 +157,7 @@ const DB = {
 
   remove(key) {
     try {
+      if (!writeSqliteSync('DELETE', key)) return false;
       localStorage.removeItem(key);
       return true;
     } catch (e) {
@@ -117,5 +176,23 @@ const DB = {
     } catch (e) {
       return false;
     }
+  },
+
+  backend() { return SQLITE_BACKEND_ACTIVE ? 'sqlite' : 'browser'; },
+
+  async importCsv(collection, file) {
+    if (!SQLITE_BACKEND_ACTIVE) throw new Error('CSV server import requires npm start.');
+    const text = typeof file === 'string' ? file : await file.text();
+    const response = await fetch(`/api/csv/${encodeURIComponent(collection)}/import`, {method:'POST',headers:{'Content-Type':'text/csv; charset=utf-8'},body:text});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'CSV import failed.');
+    const stored = await fetch(`/api/storage/${encodeURIComponent(collection)}`).then(item => item.json());
+    localStorage.setItem(collection, JSON.stringify(stored.value || []));
+    return result;
+  },
+
+  exportCsvUrl(collection) {
+    if (!SQLITE_BACKEND_ACTIVE) return null;
+    return `/api/csv/${encodeURIComponent(collection)}/export`;
   }
 };

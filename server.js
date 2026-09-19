@@ -1,0 +1,38 @@
+'use strict';
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const { openDatabase } = require('./server/database');
+const { parseCsv, stringifyCsv } = require('./server/csv');
+
+const ROOT = __dirname;
+const PORT = Number(process.env.PORT || 3000);
+const DB_FILE = process.env.SQLITE_PATH || path.join(ROOT, 'data', 'neu-examination.sqlite');
+const MAX_BODY = 10 * 1024 * 1024;
+const KEY_RE = /^[A-Za-z0-9:_-]{1,80}$/;
+const CSV_COLLECTIONS = new Set(['users','faculty','students','subjects','sections','sectionSubjects','studentEnrollments','subjectAssignments','exams','questions','studentSubmissions','applicationAuditLog']);
+const MIME = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon','.md':'text/markdown; charset=utf-8'};
+const store = openDatabase(DB_FILE);
+
+function send(res, status, body, type='application/json; charset=utf-8', headers={}) { res.writeHead(status, {'Content-Type':type,'X-Content-Type-Options':'nosniff',...headers}); res.end(type.startsWith('application/json') ? JSON.stringify(body) : body); }
+function readBody(req) { return new Promise((resolve,reject)=>{let size=0,chunks=[];req.on('data',chunk=>{size+=chunk.length;if(size>MAX_BODY){reject(Object.assign(new Error('Request body is too large.'),{status:413}));req.destroy();}else chunks.push(chunk);});req.on('end',()=>resolve(Buffer.concat(chunks).toString('utf8')));req.on('error',reject);}); }
+function cleanKey(value) { const key=decodeURIComponent(value||''); if(!KEY_RE.test(key)) throw Object.assign(new Error('Invalid collection name.'),{status:400}); return key; }
+function collectionFromCsvPath(pathname) { const match=pathname.match(/^\/api\/csv\/([^/]+)\/(import|export)$/); if(!match)return null;const key=cleanKey(match[1]);if(!CSV_COLLECTIONS.has(key))throw Object.assign(new Error('CSV is not enabled for this collection.'),{status:400});return{key,action:match[2]}; }
+
+async function api(req,res,url) {
+  if(url.pathname==='/api/health'&&req.method==='GET') return send(res,200,{ok:true,storage:'sqlite',database:path.basename(DB_FILE)});
+  if(url.pathname==='/api/storage'&&req.method==='GET') return send(res,200,{records:store.all()});
+  if(url.pathname==='/api/migrate'&&req.method==='POST'){const parsed=JSON.parse(await readBody(req)||'{}');if(!parsed.records||typeof parsed.records!=='object'||Array.isArray(parsed.records))throw Object.assign(new Error('records must be an object.'),{status:400});for(const key of Object.keys(parsed.records))cleanKey(key);store.migrate(parsed.records,{missingOnly:parsed.missingOnly===true});return send(res,200,{ok:true,count:Object.keys(parsed.records).length,missingOnly:parsed.missingOnly===true});}
+  const storageMatch=url.pathname.match(/^\/api\/storage\/([^/]+)$/);
+  if(storageMatch){const key=cleanKey(storageMatch[1]);if(req.method==='GET')return send(res,200,{key,value:store.read(key,null)});if(req.method==='PUT'){const parsed=JSON.parse(await readBody(req)||'{}');if(!Object.hasOwn(parsed,'value'))throw Object.assign(new Error('value is required.'),{status:400});store.write(key,parsed.value);return send(res,200,{ok:true,key});}if(req.method==='DELETE'){store.delete(key);return send(res,200,{ok:true,key});}}
+  const csv=collectionFromCsvPath(url.pathname);
+  if(csv&&csv.action==='import'&&req.method==='POST'){const rows=parseCsv(await readBody(req));store.write(csv.key,rows);store.recordImport(csv.key,rows.length);return send(res,200,{ok:true,collection:csv.key,rows:rows.length});}
+  if(csv&&csv.action==='export'&&req.method==='GET'){const rows=store.read(csv.key,[]);if(!Array.isArray(rows))throw Object.assign(new Error('Stored collection is not tabular.'),{status:409});const filename=`${csv.key}.csv`;return send(res,200,stringifyCsv(rows),'text/csv; charset=utf-8',{'Content-Disposition':`attachment; filename="${filename}"`});}
+  return false;
+}
+
+function staticFile(req,res,url){let pathname=url.pathname==='/'?'/html/index.html':url.pathname;let decoded;try{decoded=decodeURIComponent(pathname);}catch{return send(res,400,{error:'Invalid path.'});}if(/^\/[A-Za-z0-9_-]+\.html$/.test(decoded))decoded='/html'+decoded;const target=path.resolve(ROOT,'.'+decoded);if(target!==ROOT&&!target.startsWith(ROOT+path.sep))return send(res,403,{error:'Forbidden.'});fs.stat(target,(error,stat)=>{if(error||!stat.isFile())return send(res,404,{error:'File not found.'});fs.createReadStream(target).on('error',()=>send(res,500,{error:'Could not read file.'})).pipe((res.writeHead(200,{'Content-Type':MIME[path.extname(target).toLowerCase()]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}),res));});}
+
+const server=http.createServer(async(req,res)=>{const url=new URL(req.url,'http://localhost');try{if(url.pathname.startsWith('/api/')){const handled=await api(req,res,url);if(handled!==false)return;return send(res,404,{error:'API route not found.'});}if(!['GET','HEAD'].includes(req.method))return send(res,405,{error:'Method not allowed.'});staticFile(req,res,url);}catch(error){const status=error.status||400;if(status>=500)console.error(error);send(res,status,{error:error.message||'Request failed.'});}});
+server.listen(PORT,()=>console.log(`NEU Examination server: http://localhost:${PORT}\nSQLite: ${DB_FILE}`));
+process.on('SIGINT',()=>{store.close();server.close(()=>process.exit(0));});
