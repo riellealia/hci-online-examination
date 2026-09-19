@@ -67,9 +67,11 @@ ok((r.read('users')||[]).some(user=>user.username==='admin'&&user.password==='ch
 r.d.getElementById('closePasswordReset').click();
 ok(resetDialog.hidden,'password-reset dialog closes without leaving the login page');
 
-const repaired=openLogin({demoCurriculumVersion:23,users:[{username:'S-DEMO',password:'student',role:'student'}],faculty:[],students:[],subjects:[]});
+const repaired=openLogin({demoCurriculumVersion:24,users:[{username:'S-DEMO',password:'student',role:'student'}],faculty:[],students:[],subjects:[]});
 const repairedUsers=repaired.read('users');
 ok(['admin','dean.demo','coordinator.demo','2025-00002','23-32534-345'].every(username=>repairedUsers.some(user=>user.username===username)),'all five role demo accounts are restored even when this device already has the current data version');
+ok(repairedUsers.filter(user=>user.role==='coordinator').length===10,'nine Coordinator members plus the demo Coordinator account are restored');
+ok((repaired.read('coordinators')||[]).length===10,'ten Faculty Coordinator profiles are available');
 repaired.w.close();
 
 console.log('\n=== T. Blank and invalid forms are rejected ===');

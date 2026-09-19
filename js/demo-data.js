@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 23,
+  version: 24,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -84,7 +84,19 @@ const DemoData = {
     mariaCodes.forEach((code,index)=>{const offer=offers.find(item=>item.subjectCode===code&&['2BSCS-1','2BSIT-1','2BSIS-1'].includes(item.sectionId));if(offer)studentEnrollments.push({id:`ENR-2025-00002-${index+1}`,studentId:'2025-00002',offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId});});
     const subjectAssignments=subjects.map(subject=>({subjectCode:subject.code,facultyIds:[...new Set(offers.filter(offer=>offer.subjectCode===subject.code).map(offer=>offer.facultyId))]}));
     const passwordName=value=>value.toLowerCase().replace(/\s+/g,'');
-    const users=[{username:'admin',password:'admin123',role:'admin'},...faculty.map(item=>{const firstOffer=offers.find(offer=>offer.facultyId===item.id),year=firstOffer?sections.find(section=>section.id===firstOffer.sectionId)?.yearLevel||0:0;return{username:item.id,password:item.id==='23-32534-345'?'reyes23':passwordName(item.last)+year,role:'faculty'};}),...students.map(item=>({username:item.id,password:item.id==='2025-00002'?'santos2025':passwordName(item.last)+(sections.find(section=>section.id===item.sections[0])?.yearLevel||0),role:'student'}))];
+    const coordinators=[
+      {username:'coordinator.demo',password:'coord123',first:'Demo',last:'Santos'},
+      {username:'coord.001',password:'coord001',first:'Andrea',last:'Cruz'},
+      {username:'coord.002',password:'coord002',first:'Benjamin',last:'Flores'},
+      {username:'coord.003',password:'coord003',first:'Camille',last:'Garcia'},
+      {username:'coord.004',password:'coord004',first:'Daniel',last:'Mendoza'},
+      {username:'coord.005',password:'coord005',first:'Elena',last:'Navarro'},
+      {username:'coord.006',password:'coord006',first:'Francis',last:'Aquino'},
+      {username:'coord.007',password:'coord007',first:'Grace',last:'Villanueva'},
+      {username:'coord.008',password:'coord008',first:'Henry',last:'Bautista'},
+      {username:'coord.009',password:'coord009',first:'Isabella',last:'Ramos'}
+    ].map(item=>({...item,id:item.username,role:'coordinator',college:'College of Information and Computer Studies',status:'active'}));
+    const users=[{username:'admin',password:'admin123',role:'admin'},{username:'dean.demo',password:'dean123',role:'dean',first:'College',last:'Dean'},...coordinators.map(({username,password,role,first,last,college,status})=>({username,password,role,first,last,college,status})),...faculty.map(item=>{const firstOffer=offers.find(offer=>offer.facultyId===item.id),year=firstOffer?sections.find(section=>section.id===firstOffer.sectionId)?.yearLevel||0:0;return{username:item.id,password:item.id==='23-32534-345'?'reyes23':passwordName(item.last)+year,role:'faculty'};}),...students.map(item=>({username:item.id,password:item.id==='2025-00002'?'santos2025':passwordName(item.last)+(sections.find(section=>section.id===item.sections[0])?.yearLevel||0),role:'student'}))];
     const exams=[],questions=[],studentSubmissions=[],anchor=new Date(Date.UTC(2026,7,25));
     const isoDate=offset=>{const date=new Date(anchor);date.setUTCDate(date.getUTCDate()+offset);return date.toISOString().slice(0,10);};
     const durationChoices=[30,45,60,75,90,120],assessmentNames=['Quick Quiz','Skills Check','Unit Test'],questionTypes=['mcq','truefalse','number','fillblank','matching','essay'];
@@ -175,7 +187,7 @@ const DemoData = {
     ];
     const studentEmails=[{id:'DEMO-MAIL-001',studentId:'2025-00002',facultyId:'23-32534-345',subject:'CCS211-24 — Question about Skills Check',message:'May I clarify the feedback on question 4?',sentAt:'2026-08-28T15:42:00+08:00',read:false}];
     const studentNotifications=[{id:'DEMO-NOTICE-001',studentId:'2025-00002',reportId:'DEMO-REPORT-004',message:'Your scoring concern was resolved and the answer was reviewed.',createdAt:'2026-08-25T10:05:00+08:00',read:false}];
-    Object.entries({faculty,students,subjects,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
+    Object.entries({faculty,coordinators,students,subjects,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
     localStorage.setItem('demoCurriculumVersion',String(this.version)); return true;
   }
 };

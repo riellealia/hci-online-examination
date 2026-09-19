@@ -62,6 +62,6 @@ const unifiedLogin=load('login.html',{users:[],faculty:[],students:[],subjects:[
 ok(unifiedLogin.d.getElementById('username').value==='admin'&&unifiedLogin.d.getElementById('password').value==='admin123','Unified login prefills one role-neutral demo entry point');unifiedLogin.w.close();
 const ignoredRoleQuery=load('login.html',{users:[],faculty:[],students:[],subjects:[]},{query:'?role=student'});
 ok(ignoredRoleQuery.d.getElementById('username').value==='admin'&&!ignoredRoleQuery.d.body.dataset.role,'legacy role query no longer selects or recolors the login form');ignoredRoleQuery.w.close();
-const currentDevice=load('login.html',{demoCurriculumVersion:23,users:[],faculty:[],students:[],subjects:[]});
+const currentDevice=load('login.html',{demoCurriculumVersion:24,users:[],faculty:[],students:[],subjects:[]});
 ok(currentDevice.read('users').some(user=>user.username==='admin')&&currentDevice.read('users').some(user=>user.username==='23-32534-345'),'current-version devices repair missing Admin and Faculty demo accounts');currentDevice.w.close();
 process.exit(0);

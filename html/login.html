@@ -319,10 +319,27 @@
     students.push({ id: '2025-00002', last: 'Santos', first: 'Maria', sections: ['2BSCS-1'] });
     writeLoginRecords('students', students);
   }
+  const coordinatorAccounts = [
+    { username: 'coordinator.demo', password: 'coord123', role: 'coordinator', first: 'Demo', last: 'Santos' },
+    { username: 'coord.001', password: 'coord001', role: 'coordinator', first: 'Andrea', last: 'Cruz' },
+    { username: 'coord.002', password: 'coord002', role: 'coordinator', first: 'Benjamin', last: 'Flores' },
+    { username: 'coord.003', password: 'coord003', role: 'coordinator', first: 'Camille', last: 'Garcia' },
+    { username: 'coord.004', password: 'coord004', role: 'coordinator', first: 'Daniel', last: 'Mendoza' },
+    { username: 'coord.005', password: 'coord005', role: 'coordinator', first: 'Elena', last: 'Navarro' },
+    { username: 'coord.006', password: 'coord006', role: 'coordinator', first: 'Francis', last: 'Aquino' },
+    { username: 'coord.007', password: 'coord007', role: 'coordinator', first: 'Grace', last: 'Villanueva' },
+    { username: 'coord.008', password: 'coord008', role: 'coordinator', first: 'Henry', last: 'Bautista' },
+    { username: 'coord.009', password: 'coord009', role: 'coordinator', first: 'Isabella', last: 'Ramos' }
+  ];
+  const coordinatorProfiles = coordinatorAccounts.map(account => ({
+    id: account.username, username: account.username, first: account.first, last: account.last,
+    role: 'coordinator', college: 'College of Information and Computer Studies', status: 'active'
+  }));
+  writeLoginRecords('coordinators', coordinatorProfiles);
   const requiredDemoAccounts = [
     { username: 'admin', password: 'admin123', role: 'admin' },
     { username: 'dean.demo', password: 'dean123', role: 'dean' },
-    { username: 'coordinator.demo', password: 'coord123', role: 'coordinator' },
+    ...coordinatorAccounts,
     { username: '23-32534-345', password: 'reyes23', role: 'faculty' },
     { username: '2025-00002', password: 'santos2025', role: 'student' }
   ];

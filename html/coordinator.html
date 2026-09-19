@@ -36,7 +36,9 @@
     const read=(key)=>DB.read(key,[]); const offerings=read('sectionSubjects').reduce((sum,item)=>sum+(item.assignments?.length||item.subjectCodes?.length||0),0);
     offeringCount.textContent=offerings; professorCount.textContent=read('faculty').length; studentCount.textContent=read('students').length;
     requestCount.textContent=read('approvalRequests').filter(item=>item.status==='pending').length;
-    mountProfileMenu({name:'Faculty Coordinator',role:'coordinator',id:session.username,container:'#topbarRight'});
+    const coordinator=read('coordinators').find(item=>item.username===session.username||item.id===session.username);
+    const coordinatorName=coordinator?`${coordinator.first} ${coordinator.last}`:'Faculty Coordinator';
+    mountProfileMenu({name:coordinatorName,role:'coordinator',id:session.username,container:'#topbarRight'});
     const coordinatorNav=mountSidebar({items:[{id:'dashboardSection',label:'Dashboard',icon:'&#8962;'},{id:'offeringsSection',label:'Offerings',icon:'&#9638;'},{id:'assignmentsSection',label:'Assignments',icon:'&#8644;'},{id:'enrollmentSection',label:'Enrollment',icon:'&#10010;'},{id:'schedulesSection',label:'Schedules',icon:'&#9716;'},{id:'logsSection',label:'Logs',icon:'&#9719;'}]});
   </script>
 </body>
