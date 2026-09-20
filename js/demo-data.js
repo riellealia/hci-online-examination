@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 26,
+  version: 27,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -26,7 +26,7 @@ const DemoData = {
     // role attempt Administrator-only collection writes on each new browser.
     const sqlite = typeof DB.backend === 'function' && DB.backend() === 'sqlite';
     const session = DB.read('currentUser', null);
-    if (sqlite && session && session.role !== 'admin') {
+    if ((session && session.role !== 'admin') || (sqlite && !session)) {
       localStorage.setItem('demoCurriculumVersion', String(this.version));
       return false;
     }
@@ -83,50 +83,37 @@ const DemoData = {
       const yearLevel=yearIndex+1,subjectCode=`${prefixes[program]}${yearLevel}${11+index}-24`;
       curricula.push({curriculumId:`PH-${program}-2024`,country:'Philippines',program,track:'General',version:'2024',effectiveSchoolYear:'2024-2025',status:'active',sourceUrl:'https://legacy.ched.gov.ph/wp-content/uploads/2017/10/CMO-no.-25-s.-2015.pdf',yearLevel,term:index===0?'first':'second',subjectCode,subjectName:name,units:3,prerequisites:[]});
     })));
-    const sections=[],subjects=[],sectionSubjects=[]; let offerNo=1, subjectNo=1;
-    Object.entries(curriculum).forEach(([program,years],programIndex)=>years.forEach((names,yearIndex)=>{
-      const yearLevel=yearIndex+1, sectionCount=yearLevel===2?2:1;
-      const yearSubjects=names.map((name,index)=>{const code=`${prefixes[program]}${yearLevel}${11+index}-24`;subjects.push({code,name,program,yearLevel,units:3});return code;});
-      for(let sectionIndex=0;sectionIndex<sectionCount;sectionIndex++){
-        const sectionNumber=sectionIndex+1,id=`${yearLevel}${program}-${sectionNumber}`;sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel,capacity:50});
-        const assignments=yearSubjects.map(subjectCode=>{const number=offerNo++;return{id:`OFR-${String(number).padStart(3,'0')}`,subjectCode,facultyId:faculty[(number-1)%(faculty.length-3)].id};});
-        sectionSubjects.push({sectionId:id,assignments});
+    const storedCurricula=DB.read('curricula',[]),seedCurricula=storedCurricula.length>curricula.length?storedCurricula:curricula;
+    const programs=['BSCS','BSIT','BSIS','BSGAMEDEV','BSANIMATION'],sections=[],subjects=[],sectionSubjects=[];let offerNo=1;
+    const activeFirstSemester=(program,yearLevel)=>seedCurricula.filter(item=>item.program===program&&Number(item.yearLevel)===yearLevel&&item.term==='first'&&item.status!=='archived'&&item.removed!==true).sort((a,b)=>(Number(a.order??9999)-Number(b.order??9999))||String(a.subjectCode).localeCompare(String(b.subjectCode)));
+    const subjectByCode=new Map();
+    programs.forEach(program=>[1,2,3,4].forEach(yearLevel=>{
+      const rows=activeFirstSemester(program,yearLevel);
+      rows.forEach(item=>{if(!subjectByCode.has(item.subjectCode))subjectByCode.set(item.subjectCode,{code:item.subjectCode,name:item.subjectName,program,yearLevel,term:'first',units:Number(item.units)||0})});
+      for(let sectionNumber=1;sectionNumber<=3;sectionNumber++){
+        const id=`${yearLevel}${program}-${sectionNumber}`;
+        sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel,capacity:50});
+        sectionSubjects.push({sectionId:id,assignments:rows.map(item=>{const number=offerNo++;return{id:`OFR-${String(number).padStart(4,'0')}`,subjectCode:item.subjectCode,facultyId:faculty[(number-1)%faculty.length].id}})});
       }
     }));
-    const firstYearBscsSource=sectionSubjects.find(record=>record.sectionId==='1BSCS-1');
-    sections.push({id:'1BSCS-2',name:'2',sectionNumber:2,program:'BSCS',yearLevel:1,capacity:100});
-    sectionSubjects.push({sectionId:'1BSCS-2',assignments:(firstYearBscsSource?.assignments||[]).map(item=>({id:`OFR-${String(offerNo++).padStart(3,'0')}`,subjectCode:item.subjectCode,facultyId:item.facultyId}))});
-    // Give the named faculty demo account a varied teaching load and keep her
-    // connected to several of Maria Santos's actual enrolled offerings.
-    const mariaReyesLoad=[
-      ['2BSCS-1','CCS211-24'],['2BSCS-1','CCS212-24'],
-      ['2BSCS-2','CCS211-24'],
-      ['2BSIT-1','CIT211-24'],['2BSIS-1','CIS211-24']
-    ];
-    mariaReyesLoad.forEach(([sectionId,subjectCode])=>{
-      const offering=sectionSubjects.find(record=>record.sectionId===sectionId)?.assignments.find(item=>item.subjectCode===subjectCode);
-      if(offering)offering.facultyId='23-32534-345';
-    });
-    const students=[]; let studentNo=1;
-    sections.forEach((section,index)=>{const entryYear=2027-section.yearLevel,baseFirst=['Juan','Maria','Pedro','Sofia','Miguel','Camille','Bianca','Andre'][index%8];students.push({id:`${entryYear}-${String(studentNo++).padStart(5,'0')}`,last:['Dela Cruz','Santos','Reyes','Mendoza','Navarro','Villanueva','Castillo','Bautista'][index%8],first:index>=8?`${baseFirst} A.`:baseFirst,sections:[section.id]});});
-    // Four irregular students take offerings from two sections.
-    for(let i=0;i<4;i++){const first=sections[i],second=sections[(i+5)%sections.length],entryYear=2026-i%3;students.push({id:`${entryYear}-${String(studentNo++).padStart(5,'0')}`,last:['Ramos','Torres','Lim','Gonzales'][i],first:['Leah','Marco','Iris','Noel'][i],sections:[first.id,second.id]});}
+    subjects.push(...subjectByCode.values());
+    const students=[];let studentNo=1;
     const studentLast=['Abad','Alcantara','Andres','Balagtas','Cabral','David','Escobar','Francisco','Galang','Herrera','Ignacio','Javier','Katigbak','Lacsamana','Macapagal','Natividad','Ortega','Quintos','Rivera','Samson','Tolentino','Uy','Vergara','Yap'];
     const studentFirst=['Aaron','Abigail','Adrian','Alexa','Brandon','Chloe','Christian','Denise','Ethan','Frances','Gian','Hannah','Isaac','Julia','Kyle','Louise','Nathan','Olivia','Paolo','Queenie','Sean','Trisha','Vincent','Zoe'];
-    for(let i=0;i<600;i++){
-      const primary=sections[i%sections.length],memberships=[primary.id];
-      if(i%10===0){const alternate=sections.find(section=>section.yearLevel===primary.yearLevel&&section.program!==primary.program);if(alternate)memberships.push(alternate.id);}
-      const entryYear=2027-primary.yearLevel;
-      const last=studentLast[i%studentLast.length],firstBase=studentFirst[Math.floor(i/studentLast.length)%studentFirst.length],cycle=Math.floor(i/(studentLast.length*studentFirst.length)),first=cycle?`${firstBase} ${String.fromCharCode(64+cycle)}.`:firstBase;
-      students.push({id:`${entryYear}-${String(studentNo++).padStart(5,'0')}`,last,first,sections:memberships});
-    }
+    students.push({id:'2025-00002',last:'Santos',first:'Maria',sections:['2BSCS-1']});
+    sections.forEach(section=>{
+      const existing=students.filter(student=>student.sections.includes(section.id)).length,target=20;
+      for(let index=existing;index<target;index++){
+        while(section.yearLevel===2&&studentNo===2)studentNo++;
+        const entryYear=2027-section.yearLevel,id=`${entryYear}-${String(studentNo++).padStart(5,'0')}`,nameIndex=students.length;
+        students.push({id,last:studentLast[nameIndex%studentLast.length],first:`${studentFirst[Math.floor(nameIndex/studentLast.length)%studentFirst.length]} ${String.fromCharCode(65+(nameIndex%26))}.`,sections:[section.id]});
+      }
+    });
     const offers=sectionSubjects.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId}))),studentEnrollments=[];
     const maria=students.find(student=>student.id==='2025-00002');
-    if(maria)maria.sections=['2BSCS-1','2BSIT-1','2BSIS-1'];
-    students.forEach((student,index)=>{let chosen=offers.filter(offer=>student.sections.includes(offer.sectionId));if(student.sections.length>1)chosen=chosen.slice(0,3);else chosen=chosen.slice(0,2);chosen.forEach((offer,i)=>studentEnrollments.push({id:`ENR-${student.id}-${i+1}`,studentId:student.id,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId}));});
-    const mariaCodes=['CCS211-24','CCS212-24','CIT211-24','CIT212-24','CIS211-24','CIS212-24'];
-    for(let index=studentEnrollments.length-1;index>=0;index--)if(studentEnrollments[index].studentId==='2025-00002')studentEnrollments.splice(index,1);
-    mariaCodes.forEach((code,index)=>{const offer=offers.find(item=>item.subjectCode===code&&['2BSCS-1','2BSIT-1','2BSIS-1'].includes(item.sectionId));if(offer)studentEnrollments.push({id:`ENR-2025-00002-${index+1}`,studentId:'2025-00002',offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId});});
+    students.forEach(student=>offers.filter(offer=>student.sections.includes(offer.sectionId)).forEach((offer,index)=>studentEnrollments.push({id:`ENR-${student.id}-${index+1}`,studentId:student.id,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId})));
+    const mariaCodes=offers.filter(item=>item.sectionId==='2BSCS-1').map(item=>item.subjectCode);
+    offers.filter(item=>item.sectionId==='2BSCS-1').slice(0,3).forEach(item=>{item.facultyId='23-32534-345';const stored=sectionSubjects.find(record=>record.sectionId===item.sectionId)?.assignments.find(assignment=>assignment.id===item.id);if(stored)stored.facultyId=item.facultyId});
     const subjectAssignments=subjects.map(subject=>({subjectCode:subject.code,facultyIds:[...new Set(offers.filter(offer=>offer.subjectCode===subject.code).map(offer=>offer.facultyId))]}));
     const passwordName=value=>value.toLowerCase().replace(/\s+/g,'');
     const coordinators=[
@@ -156,15 +143,15 @@ const DemoData = {
       const subjectOffers=offers.filter(offer=>offer.subjectCode===subject.code),examCount=subjectIndex%3+1;
       for(let examIndex=0;examIndex<examCount;examIndex++){
         const offer=subjectOffers[examIndex%subjectOffers.length],number=exams.length+1,itemCount=5+((subjectIndex*7+examIndex*5)%16);
-        const normalOffset=((subjectIndex*3+examIndex*11)%38)-7,dayOffset=subject.code==='CCS211-24'?(examIndex<2?(-7+examIndex*5):0):normalOffset;
-        const isLiveDemo=subject.code==='CCS211-24'&&examIndex===2;
+        const normalOffset=((subjectIndex*3+examIndex*11)%38)-7,dayOffset=subject.code===mariaCodes[0]?(examIndex<2?(-7+examIndex*5):0):normalOffset;
+        const isLiveDemo=subject.code===mariaCodes[0]&&examIndex===2;
         const exam={id:`DEMO-EXAM-${String(number).padStart(3,'0')}`,facultyId:offer.facultyId,subjectCode:subject.code,title:`${subject.name} — ${isLiveDemo?'Live Demo Quiz':assessmentNames[examIndex]}`,desc:`A short ${assessmentNames[examIndex].toLowerCase()} covering varied concepts and response formats.`,date:isoDate(dayOffset),start:isLiveDemo?'00:00':'08:00',end:isLiveDemo?'23:59':'20:00',durationMinutes:isLiveDemo?30:durationChoices[(subjectIndex+examIndex)%durationChoices.length],passingPercent:70,materials:examIndex%2?'Scratch paper permitted':'No additional materials',questionLayout:examIndex%2?'all':'one',navigationMode:examIndex%3?'free':'forward',status:'published',scoreRelease:'after-deadline',answerRelease:examIndex%2?'after-deadline':'never',showSubmittedAnswers:true,showFeedback:true,sections:[offer.sectionId]};
         exams.push(exam);for(let q=0;q<itemCount;q++)questions.push(buildQuestion(exam,q,subject));
         if(dayOffset<0){const eligible=[...new Set(studentEnrollments.filter(item=>item.subjectCode===subject.code&&item.sectionId===offer.sectionId).map(item=>item.studentId))],total=itemCount*2;
           eligible.forEach((studentId,rank)=>{if(rank%10===0)return;const failed=rank%10===1||rank%10===2,awarded=failed?Math.floor(total*.5):Math.min(total,Math.ceil(total*(.75+(rank%4)*.05)));studentSubmissions.push({id:`SUB-${exam.id}-${studentId}`,studentId,examId:exam.id,submittedAt:`${exam.date}T${String(10+rank%7).padStart(2,'0')}:15:00+08:00`,total,answers:[{awarded,needsManualGrading:false}]});});}
       }
     });
-    const practiceSubject=subjects.find(subject=>subject.code==='CCS212-24'),practiceOffer=offers.find(offer=>offer.subjectCode==='CCS212-24'&&offer.sectionId==='2BSCS-1');
+    const practiceCode=mariaCodes.find(code=>code==='CHC1101')||mariaCodes[1]||mariaCodes[0],practiceSubject=subjects.find(subject=>subject.code===practiceCode),practiceOffer=offers.find(offer=>offer.subjectCode===practiceCode&&offer.sectionId==='2BSCS-1');
     const practiceExam={id:'DEMO-ALWAYS-OPEN',facultyId:practiceOffer.facultyId,subjectCode:practiceSubject.code,title:'Human-Computer Interaction — Always-Open Practice Exam',desc:'A reusable practice assessment with no opening date or deadline.',date:'',start:'',end:'',durationMinutes:0,maxAttempts:99,passingPercent:70,materials:'Notes permitted',questionLayout:'one',navigationMode:'free',status:'published',scoreRelease:'immediate',answerRelease:'immediate',showSubmittedAnswers:true,showFeedback:true,sections:['2BSCS-1']};
     exams.push(practiceExam);for(let q=0;q<10;q++)questions.push(buildQuestion(practiceExam,q,practiceSubject));
     const mistakesExam={id:'DEMO-REVIEW-MISTAKES',facultyId:practiceOffer.facultyId,subjectCode:practiceSubject.code,title:'Human-Computer Interaction — Incorrect Answers Review Demo',desc:'A completed demonstration assessment containing both correct and incorrect responses.',date:isoDate(-1),start:'10:00',end:'11:00',durationMinutes:45,maxAttempts:1,passingPercent:70,materials:'No additional materials',questionLayout:'one',navigationMode:'free',status:'published',scoreRelease:'immediate',answerRelease:'immediate',showSubmittedAnswers:true,showFeedback:true,sections:['2BSCS-1']};
@@ -232,7 +219,6 @@ const DemoData = {
     ];
     const studentEmails=[{id:'DEMO-MAIL-001',studentId:'2025-00002',facultyId:'23-32534-345',subject:'CCS211-24 — Question about Skills Check',message:'May I clarify the feedback on question 4?',sentAt:'2026-08-28T15:42:00+08:00',read:false}];
     const studentNotifications=[{id:'DEMO-NOTICE-001',studentId:'2025-00002',reportId:'DEMO-REPORT-004',message:'Your scoring concern was resolved and the answer was reviewed.',createdAt:'2026-08-25T10:05:00+08:00',read:false}];
-    const storedCurricula=DB.read('curricula',[]),seedCurricula=storedCurricula.length>curricula.length?storedCurricula:curricula;
     Object.entries({faculty,coordinators,students,subjects,curricula:seedCurricula,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
     localStorage.setItem('demoCurriculumVersion',String(this.version)); return true;
   }

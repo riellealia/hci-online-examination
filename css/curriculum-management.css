@@ -52,25 +52,41 @@
 /* Compact semester list */
 #loadPolicyRoot .semester-accordion-list{display:grid;gap:6px;border:0}
 #loadPolicyRoot .semester-accordion{overflow:hidden;border:1px solid var(--cm-line)!important;border-radius:10px!important;background:#fff;box-shadow:none;transition:border-color .15s ease}
+#loadPolicyRoot .semester-accordion.selected-semester{outline:0!important;outline-offset:0}
 #loadPolicyRoot .semester-accordion:hover,#loadPolicyRoot .semester-accordion[open]{border-color:#cbd8e5!important;box-shadow:none}
 #loadPolicyRoot .semester-accordion>.curriculum-semester-heading{display:flex;min-height:46px;align-items:center;justify-content:space-between;gap:10px;padding:7px 12px;border:0;background:#f8fafc;color:var(--cm-ink);list-style:none;cursor:pointer}
 #loadPolicyRoot .semester-accordion[open]>.curriculum-semester-heading{background:#f3f7fb;box-shadow:inset 2px 0 0 #7ca4c8}
 #loadPolicyRoot .curriculum-semester-heading::-webkit-details-marker{display:none}
-#loadPolicyRoot .semester-heading-copy{display:grid;gap:1px;min-width:0}
-#loadPolicyRoot .semester-title-line{display:flex;align-items:center;flex-wrap:wrap;gap:5px 7px}
+#loadPolicyRoot .semester-heading-copy{display:grid;width:100%;gap:1px;min-width:0}
+#loadPolicyRoot .semester-title-line{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;align-items:center;gap:7px}
 #loadPolicyRoot .semester-title-line>strong{color:#25364a;font-size:13px;font-weight:650;letter-spacing:-.01em}
 #loadPolicyRoot .semester-heading-copy>span{color:var(--cm-muted);font-size:10.5px;font-weight:400}
 #loadPolicyRoot .load-badge{display:inline-flex;align-items:center;width:max-content;padding:2px 7px;border:0;border-radius:999px;font-size:9.5px;font-weight:600;line-height:1.45;white-space:nowrap}
 #loadPolicyRoot .load-badge.normal,#loadPolicyRoot .semester-accordion[open] .load-badge.normal{background:#e7f1fa;color:#326d9d}
 #loadPolicyRoot .load-badge.overload,#loadPolicyRoot .semester-accordion[open] .load-badge.overload{background:#f8eedc;color:#86621f}
-#loadPolicyRoot .load-chevron{flex:none;color:#8291a2;font-size:15px;transition:transform .16s ease}
-#loadPolicyRoot .semester-accordion[open] .load-chevron{transform:rotate(180deg)}
+#loadPolicyRoot .semester-accordion>.curriculum-semester-heading>.load-chevron{display:none}
+
+@media(max-width:620px){
+  #loadPolicyRoot .semester-title-line{grid-template-columns:1fr auto}
+  #loadPolicyRoot .semester-title-line>strong{grid-column:1/-1}
+}
 
 /* Curriculum rows */
 #loadPolicyRoot .semester-subjects{overflow-x:auto}
 #loadPolicyRoot .curriculum-flat-head,#loadPolicyRoot .semester-subjects .curriculum-subject-row{display:grid;grid-template-columns:minmax(110px,.7fr) minmax(260px,2fr) 52px;gap:12px;align-items:center;padding:0 18px}
 #loadPolicyRoot .curriculum-flat-head{height:31px;border-top:1px solid #e8edf2;background:#fbfcfd;color:#78879a;font-size:9.5px;font-weight:650;letter-spacing:.055em;text-transform:uppercase}
 #loadPolicyRoot .semester-subjects .curriculum-subject-row{min-height:40px;border-top:1px solid #edf1f4;background:#fff;color:#334155;font-size:12.5px;cursor:context-menu;transition:background .12s ease}
+#loadPolicyRoot .semester-subjects .curriculum-subject-row{position:relative}
+#loadPolicyRoot .curriculum-drag-handle{position:absolute;top:50%;left:9px;display:grid;width:25px;height:28px;min-height:0;place-items:center;padding:0;transform:translateY(-50%);border:0;border-radius:7px;background:transparent;color:#91a0b1;cursor:grab}
+#loadPolicyRoot .curriculum-drag-handle:hover,#loadPolicyRoot .curriculum-drag-handle:focus-visible{background:#edf3f8;color:#466b8d;outline:0}
+#loadPolicyRoot .curriculum-drag-handle:active{cursor:grabbing}
+#loadPolicyRoot .curriculum-drag-handle svg{width:16px;height:16px;fill:currentColor;pointer-events:none}
+#loadPolicyRoot .semester-subjects .curriculum-subject-row>strong:first-of-type,#loadPolicyRoot .semester-subjects .curriculum-flat-head>span:first-child{margin-left:22px}
+#loadPolicyRoot .curriculum-subject-row.dragging{opacity:.42}
+#loadPolicyRoot .curriculum-subject-row.drag-over{box-shadow:inset 0 2px 0 #789cbc;background:#f3f8fc}
+#loadPolicyRoot .semester-accordion.drag-over{border-color:#9bb7cf!important;background:#f8fbfd}
+#loadPolicyRoot.curriculum-selecting .curriculum-drag-handle{display:none}
+#loadPolicyRoot.curriculum-selecting .semester-subjects .curriculum-subject-row>strong:first-of-type{margin-left:0}
 #loadPolicyRoot .semester-subjects .curriculum-subject-row:hover{background:#f8fafc}
 #loadPolicyRoot .semester-subjects .curriculum-subject-row strong{font-weight:600}
 #loadPolicyRoot .semester-subjects .curriculum-subject-row>:last-child{text-align:right}

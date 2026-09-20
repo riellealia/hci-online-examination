@@ -418,7 +418,8 @@
     const section=sections[index]; if(!section)return notify('That section no longer exists.','error');
     document.getElementById('sectionSubjectsID').value=section.id; document.getElementById('sectionSubjectsTitle').textContent=`Subjects for ${section.id}`;
     const existingRecord=sectionSubjects.find(item=>item.sectionId===section.id), assigned=new Map((existingRecord?.assignments||[]).map(item=>[item.subjectCode,item]));
-    document.getElementById('sectionSubjects').innerHTML=subjects.length?subjects.map(subject=>`<div class="section-offering-option"><label class="section-subject-option"><input type="checkbox" value="${subject.code}"${assigned.has(subject.code)?' checked':''}><span><strong>${subject.code}</strong><small>${subject.name}</small></span></label><select data-faculty-for="${subject.code}" aria-label="Professor for ${subject.code}"><option value="">Choose professor</option>${faculty.map(person=>`<option value="${person.id}"${assigned.get(subject.code)?.facultyId===person.id?' selected':''}>${person.last}, ${person.first}</option>`).join('')}</select></div>`).join(''):'<p class="profile-empty">Create a subject before assigning it to this section.</p>'; openModal('sectionSubjectsModal');
+    const curriculumSubjects=DB.read('curricula',[]).filter(item=>item.program===section.program&&Number(item.yearLevel)===Number(section.yearLevel)&&item.term==='first'&&item.status!=='archived'&&item.removed!==true).sort((a,b)=>(Number(a.order??9999)-Number(b.order??9999))||String(a.subjectCode).localeCompare(String(b.subjectCode)));
+    document.getElementById('sectionSubjects').innerHTML=curriculumSubjects.length?curriculumSubjects.map(subject=>`<div class="section-offering-option"><label class="section-subject-option"><input type="checkbox" value="${subject.subjectCode}" checked disabled aria-disabled="true"><span><strong>${subject.subjectCode}</strong><small>${subject.subjectName}</small></span></label><select data-faculty-for="${subject.subjectCode}" aria-label="Professor for ${subject.subjectCode}"><option value="">Choose professor</option>${faculty.map(person=>`<option value="${person.id}"${assigned.get(subject.subjectCode)?.facultyId===person.id?' selected':''}>${person.last}, ${person.first}</option>`).join('')}</select></div>`).join(''):'<p class="profile-empty">No active first-semester subjects exist in Load Management for this course and year.</p>'; openModal('sectionSubjectsModal');
   }
 
   function openAdminRowMenu(trigger,x,y){
@@ -515,7 +516,18 @@
   function openStudentSectionPicker(code){const subject=subjects.find(item=>item.code===code),student=activeStudentEnrollmentStudent,offers=SectionService.offerings(sectionSubjects).filter(item=>item.subjectCode===code),pending=pendingStudentOfferings.find(item=>item.subjectCode===code),seat=subjectSeatSummary(code);selectedStudentOfferingId=pending?.id||null;document.getElementById('studentSectionPickerSubject').innerHTML=`<strong>${code}</strong><span>${subject?.name||'Unknown subject'}</span><small class="subject-picker-capacity ${seat.available?'has-seats':'is-full'}">${seat.students} enrolled across ${seat.offers} section${seat.offers===1?'':'s'} · ${seat.available?`${seat.seats} seat${seat.seats===1?'':'s'} still available`:'No seats available'}</small>`;document.getElementById('studentSectionPickerOptions').innerHTML=offers.map(offer=>{const count=offeringStudentCount(offer),capacity=sectionStudentCapacity(offer.sectionId),remaining=Math.max(0,capacity-count),full=!offeringHasRoom(offer,student?.id);if(full&&offer.id===selectedStudentOfferingId)selectedStudentOfferingId=null;return `<button type="button" class="student-section-choice ${offer.id===selectedStudentOfferingId?'selected':''}" data-offering-id="${offer.id}" onclick="selectStudentSection(this)" ${full?'disabled aria-disabled="true"':''}><span class="section-choice-mark" aria-hidden="true">${offer.id===selectedStudentOfferingId?'✓':''}</span><span><strong>${offer.sectionId}</strong><small>${professorForOffering(offer)} · ${count} / ${capacity} students · ${full?'Full':`${remaining} seat${remaining===1?'':'s'} available`}</small></span></button>`}).join('')||'<div class="profile-empty">No sections are available for this subject.</div>';document.getElementById('saveStudentSection').disabled=!selectedStudentOfferingId;openModal('studentSectionPickerModal')}
   function applyStudentOffering(){const offer=SectionService.offerings(sectionSubjects).find(item=>item.id===selectedStudentOfferingId),student=activeStudentEnrollmentStudent;if(!offer||!student)return notify('Choose a section first.','error');if(!offeringHasRoom(offer,student.id))return notify(`${offer.sectionId} is full for ${offer.subjectCode}. Choose another section.`,'error');ensurePendingStudent(student);pendingStudentOfferings=pendingStudentOfferings.filter(item=>item.subjectCode!==offer.subjectCode);pendingStudentOfferings.unshift(offer);closeStudentSectionPicker();renderStudentEnrollmentPage();const details=document.querySelector('#studentEnrollmentContent .available-subjects');if(details)details.open=true;notify(`${offer.subjectCode} added to the pending subject batch.`,'success')}
   function saveStudentEnrollmentBatch(){const student=activeStudentEnrollmentStudent;if(!student||!pendingStudentOfferings.length)return notify('Add at least one subject first.','error');const batch=[...pendingStudentOfferings],full=batch.find(offer=>!offeringHasRoom(offer,student.id));if(full)return notify(`${full.subjectCode} in ${full.sectionId} is full (${sectionStudentCapacity(full.sectionId)} students). Choose another section.`,'error');batch.forEach((offer,index)=>{studentEnrollments.push({id:`ENR-${student.id}-${Date.now()}-${index}`,studentId:student.id,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId});AuditLog.record('enroll','student-subject',`${student.id}:${offer.subjectCode}`,{studentId:student.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId,facultyId:offer.facultyId})});if(!persistAll())return;pendingStudentOfferings=[];renderStudentEnrollmentPage();loadAll();notify(`${batch.length} subject${batch.length===1?'':'s'} saved for ${student.first} ${student.last}.`,'success')}
-  function automaticallyAddStudentSubjects(){const student=activeStudentEnrollmentStudent;if(!student)return;ensurePendingStudent(student);const yearLevel=studentYearFromRecord(student),enrolled=new Set([...studentEnrollments.filter(item=>item.studentId===student.id),...allotments.filter(item=>item.studentId===student.id)].map(item=>item.subjectCode)),eligibleCodes=new Set(subjects.filter(subject=>Number(subject.yearLevel)===yearLevel&&!enrolled.has(subject.code)).map(subject=>subject.code)),bySubject=new Map(pendingStudentOfferings.map(offer=>[offer.subjectCode,offer]));SectionService.offerings(sectionSubjects).forEach(offer=>{if(eligibleCodes.has(offer.subjectCode)&&!bySubject.has(offer.subjectCode)&&offeringHasRoom(offer,student.id))bySubject.set(offer.subjectCode,offer)});const added=bySubject.size-pendingStudentOfferings.length;pendingStudentOfferings=[...bySubject.values()];renderStudentEnrollmentPage();const details=document.querySelector('#studentEnrollmentContent .available-subjects');if(details)details.open=true;notify(added?`${added} Year ${yearLevel} subject${added===1?'':'s'} added to the pending batch.`:`All available Year ${yearLevel} subjects are already enrolled, selected, or full.`,added?'success':'info')}
+  function automaticallyAddStudentSubjects(){
+    const student=activeStudentEnrollmentStudent;if(!student)return;
+    ensurePendingStudent(student);
+    const enrolled=new Set([...studentEnrollments.filter(item=>item.studentId===student.id),...allotments.filter(item=>item.studentId===student.id)].map(item=>item.subjectCode));
+    const memberships=(student.sections||[]).map(id=>sections.find(section=>SectionService.normaliseId(section.id)===SectionService.normaliseId(id))).filter(Boolean);
+    const curriculum=DB.read('curricula',[]),eligibleCodes=new Set();
+    memberships.forEach(section=>curriculum.filter(item=>item.program===section.program&&Number(item.yearLevel)===Number(section.yearLevel)&&item.term==='first'&&item.status!=='archived'&&item.removed!==true&&!enrolled.has(item.subjectCode)).forEach(item=>eligibleCodes.add(item.subjectCode)));
+    const memberSections=new Set(memberships.map(section=>SectionService.normaliseId(section.id))),bySubject=new Map(pendingStudentOfferings.map(offer=>[offer.subjectCode,offer]));
+    SectionService.offerings(sectionSubjects).forEach(offer=>{if(memberSections.has(SectionService.normaliseId(offer.sectionId))&&eligibleCodes.has(offer.subjectCode)&&!bySubject.has(offer.subjectCode)&&offeringHasRoom(offer,student.id))bySubject.set(offer.subjectCode,offer)});
+    const added=bySubject.size-pendingStudentOfferings.length;pendingStudentOfferings=[...bySubject.values()];renderStudentEnrollmentPage();const details=document.querySelector('#studentEnrollmentContent .available-subjects');if(details)details.open=true;
+    notify(added?`${added} first-semester curriculum subject${added===1?'':'s'} added to the pending batch.`:'All first-semester curriculum subjects are already enrolled, selected, or full.',added?'success':'info');
+  }
 
   function openStudentProfile(index){
     const student=students[index]; if(!student)return notify('That student no longer exists.','error');
@@ -658,35 +670,8 @@
     }
 
     if(type==='subjects'){
-      const code=document.getElementById('subCode').value.trim();
-      const name=document.getElementById('subName').value.trim();
-      if(!code||!name) return notify('Fill all fields', 'error');
-
-      if(subjects.some((s,i)=>s.code===code && i!==editIndex)){
-        return notify(`A subject with code "${code}" already exists.`, 'error');
-      }
-
-      const isEdit = editType==='subjects' && editIndex!==null;
-      const oldCode = isEdit ? subjects[editIndex].code : null;
-
-      if(isEdit){
-        subjects[editIndex]={code,name};
-        if(oldCode !== code){
-          subjectAssignments.forEach(sa=>{ if(sa.subjectCode===oldCode) sa.subjectCode=code; });
-          allotments.forEach(a=>{ if(a.subjectCode===oldCode) a.subjectCode=code; });
-          sectionSubjects.forEach(item=>item.subjectCodes=(item.subjectCodes||[]).map(value=>value===oldCode?code:value));
-          const exams=DB.read('exams',[]);
-          exams.forEach(e=>{ if(e.subjectCode===oldCode) e.subjectCode=code; });
-          DB.write('exams',exams);
-        }
-      } else {
-        subjects.push({code,name});
-      }
-
-      if(!persistAll()) return;
-      AuditLog.record(isEdit?'update':'create','subject',code,{name});
-      closeModal('subjectModal');
-      notify(isEdit ? `Subject ${code} updated.` : `Subject ${code} added.`, 'success');
+      notify('Add and edit active subjects in Student Load Policy. Load Management is the curriculum source of truth.','info');
+      editIndex=null;editType=null;closeModal('subjectModal');return;
     }
 
     // Backward compatibility: if your allotments Save button still calls saveItem('allotments'),
@@ -1028,6 +1013,7 @@
     if(!required(arr, 'Unknown record type — nothing was deleted.')) return;
     const item = arr[index];
     if(!required(item, 'That record no longer exists. The list has been refreshed.')) { loadAll(); return; }
+    if(type==='subjects'&&DB.read('curricula',[]).some(entry=>entry.subjectCode===item.code&&entry.status!=='archived'&&entry.removed!==true))return notify('Remove or archive this subject in Student Load Policy. Load Management is the curriculum source of truth.','info');
 
     const d = describeDeletion(type,item);
     if(!(await confirmDialog({
@@ -1106,6 +1092,7 @@
       openModal('studentModal');
     }
     if(type==='subjects'){
+      if(DB.read('curricula',[]).some(entry=>entry.subjectCode===item.code&&entry.status!=='archived'&&entry.removed!==true)){editIndex=null;editType=null;return notify('Edit this subject in Student Load Policy. Load Management is the curriculum source of truth.','info')}
       document.getElementById('subCode').value=item.code;
       document.getElementById('subName').value=item.name;
       openModal('subjectModal');
