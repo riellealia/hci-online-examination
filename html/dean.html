@@ -32,6 +32,8 @@
   <section id="logsSection" class="role-workspace"><h2>Dean activity logs</h2><p>College personnel, approval, assignment, and academic events.</p><div class="role-filter-bar"><input id="deanLogSearch" type="search" placeholder="Search activity"><select id="deanLogCategory"><option value="">All categories</option><option value="personnel">Personnel</option><option value="approval">Approval</option><option value="assignment/enrollment">Assignment and enrollment</option><option value="schedule/load">Schedule and load</option><option value="examination/grading">Examination and grading</option></select></div><div id="deanLogTable" class="role-log-table"></div></section>
   <script>
     const session=requireRole('dean'); if(!session) throw new Error('Not authorised — redirecting to login.');
+    document.querySelector('#approvalsSection h2').textContent='Academic applications';
+    document.querySelector('#approvalsSection > p').textContent='Review Professor assignments and Student overload applications. Additional subjects are enrolled only after approval.';
     if(typeof DemoData!=='undefined') DemoData.install();
     const read=(key)=>DB.read(key,[]); const users=read('users');
     professorCount.textContent=read('faculty').length;

@@ -57,17 +57,15 @@ ok(dean.read('approvalRequests').find(item => item.id === assignmentId).status =
 ok(dean.d.querySelector('#deanApprovalList .role-history'), 'Dean can inspect retained request history');
 ok(dean.d.querySelectorAll('#deanLogTable tbody tr').length >= 1, 'Dean activity log refreshes after a decision');
 
+const overloadId = dean.read('approvalRequests').find(item => item.type === 'student-overload').id;
+dean.d.getElementById(`remarks-${overloadId}`).value = 'Academic need and configured maximum verified.';
+dean.w.reviewAssignment(overloadId, 'approved');
+ok(dean.read('studentEnrollments').some(item => item.studentId === 'S1' && item.overloadApprovalId === overloadId), 'Dean approval creates the additional enrollment');
+ok(dean.read('approvalRequests').find(item => item.id === overloadId).status === 'approved', 'Dean overload decision is retained in request history');
+
 const afterDean = snapshot(dean);
 let admin = load('admin.html', { ...afterDean, currentUser: { username: 'admin', role: 'admin' } });
-ok(!admin.blocked && admin.rec.errors.length === 0, 'Admin overload page loads without runtime errors');
-const overloadId = admin.read('approvalRequests').find(item => item.type === 'student-overload').id;
-admin.d.getElementById(`admin-remarks-${overloadId}`).value = 'Academic need confirmed.';
-admin.w.reviewOverload(overloadId, 'approved');
-ok(admin.read('studentEnrollments').some(item => item.studentId === 'S1' && item.overloadApprovalId === overloadId), 'Admin approval creates the linked overload enrollment');
-ok(admin.read('approvalRequests').find(item => item.id === overloadId).status === 'approved', 'Admin decision is retained in request history');
-ok(admin.read('applicationAuditLog').some(item => item.details?.requestId === overloadId), 'UI decision creates an approval-linked audit event');
-admin.d.getElementById('adminOverloadStatus').value = 'pending';
-admin.d.getElementById('adminOverloadStatus').dispatchEvent(new admin.w.Event('change'));
-ok(/No matching Student overload requests/.test(admin.d.getElementById('adminOverloadApprovalList').textContent), 'Admin overload status filter updates the queue');
+ok(!admin.d.querySelector('#sidebar [data-panel="overloadApprovalSection"]'), 'Admin no longer has an overload approval queue');
+ok(dean.read('applicationAuditLog').some(item => item.details?.requestId === overloadId), 'Dean overload approval creates a linked audit event');
 
 coordinator.dom.window.close(); dean.dom.window.close(); admin.dom.window.close();

@@ -3,7 +3,6 @@
 const AuditLog = {
   record(action, entityType, entityId, details = {}, actor = null, metadata = {}) {
     const session = actor || DB.read('currentUser', null) || { username: 'system', role: 'system' };
-    const entries = DB.read('applicationAuditLog', []);
     const entry = {
       id: `audit_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
       at: new Date().toISOString(), actorId: session.username || 'unknown',
@@ -14,7 +13,8 @@ const AuditLog = {
       result: metadata.result || 'success', reason: metadata.reason || details.reason || '',
       academicPeriod: metadata.academicPeriod || details.academicPeriod || '', details
     };
-    entries.push(entry);
+    if (typeof DB.append === 'function') return DB.append('applicationAuditLog', entry) ? entry : false;
+    const entries = DB.read('applicationAuditLog', []); entries.push(entry);
     return DB.write('applicationAuditLog', entries) ? entry : false;
   },
   read() { return DB.read('applicationAuditLog', []).slice().sort((a,b) => new Date(b.at)-new Date(a.at)); },

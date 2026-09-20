@@ -1373,7 +1373,7 @@ let mySubjects = []; // Will store subjects assigned to this faculty
 // ======= SECTION SWITCHING =======
 // Kept as switchTab() so existing call sites still work; navigation is now the
 // shared sidebar rather than a tab bar. btnEl is accepted but unused.
-let facultyNav = null;
+var facultyNav = null;
 
 function switchTab(tabName, btnEl) {
     if (facultyNav) { facultyNav.show(tabName); return; }

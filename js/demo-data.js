@@ -21,6 +21,13 @@ const DemoData = {
     DB.write(key,[...cleaned,...missing]);return true;
   },
   install() {
+    // Browser role pages must not overwrite canonical SQLite collections.
+    const sqlite = typeof DB.backend === 'function' && DB.backend() === 'sqlite';
+    const session = DB.read('currentUser', null);
+    if ((session && session.role !== 'admin') || (sqlite && !session)) {
+      localStorage.setItem('demoCurriculumVersion', String(this.version));
+      return false;
+    }
     this.ensureLearningContent();
     if (Number(localStorage.getItem('demoCurriculumVersion') || 0) >= this.version) return false;
     const currentStudents=DB.read('students',[]);

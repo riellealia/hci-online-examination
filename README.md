@@ -16,6 +16,7 @@ The prototype currently includes:
 - separate Admin, Dean, Faculty Coordinator, Professor, and Student dashboards;
 - password visibility controls and prototype account-recovery verification;
 - shared permission enforcement, approval lifecycle, notifications, and structured audit services;
+- SQLite-backed server login with opaque expiring sessions, logout revocation, active-account checks, and sign-in rate limiting;
 - subject, section, enrollment, examination, submission, grading, reporting, and audit data;
 - light and dark interface themes;
 - SQLite as the primary data source when the Node server is running; and
@@ -102,17 +103,22 @@ CSV is supported only for transferring tabular data. The parser supports UTF-8 B
 The Node server provides:
 
 - `GET /api/health` — server and storage status
-- `GET /api/storage` — all stored collections
-- `GET /api/storage/:collection` — one collection
-- `PUT /api/storage/:collection` — save one collection
-- `DELETE /api/storage/:collection` — remove one collection
-- `POST /api/migrate` — transactional browser-data migration
-- `POST /api/csv/:collection/import` — validated CSV import
-- `GET /api/csv/:collection/export` — CSV export
+- `POST /api/auth/login` — validate a SQLite account and create a server session
+- `GET /api/auth/session` — validate the current bearer token
+- `DELETE /api/auth/logout` — revoke the current bearer token
+- `GET /api/storage` — all stored collections (signed-in account)
+- `GET /api/storage/:collection` — one collection (signed-in account)
+- `PUT /api/storage/:collection` — save one collection (signed-in account)
+- `DELETE /api/storage/:collection` — remove one collection (signed-in account)
+- `POST /api/migrate` — transactional browser-data migration (Administrator)
+- `POST /api/csv/:collection/import` — validated CSV-to-SQLite import (Administrator)
+- `GET /api/csv/:collection/export` — SQLite-to-CSV export (Administrator)
+
+Except for health and login, API requests require `Authorization: Bearer <token>`. CSV endpoints are transfer tools only: imports are parsed and saved into SQLite, and exports are generated from the current SQLite records. CSV files are never used as the live database.
 
 ## Tests
 
-The repository currently contains 50 automated test files. The latest complete verification passed all 50 files, including cross-role approval UI, permissions, approval transitions, stale-request protection, approved academic changes, audit records, SQLite persistence, source-of-truth migration, HTTP routes, and CSV import/export.
+The repository currently contains 54 automated test files. The latest complete verification passed all 54 files, including server authentication sessions, collection-level authorization, protected approval writes, append-only audit enforcement, role-safe SQLite startup, cross-role approval UI, stale-request protection, approved academic changes, SQLite persistence, source-of-truth migration, HTTP routes, and CSV import/export.
 
 Run the SQLite tests without installing additional packages:
 
@@ -158,4 +164,4 @@ git push
 
 ## Scope note
 
-This remains an HCI academic prototype. SQLite provides durable local persistence, but production deployment would still require hardened authentication, authorization enforcement, secret management, backups, concurrency planning, HTTPS, and a deployment-specific security review.
+This remains an HCI academic prototype. SQLite provides durable local persistence, and all storage and CSV routes now require a valid server session; migration and CSV transfer additionally require an Administrator account. Production deployment would still require collection-level authorization, password hashing, secret management, backups, concurrency planning, HTTPS, and a deployment-specific security review.

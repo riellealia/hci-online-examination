@@ -89,6 +89,11 @@ function requireRole(role) {
 /* Ends the session properly. Previously admin and faculty only redirected,
    which left currentUser in storage and the session effectively still open. */
 function logout() {
+  try {
+    const token = sessionStorage.getItem('serverSessionToken');
+    if (token) fetch('/api/auth/logout', { method: 'DELETE', headers: { Authorization: `Bearer ${token}` }, keepalive: true }).catch(() => {});
+    sessionStorage.removeItem('serverSessionToken');
+  } catch (_) {}
   localStorage.removeItem('currentUser');
   window.location.replace('index.html');
 }

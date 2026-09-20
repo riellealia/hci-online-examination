@@ -14,6 +14,20 @@ const AcademicWorkflowService = (() => {
     return DB.read('users', []).some(user => user.username === username && user.role === role
       && user.disabled !== true && !['deactivated', 'archived', 'graduated', 'transferred'].includes(String(user.status || 'active').toLowerCase()));
   }
+  function unitRecord(subjectCode) {
+    const subject=DB.read('subjects', []).find(item=>item.code===subjectCode&&Number(item.units)>0);
+    if(subject)return{units:Number(subject.units),source:'subject'};
+    const curriculum=DB.read('curricula', []).find(item=>item.subjectCode===subjectCode&&Number(item.units)>0);
+    return curriculum?{units:Number(curriculum.units),source:'curriculum'}:null;
+  }
+  function studentLoad(studentId) {
+    const seen=new Set();
+    return DB.read('studentEnrollments', []).filter(item=>item.studentId===studentId&&!seen.has(item.subjectCode)&&seen.add(item.subjectCode)).reduce((sum,item)=>sum+(unitRecord(item.subjectCode)?.units||0),0);
+  }
+  function proposedStudentLoad(studentId, subjectCode) {
+    const record=unitRecord(subjectCode),currentUnits=studentLoad(studentId);
+    return record?{currentUnits,subjectUnits:record.units,proposedUnits:currentUnits+record.units,source:record.source}:null;
+  }
   function requestProfessorAssignment({ offeringId, facultyId, reason, academicPeriod = '' }, actor = null) {
     const sectionSubjects = DB.read('sectionSubjects', []), located = offeringById(sectionSubjects, offeringId);
     if (!located) fail('The selected subject offering does not exist.', 'NOT_FOUND');
@@ -35,15 +49,17 @@ const AcademicWorkflowService = (() => {
     if (typeof AuditLog !== 'undefined') AuditLog.record('apply-approved-assignment', 'subject-offering', change.offeringId,
       { requestId: request.id }, actor, { category: 'assignment/enrollment', previousValue, newValue: { facultyId: change.facultyId }, result: 'success', academicPeriod: request.academicPeriod });
   }
-  function requestStudentOverload({ studentId, offeringId, proposedUnits, normalLimit, reason, academicPeriod = '' }, actor = null) {
+  function requestStudentOverload({ studentId, offeringId, proposedUnits, normalLimit, maximumLimit, reason, academicPeriod = '' }, actor = null) {
     const located = offeringById(DB.read('sectionSubjects', []), offeringId);
     if (!located) fail('The selected subject offering does not exist.', 'NOT_FOUND');
     if (!DB.read('students', []).some(student => student.id === studentId) || !activeAccount(studentId, 'student')) fail('The selected Student is not active.');
     if (DB.read('studentEnrollments', []).some(item => item.studentId === studentId && (item.offeringId === offeringId || item.subjectCode === located.assignment.subjectCode))) fail('The Student is already enrolled in this subject.');
-    if (!(Number(proposedUnits) > Number(normalLimit))) fail('The proposed load does not exceed the normal limit. No overload approval is required.');
+    const calculated=proposedStudentLoad(studentId,located.assignment.subjectCode),effectiveProposedUnits=calculated?.proposedUnits??Number(proposedUnits);
+    if (!(effectiveProposedUnits > Number(normalLimit))) fail('The proposed load does not exceed the normal limit. No overload approval is required.');
+    if (maximumLimit !== undefined && maximumLimit !== '' && Number.isFinite(Number(maximumLimit)) && effectiveProposedUnits > Number(maximumLimit)) fail(`The proposed load exceeds the configured maximum of ${Number(maximumLimit)} units.`);
     return ApprovalService.submit({
       type: 'student-overload', targetType: 'student-enrollment', targetId: `${studentId}:${offeringId}`,
-      proposedChange: { studentId, offeringId, subjectCode: located.assignment.subjectCode, sectionId: located.section.sectionId, proposedUnits: Number(proposedUnits), normalLimit: Number(normalLimit) },
+      proposedChange: { studentId, offeringId, subjectCode: located.assignment.subjectCode, sectionId: located.section.sectionId, currentUnits:calculated?.currentUnits??null,subjectUnits:calculated?.subjectUnits??null,proposedUnits:effectiveProposedUnits,normalLimit: Number(normalLimit), maximumLimit: maximumLimit === undefined || maximumLimit === '' ? null : Number(maximumLimit) },
       reason, academicPeriod
     }, actor);
   }
@@ -67,7 +83,7 @@ const AcademicWorkflowService = (() => {
     ApprovalService.registerApplyHandler('student-overload', applyStudentOverload);
     return true;
   }
-  return { install, requestProfessorAssignment, requestStudentOverload, applyProfessorAssignment, applyStudentOverload };
+  return { install, unitRecord, studentLoad, proposedStudentLoad, requestProfessorAssignment, requestStudentOverload, applyProfessorAssignment, applyStudentOverload };
 })();
 
 AcademicWorkflowService.install();
