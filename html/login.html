@@ -622,7 +622,15 @@
       signedInAt: Date.now(),
       lastActivityAt: Date.now()
     }));
-    AuditLog.record('login','session',user.username,{role:effectiveRole},{username:user.username,role:effectiveRole});
+    // Authentication must not be undone just because the secondary audit
+    // write is temporarily unavailable. The server session is already valid,
+    // so continue to the authorized workspace and report the audit issue only
+    // in the developer console.
+    try {
+      AuditLog.record('login','session',user.username,{role:effectiveRole},{username:user.username,role:effectiveRole});
+    } catch (error) {
+      console.warn('[login] audit event could not be recorded', error);
+    }
     window.location.href = route;
   });
 </script>
