@@ -16,7 +16,7 @@ ok(/Live/.test(r.d.getElementById('monitoringState').textContent)&&r.d.getElemen
 r.w.setDashboardView('list');
 ok(r.d.getElementById('dashboardSection').classList.contains('dashboard-view-list')&&r.w.localStorage.getItem('adminDashboardView:admin')==='list','list view applies and is saved for the Admin account');
 const cards=[...r.d.querySelectorAll('.admin-dashboard-link')];
-ok(cards.length===6,'all six dashboard cards are navigation shortcuts');
+ok(cards.length===7,'all seven dashboard cards are navigation shortcuts');
 ok(cards.every(card=>card.tabIndex===0&&card.getAttribute('role')==='link'&&card.getAttribute('aria-label')),'cards are keyboard accessible and named');
 cards[1].dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
 ok(r.d.getElementById('studentSection').style.display==='block','clicking Students opens its management page');

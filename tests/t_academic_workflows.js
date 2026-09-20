@@ -48,14 +48,18 @@ const stale = workflows.requestProfessorAssignment({ offeringId: 'OFR-2', facult
 records.sectionSubjects[0].assignments[1].facultyId = 'F2';
 assert.throws(() => approvals.approve(stale.id, 'Reviewed.', dean), error => error.code === 'STALE_TARGET');
 assert.strictEqual(records.approvalRequests.find(item => item.id === stale.id).status, 'pending', 'failed application must remain pending for review');
+assert.ok(records.applicationAuditLog.some(item => item.entityId === stale.id && item.action === 'apply-failed' && item.result === 'failed'), 'stale application failure must be audited');
 
 const overload = workflows.requestStudentOverload({ studentId: 'S1', offeringId: 'OFR-1', proposedUnits: 24, normalLimit: 21, reason: 'Final-term requirement.', academicPeriod: '2026-1' }, coordinator);
 assert.strictEqual(records.studentEnrollments.length, 0, 'overload submission must not enroll early');
-approvals.approve(overload.id, 'Requirements confirmed.', admin);
+approvals.approve(overload.id, 'Requirements confirmed.', dean);
 assert.strictEqual(records.studentEnrollments.length, 1);
 assert.strictEqual(records.studentEnrollments[0].overloadApprovalId, overload.id);
+records.subjects=[{code:'SUB-2',units:3},...Array.from({length:7},(_,index)=>({code:`BASE-${index}`,units:3}))];
+records.studentEnrollments.push(...Array.from({length:7},(_,index)=>({id:`BASE-${index}`,studentId:'S2',subjectCode:`BASE-${index}`})));
+const calculatedOverload=workflows.requestStudentOverload({studentId:'S2',offeringId:'OFR-2',proposedUnits:99,normalLimit:21,maximumLimit:30,reason:'Calculated from enrolled units.'},coordinator);
+assert.strictEqual(calculatedOverload.proposedChange.currentUnits,21);assert.strictEqual(calculatedOverload.proposedChange.subjectUnits,3);assert.strictEqual(calculatedOverload.proposedChange.proposedUnits,24,'unit count is the authoritative Student load');
 assert.throws(() => workflows.requestStudentOverload({ studentId: 'S1', offeringId: 'OFR-1', proposedUnits: 25, normalLimit: 21, reason: 'Duplicate.' }, coordinator), /already enrolled/i);
-assert.throws(() => workflows.requestStudentOverload({ studentId: 'S2', offeringId: 'OFR-2', proposedUnits: 21, normalLimit: 21, reason: 'Not overloaded.' }, coordinator), /does not exceed/i);
 
 const appliedEvents = records.applicationAuditLog.filter(item => item.action.startsWith('apply-approved'));
 assert.strictEqual(appliedEvents.length, 2);

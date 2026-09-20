@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 24,
+  version: 26,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -21,6 +21,15 @@ const DemoData = {
     DB.write(key,[...cleaned,...missing]);return true;
   },
   install() {
+    // When SQLite already supplied the canonical records, this browser only
+    // needs to remember the demo version. Re-seeding here would make every
+    // role attempt Administrator-only collection writes on each new browser.
+    const sqlite = typeof DB.backend === 'function' && DB.backend() === 'sqlite';
+    const session = DB.read('currentUser', null);
+    if (sqlite && session && session.role !== 'admin') {
+      localStorage.setItem('demoCurriculumVersion', String(this.version));
+      return false;
+    }
     this.ensureLearningContent();
     if (Number(localStorage.getItem('demoCurriculumVersion') || 0) >= this.version) return false;
     const currentStudents=DB.read('students',[]);
@@ -38,10 +47,46 @@ const DemoData = {
       BSIT:[['Introduction to Computing','Web Systems and Technologies'],['Networking 1','Information Management'],['Cloud Computing','Information Assurance and Security'],['IT Service Management','IT Internship / OJT']],
       BSIS:[['Fundamentals of Information Systems','Business Organization and Management'],['Systems Analysis and Design','Database Management Systems'],['Business Intelligence','Information Systems Project Management'],['IT Audit and Controls','Capstone Project 2']]
     }, prefixes={BSCS:'CCS',BSIT:'CIT',BSIS:'CIS'};
+    const curriculumSources={BSGAMEDEV:'https://apps.ue.edu.ph/p/curriculum.php?c=CBSEMCG2023',BSANIMATION:'https://apps.ue.edu.ph/p/curriculum.php?c=CBSEMC2023'};
+    const curriculumRows=(program,track,rows)=>rows.flatMap(([yearLevel,term,list])=>list.split(';').map(value=>{
+      const [code,units,name]=value.split('|');
+      return {curriculumId:`PH-${program}-2023`,country:'Philippines',program,track,version:'2023',effectiveSchoolYear:'2023-2024',status:'active',sourceUrl:curriculumSources[program],yearLevel,term,subjectCode:code,subjectName:name,units:Number(units),prerequisites:[]};
+    }));
+    const curricula=[
+      ...curriculumRows('BSGAMEDEV','Game Development',[
+        [1,'first','CCP1101|3|Computer Programming 1;CEM1101|1|Digital Illustration;CEM1102|3|Free-Hand Drawing;CEM1103|3|Introduction to Multimedia Computing;CIC1101|3|Introduction to Computing;MLC1101|3|Literacy/Civic Welfare/Military Science 1;PPF1101|2|PATHFIT 1 (Movement Education);ZGE1101|3|Art Appreciation'],
+        [1,'second','CCP1102|3|Computer Programming 2;CDS1101|3|Data Structures and Algorithms;CEM1201|1|Digital Photography;CEM1202|3|Introduction to Animation;CEM1203|3|Introduction to Game Design and Development;CGD1201|3|Game Writing;MLC1102|3|Literacy/Civic Welfare/Military Science 2;PPF1201|2|PATHFIT 2 (Physical Fitness);ZGE1108|3|Understanding the Self'],
+        [2,'first','CEM2101|3|2D Animation;CEM2102|3|3D Modelling;CEM2103|3|Computer Graphics Programming;CEM2104|3|Digital Image Manipulation and Typography;CGD2101|3|Advanced Game Design;CGD2102|3|Game Programming 1;PPF2101|2|PATHFIT 3;ZGE1104|3|Mathematics in the Modern World'],
+        [2,'second','CEM2201|3|3D Animation;CEM2202|3|Design and Production Theories;CFD1101|3|Fundamentals of Database Systems;CGD2201|3|Artificial Intelligence in Games;CGD2202|3|Game Physics;CGD2203|3|Game Programming 2;PPF2201|2|PATHFIT 4;ZGE1105|3|Purposive Communication'],
+        [3,'first','CEM3101|3|Audio Design and Sound Engineering;CEM3102|3|Methods of Research for EMC;CGD3101|3|Game Design Pattern;CGD3102|3|Game Networking;CGD3103|3|Game Programming 3;ZGE1103|3|Ethics;ZGE1109|3|Life and Works of Rizal;ZGEEL01|3|GE Elective 1'],
+        [3,'second','CDE1101|3|Applications Development and Emerging Technologies;CEM3201|3|UX and Usability Design;CEM4980|3|Multimedia Capstone Project and Research 1;CEMEL01|3|Professional Elective 1;CGD3201|3|Quality Assurance for Games;ZGE1106|3|Readings in Philippine History;ZGE1107|3|Science, Technology, and Society;ZGEEL02|3|GE Elective 2'],
+        [3,'summer','CEMEL02|3|Professional Elective 2;CIS3202|3|Technopreneurship;CSP1101|3|Social and Professional Issues in Computing'],
+        [4,'first','CEM4990|3|Multimedia Capstone Project and Research 2;CEMEL03|3|Professional Elective 3;CEMEL04|3|Professional Elective 4;ZGE1102|3|The Contemporary World;ZGEEL03|3|GE Elective 3;ZPD1102|3|Effective Communication with Personality Development'],
+        [4,'second','CEM4970|9|Internship for EMC']
+      ]),
+      ...curriculumRows('BSANIMATION','Digital Animation',[
+        [1,'first','CCP1101|3|Computer Programming 1;CEM1101|1|Digital Illustration;CEM1102|3|Free-Hand Drawing;CEM1103|3|Introduction to Multimedia Computing;CIC1101|3|Introduction to Computing;MLC1101|3|Literacy/Civic Welfare/Military Science 1;PPF1101|2|PATHFIT 1 (Movement Education);ZGE1101|3|Art Appreciation'],
+        [1,'second','CCP1102|3|Computer Programming 2;CDA1201|3|Writing for Film and Animation;CDS1101|3|Data Structures and Algorithms;CEM1201|1|Digital Photography;CEM1202|3|Introduction to Animation;CEM1203|3|Introduction to Game Design and Development;MLC1102|3|Literacy/Civic Welfare/Military Science 2;PPF1201|2|PATHFIT 2 (Physical Fitness);ZGE1108|3|Understanding the Self'],
+        [2,'first','CDA2101|3|Non-Linear Video Editing;CDA2102|3|Storyboarding, Animatics and Pre-Visualization;CEM2101|3|2D Animation;CEM2102|3|3D Modelling;CEM2103|3|Computer Graphics Programming;CEM2104|3|Digital Image Manipulation and Typography;PPF2101|2|PATHFIT 3;ZGE1104|3|Mathematics in the Modern World'],
+        [2,'second','CDA2201|3|3D Character Animation;CDA2202|3|3D Texturing;CDA2203|3|Advanced 2D Animation;CEM2201|3|3D Animation;CEM2202|3|Design and Production Theories;CFD1101|3|Fundamentals of Database Systems;PPF2201|2|PATHFIT 4;ZGE1105|3|Purposive Communication'],
+        [3,'first','CDA3101|3|3D Particles and Dynamics;CDA3102|3|3D Rendering;CDA3103|3|Scripting for 3D Animation;CEM3101|3|Audio Design and Sound Engineering;CEM3102|3|Methods of Research for EMC;ZGE1103|3|Ethics;ZGE1109|3|Life and Works of Rizal;ZGEEL01|3|GE Elective 1'],
+        [3,'second','CDA3201|3|Visual Effects Design;CDE1101|3|Applications Development and Emerging Technologies;CEM3201|3|UX and Usability Design;CEM4980|3|Multimedia Capstone Project and Research 1;CEMEL01|3|Professional Elective 1;ZGE1106|3|Readings in Philippine History;ZGE1107|3|Science, Technology, and Society;ZGEEL02|3|GE Elective 2'],
+        [3,'summer','CEMEL02|3|Professional Elective 2;CIS3202|3|Technopreneurship;CSP1101|3|Social and Professional Issues in Computing'],
+        [4,'first','CEM4990|3|Multimedia Capstone Project and Research 2;CEMEL03|3|Professional Elective 3;CEMEL04|3|Professional Elective 4;ZGE1102|3|The Contemporary World;ZGEEL03|3|GE Elective 3;ZPD1102|3|Effective Communication with Personality Development'],
+        [4,'second','CEM4970|9|Internship for EMC']
+      ])
+    ];
+    // Keep the original BSCS/BSIT/BSIS operational demo subjects visible in
+    // the same year/semester load editor. The expanded CHED-based catalog can
+    // extend these versioned rows without changing active offerings.
+    Object.entries(curriculum).forEach(([program,years])=>years.forEach((names,yearIndex)=>names.forEach((name,index)=>{
+      const yearLevel=yearIndex+1,subjectCode=`${prefixes[program]}${yearLevel}${11+index}-24`;
+      curricula.push({curriculumId:`PH-${program}-2024`,country:'Philippines',program,track:'General',version:'2024',effectiveSchoolYear:'2024-2025',status:'active',sourceUrl:'https://legacy.ched.gov.ph/wp-content/uploads/2017/10/CMO-no.-25-s.-2015.pdf',yearLevel,term:index===0?'first':'second',subjectCode,subjectName:name,units:3,prerequisites:[]});
+    })));
     const sections=[],subjects=[],sectionSubjects=[]; let offerNo=1, subjectNo=1;
     Object.entries(curriculum).forEach(([program,years],programIndex)=>years.forEach((names,yearIndex)=>{
       const yearLevel=yearIndex+1, sectionCount=yearLevel===2?2:1;
-      const yearSubjects=names.map((name,index)=>{const code=`${prefixes[program]}${yearLevel}${11+index}-24`;subjects.push({code,name,program,yearLevel});return code;});
+      const yearSubjects=names.map((name,index)=>{const code=`${prefixes[program]}${yearLevel}${11+index}-24`;subjects.push({code,name,program,yearLevel,units:3});return code;});
       for(let sectionIndex=0;sectionIndex<sectionCount;sectionIndex++){
         const sectionNumber=sectionIndex+1,id=`${yearLevel}${program}-${sectionNumber}`;sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel,capacity:50});
         const assignments=yearSubjects.map(subjectCode=>{const number=offerNo++;return{id:`OFR-${String(number).padStart(3,'0')}`,subjectCode,facultyId:faculty[(number-1)%(faculty.length-3)].id};});
@@ -187,7 +232,8 @@ const DemoData = {
     ];
     const studentEmails=[{id:'DEMO-MAIL-001',studentId:'2025-00002',facultyId:'23-32534-345',subject:'CCS211-24 — Question about Skills Check',message:'May I clarify the feedback on question 4?',sentAt:'2026-08-28T15:42:00+08:00',read:false}];
     const studentNotifications=[{id:'DEMO-NOTICE-001',studentId:'2025-00002',reportId:'DEMO-REPORT-004',message:'Your scoring concern was resolved and the answer was reviewed.',createdAt:'2026-08-25T10:05:00+08:00',read:false}];
-    Object.entries({faculty,coordinators,students,subjects,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
+    const storedCurricula=DB.read('curricula',[]),seedCurricula=storedCurricula.length>curricula.length?storedCurricula:curricula;
+    Object.entries({faculty,coordinators,students,subjects,curricula:seedCurricula,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
     localStorage.setItem('demoCurriculumVersion',String(this.version)); return true;
   }
 };

@@ -224,7 +224,7 @@ Check conflicts for Professor, Section, enrolled Students, and enabled Room. Adj
 - Professor load: sum of configured units/hours for approved active offerings in one period.
 - Admin configures normal limits and optional maximum ceilings.
 - Load calculation must be visible before an assignment is submitted.
-- Student overload requires Admin approval.
+- Admin configures normal-load and absolute maximum-load rules by program, year level, and term. Faculty Coordinators process Student subject/load changes and submit overload applications; Student overload requires Dean approval before the additional enrollment becomes active.
 - Professor overload handling is **Needs confirmation**; Dean review of the assignment is always required.
 
 ## Capacity and availability

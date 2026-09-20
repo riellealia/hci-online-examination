@@ -18,18 +18,45 @@ const _storageSeen = new Map();
 const SQLITE_BACKEND_ACTIVE = typeof location !== 'undefined'
   && /^https?:$/.test(location.protocol) && location.port === '3000';
 const SQLITE_LOCAL_ONLY = new Set(['currentUser','accessNotice']);
+function sqliteSessionToken() { try { return sessionStorage.getItem('serverSessionToken') || ''; } catch (_) { return ''; } }
+function invalidateSqliteSession(message = 'Your server session expired. Please sign in again.') {
+  try {
+    sessionStorage.removeItem('serverSessionToken');
+    localStorage.removeItem('currentUser');
+    localStorage.setItem('accessNotice', JSON.stringify(message));
+  } catch (_) {}
+}
 
 /* The current UI is synchronous, so SQLite data is hydrated into a browser
    cache before page scripts execute. When served by server.js, writes must
    succeed in SQLite before the compatibility cache is changed. */
 function sqliteBootstrap() {
   if (!SQLITE_BACKEND_ACTIVE || typeof XMLHttpRequest === 'undefined') return;
+  const token = sqliteSessionToken();
+  if (!token) return;
   try {
     const request = new XMLHttpRequest();
     request.open('GET', '/api/storage', false);
+    request.setRequestHeader('Authorization', `Bearer ${token}`);
     request.send();
+    if (request.status === 401 || request.status === 403) { invalidateSqliteSession(); return; }
     if (request.status !== 200) throw new Error(`SQLite bootstrap returned ${request.status}.`);
-    const records = JSON.parse(request.responseText || '{}').records || {};
+    const response = JSON.parse(request.responseText || '{}');
+    const records = response.records || {};
+    let browserSession = null;
+    try { browserSession = JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (_) {}
+    const serverSession = response.session || null;
+    const normalizeRole = value => String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
+      .replace('administrator', 'admin').replace('collegedean', 'dean')
+      .replace('facultycoordinator', 'coordinator').replace('professor', 'faculty');
+    if (!serverSession || !browserSession
+      || String(browserSession.username || browserSession.id || '') !== String(serverSession.username || '')
+      || normalizeRole(browserSession.role) !== normalizeRole(serverSession.role)) {
+      invalidateSqliteSession('Your browser login did not match the active server session. Please sign in again.');
+      if (typeof window !== 'undefined') setTimeout(()=>window.location.replace('index.html'),0);
+      return;
+    }
+    const serverCollections = Array.isArray(response.collections) ? response.collections : Object.keys(records);
     const keys = Object.keys(records);
     const local = {};
     for (let index = 0; index < localStorage.length; index++) {
@@ -37,6 +64,7 @@ function sqliteBootstrap() {
       if (!key || SQLITE_LOCAL_ONLY.has(key)) continue;
       try { local[key] = JSON.parse(localStorage.getItem(key)); } catch (_) {}
     }
+    serverCollections.forEach(key => { if (!SQLITE_LOCAL_ONLY.has(key) && !Object.hasOwn(records, key)) localStorage.removeItem(key); });
     if (keys.length) {
       keys.forEach(key => { if (!SQLITE_LOCAL_ONLY.has(key)) localStorage.setItem(key, JSON.stringify(records[key])); });
     }
@@ -47,6 +75,7 @@ function sqliteBootstrap() {
       const migration = new XMLHttpRequest();
       migration.open('POST', '/api/migrate', false);
       migration.setRequestHeader('Content-Type', 'application/json');
+      migration.setRequestHeader('Authorization', `Bearer ${token}`);
       migration.send(JSON.stringify({ records: migrationRecords, missingOnly: keys.length > 0 }));
       if (migration.status !== 200) throw new Error(`SQLite migration returned ${migration.status}.`);
     }
@@ -57,15 +86,27 @@ function sqliteBootstrap() {
 
 function writeSqliteSync(method, key, value) {
   if (!SQLITE_BACKEND_ACTIVE || SQLITE_LOCAL_ONLY.has(key)) return true;
+  if (!sqliteSessionToken()) return true;
   try {
     const request = new XMLHttpRequest();
     request.open(method, `/api/storage/${encodeURIComponent(key)}`, false);
+    const token = sqliteSessionToken(); if (token) request.setRequestHeader('Authorization', `Bearer ${token}`);
     if (method === 'PUT') request.setRequestHeader('Content-Type', 'application/json');
     request.send(method === 'PUT' ? JSON.stringify({ value }) : null);
-    if (request.status < 200 || request.status >= 300) throw new Error(`SQLite returned ${request.status}.`);
+    if (request.status === 401) {
+      invalidateSqliteSession();
+      storageNotify('Your server session expired. Redirecting to sign in.', 'error');
+      if (typeof window !== 'undefined') setTimeout(()=>window.location.replace('index.html'),0);
+      return false;
+    }
+    if (request.status < 200 || request.status >= 300) {
+      let reason = '';
+      try { reason = JSON.parse(request.responseText || '{}').error || ''; } catch (_) {}
+      throw new Error(reason || `SQLite returned ${request.status}.`);
+    }
     return true;
   } catch (error) {
-    storageNotify(`SQLite could not save "${key}". Nothing was changed.`, 'error');
+    storageNotify(`SQLite could not save "${key}": ${error.message || 'the server rejected the change'}`, 'error');
     console.error('[storage] SQLite write failed', key, error);
     return false;
   }
@@ -155,6 +196,42 @@ const DB = {
     }
   },
 
+  /* Append one immutable event without replacing a possibly stale collection.
+     SQLite performs this atomically so concurrent tabs cannot omit history. */
+  append(key, entry) {
+    if (!SQLITE_BACKEND_ACTIVE || SQLITE_LOCAL_ONLY.has(key) || !sqliteSessionToken()) {
+      const items = this.read(key, []);
+      if (!Array.isArray(items)) return false;
+      if (!items.some(item => item?.id && item.id === entry?.id)) items.push(entry);
+      return this.write(key, items);
+    }
+    try {
+      const request = new XMLHttpRequest();
+      request.open('POST', `/api/storage/${encodeURIComponent(key)}/append`, false);
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.setRequestHeader('Authorization', `Bearer ${sqliteSessionToken()}`);
+      request.send(JSON.stringify({ entry }));
+      if (request.status === 401) {
+        invalidateSqliteSession();
+        storageNotify('Your server session expired. Redirecting to sign in.', 'error');
+        if (typeof window !== 'undefined') setTimeout(()=>window.location.replace('index.html'),0);
+        return false;
+      }
+      if (request.status < 200 || request.status >= 300) {
+        let reason = '';
+        try { reason = JSON.parse(request.responseText || '{}').error || ''; } catch (_) {}
+        throw new Error(reason || `SQLite returned ${request.status}.`);
+      }
+      const response = JSON.parse(request.responseText || '{}');
+      localStorage.setItem(key, JSON.stringify(response.value || []));
+      return true;
+    } catch (error) {
+      storageNotify(`SQLite could not append "${key}": ${error.message || 'the server rejected the event'}`, 'error');
+      console.error('[storage] SQLite append failed', key, error);
+      return false;
+    }
+  },
+
   remove(key) {
     try {
       if (!writeSqliteSync('DELETE', key)) return false;
@@ -183,10 +260,11 @@ const DB = {
   async importCsv(collection, file) {
     if (!SQLITE_BACKEND_ACTIVE) throw new Error('CSV server import requires npm start.');
     const text = typeof file === 'string' ? file : await file.text();
-    const response = await fetch(`/api/csv/${encodeURIComponent(collection)}/import`, {method:'POST',headers:{'Content-Type':'text/csv; charset=utf-8'},body:text});
+    const token=sqliteSessionToken();if(!token)throw new Error('Sign in again before importing CSV data.');
+    const response = await fetch(`/api/csv/${encodeURIComponent(collection)}/import`, {method:'POST',headers:{'Content-Type':'text/csv; charset=utf-8','Authorization':`Bearer ${token}`},body:text});
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'CSV import failed.');
-    const stored = await fetch(`/api/storage/${encodeURIComponent(collection)}`).then(item => item.json());
+    const stored = await fetch(`/api/storage/${encodeURIComponent(collection)}`,{headers:{'Authorization':`Bearer ${token}`}}).then(item => item.json());
     localStorage.setItem(collection, JSON.stringify(stored.value || []));
     return result;
   },

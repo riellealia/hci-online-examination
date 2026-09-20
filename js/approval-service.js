@@ -4,7 +4,7 @@ const ApprovalService = (() => {
   const statuses = Object.freeze(['pending', 'approved', 'rejected', 'cancelled', 'withdrawn']);
   const types = Object.freeze({
     'professor-assignment': { submit: 'coordinator', review: 'dean' },
-    'student-overload': { submit: 'coordinator', review: 'admin' }
+    'student-overload': { submit: 'coordinator', review: 'dean' }
   });
   const applyHandlers = new Map();
   const now = () => new Date().toISOString();
@@ -48,13 +48,17 @@ const ApprovalService = (() => {
     if (!['approved', 'rejected'].includes(decision)) fail('Decision must be approved or rejected.');
     const actingUser = actor(suppliedActor), records = read(), request = records.find(item => item.id === requestId);
     if (!request) fail('Approval request was not found.', 'NOT_FOUND');
-    if (request.status !== 'pending') fail('Only pending requests can be reviewed.', 'INVALID_TRANSITION');
+    if (request.status !== 'pending') { audit('deny-review', request, { reason: 'Request is no longer pending.', attemptedDecision: decision }, actingUser, 'denied'); fail('Only pending requests can be reviewed.', 'INVALID_TRANSITION'); }
     const config = types[request.type];
-    if (!config || role(actingUser?.role) !== config.review) fail('This role cannot review the request.', 'PERMISSION_DENIED');
-    PermissionService.require(`approval.${request.type}.review`, { actor: actingUser });
-    if (actingUser.username === request.requesterId) fail('A requester cannot approve or reject their own request.', 'SELF_APPROVAL');
-    if (decision === 'rejected' && !remarks.trim()) fail('Reviewer remarks are required when rejecting a request.');
-    if (decision === 'approved' && applyHandlers.has(request.type)) applyHandlers.get(request.type)(clone(request.proposedChange), clone(request), actingUser);
+    if (!config || role(actingUser?.role) !== config.review) { audit('deny-review', request, { reason: 'Reviewer role is not authorized.', attemptedDecision: decision }, actingUser, 'denied'); fail('This role cannot review the request.', 'PERMISSION_DENIED'); }
+    try { PermissionService.require(`approval.${request.type}.review`, { actor: actingUser }); }
+    catch (error) { audit('deny-review', request, { reason: error.message, attemptedDecision: decision }, actingUser, 'denied'); throw error; }
+    if (actingUser.username === request.requesterId) { audit('deny-review', request, { reason: 'Self-approval is not allowed.', attemptedDecision: decision }, actingUser, 'denied'); fail('A requester cannot approve or reject their own request.', 'SELF_APPROVAL'); }
+    if (decision === 'rejected' && !remarks.trim()) { audit('deny-review', request, { reason: 'Rejection remarks are required.', attemptedDecision: decision }, actingUser, 'denied'); fail('Reviewer remarks are required when rejecting a request.'); }
+    if (decision === 'approved' && applyHandlers.has(request.type)) {
+      try { applyHandlers.get(request.type)(clone(request.proposedChange), clone(request), actingUser); }
+      catch (error) { audit('apply-failed', request, { reason: error.message, code: error.code || 'APPLY_FAILED' }, actingUser, 'failed'); throw error; }
+    }
     const changedAt = now(); request.status = decision; request.reviewerId = actingUser.username;
     request.reviewerRole = role(actingUser.role); request.reviewerRemarks = remarks.trim(); request.decisionAt = changedAt;
     request.history.push({ status: decision, at: changedAt, actorId: actingUser.username, actorRole: role(actingUser.role), remarks: remarks.trim() });
@@ -69,8 +73,9 @@ const ApprovalService = (() => {
     if (request.status !== 'pending') fail('Only pending requests can be closed.', 'INVALID_TRANSITION');
     const isRequester = actingUser?.username === request.requesterId;
     if (nextStatus === 'withdrawn' && !isRequester) fail('Only the requester may withdraw this request.', 'PERMISSION_DENIED');
-    if (nextStatus === 'cancelled' && role(actingUser?.role) !== 'admin') fail('Only an Administrator may cancel this request.', 'PERMISSION_DENIED');
+    if (nextStatus === 'cancelled' && role(actingUser?.role) !== 'admin') { audit('deny-cancel', request, { reason: 'Only an Administrator may cancel requests.' }, actingUser, 'denied'); fail('Only an Administrator may cancel this request.', 'PERMISSION_DENIED'); }
     if (nextStatus === 'withdrawn') PermissionService.require('approval.own.withdraw', { actor: actingUser });
+    if (nextStatus === 'cancelled') PermissionService.require('approval.any.cancel', { actor: actingUser });
     const changedAt = now(); request.status = nextStatus;
     request.history.push({ status: nextStatus, at: changedAt, actorId: actingUser.username, actorRole: role(actingUser.role), remarks: remarks.trim() });
     save(records); audit(nextStatus === 'withdrawn' ? 'withdraw' : 'cancel', request, { remarks: remarks.trim() }, actingUser);
@@ -89,7 +94,7 @@ const ApprovalService = (() => {
     if (!PermissionService.active(actingUser)) return [];
     const actingRole = role(actingUser.role);
     if (actingRole === 'admin') return filterRecords(filters);
-    if (actingRole === 'dean') return filterRecords(filters).filter(item => item.type === 'professor-assignment' && item.reviewerRole === 'dean');
+    if (actingRole === 'dean') return filterRecords({ ...filters, type: '' }).filter(item => item.reviewerRole === 'dean');
     if (actingRole === 'coordinator') return filterRecords(filters).filter(item => item.requesterId === actingUser.username);
     return [];
   }

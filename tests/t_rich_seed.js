@@ -7,6 +7,9 @@ const offers=records.flatMap(record=>record.assignments.map(item=>({...item,sect
 ok(faculty.length===28&&new Set(faculty.map(item=>item.id)).size===28&&faculty.every(item=>/^\d{2}-\d{5}-\d{3}$/.test(item.id)),'28 teachers use unique NN-NNNNN-NNN IDs');
 ok(subjects.length===24&&sections.length===16&&students.length===620,'three programs, 16 sections, and 620 students are seeded');
 ok(sections.find(section=>section.id==='1BSCS-2')?.capacity===100&&sections.filter(section=>section.id!=='1BSCS-2').every(section=>section.capacity===50),'1BSCS-2 has a 100-student limit while every other section has 50');
+const curricula=r.read('curricula');
+ok(curricula.filter(item=>item.program==='BSGAMEDEV').length===59&&curricula.filter(item=>item.program==='BSANIMATION').length===59,'complete BSEMC Game Development and Digital Animation curricula are seeded');
+ok(curricula.some(item=>item.program==='BSGAMEDEV'&&item.yearLevel===4&&item.term==='second'&&item.subjectCode==='CEM4970'&&item.units===9),'BSEMC curriculum records retain year, term, subject, and unit data');
 ok(students.every(item=>/^\d{4}-\d{5}$/.test(item.id)),'students use YYYY-NNNNN IDs');
 ok(subjects.every(item=>/^(CCS|CIT|CIS)\d{3}-\d{2}$/.test(item.code)),'subjects use program-prefixed codes');
 ok(new Set(offers.map(item=>item.id)).size===offers.length,'every section-subject offering has a unique ID');

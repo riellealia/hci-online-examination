@@ -305,7 +305,10 @@
   const readLoginRecords = (key, fallback) => typeof DB !== 'undefined'
     ? DB.read(key, fallback)
     : JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
-  const writeLoginRecords = (key, value) => typeof DB !== 'undefined'
+  // The login screen may still hold a valid non-Admin server token. Account
+  // repair belongs to server startup/Admin setup, so never attempt protected
+  // SQLite collection writes from this public page.
+  const writeLoginRecords = (key, value) => typeof DB !== 'undefined' && DB.backend() !== 'sqlite'
     ? DB.write(key, value)
     : (localStorage.setItem(key, JSON.stringify(value)), true);
   faculty = readLoginRecords('faculty', faculty);
@@ -566,7 +569,7 @@
   [usernameInput, passwordInput].forEach(el =>
     el.addEventListener("input", clearAuthError));
 
-  loginForm.addEventListener("submit", function(e) {
+  loginForm.addEventListener("submit", async function(e) {
     e.preventDefault();
     clearAuthError();
 
@@ -579,14 +582,21 @@
       return;
     }
 
-    const user = validateLogin(username, password);
+    let user = null;
+    if (typeof DB !== 'undefined' && DB.backend() === 'sqlite') {
+      try {
+        const response = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Those details do not match an active account.');
+        sessionStorage.setItem('serverSessionToken', result.token);
+        user = result.session;
+      } catch (error) {
+        showAuthError(error.message || 'The server could not authenticate this account.');
+        passwordInput.focus(); passwordInput.select(); return;
+      }
+    } else user = validateLogin(username, password);
 
-    if (!user) {
-      showAuthError("Those details do not match an active account. Check your username and password.");
-      passwordInput.focus();
-      passwordInput.select();
-      return;
-    }
+    if (!user) { showAuthError("Those details do not match an active account. Check your username and password."); passwordInput.focus(); passwordInput.select(); return; }
 
     const effectiveRole = normalizeLoginRole(user.role);
     const route = roleRoutes[effectiveRole];

@@ -7,6 +7,7 @@ const PermissionService = (() => {
       'dashboard.dean.view', 'personnel.view', 'personnel.professor.manage',
       'personnel.coordinator.manage', 'profile.faculty.view',
       'profile.coordinator.view', 'approval.professor-assignment.review',
+      'approval.student-overload.review',
       'audit.college.view', 'statistics.college.view'
     ],
     coordinator: [

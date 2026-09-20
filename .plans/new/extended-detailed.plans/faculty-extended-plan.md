@@ -13,7 +13,7 @@ The Faculty Coordinator manages subject offerings, sections, Professor assignmen
 
 ## Restrictions
 
-The Faculty Coordinator cannot permanently delete accounts, edit protected identity details, grant permissions, approve their own requests, approve overloads, or modify Professor examinations and grades.
+The Faculty Coordinator cannot permanently delete accounts, edit protected identity details, grant permissions, approve their own requests, approve overloads, or modify Professor examinations and grades. Coordinators process subject/load changes and submit overload applications to the Dean.
 
 ## Required pages
 
@@ -61,7 +61,7 @@ Validation:
 - no schedule conflict;
 - load within limit or approved overload.
 
-Normal enrollment is active without additional approval by default. Overloads remain pending until Admin approval.
+Normal enrollment is active without additional approval by default. Overloads remain pending until Dean approval and cannot create the additional enrollment early.
 
 ### Scheduling
 

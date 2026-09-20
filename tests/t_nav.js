@@ -1,7 +1,7 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 const pages=[
-  ['admin.html',  {username:'admin',role:'admin'},  7, 'Dashboard'],
+  ['admin.html',  {username:'admin',role:'admin'},  8, 'Dashboard'],
   ['faculty.html',{username:'F1',role:'faculty'},   4, 'My Subjects'],
   ['student.html',{username:'S1',role:'student'},   4, 'Overview']
 ];
@@ -25,7 +25,7 @@ for(const [page,user,count,firstLabel] of pages){
 
 const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
-ok(adminLinks.slice(0,3).join(',')==='dashboardSection,systemSection,auditSection','Admin places System Management and Audit Log directly below Dashboard');
+ok(adminLinks.slice(0,4).join(',')==='dashboardSection,systemSection,loadPolicySection,auditSection','Admin places System Management, Load Policy, and Audit Log directly below Dashboard');
 const adminDivider=adminNavPage.d.querySelector('#sidebar .sidebar-divider[role="separator"]');
 ok(adminDivider?.textContent.trim()==='School controls'&&adminDivider.nextElementSibling?.dataset.panel==='facultySection','Admin sidebar divider separates system controls from school controls');
 adminNavPage.w.close();

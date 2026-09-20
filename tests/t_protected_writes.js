@@ -1,0 +1,15 @@
+'use strict';
+const assert = require('assert');
+const { validateAudit, validateApprovals } = require('../server/protected-write');
+const coordinator = { username: 'coord.001', role: 'coordinator' };
+const dean = { username: 'dean.demo', role: 'dean' };
+const log = [{ id: 'a1', actorId: 'coord.001', actorRole: 'coordinator' }];
+assert.doesNotThrow(() => validateAudit(log, [...log, { id: 'a2', actorId: 'coord.001', actorRole: 'coordinator' }], coordinator));
+assert.throws(() => validateAudit(log, [], coordinator), /append-only/i);
+assert.throws(() => validateAudit(log, [{ ...log[0], actorId: 'someone' }], coordinator), /changed or removed/i);
+const pending = { id:'APR-1', type:'professor-assignment', requesterId:'coord.001', requesterRole:'coordinator', status:'pending', history:[] };
+assert.doesNotThrow(() => validateApprovals([], [pending], coordinator));
+assert.throws(() => validateApprovals([], [{ ...pending, requesterId:'other' }], coordinator), /owned pending/i);
+assert.doesNotThrow(() => validateApprovals([pending], [{ ...pending, status:'approved', reviewerId:'dean.demo' }], dean));
+assert.throws(() => validateApprovals([pending], [{ ...pending, status:'approved', reviewerId:'other' }], dean), /limited/i);
+console.log('✅ approval transitions are role-bound and audit history is append-only');

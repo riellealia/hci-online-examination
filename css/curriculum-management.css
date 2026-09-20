@@ -1,0 +1,114 @@
+/* Unified Curriculum & Load Management UI.
+   This file is intentionally scoped to #loadPolicyRoot and loaded last. */
+#loadPolicyRoot{
+  --cm-ink:#26384d;
+  --cm-muted:#718096;
+  --cm-line:#e1e7ee;
+  --cm-soft:#f7f9fc;
+  --cm-accent:#315f8d;
+  --cm-accent-soft:#edf5fc;
+  --cm-danger:#b63838;
+  color:var(--cm-ink);
+  font:400 13px/1.45 "Poppins","Segoe UI",Arial,sans-serif;
+}
+#loadPolicyRoot .management-page-head{margin-bottom:10px}
+#loadPolicyRoot .management-page-head h3{font-size:20px;font-weight:650;letter-spacing:-.02em}
+#loadPolicyRoot .management-page-head p{font-size:12px;font-weight:400}
+#loadPolicyRoot .load-policy-page{padding:0;border:0;background:transparent}
+
+/* Program navigation */
+#loadPolicyRoot .load-program-tabs{display:flex;gap:22px;margin:0 0 12px;padding:0;border-bottom:1px solid var(--cm-line);overflow-x:auto;scrollbar-width:none}
+#loadPolicyRoot .load-program-tabs button{position:relative;min-height:38px;margin:0;padding:8px 1px 10px;border:0;border-radius:0;background:transparent;color:var(--cm-muted);font-family:inherit;font-size:12px;font-weight:600;line-height:1;box-shadow:none;white-space:nowrap}
+#loadPolicyRoot .load-program-tabs button:hover,#loadPolicyRoot .load-program-tabs button.active{background:transparent;color:var(--cm-accent)}
+#loadPolicyRoot .load-program-tabs button.active::after{content:"";position:absolute;right:0;bottom:-1px;left:0;height:2px;border-radius:2px 2px 0 0;background:var(--cm-accent)}
+
+/* Shared Admin toolbar */
+#loadPolicyRoot .curriculum-admin-toolbar{position:relative;display:flex;align-items:center;gap:7px;margin:0;padding:9px 4px 10px;border:0;background:transparent}
+#loadPolicyRoot .curriculum-admin-toolbar>.curriculum-tool-button,#loadPolicyRoot .curriculum-admin-toolbar>.curriculum-file-tool{display:grid;place-items:center;width:40px;min-width:40px;height:40px;min-height:40px;padding:0;border:1px solid #d8e1eb;border-radius:11px;background:#fff;color:var(--cm-accent);box-shadow:0 3px 10px rgba(37,64,91,.06)}
+#loadPolicyRoot .curriculum-admin-toolbar>.curriculum-tool-button:hover,#loadPolicyRoot .curriculum-admin-toolbar>.curriculum-file-tool:hover{border-color:#91adca;background:var(--cm-accent-soft);transform:none}
+#loadPolicyRoot .curriculum-admin-toolbar>.curriculum-tool-button span,#loadPolicyRoot .curriculum-admin-toolbar>.curriculum-file-tool span{display:none}
+#loadPolicyRoot .curriculum-admin-toolbar svg{width:18px;height:18px;fill:currentColor}
+#loadPolicyRoot .curriculum-data-tools{position:relative;display:flex;align-items:center;gap:6px;margin-left:auto}
+#loadPolicyRoot .curriculum-data-tools .tool-icon,#loadPolicyRoot .curriculum-toolbar-settings>summary{display:grid;place-items:center;width:40px;min-width:40px;height:40px;min-height:40px;padding:0;border:1px solid #d8e1eb;border-radius:11px;background:#fff;color:#52677e;box-shadow:0 3px 10px rgba(37,64,91,.06);cursor:pointer}
+#loadPolicyRoot .curriculum-data-tools .tool-icon:hover,#loadPolicyRoot .curriculum-toolbar-settings>summary:hover{border-color:#91adca;background:var(--cm-accent-soft);color:var(--cm-accent)}
+#loadPolicyRoot .curriculum-data-tools .tool-icon.active{border-color:#7d9fbe;background:#e5f0fa;color:#264f76}
+#loadPolicyRoot .table-search-box,#loadPolicyRoot .table-tool-select{position:absolute;top:47px;right:0;z-index:80;padding:9px;border:1px solid #dbe3ec;border-radius:12px;background:#fff;box-shadow:0 12px 30px rgba(25,42,62,.15)}
+#loadPolicyRoot .table-search-box[hidden],#loadPolicyRoot .table-tool-select[hidden]{display:none}
+#loadPolicyRoot .table-search-box input{width:min(280px,70vw);height:38px;margin:0;padding:0 11px;border:1px solid #ccd7e3;border-radius:9px;font:inherit}
+#loadPolicyRoot .table-tool-select{display:flex;align-items:center;gap:8px;color:var(--cm-muted);font-size:12px;white-space:nowrap}
+#loadPolicyRoot .table-tool-select select{height:38px;margin:0;padding:0 30px 0 9px;border:1px solid #ccd7e3;border-radius:9px;background:#fff;font:inherit}
+#loadPolicyRoot .curriculum-toolbar-settings{position:relative}
+#loadPolicyRoot .curriculum-toolbar-settings>summary{list-style:none}
+#loadPolicyRoot .curriculum-toolbar-settings>summary::-webkit-details-marker{display:none}
+#loadPolicyRoot .curriculum-toolbar-settings>summary span{display:none}
+#loadPolicyRoot .curriculum-toolbar-settings nav{position:absolute;top:47px;right:0;left:auto;z-index:90;display:grid;width:218px;gap:2px;padding:6px;border:1px solid #dbe3ec;border-radius:12px;background:#fff;box-shadow:0 14px 34px rgba(26,43,62,.17)}
+#loadPolicyRoot .curriculum-toolbar-settings:not([open]) nav{display:none}
+#loadPolicyRoot .curriculum-toolbar-settings nav button,#loadPolicyRoot~.curriculum-context-menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;margin:0;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--cm-ink);font:400 12px/1.35 "Poppins","Segoe UI",Arial,sans-serif;text-align:left;cursor:pointer}
+#loadPolicyRoot .curriculum-toolbar-settings nav button:hover{background:var(--cm-accent-soft);color:var(--cm-accent)}
+#loadPolicyRoot .curriculum-toolbar-settings nav button.danger{color:var(--cm-danger)}
+#loadPolicyRoot .curriculum-toolbar-settings nav button.danger:hover{background:#fff0f0;color:#a52424}
+#loadPolicyRoot .curriculum-toolbar-settings nav svg{width:17px;height:17px;flex:none}
+
+/* Compact semester list */
+#loadPolicyRoot .semester-accordion-list{display:grid;gap:6px;border:0}
+#loadPolicyRoot .semester-accordion{overflow:hidden;border:1px solid var(--cm-line)!important;border-radius:10px!important;background:#fff;box-shadow:none;transition:border-color .15s ease}
+#loadPolicyRoot .semester-accordion:hover,#loadPolicyRoot .semester-accordion[open]{border-color:#cbd8e5!important;box-shadow:none}
+#loadPolicyRoot .semester-accordion>.curriculum-semester-heading{display:flex;min-height:46px;align-items:center;justify-content:space-between;gap:10px;padding:7px 12px;border:0;background:#f8fafc;color:var(--cm-ink);list-style:none;cursor:pointer}
+#loadPolicyRoot .semester-accordion[open]>.curriculum-semester-heading{background:#f3f7fb;box-shadow:inset 2px 0 0 #7ca4c8}
+#loadPolicyRoot .curriculum-semester-heading::-webkit-details-marker{display:none}
+#loadPolicyRoot .semester-heading-copy{display:grid;gap:1px;min-width:0}
+#loadPolicyRoot .semester-title-line{display:flex;align-items:center;flex-wrap:wrap;gap:5px 7px}
+#loadPolicyRoot .semester-title-line>strong{color:#25364a;font-size:13px;font-weight:650;letter-spacing:-.01em}
+#loadPolicyRoot .semester-heading-copy>span{color:var(--cm-muted);font-size:10.5px;font-weight:400}
+#loadPolicyRoot .load-badge{display:inline-flex;align-items:center;width:max-content;padding:2px 7px;border:0;border-radius:999px;font-size:9.5px;font-weight:600;line-height:1.45;white-space:nowrap}
+#loadPolicyRoot .load-badge.normal,#loadPolicyRoot .semester-accordion[open] .load-badge.normal{background:#e7f1fa;color:#326d9d}
+#loadPolicyRoot .load-badge.overload,#loadPolicyRoot .semester-accordion[open] .load-badge.overload{background:#f8eedc;color:#86621f}
+#loadPolicyRoot .load-chevron{flex:none;color:#8291a2;font-size:15px;transition:transform .16s ease}
+#loadPolicyRoot .semester-accordion[open] .load-chevron{transform:rotate(180deg)}
+
+/* Curriculum rows */
+#loadPolicyRoot .semester-subjects{overflow-x:auto}
+#loadPolicyRoot .curriculum-flat-head,#loadPolicyRoot .semester-subjects .curriculum-subject-row{display:grid;grid-template-columns:minmax(110px,.7fr) minmax(260px,2fr) 52px;gap:12px;align-items:center;padding:0 18px}
+#loadPolicyRoot .curriculum-flat-head{height:31px;border-top:1px solid #e8edf2;background:#fbfcfd;color:#78879a;font-size:9.5px;font-weight:650;letter-spacing:.055em;text-transform:uppercase}
+#loadPolicyRoot .semester-subjects .curriculum-subject-row{min-height:40px;border-top:1px solid #edf1f4;background:#fff;color:#334155;font-size:12.5px;cursor:context-menu;transition:background .12s ease}
+#loadPolicyRoot .semester-subjects .curriculum-subject-row:hover{background:#f8fafc}
+#loadPolicyRoot .semester-subjects .curriculum-subject-row strong{font-weight:600}
+#loadPolicyRoot .semester-subjects .curriculum-subject-row>:last-child{text-align:right}
+#loadPolicyRoot .curriculum-empty{margin:0;padding:14px 18px;border:0;border-top:1px solid #edf1f4;color:var(--cm-muted);font-size:12px}
+#loadPolicyRoot .curriculum-group-row{padding:6px 18px;border-top:1px solid #dce7f0;background:#eef4f9;color:#426989;font-size:10px;font-weight:650;letter-spacing:.05em;text-transform:uppercase}
+#loadPolicyRoot .system-note{margin:10px 2px 0;color:var(--cm-muted);font-size:11px}
+
+/* Row-attached context navigation */
+.curriculum-context-menu{position:fixed;z-index:5000;display:grid;width:208px;gap:2px;padding:6px;border:1px solid #dbe3ec;border-radius:12px;background:#fff;box-shadow:0 14px 34px rgba(26,43,62,.17)}
+.curriculum-context-menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;margin:0;padding:8px 10px;border:0!important;border-radius:8px!important;background:transparent;color:#26384d;font:400 12px/1.35 "Poppins","Segoe UI",Arial,sans-serif;text-align:left;cursor:pointer}
+.curriculum-context-menu button:hover{background:#edf5fc;color:#315f8d}
+.curriculum-context-menu button.danger{margin:0;color:#b63838}
+.curriculum-context-menu button.danger:hover{background:#fff0f0;color:#a52424}
+.curriculum-context-menu svg{width:17px;height:17px;flex:none;fill:currentColor}
+
+/* One modal language for every curriculum command */
+.curriculum-editor-backdrop{position:fixed;inset:0;z-index:5100;display:grid;place-items:center;padding:18px;background:rgba(20,31,45,.38);backdrop-filter:blur(2px)}
+.curriculum-editor-modal{width:min(480px,calc(100vw - 28px));max-height:min(680px,calc(100vh - 28px));overflow:auto;border:1px solid #e0e6ed;border-radius:16px;background:#fff;box-shadow:0 22px 60px rgba(15,23,42,.2);font:400 13px/1.45 "Poppins","Segoe UI",Arial,sans-serif}
+.curriculum-editor-modal header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px 14px;border-bottom:1px solid #e7ecf2}
+.curriculum-editor-modal header small{display:block;color:#718096;font-size:10.5px;font-weight:500;letter-spacing:.02em;text-transform:none}
+.curriculum-editor-modal h3{margin:3px 0 0;color:#1d2b3d;font-size:18px;font-weight:650;letter-spacing:-.02em}
+.curriculum-editor-close{display:grid;width:34px;height:34px;min-height:34px;place-items:center;padding:0;border:0;border-radius:9px;background:#f4f6f8;color:#66758a;font-size:21px;cursor:pointer}
+.curriculum-editor-close:hover{background:#e9eef3;color:#26384d}
+.curriculum-editor-fields{display:grid;gap:12px;padding:18px 20px}
+.curriculum-editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.curriculum-editor-fields label{display:grid;gap:5px;min-width:0;color:#56657a;font-size:11px;font-weight:600}
+.curriculum-editor-fields input,.curriculum-editor-fields select{width:100%;height:40px;margin:0;padding:0 10px;border:1px solid #d5dee8;border-radius:9px;background:#fff;color:#26384d;font-family:inherit;font-size:12.5px;font-weight:400;line-height:1;box-sizing:border-box}
+.curriculum-editor-fields input:focus,.curriculum-editor-fields select:focus{border-color:#789cbc;outline:3px solid #e7f0f8}
+.curriculum-editor-fields input[readonly]{background:#f4f6f8;color:#718096}
+.curriculum-editor-warning{margin:0;padding:9px 10px;border-radius:8px;background:#fff4f4;color:#a52d34;font-size:11px}
+.curriculum-editor-warning:empty{display:none}
+.curriculum-editor-modal footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px 16px;border-top:1px solid #e7ecf2;background:#fbfcfd}
+.curriculum-editor-modal footer button{min-height:38px;padding:8px 13px;border-radius:9px;font-size:12px;font-weight:650}
+
+@media(max-width:620px){
+  #loadPolicyRoot .curriculum-admin-toolbar{padding-inline:0}
+  #loadPolicyRoot .curriculum-data-tools{position:static}
+  #loadPolicyRoot .table-search-box,#loadPolicyRoot .table-tool-select{top:50px;right:0}
+  #loadPolicyRoot .curriculum-flat-head,#loadPolicyRoot .semester-subjects .curriculum-subject-row{min-width:500px}
+  .curriculum-editor-grid{grid-template-columns:1fr}
+}

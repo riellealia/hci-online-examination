@@ -5,7 +5,7 @@ console.log('=== SYSTEM MANAGEMENT. Admin-wide prototype controls ===');
 let seed=SEED();
 let page=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 ok(!!page.d.getElementById('systemSection')&&!!page.d.querySelector('#sidebar [data-panel="systemSection"]'),'System Management is one Admin page and navigation item');
-ok(page.d.querySelectorAll('#systemManagementRoot .system-card').length===6,'page contains the six requested tools');
+ok(page.d.querySelectorAll('#systemManagementRoot .system-card').length===6,'System Management keeps its six portal tools');
 const switches=[...page.d.querySelectorAll('#systemManagementRoot .system-toggle-input[role="switch"]')];
 ok(switches.length===3&&switches.every(input=>input.nextElementSibling?.classList.contains('system-toggle-track')),'maintenance and account controls render as accessible toggles');
 
@@ -47,6 +47,16 @@ page.d.getElementById('allowFacultyLogin').checked=false;
 page.d.getElementById('sessionTimeoutMinutes').value='45';
 page.w.SystemManagement.saveAccessRules();
 ok(page.read('systemSettings').allowFacultyLogin===false&&page.read('systemSettings').sessionTimeoutMinutes===45,'role access and session timeout are saved');
+
+ok(!!page.d.getElementById('loadPolicySection')&&[...page.d.querySelectorAll('#loadPolicyRoot .load-program-tabs button')].map(button=>button.textContent).join('|')==='BSCS|BSIT|BSIS|BSGAMEDEV|BSANIMATION','load policy has a separate page with all five program tabs');
+ok(page.d.querySelectorAll('.load-year-row').length===4&&page.d.querySelectorAll('.load-term-row').length===12,'load policy provides expandable lists for four years and twelve terms');
+page.w.SystemManagement.selectLoadProgram('BSGAMEDEV');
+ok(page.d.querySelectorAll('.curriculum-subject-row').length===59&&/45 total units/.test(page.d.querySelector('.load-year-row summary').textContent),'load editing lists curriculum subjects and calculated unit totals');
+ok(page.d.getElementById('load-BSCS-1-first').value==='20'&&page.d.getElementById('overload-BSCS-1-first').value==='30','First Year First Semester defaults to load 20 and maximum 30');
+page.d.getElementById('load-BSCS-1-first').value='22';
+page.d.getElementById('overload-BSCS-1-first').value='29';
+page.w.SystemManagement.saveLoadPolicies();
+ok(page.read('systemSettings').loadPolicies.BSCS[1].first.load===22&&page.read('systemSettings').loadPolicies.BSCS[1].first.overload===29,'Admin can edit and save normal and maximum loads');
 
 const backup=page.w.SystemManagement.createBackup();
 ok(backup.format==='neu-online-examination-backup'&&backup.records.users.length===4,'backup contains the existing browser records');
