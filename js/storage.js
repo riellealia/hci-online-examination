@@ -19,6 +19,17 @@ const SQLITE_BACKEND_ACTIVE = typeof location !== 'undefined'
   && /^https?:$/.test(location.protocol) && location.port === '3000';
 const SQLITE_LOCAL_ONLY = new Set(['currentUser','accessNotice']);
 function sqliteSessionToken() { try { return sessionStorage.getItem('serverSessionToken') || ''; } catch (_) { return ''; } }
+function resetSqliteLoginEntry() {
+  if (!SQLITE_BACKEND_ACTIVE || typeof location === 'undefined' || !/(?:^|\/)login\.html$/.test(location.pathname || '')) return false;
+  try {
+    // Opening sign-in starts a fresh authentication attempt. Remove only
+    // identity/session state; all hydrated academic collections remain.
+    sessionStorage.removeItem('serverSessionToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('accessNotice');
+  } catch (_) {}
+  return true;
+}
 function invalidateSqliteSession(message = 'Your server session expired. Please sign in again.') {
   try {
     sessionStorage.removeItem('serverSessionToken');
@@ -112,7 +123,7 @@ function writeSqliteSync(method, key, value) {
   }
 }
 
-sqliteBootstrap();
+if (!resetSqliteLoginEntry()) sqliteBootstrap();
 
 function storageNotify(message, type) {
   const now = (typeof performance !== 'undefined' && performance.now)
