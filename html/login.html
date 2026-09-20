@@ -631,7 +631,8 @@
     } catch (error) {
       console.warn('[login] audit event could not be recorded', error);
     }
-    window.location.href = route;
+    const destination = new URL(route, window.location.href).href;
+    window.location.replace(destination);
   });
 </script>
 </body>
