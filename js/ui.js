@@ -27,15 +27,22 @@ function reportFailure(what, detail) {
 
   console.error('[failure]', what, detail);
   if (typeof notify === 'function') {
+    const onLoginPage = typeof location !== 'undefined' && /(?:^|\/)login\.html$/.test(location.pathname || '');
+    const safeDetail = onLoginPage && key ? ` Technical detail: ${key}` : '';
     notify(
       `${what} did not complete. Nothing was changed — please try again, `
-      + 'and reload the page if it keeps happening.',
+      + `and reload the page if it keeps happening.${safeDetail}`,
       'error', 7000);
   }
 }
 
 if (typeof window !== 'undefined') {
   window.addEventListener('error', e => {
+    const source = String(e.filename || '');
+    if (/^(?:chrome|moz|safari-web)-extension:\/\//i.test(source)) return;
+    if (source) {
+      try { if (new URL(source, location.href).origin !== location.origin) return; } catch (_) {}
+    } else if (!e.error && (!e.message || e.message === 'Script error.')) return;
     // Ignore failed images/stylesheets; those are reported separately.
     if (e.target && e.target !== window && e.target.tagName) {
       const tag = e.target.tagName.toLowerCase();

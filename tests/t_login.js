@@ -108,6 +108,11 @@ r.submit('legacy.coordinator','coord');
 cu=r.read('currentUser');
 ok(cu&&cu.role==='coordinator','legacy Faculty Coordinator role labels normalize to the Coordinator workspace role');
 
+r=openLogin({systemSettings:null});
+r.submit('dean.demo','dean123');
+cu=r.read('currentUser');
+ok(cu&&cu.role==='dean','stale null system settings do not block Dean login');
+
 console.log('\n=== V. Access controls use the detected account role ===');
 r=openLogin({systemSettings:{maintenance:true,maintenanceMessage:'Maintenance test'}});
 r.submit('2024-00001','delacruz3');

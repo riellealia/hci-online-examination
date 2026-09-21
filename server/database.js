@@ -30,6 +30,17 @@ function openDatabase(filename) {
     read(key, fallback = null) { const row = readOne.get(key); return row ? JSON.parse(row.value_json) : fallback; },
     all() { return Object.fromEntries(readAll.all().map(row => [row.collection_key, JSON.parse(row.value_json)])); },
     write(key, value) { upsert.run(key, JSON.stringify(value), new Date().toISOString()); return true; },
+    append(key, value) {
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        const row=readOne.get(key),items=row?JSON.parse(row.value_json):[];
+        if(!Array.isArray(items))throw new Error(`${key} is not an appendable collection.`);
+        if(!items.some(item=>item?.id&&item.id===value?.id))items.push(value);
+        upsert.run(key,JSON.stringify(items),new Date().toISOString());
+        db.exec('COMMIT');
+        return items;
+      } catch(error) { db.exec('ROLLBACK'); throw error; }
+    },
     delete(key) { remove.run(key); return true; },
     migrate(records, options = {}) {
       db.exec('BEGIN IMMEDIATE');

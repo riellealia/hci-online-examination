@@ -3,6 +3,7 @@ const ok=(condition,message)=>console.log(`  ${condition?'✅':'❌'} ${message}
 
 console.log('=== SECTIONS. Separate records, memberships, and inherited subjects ===');
 let seed=SEED();
+seed.curricula=[{program:'BSCS',yearLevel:3,term:'first',subjectCode:'SUB1',subjectName:'HCI',units:3,status:'active'},{program:'BSCS',yearLevel:3,term:'first',subjectCode:'SUB2',subjectName:'SE',units:3,status:'active'}];
 let r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 ok(r.read('sections').some(section=>section.id==='A'),'legacy student section is migrated to a section record');
 ok(!!r.d.querySelector('#sectionSection .table-corner-actions .corner-icon-btn svg'),'Section Add action floats in the table corner');
@@ -24,7 +25,7 @@ r.w.saveSection();
 ok(r.read('sections').some(section=>section.id==='3BSCS-2'&&section.program==='BSCS'&&section.yearLevel===3&&section.sectionNumber===2&&section.capacity===35),'new section stores its ID, year, curriculum, section number, and student capacity');
 const headings=[...r.d.querySelectorAll('#sectionTable th')].map(cell=>cell.textContent.trim());
 ok(headings.join('|')==='Unique ID|Year Level|Curriculum|Section|Count|Actions','section table uses the requested six-column academic order');
-ok([...r.d.getElementById('sectionProgram').options].map(option=>option.textContent).join('|')==='BSCS|BSIT|BSIS','curriculum choices are BSCS, BSIT, and BSIS');
+ok([...r.d.getElementById('sectionProgram').options].map(option=>option.value).join('|')==='BSCS|BSIT|BSIS|BSGAMEDEV|BSANIMATION','curriculum choices include BSCS, BSIT, BSIS, Game Development, and Digital Animation');
 const savedRow=[...r.d.querySelectorAll('#sectionTable tr')].find(row=>row.cells[0]?.textContent.includes('3BSCS-2'));
 ok(savedRow&&savedRow.cells[1].textContent==='3'&&savedRow.cells[2].textContent==='BSCS'&&savedRow.cells[3].textContent==='2'&&savedRow.cells[4].textContent==='0/35','3BSCS-2 displays its academic details and student count over limit');
 r.w.editItem('sections',r.read('sections').findIndex(section=>section.id==='3BSCS-2'));
@@ -43,10 +44,9 @@ r.d.getElementById('sectionName').value='Duplicate';
 r.w.saveSection();
 ok(r.read('sections').length===before,'duplicate section ID is rejected');
 
-r.w.openSectionSubjects(0);
+r.w.openSectionSubjects(r.read('sections').findIndex(section=>section.id==='3BSCS-2'));
 const subjectChecks=[...r.d.querySelectorAll('#sectionSubjects input[type="checkbox"]')];
-ok(subjectChecks.length===2,'section editor presents every subject as an explicit checkbox');
-subjectChecks.forEach(input=>input.checked=true);
+ok(subjectChecks.length===2,'section editor lists the active Load Management curriculum subjects');
 [...r.d.querySelectorAll('#sectionSubjects select[data-faculty-for]')].forEach(select=>select.value='F1');
 r.w.saveSectionSubjects();
 ok(r.read('sectionSubjects')[0].assignments.length===2&&r.read('sectionSubjects')[0].assignments.every(item=>item.facultyId==='F1'),'multiple subject offerings with professors are saved to one section');

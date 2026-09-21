@@ -28,7 +28,7 @@ ok(r.read('currentUser')===null,'stale session cleared from storage');
 
 console.log('\n=== E. URL tampering no longer switches identity ===');
 const t=load('faculty.html',{...SEED(),currentUser:{username:'F1',role:'faculty'}},{query:'?facultyId=F2'});
-const body=t.d.body.textContent;
+const visibleBody=t.d.body.cloneNode(true);visibleBody.querySelectorAll('script,style').forEach(node=>node.remove());const body=visibleBody.textContent;
 ok(/Maria/.test(body),'shows the logged-in lecturer (F1 Maria)');
 ok(!/Jose/.test(body),'does NOT switch to F2 Jose via ?facultyId=');
 t.w.switchTab('exams-tab',t.d.querySelectorAll('.tab-btn')[1]);

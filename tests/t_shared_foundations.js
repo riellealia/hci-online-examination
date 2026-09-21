@@ -44,6 +44,10 @@ const submitted = approvals.submit({
 }, coordinator);
 assert.strictEqual(submitted.status, 'pending');
 assert.strictEqual(submitted.history.length, 1);
+assert.throws(() => approvals.submit({
+  type: 'professor-assignment', targetType: 'subject-offering', targetId: 'OFR-001',
+  proposedChange: { facultyId: 'faculty.001' }, reason: 'Duplicate proposal.'
+}, coordinator), error => error.code === 'DUPLICATE_PENDING');
 assert.throws(() => approvals.approve(submitted.id, '', coordinator), error => error.code === 'PERMISSION_DENIED');
 
 let applied = null;
@@ -57,8 +61,8 @@ const rejectedRequest = approvals.submit({
   type: 'student-overload', targetType: 'student', targetId: 'student.001',
   proposedChange: { units: 27 }, reason: 'Graduation requirement.'
 }, coordinator);
-assert.throws(() => approvals.reject(rejectedRequest.id, '', admin), /remarks are required/i);
-assert.strictEqual(approvals.reject(rejectedRequest.id, 'Maximum load exceeded.', admin).status, 'rejected');
+assert.throws(() => approvals.reject(rejectedRequest.id, '', dean), /remarks are required/i);
+assert.strictEqual(approvals.reject(rejectedRequest.id, 'Maximum load exceeded.', dean).status, 'rejected');
 
 const withdrawnRequest = approvals.submit({
   type: 'professor-assignment', targetType: 'subject-offering', targetId: 'OFR-002',
@@ -67,15 +71,25 @@ const withdrawnRequest = approvals.submit({
 assert.throws(() => approvals.withdraw(withdrawnRequest.id, '', dean), error => error.code === 'PERMISSION_DENIED');
 assert.strictEqual(approvals.withdraw(withdrawnRequest.id, 'Assignment changed.', coordinator).status, 'withdrawn');
 
+const cancelledRequest = approvals.submit({
+  type: 'student-overload', targetType: 'student', targetId: 'student.001',
+  proposedChange: { units: 25 }, reason: 'Temporary request.'
+}, coordinator);
+assert.throws(() => approvals.cancel(cancelledRequest.id, 'Not authorized.', dean), error => error.code === 'PERMISSION_DENIED');
+assert.strictEqual(approvals.cancel(cancelledRequest.id, 'Request is no longer applicable.', admin).status, 'cancelled');
+
 assert.strictEqual(approvals.query({ status: 'approved' }, admin).length, 1);
 assert.strictEqual(approvals.query({ status: 'approved' }).length, 0, 'anonymous callers cannot read approval records');
-assert.strictEqual(approvals.queryFor(coordinator).length, 3, 'Coordinator sees only their submitted requests');
-assert.strictEqual(approvals.queryFor(dean).length, 2, 'Dean sees only Professor-assignment requests');
+assert.strictEqual(approvals.queryFor(coordinator).length, 4, 'Coordinator sees only their submitted requests');
+assert.strictEqual(approvals.queryFor(dean).length, 4, 'Dean sees Professor-assignment and Student-overload applications');
+assert.strictEqual(approvals.queryFor(dean, { type: 'student-overload' }).length, 2, 'Dean query preserves the requested application type filter');
 assert.strictEqual(approvals.queryFor({ username: 'student.001', role: 'student' }).length, 0, 'Student cannot read approval records');
 assert.ok(records.applicationAuditLog.length >= 6, 'approval activity must create audit records');
-assert.ok(records.applicationAuditLog.every(item => item.category === 'approval' && item.result === 'success'));
+assert.ok(records.applicationAuditLog.every(item => item.category === 'approval'));
+assert.ok(records.applicationAuditLog.some(item => item.result === 'denied'), 'denied review and cancellation attempts are audited');
 assert.ok(records.applicationAuditLog.every(item => 'previousValue' in item && 'newValue' in item && 'academicPeriod' in item));
 assert.ok(records.notifications.some(item => item.userId === 'coord.001' && /approved/.test(item.message)));
+assert.ok(records.notifications.some(item => item.userId === 'dean.demo' && /awaiting review/.test(item.message)), 'review notices target active Dean accounts instead of a role-name placeholder');
 assert.strictEqual(vm.runInContext("AuditLog.query({category:'approval'}).length", context), records.applicationAuditLog.length);
 assert.strictEqual(vm.runInContext("AuditLog.queryFor({username:'student.001',role:'student'}).length", context), 0, 'Student cannot read administrative audit history');
 assert.ok(vm.runInContext("AuditLog.queryFor({username:'dean.demo',role:'dean'}).length", context) > 0, 'Dean can read college approval history');

@@ -32,7 +32,7 @@ function load(page, seed, opts={}){
   // Inline auth.js: jsdom will not fetch it from disk.
   let html=fs.readFileSync(DIR+page,'utf8')
     .replace('<script src="../js/storage.js"></script>', `<script>${STORAGE}</script>`)
-    .replace('<script src="../js/section-service.js"></script>', `<script>${SECTION_SERVICE}</script>`)
+    .replace('<script src="../js/section-service.js"></script>', () => `<script>${SECTION_SERVICE}</script>`)
     .replace('<script src="../js/student-profile.js"></script>', `<script>${STUDENT_PROFILE}</script>`)
     .replace('<script src="../js/faculty-profile.js"></script>', `<script>${FACULTY_PROFILE}</script>`)
     .replace('<script src="../js/audit-service.js"></script>', `<script>${AUDIT_SERVICE}</script>`)

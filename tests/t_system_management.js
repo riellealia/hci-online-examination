@@ -1,11 +1,12 @@
 const {load,SEED}=require('./harness');
+const officialCurricula=require('../assets/philippine-curricula.json');
 const ok=(condition,message)=>console.log(`  ${condition?'✅':'❌'} ${message}`);
 
 console.log('=== SYSTEM MANAGEMENT. Admin-wide prototype controls ===');
 let seed=SEED();
-let page=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
+let page=load('admin.html',{...seed,curricula:officialCurricula,currentUser:{username:'admin',role:'admin'}});
 ok(!!page.d.getElementById('systemSection')&&!!page.d.querySelector('#sidebar [data-panel="systemSection"]'),'System Management is one Admin page and navigation item');
-ok(page.d.querySelectorAll('#systemManagementRoot .system-card').length===6,'page contains the six requested tools');
+ok(page.d.querySelectorAll('#systemManagementRoot .system-card').length===6,'System Management keeps its six portal tools');
 const switches=[...page.d.querySelectorAll('#systemManagementRoot .system-toggle-input[role="switch"]')];
 ok(switches.length===3&&switches.every(input=>input.nextElementSibling?.classList.contains('system-toggle-track')),'maintenance and account controls render as accessible toggles');
 
@@ -47,6 +48,12 @@ page.d.getElementById('allowFacultyLogin').checked=false;
 page.d.getElementById('sessionTimeoutMinutes').value='45';
 page.w.SystemManagement.saveAccessRules();
 ok(page.read('systemSettings').allowFacultyLogin===false&&page.read('systemSettings').sessionTimeoutMinutes===45,'role access and session timeout are saved');
+
+ok(!!page.d.getElementById('loadPolicySection')&&page.d.querySelector('#loadPolicyRoot .management-page-head h3')?.textContent==='Subject Management'&&[...page.d.querySelectorAll('#loadPolicyRoot .load-program-tabs button')].map(button=>button.textContent.trim()).join('|')==='BSCS|BSIT|BSIS|BSEMC – Game Development|BSEMC – Digital Animation','Subject Management has a separate page with all five properly named program tabs');
+ok(page.d.querySelectorAll('.load-term-row').length>=8,'load policy provides expandable semester lists and hides empty summer terms');
+page.w.SystemManagement.selectLoadProgram('BSGAMEDEV');
+ok(page.d.querySelectorAll('.curriculum-subject-row').length===59&&/normal units/.test(page.d.querySelector('.semester-title-line').textContent),'load editing lists curriculum subjects and calculated unit limits');
+ok(page.w.SystemManagement.loadPolicies().BSCS[1].first.load===20&&page.w.SystemManagement.loadPolicies().BSCS[1].first.overload===30,'First Year First Semester defaults to load 20 and maximum 30');
 
 const backup=page.w.SystemManagement.createBackup();
 ok(backup.format==='neu-online-examination-backup'&&backup.records.users.length===4,'backup contains the existing browser records');

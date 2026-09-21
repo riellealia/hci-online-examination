@@ -25,7 +25,9 @@ for(const [page,user,count,firstLabel] of pages){
 
 const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
-ok(adminLinks.slice(0,3).join(',')==='dashboardSection,systemSection,auditSection','Admin places System Management and Audit Log directly below Dashboard');
+ok(adminLinks.slice(0,4).join(',')==='dashboardSection,systemSection,loadPolicySection,auditSection','Admin places System Management, Subject Management, and Audit Log directly below Dashboard');
+ok(adminNavPage.d.querySelector('#sidebar [data-panel="loadPolicySection"]')?.textContent.includes('Subject Management'),'unified curriculum and load workspace is named Subject Management');
+ok(!adminNavPage.d.querySelector('#sidebar [data-panel="subjectSection"]'),'archived legacy Subject Management is removed from navigation');
 const adminDivider=adminNavPage.d.querySelector('#sidebar .sidebar-divider[role="separator"]');
 ok(adminDivider?.textContent.trim()==='School controls'&&adminDivider.nextElementSibling?.dataset.panel==='facultySection','Admin sidebar divider separates system controls from school controls');
 adminNavPage.w.close();
@@ -92,8 +94,8 @@ r.d.getElementById('subCode').value='NEW-1';
 r.d.getElementById('subName').value='Brand New Subject';
 r.w.saveItem('subjects');
 const t=[...r.d.querySelectorAll('.toast')].pop();
-ok(!!t&&t.classList.contains('toast-success'),'adding a subject gives a success toast');
-ok(/NEW-1 added/.test(t.textContent),'and names what was added');
+ok(!!t&&t.classList.contains('toast-info'),'legacy subject creation redirects to the curriculum source of truth');
+ok(/Subject Management/.test(t.textContent),'and names where subjects are now added');
 r.d.getElementById('fID').value='F9';
 r.d.getElementById('fLast').value='Cruz';
 r.d.getElementById('fFirst').value='Ana';
