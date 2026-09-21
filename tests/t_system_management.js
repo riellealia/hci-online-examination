@@ -49,7 +49,7 @@ page.d.getElementById('sessionTimeoutMinutes').value='45';
 page.w.SystemManagement.saveAccessRules();
 ok(page.read('systemSettings').allowFacultyLogin===false&&page.read('systemSettings').sessionTimeoutMinutes===45,'role access and session timeout are saved');
 
-ok(!!page.d.getElementById('loadPolicySection')&&[...page.d.querySelectorAll('#loadPolicyRoot .load-program-tabs button')].map(button=>button.textContent.trim()).join('|')==='BSCS|BSIT|BSIS|BSEMC – Game Development|BSEMC – Digital Animation','load policy has a separate page with all five properly named program tabs');
+ok(!!page.d.getElementById('loadPolicySection')&&page.d.querySelector('#loadPolicyRoot .management-page-head h3')?.textContent==='Subject Management'&&[...page.d.querySelectorAll('#loadPolicyRoot .load-program-tabs button')].map(button=>button.textContent.trim()).join('|')==='BSCS|BSIT|BSIS|BSEMC – Game Development|BSEMC – Digital Animation','Subject Management has a separate page with all five properly named program tabs');
 ok(page.d.querySelectorAll('.load-term-row').length>=8,'load policy provides expandable semester lists and hides empty summer terms');
 page.w.SystemManagement.selectLoadProgram('BSGAMEDEV');
 ok(page.d.querySelectorAll('.curriculum-subject-row').length===59&&/normal units/.test(page.d.querySelector('.semester-title-line').textContent),'load editing lists curriculum subjects and calculated unit limits');

@@ -13,7 +13,7 @@ ok(/card-grid[^}]*repeat\(3/.test(css) && /repeat\(2/.test(css) && /grid-templat
 ok(/background: #fff !important/.test(css),'legacy multicolor card surfaces are overridden with neutral surfaces');
 ok(/table-icon-btn/.test(css) && /focus-visible/.test(css),'icon actions include hover and keyboard focus treatments');
 const r=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
-ok(r.d.querySelectorAll('#dashboardSection .card-note').length===7,'every management shortcut includes a concise description');
+ok(r.d.querySelectorAll('#dashboardSection .admin-dashboard-link:not([hidden]) .card-note').length===6,'every active management shortcut includes a concise description');
 const actions=[...r.d.querySelectorAll('#facultyTable .admin-row-action')];
 ok(actions.length>0&&actions.length===r.d.querySelectorAll('#facultyTable tr').length-1,'each Faculty row uses one compact settings action');
 ok(actions.every(action=>/Edit/.test(action.textContent)&&/Delete/.test(action.textContent)),'each Faculty settings menu names Edit and Delete');
@@ -23,7 +23,7 @@ ok(triggers.every(button=>button.getAttribute('aria-label') && button.title),'ic
 const firstFacultyCell=r.d.querySelector('#facultyTable tr:nth-child(2) td');
 firstFacultyCell.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:80,clientY:90}));
 ok(firstFacultyCell.closest('tr').querySelector('.section-action-menu').classList.contains('open'),'right-clicking a table cell opens its settings menu');
-ok(r.d.querySelectorAll('.plus-circle').length===4 && [...r.d.querySelectorAll('.plus-circle')].every(button=>button.tagName==='BUTTON'),'remaining dashboard add actions use semantic buttons after removing the allotment shortcut');
+ok(r.d.querySelectorAll('.admin-dashboard-link:not([hidden]) .plus-circle').length===3 && [...r.d.querySelectorAll('.admin-dashboard-link:not([hidden]) .plus-circle')].every(button=>button.tagName==='BUTTON'),'active dashboard add actions use semantic buttons after archiving the legacy subject shortcut');
 ok(/\.student-profile-page[^}]*height:calc\(100dvh - 36px\)[^}]*overflow-y:auto/.test(css),'profile page has a viewport-bound vertical scroll region');
 r.w.close();
 process.exit(0);

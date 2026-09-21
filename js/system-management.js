@@ -11,7 +11,17 @@ var SystemManagement=(()=>{
   let activeCurriculumYear=1,activeCurriculumTerm='first',curriculumSelectMode=false;
   const curriculumProgramNames={BSCS:'BSCS',BSIT:'BSIT',BSIS:'BSIS',BSGAMEDEV:'BSEMC \u2013 Game Development',BSANIMATION:'BSEMC \u2013 Digital Animation'};
   const curriculumProgramName=program=>curriculumProgramNames[program]||program;
-  function labelCurriculumPrograms(root=document){root.querySelectorAll('#loadPolicyRoot .load-program-tabs button').forEach(button=>{const code=button.dataset.program||button.textContent.trim();const label=curriculumProgramName(code);button.dataset.program=code;if(button.textContent!==label)button.textContent=label});root.querySelectorAll('.curriculum-editor-modal select[name="program"] option').forEach(option=>{const label=curriculumProgramName(option.value);if(option.textContent!==label)option.textContent=label});root.querySelectorAll('#loadPolicyRoot .semester-heading-copy>span').forEach(meta=>{meta.textContent=meta.textContent.replace(/\s*·\s*\d+\s+curriculum units\s*$/i,'')});syncLoadManagementSource();installCurriculumDragAndDrop(root)}
+  function labelCurriculumPrograms(root=document){
+    const heading=root.querySelector('#loadPolicyRoot .management-page-head h3');
+    const description=root.querySelector('#loadPolicyRoot .management-page-head p');
+    if(heading)heading.textContent='Subject Management';
+    if(description)description.textContent='Manage curricula, subjects, units, semester placement, and load limits.';
+    root.querySelectorAll('#loadPolicyRoot .load-program-tabs button').forEach(button=>{const code=button.dataset.program||button.textContent.trim();const label=curriculumProgramName(code);button.dataset.program=code;if(button.textContent!==label)button.textContent=label});
+    root.querySelectorAll('.curriculum-editor-modal select[name="program"] option').forEach(option=>{const label=curriculumProgramName(option.value);if(option.textContent!==label)option.textContent=label});
+    root.querySelectorAll('#loadPolicyRoot .semester-heading-copy>span').forEach(meta=>{meta.textContent=meta.textContent.replace(/\s*·\s*\d+\s+curriculum units\s*$/i,'')});
+    syncLoadManagementSource();
+    installCurriculumDragAndDrop(root)
+  }
 
   function saveSettings(patch,message){const next={...settings(),...patch};if(!DB.write('systemSettings',next))return false;AuditLog.record('update','system-settings','global',{fields:Object.keys(patch)});notify(message,'success');render();return true}
   function saveMaintenance(){return saveSettings({maintenance:document.getElementById('systemMaintenance').checked,maintenanceMessage:document.getElementById('maintenanceMessage').value.trim()||defaults.maintenanceMessage},'Maintenance settings saved.');}

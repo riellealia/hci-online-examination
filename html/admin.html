@@ -72,7 +72,7 @@
         <div class="card-top"><div class="card-icon">👥</div><div class="card-count" id="countStudents">0</div></div>
         <div class="card-bottom beige"><div class="card-copy"><div class="card-label">Students</div><div class="card-note">Profiles and enrollments</div></div><button class="plus-circle" onclick="event.stopPropagation();openStudentModal()" aria-label="Add student" title="Add student">＋</button></div>
       </div>
-      <div class="card green admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'subjectSection')" onkeydown="activateAdminCard(event,'subjectSection')" aria-label="Open Subject Management">
+      <div class="card green admin-dashboard-link" hidden aria-hidden="true" data-archived="true" onclick="openAdminCard(event,'subjectSection')">
         <div class="card-top"><div class="card-icon">📚</div><div class="card-count" id="countSubjects">0</div></div>
         <div class="card-bottom green"><div class="card-copy"><div class="card-label">Subjects</div><div class="card-note">Course catalog and offerings</div></div><button class="plus-circle" onclick="event.stopPropagation();openModal('subjectModal')" aria-label="Add subject" title="Add subject">＋</button></div>
       </div>
@@ -88,9 +88,9 @@
         <div class="card-top"><div class="card-icon">&#9881;</div><div class="card-count">6</div></div>
         <div class="card-bottom green"><div class="card-copy"><div class="card-label">System management</div><div class="card-note">Announcements, access, and data tools</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
       </div>
-      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'loadPolicySection')" onkeydown="activateAdminCard(event,'loadPolicySection')" aria-label="Open Student Load Policy">
+      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'loadPolicySection')" onkeydown="activateAdminCard(event,'loadPolicySection')" aria-label="Open Subject Management">
         <div class="card-top"><div class="card-icon">&#9636;</div><div class="card-count">5</div></div>
-        <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Student load policy</div><div class="card-note">Programs, year levels, and term limits</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
+        <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Subject management</div><div class="card-note">Curricula, subjects, units, and load limits</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
       </div>
     </div>
   </div>
@@ -135,7 +135,9 @@
     <div class="management-table-shell"><div class="table-corner-actions"><button class="corner-icon-btn" onclick="openSectionModal()" aria-label="Add section" title="Add section"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg></button><button class="corner-icon-btn export-action" onclick="exportTableCsv('sectionTable','sections.csv')" aria-label="Export sections CSV" title="Export sections CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="sectionTable"></table></div></div>
   </div>
 
-  <div id="subjectSection" class="panel">
+  <!-- Archived legacy catalog. The unified curriculum workspace in loadPolicySection
+       is now the only visible Subject Management page. -->
+  <div id="subjectSection" class="panel" hidden aria-hidden="true" data-archived="true">
     <div class="management-page-head"><h3>Subjects</h3><p>Manage subject codes, names, and academic offerings.</p></div>
     <div class="management-table-shell">
     <div class="action-box">
@@ -419,7 +421,7 @@
     document.getElementById('sectionSubjectsID').value=section.id; document.getElementById('sectionSubjectsTitle').textContent=`Subjects for ${section.id}`;
     const existingRecord=sectionSubjects.find(item=>item.sectionId===section.id), assigned=new Map((existingRecord?.assignments||[]).map(item=>[item.subjectCode,item]));
     const curriculumSubjects=DB.read('curricula',[]).filter(item=>item.program===section.program&&Number(item.yearLevel)===Number(section.yearLevel)&&item.term==='first'&&item.status!=='archived'&&item.removed!==true).sort((a,b)=>(Number(a.order??9999)-Number(b.order??9999))||String(a.subjectCode).localeCompare(String(b.subjectCode)));
-    document.getElementById('sectionSubjects').innerHTML=curriculumSubjects.length?curriculumSubjects.map(subject=>`<div class="section-offering-option"><label class="section-subject-option"><input type="checkbox" value="${subject.subjectCode}" checked disabled aria-disabled="true"><span><strong>${subject.subjectCode}</strong><small>${subject.subjectName}</small></span></label><select data-faculty-for="${subject.subjectCode}" aria-label="Professor for ${subject.subjectCode}"><option value="">Choose professor</option>${faculty.map(person=>`<option value="${person.id}"${assigned.get(subject.subjectCode)?.facultyId===person.id?' selected':''}>${person.last}, ${person.first}</option>`).join('')}</select></div>`).join(''):'<p class="profile-empty">No active first-semester subjects exist in Load Management for this course and year.</p>'; openModal('sectionSubjectsModal');
+    document.getElementById('sectionSubjects').innerHTML=curriculumSubjects.length?curriculumSubjects.map(subject=>`<div class="section-offering-option"><label class="section-subject-option"><input type="checkbox" value="${subject.subjectCode}" checked disabled aria-disabled="true"><span><strong>${subject.subjectCode}</strong><small>${subject.subjectName}</small></span></label><select data-faculty-for="${subject.subjectCode}" aria-label="Professor for ${subject.subjectCode}"><option value="">Choose professor</option>${faculty.map(person=>`<option value="${person.id}"${assigned.get(subject.subjectCode)?.facultyId===person.id?' selected':''}>${person.last}, ${person.first}</option>`).join('')}</select></div>`).join(''):'<p class="profile-empty">No active first-semester subjects exist in Subject Management for this course and year.</p>'; openModal('sectionSubjectsModal');
   }
 
   function openAdminRowMenu(trigger,x,y){
@@ -670,7 +672,7 @@
     }
 
     if(type==='subjects'){
-      notify('Add and edit active subjects in Student Load Policy. Load Management is the curriculum source of truth.','info');
+      notify('Add and edit active subjects in Subject Management.','info');
       editIndex=null;editType=null;closeModal('subjectModal');return;
     }
 
@@ -1013,7 +1015,7 @@
     if(!required(arr, 'Unknown record type — nothing was deleted.')) return;
     const item = arr[index];
     if(!required(item, 'That record no longer exists. The list has been refreshed.')) { loadAll(); return; }
-    if(type==='subjects'&&DB.read('curricula',[]).some(entry=>entry.subjectCode===item.code&&entry.status!=='archived'&&entry.removed!==true))return notify('Remove or archive this subject in Student Load Policy. Load Management is the curriculum source of truth.','info');
+    if(type==='subjects'&&DB.read('curricula',[]).some(entry=>entry.subjectCode===item.code&&entry.status!=='archived'&&entry.removed!==true))return notify('Remove or archive this subject in Subject Management.','info');
 
     const d = describeDeletion(type,item);
     if(!(await confirmDialog({
@@ -1092,7 +1094,7 @@
       openModal('studentModal');
     }
     if(type==='subjects'){
-      if(DB.read('curricula',[]).some(entry=>entry.subjectCode===item.code&&entry.status!=='archived'&&entry.removed!==true)){editIndex=null;editType=null;return notify('Edit this subject in Student Load Policy. Load Management is the curriculum source of truth.','info')}
+      if(DB.read('curricula',[]).some(entry=>entry.subjectCode===item.code&&entry.status!=='archived'&&entry.removed!==true)){editIndex=null;editType=null;return notify('Edit this subject in Subject Management.','info')}
       document.getElementById('subCode').value=item.code;
       document.getElementById('subName').value=item.name;
       openModal('subjectModal');
@@ -1375,13 +1377,12 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
     items: [
       { id: 'dashboardSection',      label: 'Dashboard',                 icon: '&#8962;' },
       { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' },
-      { id: 'loadPolicySection',     label: 'Student Load Policy',       icon: '&#9636;' },
+      { id: 'loadPolicySection',     label: 'Subject Management',        icon: '&#128218;' },
       { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
       { divider: true, label: 'School controls' },
       { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
       { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
       { id: 'sectionSection',        label: 'Section Management',        icon: '&#9638;' },
-      { id: 'subjectSection',        label: 'Subject Management',        icon: '&#128218;' },
     ],
     titleEl: null,
     onSelect(id) {
