@@ -21,6 +21,10 @@ const ApprovalService = (() => {
     items.unshift({ id: `NTF-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, userId, requestId, message, read: false, createdAt: now() });
     DB.write('notifications', items);
   }
+  function noticeRole(roleName, message, requestId) {
+    const recipients = DB.read('users', []).filter(user => role(user.role) === roleName && PermissionService.active({ username: user.username, role: user.role }));
+    recipients.forEach(user => notice(user.username, message, requestId));
+  }
   function audit(action, request, details = {}, actingUser = null, result = 'success') {
     if (typeof AuditLog !== 'undefined') AuditLog.record(action, 'approval-request', request.id, details, actingUser, { category: 'approval', result, academicPeriod: request.academicPeriod });
   }
@@ -39,9 +43,12 @@ const ApprovalService = (() => {
       reviewerId: '', reviewerRole: config.review, reviewerRemarks: '', decisionAt: '',
       history: [{ status: 'pending', at: createdAt, actorId: actingUser.username, actorRole: role(actingUser.role), remarks: input.reason.trim() }]
     };
-    const records = read(); records.push(request); save(records);
+    const records = read();
+    if (records.some(item => item.type === request.type && item.targetId === request.targetId && item.status === 'pending')) fail('A pending request already exists for this target.', 'DUPLICATE_PENDING');
+    records.push(request); save(records);
     audit('submit', request, { type: request.type, targetType: request.targetType, targetId: request.targetId }, actingUser);
-    notice(input.reviewerId || config.review, `New ${request.type} request awaiting review.`, request.id);
+    if (input.reviewerId) notice(input.reviewerId, `New ${request.type} request awaiting review.`, request.id);
+    else noticeRole(config.review, `New ${request.type} request awaiting review.`, request.id);
     return clone(request);
   }
   function decide(requestId, decision, remarks = '', suppliedActor = null) {
@@ -94,7 +101,7 @@ const ApprovalService = (() => {
     if (!PermissionService.active(actingUser)) return [];
     const actingRole = role(actingUser.role);
     if (actingRole === 'admin') return filterRecords(filters);
-    if (actingRole === 'dean') return filterRecords({ ...filters, type: '' }).filter(item => item.reviewerRole === 'dean');
+    if (actingRole === 'dean') return filterRecords(filters).filter(item => item.reviewerRole === 'dean');
     if (actingRole === 'coordinator') return filterRecords(filters).filter(item => item.requesterId === actingUser.username);
     return [];
   }
