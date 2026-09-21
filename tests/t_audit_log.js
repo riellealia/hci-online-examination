@@ -13,8 +13,8 @@ seed.studentSubmissions=[{id:'x',studentId:'S1',examId:'e1',total:10,answers:[]}
 r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 ok(!r.d.getElementById('allotmentSection'),'Student–Subject Allotment page is removed');
 ok(![...r.d.querySelectorAll('#sidebar a')].some(link=>/Student.Subject Allotment/.test(link.textContent)),'removed page is absent from navigation');
-r.d.getElementById('subCode').value='AUD1'; r.d.getElementById('subName').value='Audit Subject'; r.w.saveItem('subjects');
-ok(r.read('applicationAuditLog').some(entry=>entry.action==='create'&&entry.entityType==='subject'&&entry.actorId==='admin'),'Admin creation records who changed what');
+r.d.getElementById('fID').value='99-99999-999'; r.d.getElementById('fLast').value='Audit'; r.d.getElementById('fFirst').value='Professor'; r.w.saveItem('faculty');
+ok(r.read('applicationAuditLog').some(entry=>entry.action==='create'&&entry.entityType==='faculty'&&entry.actorId==='admin'),'Admin creation records who changed what');
 ok(!!r.d.getElementById('auditTable'),'Audit page provides the filtered activity table');
 ok(r.d.querySelector('#auditTableTools [data-table-tools="audit"]'),'Audit table retains its management tools');
 ok(!r.d.getElementById('auditExam')&&!r.d.getElementById('participationSummary'),'Exam participation controls and summary are removed');
@@ -22,7 +22,7 @@ ok(!r.d.getElementById('auditTaken')&&!r.d.getElementById('auditNotTaken'),'Took
 ok(/sign-in details/i.test(r.d.querySelector('#auditSection .panel-help').textContent),'Audit scope is sign-ins and staff changes');
 ok([...r.d.querySelectorAll('.audit-tab')].map(button=>button.textContent.trim()).join('|')==='Professors|Admin|Log in','Audit activity is separated into Professors, Admin, and Log in tabs');
 r.w.setAuditTab('admin');
-ok(r.d.querySelector('[data-audit-tab="admin"]').getAttribute('aria-selected')==='true'&&r.d.getElementById('auditTable').textContent.includes('AUD1'),'Admin tab shows administrative changes');
+ok(r.d.querySelector('[data-audit-tab="admin"]').getAttribute('aria-selected')==='true'&&r.d.getElementById('auditTable').textContent.includes('99-99999-999'),'Admin tab shows administrative changes');
 r.w.setAuditTab('login');
-ok(!r.d.getElementById('auditTable').textContent.includes('AUD1'),'Log in tab excludes change records');
+ok(!r.d.getElementById('auditTable').textContent.includes('99-99999-999'),'Log in tab excludes change records');
 r.w.close(); process.exit(0);

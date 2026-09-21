@@ -3,11 +3,13 @@ const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 console.log('=== RELATIONSHIPS. Per-subject sections and current management flows ===');
 
 const seed=SEED();
-seed.sections=[{id:'A',name:'1',capacity:30},{id:'B',name:'2',capacity:30}];
-seed.students[0].sections=['A','B'];
-seed.studentEnrollments=[{id:'EA',studentId:'S1',subjectCode:'SUB1',sectionId:'A'},{id:'EB',studentId:'S1',subjectCode:'SUB2',sectionId:'B'}];
+seed.sections=[{id:'1BSCS-1',name:'1',program:'BSCS',yearLevel:1,capacity:30},{id:'1BSCS-2',name:'2',program:'BSCS',yearLevel:1,capacity:30}];
+seed.students[0].sections=['1BSCS-1','1BSCS-2'];
+seed.studentEnrollments=[{id:'EA',studentId:'S1',subjectCode:'SUB1',sectionId:'1BSCS-1'},{id:'EB',studentId:'S1',subjectCode:'SUB2',sectionId:'1BSCS-2'}];
+seed.curricula=[{program:'BSCS',yearLevel:1,term:'first',subjectCode:'SUB1',subjectName:'HCI',units:3,status:'active'},{program:'BSCS',yearLevel:1,term:'first',subjectCode:'SUB2',subjectName:'SE',units:3,status:'active'}];
+seed.sectionSubjects=[{sectionId:'1BSCS-1',assignments:[{id:'O1',subjectCode:'SUB1',facultyId:'F1'},{id:'O2',subjectCode:'SUB2',facultyId:'F2'}]},{sectionId:'1BSCS-2',assignments:[{id:'O3',subjectCode:'SUB1',facultyId:'F1'},{id:'O4',subjectCode:'SUB2',facultyId:'F2'}]}];
 let r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
-ok(r.read('studentEnrollments').map(item=>item.sectionId).sort().join(',')==='A,B','one student can use different sections for different subjects');
+ok(new Set(r.read('studentEnrollments').map(item=>item.sectionId)).size===2,'one student can retain curriculum enrollments across different sections');
 r.w.editItem('students',0);
 ok(!r.d.getElementById('sSections')&&r.d.getElementById('sYear'),'Student editor uses year level instead of a global section picker');
 r.d.getElementById('sLast').value='Cruz';r.d.getElementById('sFirst').value='Juan';r.w.saveItem('students');
@@ -15,7 +17,7 @@ ok(r.read('studentEnrollments').length===2,'editing identity details preserves p
 ok(r.d.querySelectorAll('.upload-action').length===3,'current CSV imports use three accessible upload actions');
 ok([...r.d.querySelectorAll('.upload-action')].every(label=>label.getAttribute('aria-label')&&label.title),'upload icons keep labels and tooltips');
 ok(r.d.querySelectorAll('.management-table-shell > .action-box').length===4,'management actions use the current table-corner pattern');
-ok(r.d.querySelectorAll('.management-page-head').length===5,'management pages retain titles and descriptions');
+ok(r.d.querySelectorAll('.management-page-head').length===6,'management pages retain titles and descriptions');
 ok(r.d.querySelectorAll('.export-action').length===6,'all six Admin data tables provide CSV export actions');
 r.w.close();
 

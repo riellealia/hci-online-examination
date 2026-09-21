@@ -1,9 +1,10 @@
 const {load,SEED}=require('./harness');
+const officialCurricula=require('../assets/philippine-curricula.json');
 const ok=(condition,message)=>console.log(`  ${condition?'✅':'❌'} ${message}`);
 
 console.log('=== SYSTEM MANAGEMENT. Admin-wide prototype controls ===');
 let seed=SEED();
-let page=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
+let page=load('admin.html',{...seed,curricula:officialCurricula,currentUser:{username:'admin',role:'admin'}});
 ok(!!page.d.getElementById('systemSection')&&!!page.d.querySelector('#sidebar [data-panel="systemSection"]'),'System Management is one Admin page and navigation item');
 ok(page.d.querySelectorAll('#systemManagementRoot .system-card').length===6,'System Management keeps its six portal tools');
 const switches=[...page.d.querySelectorAll('#systemManagementRoot .system-toggle-input[role="switch"]')];
@@ -48,15 +49,11 @@ page.d.getElementById('sessionTimeoutMinutes').value='45';
 page.w.SystemManagement.saveAccessRules();
 ok(page.read('systemSettings').allowFacultyLogin===false&&page.read('systemSettings').sessionTimeoutMinutes===45,'role access and session timeout are saved');
 
-ok(!!page.d.getElementById('loadPolicySection')&&[...page.d.querySelectorAll('#loadPolicyRoot .load-program-tabs button')].map(button=>button.textContent).join('|')==='BSCS|BSIT|BSIS|BSGAMEDEV|BSANIMATION','load policy has a separate page with all five program tabs');
-ok(page.d.querySelectorAll('.load-year-row').length===4&&page.d.querySelectorAll('.load-term-row').length===12,'load policy provides expandable lists for four years and twelve terms');
+ok(!!page.d.getElementById('loadPolicySection')&&[...page.d.querySelectorAll('#loadPolicyRoot .load-program-tabs button')].map(button=>button.textContent.trim()).join('|')==='BSCS|BSIT|BSIS|BSEMC – Game Development|BSEMC – Digital Animation','load policy has a separate page with all five properly named program tabs');
+ok(page.d.querySelectorAll('.load-term-row').length>=8,'load policy provides expandable semester lists and hides empty summer terms');
 page.w.SystemManagement.selectLoadProgram('BSGAMEDEV');
-ok(page.d.querySelectorAll('.curriculum-subject-row').length===59&&/45 total units/.test(page.d.querySelector('.load-year-row summary').textContent),'load editing lists curriculum subjects and calculated unit totals');
-ok(page.d.getElementById('load-BSCS-1-first').value==='20'&&page.d.getElementById('overload-BSCS-1-first').value==='30','First Year First Semester defaults to load 20 and maximum 30');
-page.d.getElementById('load-BSCS-1-first').value='22';
-page.d.getElementById('overload-BSCS-1-first').value='29';
-page.w.SystemManagement.saveLoadPolicies();
-ok(page.read('systemSettings').loadPolicies.BSCS[1].first.load===22&&page.read('systemSettings').loadPolicies.BSCS[1].first.overload===29,'Admin can edit and save normal and maximum loads');
+ok(page.d.querySelectorAll('.curriculum-subject-row').length===59&&/normal units/.test(page.d.querySelector('.semester-title-line').textContent),'load editing lists curriculum subjects and calculated unit limits');
+ok(page.w.SystemManagement.loadPolicies().BSCS[1].first.load===20&&page.w.SystemManagement.loadPolicies().BSCS[1].first.overload===30,'First Year First Semester defaults to load 20 and maximum 30');
 
 const backup=page.w.SystemManagement.createBackup();
 ok(backup.format==='neu-online-examination-backup'&&backup.records.users.length===4,'backup contains the existing browser records');

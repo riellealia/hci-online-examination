@@ -13,7 +13,7 @@ ok(/card-grid[^}]*repeat\(3/.test(css) && /repeat\(2/.test(css) && /grid-templat
 ok(/background: #fff !important/.test(css),'legacy multicolor card surfaces are overridden with neutral surfaces');
 ok(/table-icon-btn/.test(css) && /focus-visible/.test(css),'icon actions include hover and keyboard focus treatments');
 const r=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
-ok(r.d.querySelectorAll('#dashboardSection .card-note').length===6,'every management shortcut includes a concise description');
+ok(r.d.querySelectorAll('#dashboardSection .card-note').length===7,'every management shortcut includes a concise description');
 const actions=[...r.d.querySelectorAll('#facultyTable .admin-row-action')];
 ok(actions.length>0&&actions.length===r.d.querySelectorAll('#facultyTable tr').length-1,'each Faculty row uses one compact settings action');
 ok(actions.every(action=>/Edit/.test(action.textContent)&&/Delete/.test(action.textContent)),'each Faculty settings menu names Edit and Delete');
