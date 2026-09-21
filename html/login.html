@@ -605,7 +605,7 @@
       return;
     }
 
-    const access = JSON.parse(localStorage.getItem('systemSettings') || '{}');
+    const access = JSON.parse(localStorage.getItem('systemSettings') || '{}') || {};
     if (effectiveRole !== 'admin' && access.maintenance) {
       showAuthError(access.maintenanceMessage || 'The portal is currently under maintenance.');
       return;
