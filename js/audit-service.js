@@ -1,13 +1,31 @@
 /* Append-only operational audit trail. This is application data, separate from
    the Markdown development log in .plans/progress. */
 const AuditLog = {
+  categories: Object.freeze([
+    'authentication/session', 'access/profile', 'account/lifecycle', 'permissions',
+    'academic setup', 'approval', 'assignment/enrollment', 'schedule/load',
+    'examination/grading', 'system/maintenance'
+  ]),
+  categoryFor(action, entityType, details = {}) {
+    const verb=String(action||'').toLowerCase(),entity=String(entityType||'').toLowerCase(),fields=details.fields||[];
+    if(entity==='session'||entity==='password-reset'||['login','logout'].includes(verb))return'authentication/session';
+    if(entity.includes('profile')||verb.includes('profile-view'))return'access/profile';
+    if(entity.includes('account')||['faculty','student','user','coordinator'].includes(entity)||['activate','deactivate','archive-account','restore-account'].includes(verb))return'account/lifecycle';
+    if(entity==='system-settings'&&fields.some(field=>['allowFacultyLogin','allowStudentLogin','sessionTimeoutMinutes'].includes(field))||entity.includes('permission'))return'permissions';
+    if(entity==='system-settings'&&fields.some(field=>['loadPolicies'].includes(field))||entity.includes('schedule')||entity.includes('load'))return'schedule/load';
+    if(entity.includes('curriculum')||['section','subject'].includes(entity)||entity==='system-settings'&&fields.some(field=>['schoolYear','semester'].includes(field)))return'academic setup';
+    if(entity==='approval-request')return'approval';
+    if(entity.includes('offering')||entity.includes('enrollment')||entity.includes('assignment')||entity==='student-subject'||entity==='faculty-subject-sections')return'assignment/enrollment';
+    if(entity.includes('exam')||entity.includes('question')||entity.includes('submission')||entity.includes('grade')||entity.includes('report'))return'examination/grading';
+    return'system/maintenance';
+  },
   record(action, entityType, entityId, details = {}, actor = null, metadata = {}) {
     const session = actor || DB.read('currentUser', null) || { username: 'system', role: 'system' };
     const entry = {
       id: `audit_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
       at: new Date().toISOString(), actorId: session.username || 'unknown',
       actorRole: session.role || 'unknown', action, entityType,
-      entityId: String(entityId || ''), category: metadata.category || details.category || 'system',
+      entityId: String(entityId || ''), category: metadata.category || details.category || this.categoryFor(action,entityType,details),
       previousValue: metadata.previousValue === undefined ? null : metadata.previousValue,
       newValue: metadata.newValue === undefined ? null : metadata.newValue,
       result: metadata.result || 'success', reason: metadata.reason || details.reason || '',
@@ -25,6 +43,7 @@ const AuditLog = {
       .filter(item=>!filters.category||item.category===filters.category)
       .filter(item=>!filters.action||item.action===filters.action)
       .filter(item=>!filters.entityType||item.entityType===filters.entityType)
+      .filter(item=>!filters.entityId||String(item.entityId||'').toLowerCase().includes(String(filters.entityId).toLowerCase()))
       .filter(item=>!filters.result||item.result===filters.result)
       .filter(item=>!filters.from||new Date(item.at)>=new Date(filters.from))
       .filter(item=>!filters.to||new Date(item.at)<=new Date(filters.to))

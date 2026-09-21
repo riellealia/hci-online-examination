@@ -153,13 +153,21 @@
 
   <div id="auditSection" class="panel">
     <h3>Application Audit Log</h3>
-    <p class="panel-help">Sign-in details and changes made by professors or administrators are recorded automatically.</p>
-    <div class="audit-tabs" role="tablist" aria-label="Audit log categories">
-      <button type="button" class="audit-tab active" role="tab" aria-selected="true" data-audit-tab="faculty" onclick="setAuditTab('faculty')">Professors</button>
-      <button type="button" class="audit-tab" role="tab" aria-selected="false" data-audit-tab="admin" onclick="setAuditTab('admin')">Admin</button>
-      <button type="button" class="audit-tab" role="tab" aria-selected="false" data-audit-tab="login" onclick="setAuditTab('login')">Log in</button>
+    <p class="panel-help">Search and filter authentication, access, lifecycle, permissions, academic, approval, enrollment, load, examination, and maintenance activity.</p>
+    <div class="audit-filter-grid" aria-label="Audit log filters">
+      <label>From date<input id="auditFrom" type="date" onchange="renderAuditLog()"></label>
+      <label>To date<input id="auditTo" type="date" onchange="renderAuditLog()"></label>
+      <label>Actor<select id="auditActor" onchange="renderAuditLog()"><option value="">All actors</option></select></label>
+      <label>Role<select id="auditRole" onchange="renderAuditLog()"><option value="">All roles</option><option value="admin">Admin</option><option value="dean">Dean</option><option value="coordinator">Faculty Coordinator</option><option value="faculty">Professor</option><option value="student">Student</option><option value="system">System</option></select></label>
+      <label>Category<select id="auditCategory" onchange="renderAuditLog()"><option value="">All categories</option></select></label>
+      <label>Action<select id="auditAction" onchange="renderAuditLog()"><option value="">All actions</option></select></label>
+      <label>Target type<select id="auditTargetType" onchange="renderAuditLog()"><option value="">All target types</option></select></label>
+      <label>Target ID<input id="auditTargetId" type="search" placeholder="Search target ID" oninput="renderAuditLog()"></label>
+      <label>Result<select id="auditResult" onchange="renderAuditLog()"><option value="">All results</option><option value="success">Success</option><option value="denied">Denied</option><option value="failed">Failed</option></select></label>
+      <button type="button" class="audit-reset" onclick="resetAuditFilters()">Reset filters</button>
     </div>
-    <h3 class="audit-events-title">Recorded activity</h3><div class="management-table-shell audit-table-shell"><div class="table-corner-actions" id="auditTableTools"><button class="corner-icon-btn export-action" onclick="exportTableCsv('auditTable','audit-log.csv')" aria-label="Export audit log CSV" title="Export audit log CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="auditTable"></table></div></div>
+    <p id="auditFilterSummary" class="panel-help" aria-live="polite"></p>
+    <h3 class="audit-events-title">Recorded activity</h3><div class="management-table-shell audit-table-shell"><div class="table-corner-actions" id="auditTableTools"><button class="corner-icon-btn export-action" onclick="exportTableCsv('auditTable','audit-log.csv')" aria-label="Export filtered audit log CSV" title="Export filtered audit log CSV"><span aria-hidden="true">⇩</span></button></div><div class="table-scroll"><table id="auditTable"></table></div></div>
   </div>
 
   <div id="systemSection" class="panel">
@@ -482,7 +490,7 @@
   function studentAccountRecord(student){return DB.read('users',[]).find(user=>user.username===student?.id&&user.role==='student')}
   function refreshStudentCommandState(){const student=activeStudentEnrollmentStudent,disabled=studentAccountRecord(student)?.disabled===true,action=document.querySelector('#studentEnrollmentModal .student-deactivate-action');if(!student||!action)return;document.getElementById('studentEnrollmentMeta').textContent=`${student.id} · ${disabled?'Account deactivated':'Account active'}`;action.classList.toggle('danger',!disabled);action.querySelector('span:last-child').textContent=disabled?'Activate account':'Deactivate account';action.querySelector('span:first-child').innerHTML=disabled?'&#10003;':'&#9940;'}
   function showStudentCommandTab(tab){const student=activeStudentEnrollmentStudent;if(!student)return;document.querySelectorAll('[data-command-tab]').forEach(button=>button.classList.toggle('active',button.dataset.commandTab===tab));if(tab==='subjects')return renderStudentEnrollmentPage();activeStudentProfile=StudentProfileService.build(student,{faculty,subjects,sections,subjectAssignments,allotments,sectionSubjects,studentEnrollments,exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:AuditLog.read()});showStudentProfileTab(tab);document.getElementById('studentEnrollmentContent').innerHTML=document.getElementById('studentProfileContent').innerHTML;document.querySelectorAll('[data-command-tab]').forEach(button=>button.classList.toggle('active',button.dataset.commandTab===tab))}
-  function openStudentEnrollmentPage(index){const student=students[index];if(!student)return notify('That student no longer exists.','error');activeStudentEnrollmentStudent=student;document.getElementById('studentEnrollmentAvatar').textContent=`${student.first.charAt(0)}${student.last.charAt(0)}`.toUpperCase();document.getElementById('studentEnrollmentName').textContent=`${student.first} ${student.last}`;refreshStudentCommandState();showStudentCommandTab('subjects');openModal('studentEnrollmentModal')}
+  function openStudentEnrollmentPage(index){const student=students[index];if(!student)return notify('That student no longer exists.','error');AuditLog.record('profile-view','student-profile',student.id,{viewerRole:'admin'});activeStudentEnrollmentStudent=student;document.getElementById('studentEnrollmentAvatar').textContent=`${student.first.charAt(0)}${student.last.charAt(0)}`.toUpperCase();document.getElementById('studentEnrollmentName').textContent=`${student.first} ${student.last}`;refreshStudentCommandState();showStudentCommandTab('subjects');openModal('studentEnrollmentModal')}
   function editStudentFromCommand(){const index=students.indexOf(activeStudentEnrollmentStudent);if(index<0)return;document.querySelector('#studentEnrollmentModal .student-command-menu')?.removeAttribute('open');closeModal('studentEnrollmentModal');editItem('students',index)}
   function openAcademicProfileFromEnrollment(){const index=students.indexOf(activeStudentEnrollmentStudent);if(index<0)return;closeModal('studentEnrollmentModal');openStudentProfile(index)}
   async function deactivateStudentAccount(){const student=activeStudentEnrollmentStudent;if(!student)return;const users=DB.read('users',[]),account=users.find(user=>user.username===student.id&&user.role==='student'),disabled=account?.disabled===true;if(!account)return notify('No student login account was found.','error');if(disabled){if(!(await confirmDialog({title:`Activate ${student.first} ${student.last}?`,message:'This student will be able to sign in again.',confirmLabel:'Activate account'})))return;account.disabled=false;DB.write('users',users);AuditLog.record('activate','student-account',student.id);refreshStudentCommandState();loadAll();return notify('Student account activated.','success')}if(!(await confirmDialog({title:`Deactivate ${student.first} ${student.last}?`,message:'This will prevent the student from signing in. Their academic records will remain available.',confirmLabel:'Continue',danger:true})))return;if(!(await confirmDialog({title:'Final confirmation',message:`Deactivate account ${student.id}? This takes effect immediately.`,confirmLabel:'Deactivate account',danger:true})))return;account.disabled=true;DB.write('users',users);AuditLog.record('deactivate','student-account',student.id);document.querySelector('#studentEnrollmentModal .student-command-menu')?.removeAttribute('open');refreshStudentCommandState();loadAll();notify('Student account deactivated.','success')}
@@ -533,6 +541,7 @@
 
   function openStudentProfile(index){
     const student=students[index]; if(!student)return notify('That student no longer exists.','error');
+    AuditLog.record('profile-view','student-profile',student.id,{viewerRole:'admin'});
     activeStudentProfile=StudentProfileService.build(student,{faculty,subjects,sections,subjectAssignments,allotments,sectionSubjects,studentEnrollments,exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:AuditLog.read()});
     document.getElementById('studentProfileAvatar').textContent=`${student.first.charAt(0)}${student.last.charAt(0)}`.toUpperCase();
     document.getElementById('studentProfileName').textContent=`${student.first} ${student.last}`;
@@ -569,6 +578,7 @@
   function saveFacultyAssignmentBatch(){const person=activeFacultyAdmin;if(!person||!pendingFacultyAssignments.size)return notify('Add at least one subject assignment.','error');pendingFacultyAssignments.forEach((selected,code)=>{sectionSubjects.forEach(record=>(record.assignments||[]).forEach(assignment=>{if(assignment.subjectCode===code){if(selected.has(record.sectionId))assignment.facultyId=person.id;else if(assignment.facultyId===person.id)assignment.facultyId=''}}));AuditLog.record('assign','faculty-subject-sections',`${person.id}:${code}`,{facultyId:person.id,subjectCode:code,sections:[...selected]})});if(!persistAll())return;const count=pendingFacultyAssignments.size;pendingFacultyAssignments.clear();syncFacultyPasswords();activeFacultyProfile=FacultyProfileService.build(person,{students,subjects,sections,subjectAssignments,sectionSubjects,exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:AuditLog.read()});document.getElementById('facultyProfileContent').innerHTML=facultyAssignmentMarkup(person);loadAll();notify(`${count} faculty assignment${count===1?'':'s'} saved.`,'success')}
   function openFacultyProfile(index){
     const person=faculty[index]; if(!person)return notify('That faculty record no longer exists.','error');
+    AuditLog.record('profile-view','faculty-profile',person.id,{viewerRole:'admin'});
     activeFacultyAdmin=person; pendingFacultyAssignments.clear();
     activeFacultyProfile=FacultyProfileService.build(person,{students,subjects,sections,subjectAssignments,sectionSubjects,exams:DB.read('exams',[]),submissions:DB.read('studentSubmissions',[]),audit:AuditLog.read()});
     document.getElementById('facultyProfileAvatar').textContent=`${person.first.charAt(0)}${person.last.charAt(0)}`.toUpperCase(); document.getElementById('facultyProfileName').textContent=`${person.first} ${person.last}`; document.getElementById('facultyProfileMeta').textContent=person.id; showFacultyProfileTab('assignments'); openModal('facultyProfileModal');
@@ -1198,37 +1208,17 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
     AdminTableTools.mount('subjects',document.getElementById('subjectTable'),document.querySelector('#subjectSection .action-box'));
   }
 
-  function auditPersonRows(list){ return list.length?list.map(student=>`<div class="profile-list-row"><strong>${student.last}, ${student.first}</strong><span>${student.id} · ${(student.sections||[]).join(', ')||'No section'}</span></div>`).join(''):'<div class="profile-empty">None</div>'; }
-  function renderParticipation(){
-    const exams=DB.read('exams',[]), exam=exams.find(item=>item.id===document.getElementById('auditExam').value);
-    if(!exam){ document.getElementById('participationSummary').innerHTML=''; document.getElementById('auditTaken').innerHTML='<div class="profile-empty">Choose an exam.</div>'; document.getElementById('auditNotTaken').innerHTML=''; return; }
-    const result=AuditLog.participation(exam,students,allotments,sectionSubjects,DB.read('studentSubmissions',[]));
-    document.getElementById('participationSummary').innerHTML=`<div><strong>${result.taken.length+result.notTaken.length}</strong><span>Eligible</span></div><div><strong>${result.taken.length}</strong><span>Took exam</span></div><div><strong>${result.notTaken.length}</strong><span>Did not take</span></div><div><strong>${result.taken.length+result.notTaken.length?Math.round(result.taken.length/(result.taken.length+result.notTaken.length)*100):0}%</strong><span>Participation</span></div>`;
-    document.getElementById('auditTaken').innerHTML=auditPersonRows(result.taken); document.getElementById('auditNotTaken').innerHTML=auditPersonRows(result.notTaken);
-  }
-  let activeAuditTab='faculty';
-  function setAuditTab(tab){
-    activeAuditTab=['faculty','admin','login'].includes(tab)?tab:'faculty';
-    document.querySelectorAll('.audit-tab').forEach(button=>{
-      const active=button.dataset.auditTab===activeAuditTab;
-      button.classList.toggle('active',active);
-      button.setAttribute('aria-selected',String(active));
-    });
-    renderAuditLog();
-  }
+  const auditEsc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  function fillAuditFilter(id,values,label){const select=document.getElementById(id),current=select.value;select.innerHTML=`<option value="">All ${label}</option>`+values.map(value=>`<option value="${auditEsc(value)}">${auditEsc(value)}</option>`).join('');if(values.includes(current))select.value=current;}
+  function resetAuditFilters(){['auditFrom','auditTo','auditActor','auditRole','auditCategory','auditAction','auditTargetType','auditTargetId','auditResult'].forEach(id=>document.getElementById(id).value='');renderAuditLog();}
   function renderAuditLog(){
-    const visibleEntries=AuditLog.read().filter(entry=>activeAuditTab==='login'
-      ? entry.action==='login'
-      : entry.actorRole===activeAuditTab&&entry.action!=='login');
-    const visibleRows=visibleEntries.map(entry=>`<tr><td>${new Date(entry.at).toLocaleString()}</td><td><strong>${entry.actorId}</strong><br>${entry.actorRole}</td><td>${entry.action}</td><td>${entry.entityType}${entry.entityId?' - '+entry.entityId:''}</td></tr>`).join('');
-    const emptyLabel=activeAuditTab==='login'?'No sign-ins recorded yet.':`No ${activeAuditTab==='faculty'?'professor':'admin'} changes recorded yet.`;
-    document.getElementById('auditTable').innerHTML='<tr><th>Date and time</th><th>Account</th><th>Activity</th><th>Changed record</th></tr>'+(visibleRows||`<tr><td colspan="4" class="muted-cell">${emptyLabel}</td></tr>`);
-    AdminTableTools.mount('audit',document.getElementById('auditTable'),document.getElementById('auditTableTools'));
-    return;
-    const examSelect=document.getElementById('auditExam'), exams=DB.read('exams',[]), previous=examSelect.value;
-    examSelect.innerHTML=exams.length?exams.map(exam=>`<option value="${exam.id}">${exam.title} — ${exam.subjectCode}</option>`).join(''):'<option value="">No exams available</option>'; if(exams.some(exam=>exam.id===previous))examSelect.value=previous;
-    const rows=AuditLog.read().map(entry=>`<tr><td>${new Date(entry.at).toLocaleString()}</td><td><strong>${entry.actorId}</strong><br>${entry.actorRole}</td><td>${entry.action}</td><td>${entry.entityType}${entry.entityId?' · '+entry.entityId:''}</td></tr>`).join('');
-    document.getElementById('auditTable').innerHTML='<tr><th>Date and time</th><th>Actor</th><th>Action</th><th>Record</th></tr>'+rows; renderParticipation();
+    const all=AuditLog.queryFor(session),unique=key=>[...new Set(all.map(item=>item[key]).filter(Boolean))].sort();
+    fillAuditFilter('auditActor',unique('actorId'),'actors');fillAuditFilter('auditCategory',AuditLog.categories,'categories');fillAuditFilter('auditAction',unique('action'),'actions');fillAuditFilter('auditTargetType',unique('entityType'),'target types');
+    const from=document.getElementById('auditFrom').value,to=document.getElementById('auditTo').value;
+    const visibleEntries=AuditLog.queryFor(session,{actorId:document.getElementById('auditActor').value,actorRole:document.getElementById('auditRole').value,category:document.getElementById('auditCategory').value,action:document.getElementById('auditAction').value,entityType:document.getElementById('auditTargetType').value,entityId:document.getElementById('auditTargetId').value,result:document.getElementById('auditResult').value,from:from?`${from}T00:00:00`:'',to:to?`${to}T23:59:59.999`:''});
+    const visibleRows=visibleEntries.map(entry=>`<tr><td>${auditEsc(new Date(entry.at).toLocaleString())}</td><td><strong>${auditEsc(entry.actorId)}</strong><br>${auditEsc(entry.actorRole)}</td><td>${auditEsc(entry.category)}</td><td>${auditEsc(entry.action)}</td><td>${auditEsc(entry.entityType)}${entry.entityId?' · '+auditEsc(entry.entityId):''}</td><td>${auditEsc(entry.result||'success')}</td><td>${auditEsc(entry.reason||'—')}</td></tr>`).join('');
+    document.getElementById('auditFilterSummary').textContent=`Showing ${visibleEntries.length} of ${all.length} audit event${all.length===1?'':'s'}.`;
+    document.getElementById('auditTable').innerHTML='<tr><th>Date and time</th><th>Actor</th><th>Category</th><th>Action</th><th>Target</th><th>Result</th><th>Reason</th></tr>'+(visibleRows||'<tr><td colspan="7" class="muted-cell">No audit events match the selected filters.</td></tr>');
     AdminTableTools.mount('audit',document.getElementById('auditTable'),document.getElementById('auditTableTools'));
   }
 

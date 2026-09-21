@@ -44,7 +44,8 @@ const ApprovalService = (() => {
       history: [{ status: 'pending', at: createdAt, actorId: actingUser.username, actorRole: role(actingUser.role), remarks: input.reason.trim() }]
     };
     const records = read();
-    if (records.some(item => item.type === request.type && item.targetId === request.targetId && item.status === 'pending')) fail('A pending request already exists for this target.', 'DUPLICATE_PENDING');
+    const duplicate=records.find(item => item.type === request.type && item.targetId === request.targetId && item.status === 'pending');
+    if (duplicate) { audit('deny-submit', duplicate, { reason: 'A pending request already exists for this target.', attemptedBy: actingUser.username }, actingUser, 'denied'); fail('A pending request already exists for this target.', 'DUPLICATE_PENDING'); }
     records.push(request); save(records);
     audit('submit', request, { type: request.type, targetType: request.targetType, targetId: request.targetId }, actingUser);
     if (input.reviewerId) notice(input.reviewerId, `New ${request.type} request awaiting review.`, request.id);
@@ -77,9 +78,9 @@ const ApprovalService = (() => {
     if (!['withdrawn', 'cancelled'].includes(nextStatus)) fail('Unsupported request transition.');
     const actingUser = actor(suppliedActor), records = read(), request = records.find(item => item.id === requestId);
     if (!request) fail('Approval request was not found.', 'NOT_FOUND');
-    if (request.status !== 'pending') fail('Only pending requests can be closed.', 'INVALID_TRANSITION');
+    if (request.status !== 'pending') { audit('deny-close', request, { reason: 'Request is no longer pending.', attemptedStatus: nextStatus }, actingUser, 'denied'); fail('Only pending requests can be closed.', 'INVALID_TRANSITION'); }
     const isRequester = actingUser?.username === request.requesterId;
-    if (nextStatus === 'withdrawn' && !isRequester) fail('Only the requester may withdraw this request.', 'PERMISSION_DENIED');
+    if (nextStatus === 'withdrawn' && !isRequester) { audit('deny-withdraw', request, { reason: 'Only the requester may withdraw this request.' }, actingUser, 'denied'); fail('Only the requester may withdraw this request.', 'PERMISSION_DENIED'); }
     if (nextStatus === 'cancelled' && role(actingUser?.role) !== 'admin') { audit('deny-cancel', request, { reason: 'Only an Administrator may cancel requests.' }, actingUser, 'denied'); fail('Only an Administrator may cancel this request.', 'PERMISSION_DENIED'); }
     if (nextStatus === 'withdrawn') PermissionService.require('approval.own.withdraw', { actor: actingUser });
     if (nextStatus === 'cancelled') PermissionService.require('approval.any.cancel', { actor: actingUser });
