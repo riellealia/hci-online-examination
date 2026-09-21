@@ -19,6 +19,10 @@ const AcademicWorkflowService = (() => {
     if(subject)return{units:Number(subject.units),source:'subject'};
     const curriculum=DB.read('curricula', []).find(item=>item.subjectCode===subjectCode&&Number(item.units)>0);
     return curriculum?{units:Number(curriculum.units),source:'curriculum'}:null;
+    const curriculum=DB.read('curricula', []).find(item=>item.subjectCode===subjectCode&&Number(item.units)>0);
+    if(curriculum)return{units:Number(curriculum.units),source:'curriculum'};
+    const subject=DB.read('subjects', []).find(item=>item.code===subjectCode&&Number(item.units)>0);
+    return subject?{units:Number(subject.units),source:'legacy-subject'}:null;
   }
   function studentLoad(studentId) {
     const seen=new Set();

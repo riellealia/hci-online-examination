@@ -2,7 +2,7 @@
 const SectionService = {
   normaliseId(value) { return String(value || '').trim().toUpperCase(); },
   detailsFromId(value) {
-    const id=this.normaliseId(value),current=id.match(/^(\d)(BSCS|BSIT|BSIS)-(\d+)$/),legacy=id.match(/^(BSCS|BSIT|BSIS)-(\d)([A-Z])?$/);
+    const programs='BSCS|BSIT|BSIS|BSGAMEDEV|BSANIMATION',id=this.normaliseId(value),current=id.match(new RegExp(`^(\\d)(${programs})-(\\d+)$`)),legacy=id.match(new RegExp(`^(${programs})-(\\d)([A-Z])?$`));
     return current?{program:current[2],yearLevel:Number(current[1]),sectionNumber:Number(current[3])}:legacy?{program:legacy[1],yearLevel:Number(legacy[2]),sectionNumber:legacy[3]?legacy[3].charCodeAt(0)-64:1}:{program:'',yearLevel:null,sectionNumber:null};
   },
   migrate(sections, students) {

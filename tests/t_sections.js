@@ -24,7 +24,7 @@ r.w.saveSection();
 ok(r.read('sections').some(section=>section.id==='3BSCS-2'&&section.program==='BSCS'&&section.yearLevel===3&&section.sectionNumber===2&&section.capacity===35),'new section stores its ID, year, curriculum, section number, and student capacity');
 const headings=[...r.d.querySelectorAll('#sectionTable th')].map(cell=>cell.textContent.trim());
 ok(headings.join('|')==='Unique ID|Year Level|Curriculum|Section|Count|Actions','section table uses the requested six-column academic order');
-ok([...r.d.getElementById('sectionProgram').options].map(option=>option.textContent).join('|')==='BSCS|BSIT|BSIS','curriculum choices are BSCS, BSIT, and BSIS');
+ok([...r.d.getElementById('sectionProgram').options].map(option=>option.value).join('|')==='BSCS|BSIT|BSIS|BSGAMEDEV|BSANIMATION','curriculum choices include BSCS, BSIT, BSIS, Game Development, and Digital Animation');
 const savedRow=[...r.d.querySelectorAll('#sectionTable tr')].find(row=>row.cells[0]?.textContent.includes('3BSCS-2'));
 ok(savedRow&&savedRow.cells[1].textContent==='3'&&savedRow.cells[2].textContent==='BSCS'&&savedRow.cells[3].textContent==='2'&&savedRow.cells[4].textContent==='0/35','3BSCS-2 displays its academic details and student count over limit');
 r.w.editItem('sections',r.read('sections').findIndex(section=>section.id==='3BSCS-2'));

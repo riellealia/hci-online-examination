@@ -159,7 +159,7 @@ Configure normal and maximum Student units, normal and maximum Professor teachin
 
 ### Approvals
 
-Admin reviews Student overload requests, Faculty Coordinator appointments if required, and other explicitly granted system exceptions.
+Admin configures the normal and absolute maximum Student load rules by program, year level, and term. Student overload applications are reviewed by the Dean; Admin retains system configuration and visibility.
 
 Provide Pending, Approved, Rejected, Cancelled, Withdrawn, and All tabs, filterable by request type, requester, affected person, program, date, and status.
 
@@ -196,5 +196,5 @@ Profile access events must be distinguishable from data-changing events.
 - Closing a term preserves history and clears only active views.
 - Curricula group Subjects by program, year, and term.
 - Student and Professor limits are stored separately.
-- Admin can decide overload requests with an audit trail.
+- Admin can configure normal-load and maximum-load rules with an audit trail.
 - Faculty Coordinator actions are visible to Admin but are not performed from ordinary Admin academic-management screens.
