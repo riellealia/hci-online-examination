@@ -605,7 +605,7 @@
       return;
     }
 
-    const access = JSON.parse(localStorage.getItem('systemSettings') || '{}');
+    const access = JSON.parse(localStorage.getItem('systemSettings') || '{}') || {};
     if (effectiveRole !== 'admin' && access.maintenance) {
       showAuthError(access.maintenanceMessage || 'The portal is currently under maintenance.');
       return;
@@ -622,8 +622,17 @@
       signedInAt: Date.now(),
       lastActivityAt: Date.now()
     }));
-    AuditLog.record('login','session',user.username,{role:effectiveRole},{username:user.username,role:effectiveRole});
-    window.location.href = route;
+    // Authentication must not be undone just because the secondary audit
+    // write is temporarily unavailable. The server session is already valid,
+    // so continue to the authorized workspace and report the audit issue only
+    // in the developer console.
+    try {
+      AuditLog.record('login','session',user.username,{role:effectiveRole},{username:user.username,role:effectiveRole});
+    } catch (error) {
+      console.warn('[login] audit event could not be recorded', error);
+    }
+    const destination = new URL(route, window.location.href).href;
+    window.location.replace(destination);
   });
 </script>
 </body>

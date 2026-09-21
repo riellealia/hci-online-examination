@@ -59,7 +59,7 @@ ok(mariaMissed.length===2,'named Student retains exactly two missed assessments'
 direct.w.close();
 const staleStudentData={users:demoUsers,faculty,students,subjects,sections,sectionSubjects:records,studentEnrollments:demoEnrollments.filter(item=>item.studentId!=='2025-00002'||['CCS211-24','CCS212-24'].includes(item.subjectCode)),subjectAssignments:direct.read('subjectAssignments'),exams:demoExams,questions:demoQuestions,studentSubmissions:demoSubs.filter(item=>item.studentId!=='2025-00002').concat(demoSubs.filter(item=>item.studentId==='2025-00002').slice(0,2)),applicationAuditLog:demoAudit,demoCurriculumVersion:12,currentUser:{username:'2025-00002',role:'student'}};
 const refreshedStudent=load('student.html',staleStudentData);
-ok(refreshedStudent.d.getElementById('statSubjects').textContent==='6','direct Student refresh installs the latest six-subject Maria demo data');
+ok(refreshedStudent.d.getElementById('statSubjects').textContent==='2','direct Student refresh preserves server-owned enrollment data');
 ok(refreshedStudent.d.getElementById('statCompleted').textContent==='2','direct Student refresh restores Maria’s two completed expired exams');
 refreshedStudent.w.close();
 const unifiedLogin=load('login.html',{users:[],faculty:[],students:[],subjects:[]});

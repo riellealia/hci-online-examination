@@ -21,6 +21,7 @@ const DemoData = {
     DB.write(key,[...cleaned,...missing]);return true;
   },
   install() {
+    // Browser role pages must not overwrite canonical SQLite collections.
     // When SQLite already supplied the canonical records, this browser only
     // needs to remember the demo version. Re-seeding here would make every
     // role attempt Administrator-only collection writes on each new browser.
