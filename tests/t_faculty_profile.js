@@ -7,6 +7,13 @@ seed.applicationAuditLog=[{id:'a1',at:'2026-08-20T08:00:00Z',actorId:'F1',actorR
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 const row=r.d.querySelector('#facultyTable .profile-row');
 ok(!!row&&row.tabIndex===0,'Faculty ID and name row is clickable and keyboard accessible');
+ok(![...r.d.querySelectorAll('#facultyTable tr')[0].children].some(cell=>cell.textContent==='Actions'),'the Actions column header is removed from Faculty Management');
+const facultyTrigger=row.querySelector('.section-action-trigger');
+ok(facultyTrigger.classList.contains('row-actions-trigger-hidden')&&facultyTrigger.tabIndex===-1,'the settings icon is out of the normal tab/click surface, reachable only by right-click');
+const adminModernCssForFaculty=require('fs').readFileSync(require('path').join(__dirname,'../css/admin-modern.css'),'utf8');
+ok(/body\[data-role="admin"\]\s+table\s+\.row-actions-trigger-hidden\s*\{[^}]*display:\s*none/.test(adminModernCssForFaculty),'the hide rule keeps enough specificity to actually beat the base icon-button display rule');
+row.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:60,clientY:60}));
+ok(row.querySelector('.section-action-menu').classList.contains('open'),'right-clicking the Faculty row opens its settings menu');
 row.querySelector('td').click();
 ok(r.d.getElementById('facultyProfileName').textContent==='Maria Reyes','hero identifies the selected professor');
 ok(r.d.getElementById('facultyProfileAvatar').textContent==='MR','faculty profile shows a circular initials avatar');

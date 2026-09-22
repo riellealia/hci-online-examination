@@ -164,6 +164,35 @@ body[data-role="student"] {
 body {
   line-height: var(--lh-body);
   font-size: 16px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* The shared navigation occupies real viewport space on desktop.  Keeping the
+   offset on the body lets every role page resize as one shell, including pages
+   whose panels use different class names. */
+body.sidebar-layout-ready {
+  --sidebar-shell-width: 260px;
+  padding-left: 0;
+  transition: padding-left .28s ease;
+}
+
+body.sidebar-layout-ready.sidebar-open {
+  padding-left: var(--sidebar-shell-width);
+}
+
+body.sidebar-layout-ready > .topbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body.sidebar-layout-ready > :not(#sidebar):not(script):not(.topbar) {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 h1, h2, h3, h4 {
@@ -394,15 +423,17 @@ textarea:focus-visible,
 /* Shared sidebar: the same drawer on all three dashboards */
 #sidebar {
   position: fixed;
-  top: 70px;
+  top: 0;
   left: 0;
-  height: calc(100% - 70px);
+  height: 100dvh;
   width: 0;
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 50;
   padding-top: 12px;
   white-space: nowrap;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 #sidebar .close-x {
@@ -461,8 +492,17 @@ textarea:focus-visible,
   box-shadow: none;
 }
 
-@media (max-width: 900px) {
-  #sidebar { top: 62px; height: calc(100% - 62px); }
+/* On narrow screens the drawer overlays the page. Pushing a phone-sized page
+   by 260px would make its controls leave the viewport. */
+@media (max-width: 760px) {
+  body.sidebar-layout-ready,
+  body.sidebar-layout-ready.sidebar-open {
+    padding-left: 0;
+  }
+
+  #sidebar {
+    width: min(260px, 88vw);
+  }
 }
 
 /* Tables: rounded, hairline separators */
@@ -824,6 +864,37 @@ table tr:last-child td {
 
 .confirm-ok.is-danger { background: #b3261e; }
 .confirm-ok.is-danger:hover { background: #96201a; }
+
+/* ---------- Dialog form fields (textInputDialog / textareaInputDialog / custom prompts) ----------
+   Loaded on every page (unlike the page-specific stylesheets) so these dialogs render
+   correctly everywhere, not just on pages that happen to load extra CSS. */
+
+.dialog-input-label {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.dialog-input-label input,
+.dialog-input-label select,
+.dialog-input-label textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.dialog-input-label textarea {
+  min-height: 120px;
+  resize: vertical;
+}
 
 /* ---------- Inline field validation ---------- */
 

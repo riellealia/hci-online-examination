@@ -24,6 +24,10 @@ const capRule = shared.match(/\.modal,\s*\.question-modal,\s*\.exam-box,\s*\.log
 ok(!!capRule, 'a shared cap rule exists for every wide surface');
 ok(capRule && /max-width:\s*calc\(100vw/.test(capRule[1]), 'and it caps to the viewport');
 ok(/body\s*\{[^}]*overflow-x:\s*hidden/.test(shared), 'body cannot scroll sideways');
+ok(/body\.sidebar-layout-ready\.sidebar-open\s*\{[^}]*padding-left:\s*var\(--sidebar-shell-width\)/.test(shared), 'desktop drawer gives the main page real viewport space');
+ok(/body\.sidebar-layout-ready\s*>\s*\.topbar\s*\{[^}]*position:\s*sticky[^}]*max-width:\s*100%/s.test(shared), 'shared header remains clipped inside the viewport');
+ok(/#sidebar\s*\{[^}]*position:\s*fixed[^}]*top:\s*0[^}]*height:\s*100dvh/s.test(shared), 'open sidebar uses the full viewport without an empty header-sized block');
+ok(/@media \(max-width:\s*760px\)[\s\S]*?body\.sidebar-layout-ready\.sidebar-open\s*\{[^}]*padding-left:\s*0/.test(shared), 'narrow screens overlay the drawer without pushing content out of bounds');
 
 // Which fixed-width selectors exist, and are they all in the cap list?
 const capped = ['.modal', '.question-modal', '.exam-box', '.login-container', '.confirm-box'];

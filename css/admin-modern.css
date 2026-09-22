@@ -209,6 +209,11 @@ body[data-role="admin"] .section-action-menu button:hover { background:var(--acc
 body[data-role="admin"] .section-action-menu button.danger { color:#b63838; }
 body[data-role="admin"] .section-action-menu button.danger:hover { background:#fff0f0; color:#a52424; }
 body[data-role="admin"] .section-action-menu svg { width:18px; height:18px; flex:none; fill:currentColor; }
+/* Right-click-only row actions: the trigger button and its column take no
+   visible space, but the popped-open .section-action-menu is position:fixed
+   so it still renders normally once a right-click opens it. */
+body[data-role="admin"] table .row-actions-trigger-hidden { display:none; }
+body[data-role="admin"] table td.row-actions-cell { width:0; padding:0; border:0; overflow:hidden; }
 body[data-role="admin"] .subject-code-chip { display:inline-flex; margin:2px 5px 2px 0; padding:4px 9px; border-radius:999px; background:#edf3f9; color:#365d82; font-size:12px; font-weight:750; }
 body[data-role="admin"] .muted-cell { color:#8793a3; }
 @media(max-width:600px){body[data-role="admin"] .section-management-head{align-items:flex-start}}

@@ -13,16 +13,30 @@ seed.studentSubmissions=[{studentId:'S1',examId:'e1',submittedAt:'2026-08-20T10:
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 const link=[...r.d.querySelectorAll('#studentTable tr')].find(row=>/Cruz, Juan/.test(row.textContent));
 ok(!!link&&!/Sections/.test(r.d.querySelector('#studentTable tr').textContent),'student table removes the Sections column');
-const nameCell=link.querySelector('.student-name-cell');
-ok(nameCell?.getAttribute('role')==='button'&&nameCell.tabIndex===0&&nameCell.getAttribute('aria-label')==='Manage Juan Cruz'&&!nameCell.querySelector('a,button'),'student name is an accessible clickable table cell, not a hyperlink');
-nameCell.click();
-ok(r.d.getElementById('studentEnrollmentModal').style.display==='flex'&&r.d.getElementById('studentEnrollmentName').textContent==='Juan Cruz','clicking the student name opens Manage student');
+ok(![...r.d.querySelectorAll('#studentTable tr')[0].children].some(cell=>cell.textContent==='Actions'),'the Actions column header is removed');
+ok(link.getAttribute('role')==='button'&&link.tabIndex===0&&link.getAttribute('aria-label')==='Manage Juan Cruz',"the entire row, not just the name, is an accessible clickable target");
+const trigger=link.querySelector('.section-action-trigger');
+ok(trigger.tabIndex===-1&&trigger.getAttribute('aria-hidden')==='true','the row actions trigger is out of the normal tab/click surface, reachable only by right-click');
+ok(trigger.classList.contains('row-actions-trigger-hidden'),'the row actions trigger carries the class that visually hides it');
+// jsdom does not compute real CSS cascade, so a display:none rule that's actually
+// beaten by a more specific base rule (e.g. missing the "table" element in the
+// selector) would still pass a plain classList check. Assert the selector itself
+// carries at least as much specificity as the base .table-icon-btn display rule
+// it must override, so this can't silently regress to a visible button again.
+const adminModernCss=require('fs').readFileSync(require('path').join(__dirname,'../css/admin-modern.css'),'utf8');
+ok(/body\[data-role="admin"\]\s+table\s+\.row-actions-trigger-hidden\s*\{[^}]*display:\s*none/.test(adminModernCss),'the hide rule matches the specificity of body[data-role="admin"] table .table-icon-btn, or it loses the cascade and the button stays visible');
+link.click();
+ok(r.d.getElementById('studentEnrollmentModal').style.display==='flex'&&r.d.getElementById('studentEnrollmentName').textContent==='Juan Cruz','clicking anywhere on the row opens Manage student');
 r.w.closeModal('studentEnrollmentModal');
-link.querySelector('.section-action-trigger').click();
+link.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:40,clientY:40}));
+ok(link.querySelector('.section-action-menu').classList.contains('open'),'right-clicking the row opens its actions menu');
 const actionLabels=[...link.querySelectorAll('.section-action-menu button span:last-child')].map(item=>item.textContent).join('|');
-ok(actionLabels==='Edit|Manage student|Deactivate account|Delete','student settings actions use the requested order');
+ok(actionLabels==='Edit|Edit status','student rows have no permanent-delete action, per the account lifecycle rules');
 link.querySelectorAll('.section-action-menu button')[1].click();
-ok(!link.querySelector('.section-action-menu').classList.contains('open'),'settings menu closes when its prompt opens');
+ok(!link.querySelector('.section-action-menu').classList.contains('open'),'choosing an action closes the menu');
+ok(!!r.d.querySelector('.account-status-box'),'Edit status opens from the right-click menu');
+r.d.querySelector('.account-status-box .confirm-cancel').click();
+link.click();
 ok(r.d.getElementById('studentEnrollmentName').textContent==='Juan Cruz','administrative view identifies the selected student');
 ok(r.d.getElementById('studentEnrollmentAvatar').textContent==='JC','administrative view keeps the hero profile');
 ok(!!r.d.querySelector('[data-command-tab="subjects"].active'),'administrative view keeps underline tabs');
@@ -44,7 +58,7 @@ ok(/SUB3/.test(r.d.querySelector('.student-enrolled-table tbody').textContent)&&
 ok(/Automatically add subjects/.test(r.d.querySelector('.batch-enrollment-actions').textContent),'table two provides automatic curriculum selection');
 r.w.automaticallyAddStudentSubjects();
 ok(/SUB2/.test(r.d.querySelector('.subject-only-table tbody tr:first-child').textContent)&&/Ready to add/.test(r.d.querySelector('.subject-only-table tbody tr:first-child').textContent),'automatic add stages matching year-level section subjects without saving them');
-ok(/Edit student/.test(r.d.querySelector('.student-command-menu').textContent)&&/Deactivate account/.test(r.d.querySelector('.student-command-menu').textContent),'three-dot menu exposes named administrative actions');
+ok(/Edit student/.test(r.d.querySelector('.student-command-menu').textContent)&&/Edit status/.test(r.d.querySelector('.student-command-menu').textContent),'three-dot menu exposes named administrative actions');
 r.w.showStudentCommandTab('grades');
 ok(/8 \/ 10/.test(r.d.getElementById('studentEnrollmentContent').textContent)&&/90%/.test(r.d.getElementById('studentEnrollmentContent').textContent),'administrative tabs retain grades');
 ok(r.d.querySelector('[data-command-tab="grades"]').classList.contains('active'),'selected administrative tab has active state');

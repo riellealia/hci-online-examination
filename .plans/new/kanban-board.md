@@ -2,7 +2,7 @@
 
 The live board is [HCI Online Examination — Team Kanban](https://github.com/users/riellealia/projects/1/views/2). This Markdown page is only a dated planning snapshot; update the GitHub Project for current task status.
 
-Snapshot of [GitHub issues](https://github.com/riellealia/hci-online-examination/issues) and [work claims](.claim-work.md) on 2026-09-22. Move a card in the live Project and keep its issue and claim entry consistent. Priority is inherited from the GitHub issue label; `P0` is most urgent. Required tasks come before optional tasks.
+Snapshot of [GitHub issues](https://github.com/riellealia/hci-online-examination/issues) and [work claims](.claim-work.md) on 2026-09-23. Move a card in the live Project and keep its issue and claim entry consistent. Priority is inherited from the GitHub issue label; `P0` is most urgent. Required tasks come before optional tasks.
 
 ## In progress
 
@@ -10,7 +10,7 @@ Snapshot of [GitHub issues](https://github.com/riellealia/hci-online-examination
 
 ## Claimed, not started
 
-- [#10 Account lifecycle and archive page](https://github.com/riellealia/hci-online-examination/issues/10) — Natalia · P1.
+No currently claimed tasks are waiting to start.
 
 ## Assigned in claim file, status needs confirmation
 
@@ -65,10 +65,10 @@ Do not start until the required dependencies reach Review, as specified in the [
 - [#3 Shared audit-log structure](https://github.com/riellealia/hci-online-examination/issues/3) — Natalia · P0.
 - [#4 Unified login and role routing](https://github.com/riellealia/hci-online-examination/issues/4) — Natalia · P0.
 - [#40 SQLite or backend investigation](https://github.com/riellealia/hci-online-examination/issues/40) — Natalia · P0.
+- [#10 Account lifecycle and archive page](https://github.com/riellealia/hci-online-examination/issues/10) — Natalia · P1.
 
 ## Reconcile before treating this as the live board
 
-- GitHub still has [#1](https://github.com/riellealia/hci-online-examination/issues/1), [#2](https://github.com/riellealia/hci-online-examination/issues/2), and [#3](https://github.com/riellealia/hci-online-examination/issues/3) open with `status:in-progress`, while the claim file says Complete. Confirm review and close/update the issues if appropriate.
 - [#12](https://github.com/riellealia/hci-online-examination/issues/12) is Alyssa's task in the claim file but assigned to Rielle on GitHub. Confirm the intended owner before changing either.
 - [#27](https://github.com/riellealia/hci-online-examination/issues/27) is Unclaimed in the claim file but assigned to Rielle on GitHub. Confirm whether it is actually claimed.
 - Named owners on #5–9, #13, #17–19, #22–23, and #25–26 still have `Unclaimed` status in the claim file. Confirm whether these are reserved claims or just proposed owners.

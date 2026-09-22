@@ -156,6 +156,8 @@ function mountSidebar({ items, panels, container = '.topbar-left',
   function setOpen(open) {
     bar.style.width = open ? '260px' : '0';
     menuBtn.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('sidebar-open', open);
+    document.body.classList.add('sidebar-layout-ready');
   }
 
   function show(id, options = {}) {

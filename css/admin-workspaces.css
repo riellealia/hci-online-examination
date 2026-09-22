@@ -15,33 +15,34 @@ body[data-role="admin"] #accountLifecycleSection.panel { padding: 0; border: 0; 
 .lifecycle-icon.is-descending svg { transform: rotate(180deg); }
 .lifecycle-popover { position: absolute; z-index: 25; top: calc(100% + 4px); right: 8px; display: grid; gap: 2px; width: 215px; padding: 10px; border: 1px solid #dce5f1; border-radius: 12px; background: #fff; box-shadow: 0 12px 26px rgba(29,45,72,.14); text-align: left; }
 .lifecycle-popover strong { display: block; width: 100%; padding: 4px 8px 8px; font-size: 12px; text-align: left; }
-.lifecycle-popover label { display: flex; align-items: center; justify-content: flex-start; gap: 9px; width: 100%; padding: 6px 8px; border-radius: 7px; font-size: 13px; text-align: left; cursor: pointer; }
-.lifecycle-popover label input { flex: 0 0 auto; margin: 0; }
+.lifecycle-popover label { display: grid !important; grid-template-columns: 18px max-content; align-items: center; justify-content: start !important; gap: 9px; width: 100%; padding: 6px 8px; border-radius: 7px; font-size: 13px; text-align: left !important; cursor: pointer; }
+.lifecycle-popover label input { width: auto !important; min-width: 0; flex: 0 0 auto; margin: 0 !important; justify-self: start; }
 .lifecycle-popover label:hover { background: #f3f7fc; }
 .lifecycle-popover-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid #edf0f5; }
 .lifecycle-popover-actions button { padding: 6px 10px; border: 1px solid #dce5f1; border-radius: 7px; background: #fff; color: #365d91; cursor: pointer; }
 .lifecycle-popover-actions button:last-child { background: #42699e; color: #fff; border-color: #42699e; }
-.workspace-person-row { cursor: pointer; }
+.workspace-person-row { content-visibility: auto; contain-intrinsic-block-size: 54px; cursor: pointer; }
 .workspace-person-row:hover, .workspace-person-row:focus-visible { background: #f4f8fd; outline: none; }
 .workspace-person-name { color: #365d91; font-weight: 600; }
 .workspace-history-pill { display: inline-block; padding: 4px 9px; border-radius: 999px; background: #edf3fa; color: #4a6788; font-size: 11px; white-space: nowrap; }
 .workspace-group-row td { background: #f4f7fb; color: #52657c; font-size: 12px; font-weight: 700; }
-.lifecycle-profile { position: relative; width: min(760px, calc(100vw - 32px)); max-width: 760px; padding: 0; overflow: visible; text-align: left; }
-.lifecycle-profile-head { display: flex; justify-content: space-between; gap: 12px; padding: 23px 26px 15px; }
-.lifecycle-profile-head h3 { margin: 3px 0; }
-.lifecycle-profile-head p { margin: 0; color: #6b7b90; font-size: 13px; }
-.lifecycle-profile-tabs { display: flex; gap: 22px; padding: 0 26px; border-bottom: 1px solid #e5ebf3; }
-.lifecycle-profile-tabs button { padding: 10px 2px; border: 0; border-bottom: 2px solid transparent; background: none; color: #6b7b90; font: inherit; font-size: 13px; cursor: pointer; }
-.lifecycle-profile-tabs button[aria-selected="true"] { border-bottom-color: #42699e; color: #315f8d; }
-.lifecycle-profile-content, .lifecycle-history-content { padding: 20px 26px 26px; }
+.workspace-group-toggle { display: flex; align-items: center; width: 100%; min-height: 30px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.workspace-group-chevron { width: 18px; color: #718096; transition: transform .16s ease; }
+.workspace-group-toggle[aria-expanded="false"] .workspace-group-chevron { transform: rotate(-90deg); }
+.workspace-group-count { min-width: 24px; margin-left: 8px; padding: 2px 7px; border-radius: 999px; background: #e4ebf4; color: #49617e; font-size: 11px; text-align: center; }
+.lifecycle-hydration { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 42px; padding: 10px 4px 2px; color: #718096; font-size: 12px; }
+.lifecycle-hydration button { border: 0; background: transparent; color: #42699e; font: inherit; cursor: pointer; }
+.lifecycle-account-page { text-align: left; }
+.lifecycle-profile-main { padding: 28px 32px; }
+.lifecycle-profile-content header, .lifecycle-history-content > header { margin-bottom: 18px; }
+.lifecycle-profile-content header h3, .lifecycle-history-content > header h3 { margin: 0 0 4px; }
+.lifecycle-profile-content header p, .lifecycle-history-content > header p { margin: 0; color: #718096; }
 .lifecycle-profile-content dl { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; margin: 0; }
 .lifecycle-profile-content dl > div { padding: 12px; border: 1px solid #edf0f5; border-radius: 9px; }
 .lifecycle-profile-content dt { color: #718096; font-size: 11px; }
 .lifecycle-profile-content dd { margin: 4px 0 0; color: #25364b; font-size: 13px; }
 .lifecycle-history-tools { position: relative; display: flex; justify-content: flex-end; gap: 7px; margin-bottom: 12px; }
 .lifecycle-history-content .workspace-table-scroll { max-height: min(430px, 55vh); overflow: auto; }
-.lifecycle-profile-close { position: absolute; top: 12px; right: 12px; border: 0; background: transparent; color: #627188; font-size: 23px; cursor: pointer; }
-.lifecycle-profile h4 { margin-bottom: 5px; }
 :root[data-theme="dark"] body[data-role="admin"] #accountLifecycleSection.panel { background: transparent !important; }
 :root[data-theme="dark"] #accountLifecycleRoot { background: var(--surface); border-color: var(--line); }
 :root[data-theme="dark"] .lifecycle-popover, :root[data-theme="dark"] .lifecycle-icon { background: var(--surface); color: var(--ink); border-color: var(--line); }
@@ -93,3 +94,18 @@ body[data-role="admin"] #accountLifecycleSection.panel { padding: 0; border: 0; 
 @media (max-width: 560px) { .workspace-fields { grid-template-columns: 1fr; } .workspace-row { align-items: flex-start; flex-direction: column; } .workspace-stats { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { #accountLifecycleRoot { padding: 14px; border-radius: 16px; } }
 @media (max-width: 560px) { .lifecycle-tools { align-items: flex-start; flex-wrap: wrap; } .lifecycle-tools-right { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; } .lifecycle-search input { width: 100%; } }
+
+/* ---------- Edit status dialog ---------- */
+.account-status-toggle { display: flex; align-items: flex-start; gap: 11px; margin: 14px 0; padding: 12px 14px; border: 1px solid #dfe6ef; border-radius: 11px; background: #fff; cursor: pointer; }
+.account-status-toggle:hover { border-color: #9bb6d3; background: #f7fafe; }
+.account-status-toggle:has(input:checked) { border-color: #7da3c8; background: #edf5fc; }
+.account-status-toggle input { width: 19px; min-height: 19px; margin: 3px 0 0; accent-color: #315f8d; }
+.account-status-toggle-copy { display: flex; flex-direction: column; gap: 2px; }
+.account-status-toggle-copy small { color: #718096; }
+.account-status-help { margin: -8px 0 14px; color: #718096; font-size: 12.5px; line-height: 1.5; }
+
+/* ---------- Student profile History tab toolbar ----------
+   Reuses .lifecycle-tools-right/.lifecycle-icon/.lifecycle-popover from the
+   Account Lifecycle table as-is; this only positions that same cluster at the
+   top right of a different table. */
+.student-history-toolbar { position: relative; display: flex; justify-content: flex-end; margin-bottom: 10px; }
