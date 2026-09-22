@@ -7,6 +7,7 @@ This document is the short overview for the next development phase of the Online
 ## Documents
 
 - [Claim or review work](.claim-work.md)
+- [Open the live GitHub Kanban board](https://github.com/users/riellealia/projects/1/views/2) ([repo snapshot](kanban-board.md))
 - [Role hierarchy and terminology](overview/heirarchy.md)
 - [System relationships](overview/relationship-diagram.md)
 - [Admin detailed plan](extended-detailed.plans/admin-extended-plan.md)

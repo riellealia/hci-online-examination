@@ -17,7 +17,7 @@ ok(r.read('studentEnrollments').length===2,'editing identity details preserves p
 ok(r.d.querySelectorAll('.upload-action').length===3,'current CSV imports use three accessible upload actions');
 ok([...r.d.querySelectorAll('.upload-action')].every(label=>label.getAttribute('aria-label')&&label.title),'upload icons keep labels and tooltips');
 ok(r.d.querySelectorAll('.management-table-shell > .action-box').length===4,'management actions use the current table-corner pattern');
-ok(r.d.querySelectorAll('.management-page-head').length===6,'management pages retain titles and descriptions');
+ok(r.d.querySelectorAll('.management-page-head').length===8,'management pages retain titles and descriptions');
 ok(r.d.querySelectorAll('.export-action').length===6,'all six Admin data tables provide CSV export actions');
 r.w.close();
 

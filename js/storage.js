@@ -115,6 +115,10 @@ function writeSqliteSync(method, key, value) {
       try { reason = JSON.parse(request.responseText || '{}').error || ''; } catch (_) {}
       throw new Error(reason || `SQLite returned ${request.status}.`);
     }
+    if (method === 'PUT') {
+      const response = JSON.parse(request.responseText || '{}');
+      return Object.hasOwn(response, 'value') ? { value: response.value } : true;
+    }
     return true;
   } catch (error) {
     storageNotify(`SQLite could not save "${key}": ${error.message || 'the server rejected the change'}`, 'error');
@@ -189,8 +193,9 @@ const DB = {
     }
 
     try {
-      if (!writeSqliteSync('PUT', key, value)) return false;
-      localStorage.setItem(key, payload);
+      const saved = writeSqliteSync('PUT', key, value);
+      if (!saved) return false;
+      localStorage.setItem(key, saved === true ? payload : JSON.stringify(saved.value));
       return true;
     } catch (e) {
       if (isQuotaError(e)) {

@@ -73,5 +73,6 @@ function validateProtectedWrite(store, session, key, next) {
   const existing = store.read(key, []);
   if (key === 'applicationAuditLog') validateAudit(existing, next, session);
   if (key === 'approvalRequests') validateApprovals(existing, next, session);
+  if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
 module.exports = { validateProtectedWrite, validateAudit, validateApprovals };

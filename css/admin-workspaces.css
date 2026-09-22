@@ -1,0 +1,48 @@
+#academicPeriodsSection,
+#accountLifecycleSection { color: #24334a; }
+.workspace-summary, .workspace-form, .workspace-row, .workspace-stats, .workspace-toolbar, .workspace-table-scroll { border: 1px solid #e5ebf3; border-radius: 14px; background: #fff; }
+.workspace-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; margin: 20px 0; background: #f8fbff; }
+.workspace-summary > div { display: grid; gap: 3px; }
+.workspace-eyebrow, .workspace-form-head span, .workspace-list-head span { font-size: 12px; color: #6a7990; }
+.workspace-summary strong { font-size: 18px; font-weight: 650; }
+.workspace-badge { display: inline-block; width: fit-content; margin-left: 8px; padding: 3px 9px; border-radius: 999px; background: #eff3f8; color: #516176; font-size: 11px; font-weight: 600; text-transform: capitalize; white-space: nowrap; }
+.workspace-badge.active { background: #e3f6ed; color: #187149; }
+.workspace-badge.closed, .workspace-badge.deactivated { background: #fff0de; color: #926018; }
+.workspace-badge.archived, .workspace-badge.transferred { background: #f2edf5; color: #746080; }
+.workspace-form { padding: 18px 20px; margin-bottom: 24px; }
+.workspace-form-head, .workspace-list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.workspace-fields { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; }
+.workspace-fields label { display: grid; gap: 6px; color: #53647c; font-size: 12px; font-weight: 600; }
+.workspace-fields input, .workspace-fields select, .workspace-toolbar select { width: 100%; min-height: 39px; padding: 8px 11px; border: 1px solid #dce4ef; border-radius: 9px; background: #fff; color: #24334a; font: inherit; }
+.workspace-primary, .workspace-row-actions button, .workspace-toolbar button { min-height: 36px; padding: 7px 13px; border: 1px solid #dbe5f1; border-radius: 9px; background: #fff; color: #365d91; font: inherit; font-size: 13px; cursor: pointer; }
+.workspace-primary { margin-top: 15px; background: #42699e; color: #fff; border-color: #42699e; }
+.workspace-primary:disabled { opacity: .55; cursor: wait; }
+.workspace-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 16px; margin-bottom: 8px; }
+.workspace-row-main { display: grid; gap: 5px; }
+.workspace-row-main strong { font-weight: 650; }
+.workspace-row-main small { color: #728198; }
+.workspace-row-actions { display: flex; align-items: center; gap: 12px; }
+.workspace-row-actions details { position: relative; }
+.workspace-row-actions summary, .workspace-table summary { color: #42699e; font-size: 13px; cursor: pointer; }
+.workspace-history { margin: 8px 0; padding-left: 17px; color: #516176; font-size: 12px; }
+.workspace-history li { margin: 5px 0; }
+.workspace-history small { display: block; }
+.workspace-empty, .workspace-notice { padding: 14px 16px; color: #66768c; font-size: 13px; }
+.workspace-notice { border-radius: 10px; background: #f7f9fc; }
+.workspace-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 20px 0; overflow: hidden; }
+.workspace-stats > div { display: grid; gap: 2px; padding: 15px; border-right: 1px solid #edf0f5; }
+.workspace-stats > div:last-child { border-right: 0; }
+.workspace-stats strong { font-size: 21px; font-weight: 650; }
+.workspace-stats span { font-size: 12px; color: #6a7990; }
+.workspace-toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.workspace-toolbar label { font-size: 13px; color: #596b81; }
+.workspace-toolbar select { width: auto; min-width: 160px; }
+.workspace-toolbar button { margin-left: auto; }
+.workspace-table-scroll { overflow-x: auto; }
+.workspace-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.workspace-table th, .workspace-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #edf0f5; }
+.workspace-table th { color: #6a7990; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .03em; background: #fafbfd; }
+.workspace-table tr:last-child td { border-bottom: 0; }
+.workspace-table td .workspace-badge { margin-left: 0; }
+@media (max-width: 800px) { .workspace-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .workspace-stats { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .workspace-fields { grid-template-columns: 1fr; } .workspace-row { align-items: flex-start; flex-direction: column; } .workspace-stats { grid-template-columns: repeat(2, 1fr); } }

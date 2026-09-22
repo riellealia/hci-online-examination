@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/shared-ui.css?v=20260902-left-divider">
     <link rel="stylesheet" href="../css/admin-modern.css">
+    <link rel="stylesheet" href="../css/admin-workspaces.css">
     <link rel="stylesheet" href="../css/system-management.css?v=20260902-announcement-menu-right">
     <link rel="stylesheet" href="../css/curriculum-management.css?v=20260920-unified">
     <link rel="stylesheet" href="../css/role-dashboard.css">
@@ -24,6 +25,7 @@
 <script src="../js/auth.js"></script>
     <script src="../js/ui.js?v=20260830-admin-groups"></script>
     <script src="../js/system-management.js"></script>
+    <script src="../js/admin-workspaces.js"></script>
 </head>
 
 <body data-role="admin">
@@ -91,6 +93,14 @@
       <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'loadPolicySection')" onkeydown="activateAdminCard(event,'loadPolicySection')" aria-label="Open Subject Management">
         <div class="card-top"><div class="card-icon">&#9636;</div><div class="card-count">5</div></div>
         <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Subject management</div><div class="card-note">Curricula, subjects, units, and load limits</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
+      </div>
+      <div class="card beige admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'academicPeriodsSection')" onkeydown="activateAdminCard(event,'academicPeriodsSection')" aria-label="Open Academic Periods">
+        <div class="card-top"><div class="card-icon" aria-hidden="true">▤</div><div class="card-count" id="countAcademicPeriods">—</div></div>
+        <div class="card-bottom beige"><div class="card-copy"><div class="card-label">Academic periods</div><div class="card-note">Terms, status, and rollover</div></div><span class="card-arrow" aria-hidden="true">→</span></div>
+      </div>
+      <div class="card orange admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'accountLifecycleSection')" onkeydown="activateAdminCard(event,'accountLifecycleSection')" aria-label="Open Account Lifecycle">
+        <div class="card-top"><div class="card-icon" aria-hidden="true">♙</div><div class="card-count" id="countLifecycleAccounts">0</div></div>
+        <div class="card-bottom orange"><div class="card-copy"><div class="card-label">Account lifecycle</div><div class="card-note">Account status and history</div></div><span class="card-arrow" aria-hidden="true">→</span></div>
       </div>
     </div>
   </div>
@@ -173,6 +183,9 @@
   <div id="systemSection" class="panel">
     <div id="systemManagementRoot"></div>
   </div>
+
+  <div id="academicPeriodsSection" class="panel"><div id="academicPeriodsRoot"></div></div>
+  <div id="accountLifecycleSection" class="panel"><div id="accountLifecycleRoot"></div></div>
 
   <div id="loadPolicySection" class="panel">
     <div id="loadPolicyRoot"></div>
@@ -1153,6 +1166,7 @@
     setText('countFacultySubject', subjectAssignments.length);
     setText('countSections', sections.length);
     setText('countAudit', AuditLog.read().length);
+    setText('countLifecycleAccounts', (DB.read('users',[]) || []).length);
 
     // Core tables
     const facultyRows=faculty.map((person,index)=>`<tr class="profile-row" tabindex="0" onclick="if(!event.target.closest('button'))openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}${person.middle?` ${person.middle}.`:''}</td><td>${rowActionMenu('faculty',index,person.id)}</td></tr>`).join('');
@@ -1368,19 +1382,24 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
       { id: 'dashboardSection',      label: 'Dashboard',                 icon: '&#8962;' },
       { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' },
       { id: 'loadPolicySection',     label: 'Subject Management',        icon: '&#128218;' },
+      { id: 'academicPeriodsSection',label: 'Academic Periods',          icon: '&#9636;' },
       { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
       { divider: true, label: 'School controls' },
       { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
       { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
+      { id: 'accountLifecycleSection',label:'Account Lifecycle',         icon: '&#9817;' },
       { id: 'sectionSection',        label: 'Section Management',        icon: '&#9638;' },
     ],
     titleEl: null,
     onSelect(id) {
       if (id === 'dashboardSection') startMonitoring();
       else stopMonitoring();
+      if (id === 'academicPeriodsSection') AdminWorkspaces.periods();
+      if (id === 'accountLifecycleSection') AdminWorkspaces.accounts();
     }
   });
   SystemManagement.mount();
+  AdminWorkspaces.mount();
 
   // Close modals when clicking outside
   window.addEventListener('click',function(e){

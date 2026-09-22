@@ -16,8 +16,15 @@ ok(/Live/.test(r.d.getElementById('monitoringState').textContent)&&r.d.getElemen
 r.w.setDashboardView('list');
 ok(r.d.getElementById('dashboardSection').classList.contains('dashboard-view-list')&&r.w.localStorage.getItem('adminDashboardView:admin')==='list','list view applies and is saved for the Admin account');
 const cards=[...r.d.querySelectorAll('.admin-dashboard-link:not([hidden])')];
-ok(cards.length===6,'all six active dashboard cards are navigation shortcuts');
+ok(cards.length===8,'all eight active dashboard cards are navigation shortcuts');
 ok(cards.every(card=>card.tabIndex===0&&card.getAttribute('role')==='link'&&card.getAttribute('aria-label')),'cards are keyboard accessible and named');
+const periodCard=cards.find(card=>card.getAttribute('aria-label')==='Open Academic Periods');
+const lifecycleCard=cards.find(card=>card.getAttribute('aria-label')==='Open Account Lifecycle');
+ok(!!periodCard&&!!lifecycleCard,'academic periods and account lifecycle have distinct dashboard cards');
+periodCard.dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
+ok(r.d.getElementById('academicPeriodsSection').style.display==='block'&&!!r.d.querySelector('#academicPeriodsRoot .workspace-summary'),'Academic Periods card opens its workspace');
+lifecycleCard.dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
+ok(r.d.getElementById('accountLifecycleSection').style.display==='block'&&!!r.d.querySelector('#accountLifecycleRoot .workspace-table'),'Account Lifecycle card opens its workspace');
 cards[1].dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
 ok(r.d.getElementById('studentSection').style.display==='block','clicking Students opens its management page');
 ok(r.d.getElementById('studentTable').textContent.includes('S1'),'destination shows the student list');

@@ -13,7 +13,7 @@ const AuditLog = {
     if(entity.includes('account')||['faculty','student','user','coordinator'].includes(entity)||['activate','deactivate','archive-account','restore-account'].includes(verb))return'account/lifecycle';
     if(entity==='system-settings'&&fields.some(field=>['allowFacultyLogin','allowStudentLogin','sessionTimeoutMinutes'].includes(field))||entity.includes('permission'))return'permissions';
     if(entity==='system-settings'&&fields.some(field=>['loadPolicies'].includes(field))||entity.includes('schedule')||entity.includes('load'))return'schedule/load';
-    if(entity.includes('curriculum')||['section','subject'].includes(entity)||entity==='system-settings'&&fields.some(field=>['schoolYear','semester'].includes(field)))return'academic setup';
+    if(entity.includes('academic-period')||entity.includes('curriculum')||['section','subject'].includes(entity)||entity==='system-settings'&&fields.some(field=>['schoolYear','semester'].includes(field)))return'academic setup';
     if(entity==='approval-request')return'approval';
     if(entity.includes('offering')||entity.includes('enrollment')||entity.includes('assignment')||entity==='student-subject'||entity==='faculty-subject-sections')return'assignment/enrollment';
     if(entity.includes('exam')||entity.includes('question')||entity.includes('submission')||entity.includes('grade')||entity.includes('report'))return'examination/grading';

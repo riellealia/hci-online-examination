@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const { validateAudit, validateApprovals } = require('../server/protected-write');
+const { validateAudit, validateApprovals, validateProtectedWrite } = require('../server/protected-write');
 const coordinator = { username: 'coord.001', role: 'coordinator' };
 const dean = { username: 'dean.demo', role: 'dean' };
 const admin = { username: 'admin', role: 'admin' };
@@ -15,6 +15,7 @@ const decided={...pending,status:'approved',reviewerId:'dean.demo',reviewerRole:
 assert.doesNotThrow(() => validateApprovals([pending], [decided], dean));
 assert.throws(() => validateApprovals([pending], [{ ...decided, proposedChange:{facultyId:'F9'} }], dean), /cannot alter/i);
 assert.throws(() => validateApprovals([pending], [{ ...decided, reviewerId:'other' }], dean), /limited/i);
+assert.throws(() => validateProtectedWrite({read:()=>[]}, admin, 'academicPeriods', []), /protected academic-period workflow/i);
 const cancelled={...pending,status:'cancelled',history:[...pending.history,{status:'cancelled',at:'2026-09-21T09:00:00Z',actorId:'admin',actorRole:'admin',remarks:'Obsolete request.'}]};
 assert.doesNotThrow(() => validateApprovals([pending], [cancelled], admin));
 assert.throws(() => validateApprovals([pending], [{...cancelled,proposedChange:{facultyId:'F9'}}], admin), /cannot decide or alter/i);
