@@ -27,7 +27,7 @@ const DemoData = {
     // role attempt Administrator-only collection writes on each new browser.
     const sqlite = typeof DB.backend === 'function' && DB.backend() === 'sqlite';
     const session = DB.read('currentUser', null);
-    if ((session && session.role !== 'admin') || (sqlite && !session)) {
+    if (sqlite || (session && session.role !== 'admin')) {
       localStorage.setItem('demoCurriculumVersion', String(this.version));
       return false;
     }
