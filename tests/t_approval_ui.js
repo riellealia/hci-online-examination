@@ -58,6 +58,9 @@ ok(dean.d.querySelector('#deanApprovalList .role-history'), 'Dean can inspect re
 ok(dean.d.querySelectorAll('#deanLogTable tbody tr').length >= 1, 'Dean activity log refreshes after a decision');
 
 const overloadId = dean.read('approvalRequests').find(item => item.type === 'student-overload').id;
+const overloadCard = dean.d.querySelector(`[data-request-type="student-overload"]`);
+ok(/Proposed load: 24 units/.test(overloadCard.textContent) && /Configured limits: 20 normal · 30 absolute maximum/.test(overloadCard.textContent), 'Dean sees proposed load and the current configured limits');
+ok(/No schedule conflicts detected/.test(overloadCard.textContent), 'Dean sees the overload schedule-conflict result before deciding');
 dean.d.getElementById(`remarks-${overloadId}`).value = 'Academic need and configured maximum verified.';
 dean.w.reviewAssignment(overloadId, 'approved');
 ok(dean.read('studentEnrollments').some(item => item.studentId === 'S1' && item.overloadApprovalId === overloadId), 'Dean approval creates the additional enrollment');

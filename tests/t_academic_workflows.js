@@ -59,6 +59,15 @@ records.subjects=[{code:'SUB-2',units:3},...Array.from({length:7},(_,index)=>({c
 records.studentEnrollments.push(...Array.from({length:7},(_,index)=>({id:`BASE-${index}`,studentId:'S2',subjectCode:`BASE-${index}`})));
 const calculatedOverload=workflows.requestStudentOverload({studentId:'S2',offeringId:'OFR-2',proposedUnits:99,normalLimit:21,maximumLimit:30,reason:'Calculated from enrolled units.'},coordinator);
 assert.strictEqual(calculatedOverload.proposedChange.currentUnits,21);assert.strictEqual(calculatedOverload.proposedChange.subjectUnits,3);assert.strictEqual(calculatedOverload.proposedChange.proposedUnits,24,'unit count is the authoritative Student load');
+records.sections[0].capacity=10;
+records.sectionSubjects[0].assignments[0].schedule={days:['Monday'],start:'09:00',end:'10:00'};
+records.sectionSubjects[0].assignments[1].schedule={days:['Monday'],start:'09:30',end:'10:30'};
+records.studentEnrollments.push({id:'S2-CONFLICT',studentId:'S2',offeringId:'OFR-1',subjectCode:'SUB-1',sectionId:'SEC-1'});
+const overloadReview=workflows.reviewStudentOverload(calculatedOverload);
+assert.strictEqual(overloadReview.policy.maximumLimit,30,'Dean review uses the current configured absolute maximum');
+assert.strictEqual(overloadReview.conflicts[0].offeringId,'OFR-1','Dean review identifies the conflicting offering');
+assert.throws(()=>approvals.approve(calculatedOverload.id,'Reviewed.',dean),error=>error.code==='SCHEDULE_CONFLICT');
+assert.strictEqual(records.approvalRequests.find(item=>item.id===calculatedOverload.id).status,'pending','a conflict discovered at decision time keeps the request pending');
 assert.throws(() => workflows.requestStudentOverload({ studentId: 'S1', offeringId: 'OFR-1', proposedUnits: 25, normalLimit: 21, reason: 'Duplicate.' }, coordinator), /already enrolled/i);
 
 const appliedEvents = records.applicationAuditLog.filter(item => item.action.startsWith('apply-approved'));
