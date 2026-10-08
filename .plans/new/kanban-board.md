@@ -10,7 +10,7 @@ No currently claimed tasks are in active implementation.
 
 ## Review
 
-- [#11 Academic periods and rollover](https://github.com/riellealia/hci-online-examination/issues/11) — Natalia · P0 · Implementation and 1,159-test suite complete; teammate review remains before closure.
+No tasks are currently awaiting review.
 
 ## Claimed, not started
 
@@ -64,6 +64,7 @@ Do not start until the required dependencies reach Review, as specified in the [
 
 ## Complete
 
+- [#11 Academic periods and rollover](https://github.com/riellealia/hci-online-examination/issues/11) — Natalia · P0.
 - [#1 Role permissions and protected access](https://github.com/riellealia/hci-online-examination/issues/1) — Natalia · P0.
 - [#2 Shared approval workflow](https://github.com/riellealia/hci-online-examination/issues/2) — Natalia · P0.
 - [#3 Shared audit-log structure](https://github.com/riellealia/hci-online-examination/issues/3) — Natalia · P0.
