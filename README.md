@@ -22,7 +22,7 @@ The prototype currently includes:
 - SQLite as the primary data source when the Node server is running; and
 - CSV as an import/export format rather than the application database.
 
-The Dean and Faculty Coordinator dashboards currently use the Admin dashboard as their initial structural basis. Their complete role-specific workflows remain tracked in [`.plans/new`](.plans/new).
+Dean and Faculty Coordinator workspaces now use the shared role-dashboard design system while preserving their distinct academic responsibilities. Remaining role-specific work and ownership are tracked in [`.plans/new`](.plans/new).
 
 ## Requirements
 
@@ -118,7 +118,7 @@ Except for health and login, API requests require `Authorization: Bearer <token>
 
 ## Tests
 
-The repository currently contains 54 automated test files. The latest complete verification passed all 54 files, including server authentication sessions, collection-level authorization, protected approval writes, append-only audit enforcement, role-safe SQLite startup, cross-role approval UI, stale-request protection, approved academic changes, SQLite persistence, source-of-truth migration, HTTP routes, and CSV import/export.
+The repository currently contains 66 automated test files. The 2026-10-08 complete verification passed all 66 files, including server authentication sessions, collection-level authorization, protected approval writes, append-only audit enforcement, role-safe SQLite startup, Dean overload revalidation, Dean statistics and logs, Faculty Coordinator logs, cross-role approval UI, demo-data integrity, responsive safeguards, SQLite persistence, HTTP routes, and CSV import/export.
 
 Run the SQLite tests without installing additional packages:
 
@@ -134,6 +134,8 @@ cd tests
 npm install
 npm test
 ```
+
+See [`docs/completion-evidence.md`](docs/completion-evidence.md) for the verified workflow matrix, reproducible screenshot command, captured desktop/mobile evidence, and current limitations.
 
 ## Project structure
 
@@ -164,4 +166,4 @@ git push
 
 ## Scope note
 
-This remains an HCI academic prototype. SQLite provides durable local persistence, and all storage and CSV routes now require a valid server session; migration and CSV transfer additionally require an Administrator account. Production deployment would still require collection-level authorization, password hashing, secret management, backups, concurrency planning, HTTPS, and a deployment-specific security review.
+This remains an HCI academic prototype. SQLite provides durable local persistence, collection-level authorization, protected sessions, academic-period backups, and controlled CSV transfer. Production deployment would still require password hashing, external secret management, multi-process concurrency planning, HTTPS, operational monitoring, off-device backup retention, and a deployment-specific security review. Automated tests and screenshots are implementation evidence; representative-user usability findings are still separate work.

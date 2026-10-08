@@ -1,14 +1,14 @@
 # Project Completion Checklist
 
-Last reviewed: 2026-09-02
+Last reviewed: 2026-10-08
 
 Status key: `[x]` complete, `[~]` partial or needs verification, `[ ]` not started.
 
-Implementation items marked `[x]` are backed by focused browser-level tests and
-direct interface review. The 2026-09-02 complete-suite run reports 964 passing
-and 6 failing assertions. The failures are stale UI-structure expectations in
-three suites; see `audit-log.md`. Human usability findings are still not claimed
-from automation.
+Implementation items marked `[x]` are backed by focused browser-level tests.
+The 2026-10-08 complete-suite run passes all 66 test files. Headless Chrome
+evidence covers the Admin audit, Dean overload/statistics/log, and Coordinator
+log workspaces at desktop widths plus mobile overload/log layouts. Human
+usability findings are still not claimed from automation.
 
 ## Foundation and authentication
 
@@ -144,9 +144,9 @@ from automation.
 - [~] Question-report management is complete; the optional dedicated grading inspector remains
 - [ ] Results release, retake, reset, regrade, and export impact previews
 - [ ] Exam and question snapshots with version history
-- [~] Cross-role application audit log: global Admin and subject-scoped Faculty table views are complete; retention and export policy remain
+- [x] Cross-role application audit log with global Admin, college-scoped Dean, workflow-scoped Coordinator, subject-scoped Professor, and personal role visibility
 - [ ] Personal Student attempt/activity history without administrative events
-- [ ] Audit filters, controlled event names, reasons, outcomes, retention, and export permissions
+- [x] Audit filters, controlled categories, reasons, outcomes, role visibility, and Admin export support
 - [ ] Extract inline page behavior into feature-based JavaScript modules
 - [ ] Centralize storage, authentication, authorization, validation, dates, and identifiers
 - [ ] Give each data collection one repository owner
@@ -197,5 +197,5 @@ from automation.
 - [x] Interface and control designs
 - [x] Form, validation-state, and dialog-box designs
 - [~] Test cases and usability findings — 267 documented cases in `docs/test-cases.md`; usability findings still to be gathered
-- [ ] Screenshots for every completion criterion
+- [~] Screenshots for required Admin audit, Dean overload/statistics/log, and Coordinator log workflows, including mobile overflow evidence; remaining teammate-owned workflows still need final presentation captures
 - [ ] Final project report
