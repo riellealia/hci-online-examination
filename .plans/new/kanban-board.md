@@ -2,11 +2,15 @@
 
 The live board is [HCI Online Examination — Team Kanban](https://github.com/users/riellealia/projects/1/views/2). This Markdown page is only a dated planning snapshot; update the GitHub Project for current task status.
 
-Snapshot of [GitHub issues](https://github.com/riellealia/hci-online-examination/issues) and [work claims](.claim-work.md) on 2026-09-23. Move a card in the live Project and keep its issue and claim entry consistent. Priority is inherited from the GitHub issue label; `P0` is most urgent. Required tasks come before optional tasks.
+Snapshot of [GitHub issues](https://github.com/riellealia/hci-online-examination/issues) and [work claims](.claim-work.md) on 2026-10-08. Move a card in the live Project and keep its issue and claim entry consistent. Priority is inherited from the GitHub issue label; `P0` is most urgent. Required tasks come before optional tasks.
 
 ## In progress
 
-- [#11 Academic periods and rollover](https://github.com/riellealia/hci-online-examination/issues/11) — Natalia · P0 · Backend implemented; Admin UI remains.
+No currently claimed tasks are in active implementation.
+
+## Review
+
+- [#11 Academic periods and rollover](https://github.com/riellealia/hci-online-examination/issues/11) — Natalia · P0 · Implementation and 1,159-test suite complete; teammate review remains before closure.
 
 ## Claimed, not started
 
@@ -33,7 +37,7 @@ These have a named owner in the claim file but still say `Unclaimed` there. Thei
 
 ## Unclaimed required work
 
-- [#14 Admin overload approvals](https://github.com/riellealia/hci-online-examination/issues/14) · P1.
+- [#14 Dean Student-overload approvals](https://github.com/riellealia/hci-online-examination/issues/14) · P1.
 - [#21 Faculty Coordinator dashboard](https://github.com/riellealia/hci-online-examination/issues/21) · P1.
 - [#24 Student enrollment and transfers](https://github.com/riellealia/hci-online-examination/issues/24) · P1.
 - [#27 Load calculation and overload requests](https://github.com/riellealia/hci-online-examination/issues/27) · P1.

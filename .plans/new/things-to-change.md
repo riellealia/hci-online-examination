@@ -47,7 +47,7 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
 - Add filterable active and archived account lists and log every lifecycle change.
 - Manage school years, terms, start/end dates, curriculum versions, subject units, and load limits.
 - Closing a term archives its active records; it must not erase historical records.
-- Review exceptional requests such as Student overloads.
+- Configure normal and absolute Student-load limits and retain oversight of overload decisions.
 
 ### Dean
 
@@ -56,6 +56,7 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
 - Allow the Dean to add or hire Professors and appoint Faculty Coordinators.
 - Add filterable approval, activity-log, and statistics pages.
 - Let the Dean approve or reject Professor-to-subject-offering assignments proposed by Faculty Coordinators.
+- Let the Dean approve or reject Student-overload applications submitted by Faculty Coordinators.
 
 ### Faculty Coordinator
 
@@ -65,7 +66,7 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
 - Check Professor, Student, Section, and optional Room schedule conflicts.
 - Calculate Professor teaching load and Student academic load.
 - Send Professor assignment requests to the Dean.
-- Send Student overload requests to Admin.
+- Send Student overload applications to the Dean.
 - Log every assignment, transfer, schedule, and load change.
 
 ### Professor and Student
@@ -99,7 +100,7 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
   - Reviewed by: No additional approval by default
 - **Student overload**
   - Submitted by: Faculty Coordinator
-  - Reviewed by: Admin
+  - Reviewed by: Dean
 - **Appoint a Professor as Faculty Coordinator**
   - Submitted by: Dean
   - Reviewed by: Admin by default

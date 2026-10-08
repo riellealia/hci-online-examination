@@ -7,12 +7,18 @@ const vm = require('vm');
 const local = new Map([['currentUser', JSON.stringify({ username:'admin', role:'admin' })]]);
 const session = new Map([['serverSessionToken', 'demo-token']]);
 const sent = [];
+const requested = [];
 class XMLHttpRequestMock {
   open(method, url) { this.method=method; this.url=url; }
   setRequestHeader() {}
   send(body) {
     this.status = 200;
     if (this.method === 'GET') {
+      requested.push(this.url);
+      if (this.url.includes('/api/academic-periods/current/records/')) {
+        this.responseText = JSON.stringify({ records:[{id:'ENR-CURRENT',studentId:'S0',academicPeriodId:'AY-2026-2027-FIRST-SEMESTER',periodStatus:'active'}] });
+        return;
+      }
       this.responseText = JSON.stringify({ records:{studentEnrollments:[]}, collections:['studentEnrollments'], session:{username:'admin',role:'admin'} });
       return;
     }
@@ -30,6 +36,8 @@ const context = vm.createContext({
 });
 const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'storage.js'), 'utf8');
 const db = vm.runInContext(source + '\nDB', context);
+assert.ok(requested.includes('/api/academic-periods/current/records/studentEnrollments'), 'SQLite bootstrap must hydrate operational data through the current-period route');
+assert.equal(db.read('studentEnrollments', [])[0].id, 'ENR-CURRENT', 'browser cache must exclude non-current enrollment records');
 assert.equal(db.write('studentEnrollments', [{id:'ENR-1',studentId:'S1'}]), true);
 assert.equal(db.read('studentEnrollments', [])[0].academicPeriodId, 'AY-2026-2027-FIRST-SEMESTER', 'browser cache must use the server-normalized record');
 assert.equal(db.write('studentEnrollments', db.read('studentEnrollments', [])), true);

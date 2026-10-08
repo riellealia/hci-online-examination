@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
+const { ALLOWED } = require('../server/backup-restore');
 
 const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'neu-period-http-'));
 const port = 3037, origin = `http://127.0.0.1:${port}`;
@@ -67,6 +68,10 @@ async function login(username, password) {
     result = await request('/api/academic-periods', admin, 'POST', { schoolYear:'2027-2028', term:'First Semester', startDate:'2027-08-01', endDate:'2027-12-20' });
     assert.equal(result.status, 201, JSON.stringify(result.body));
     const next = result.body.period;
+    result = await request('/api/storage', admin);
+    assert.equal(result.status, 200);
+    const backupRecords = Object.fromEntries(Object.entries(result.body.records).filter(([key]) => ALLOWED.has(key)));
+    const backup = { format:'neu-online-examination-backup', version:1, createdAt:new Date().toISOString(), records:backupRecords };
     result = await request(`/api/academic-periods/${initial.id}/impact`, admin);
     assert.equal(result.body.counts.studentEnrollments, 1);
     result = await request(`/api/academic-periods/${initial.id}/close`, admin, 'POST', {reason:'End of term'});
@@ -85,6 +90,17 @@ async function login(username, password) {
     assert.equal(result.status, 403, 'period history cannot be deleted');
     result = await request('/api/storage/studentEnrollments', admin, 'PUT', {value:[{id:'ENR-LATE',studentId:'S2'}]});
     assert.equal(result.status, 409, 'closed period cannot accept new enrollments');
+    result = await request('/api/backups/restore', dean, 'POST', {backup});
+    assert.equal(result.status, 403, 'only Admin can restore a backup');
+    const invalidBackup = {...backup,records:{...backup.records,systemSettings:{...backup.records.systemSettings,currentAcademicPeriodId:'missing'}}};
+    result = await request('/api/backups/restore', admin, 'POST', {backup:invalidBackup});
+    assert.equal(result.status, 400, 'inconsistent period backup must be rejected');
+    result = await request('/api/backups/restore', admin, 'POST', {backup});
+    assert.equal(result.status, 200, JSON.stringify(result.body));
+    result = await request('/api/academic-periods/current/records/studentEnrollments', admin);
+    assert.equal(result.body.records.length, 1, 'protected restore returns the backed-up active enrollment');
+    result = await request(`/api/academic-periods/${initial.id}/close`, admin, 'POST', {reason:'End of term after restore verification'});
+    assert.equal(result.status, 200, JSON.stringify(result.body));
     result = await request(`/api/academic-periods/${next.id}/activate`, admin, 'POST', {reason:'New term'});
     assert.equal(result.status, 200);
     result = await request('/api/academic-periods/current/records/studentEnrollments', admin);

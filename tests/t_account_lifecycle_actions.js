@@ -8,7 +8,7 @@ const flush=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
 
   // Student Management: row menu exposes Edit status instead of a one-off Deactivate button.
   const row=[...r.d.querySelectorAll('#studentTable tr')].find(tr=>/Cruz, Juan/.test(tr.textContent));
-  row.querySelector('.section-action-trigger').click();
+  row.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:40,clientY:40}));
   const editStatusButton=[...row.querySelectorAll('.section-action-menu button')].find(btn=>/Edit status/.test(btn.textContent));
   ok(!!editStatusButton,'Student Management row menu offers Edit status');
   editStatusButton.click();
@@ -46,7 +46,8 @@ const flush=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
   const lifecycleRoot=r.d.getElementById('accountLifecycleRoot');
   const lifecycleRow=lifecycleRoot.querySelector('[data-account-id="S1"]');
   ok(/Archived/.test(lifecycleRow?.textContent||''),'Account Lifecycle reflects the status change made from Student Management');
-  lifecycleRow.querySelector('.section-action-trigger').click();
+  ok(lifecycleRow.querySelector('.section-action-trigger').classList.contains('row-actions-trigger-hidden'),'Account Lifecycle removes its visible action icon');
+  lifecycleRow.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:40,clientY:40}));
   const restoreEntry=[...lifecycleRow.querySelectorAll('.section-action-menu button')].find(btn=>/Edit status/.test(btn.textContent));
   ok(!!restoreEntry,'Account Lifecycle rows also expose Edit status');
   restoreEntry.click();
@@ -65,7 +66,7 @@ const flush=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
   ok(!!managementRow,'restored students reappear in Student Management');
 
   // Deactivate via the checkbox alone, with no dropdown selection.
-  row.querySelector('.section-action-trigger').click();
+  row.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:40,clientY:40}));
   [...row.querySelectorAll('.section-action-menu button')].find(btn=>/Edit status/.test(btn.textContent)).click();
   ok(!checkbox().checked,'the checkbox reopens unchecked for the now-Active account');
   checkbox().checked=true; checkbox().dispatchEvent(new r.w.Event('change',{bubbles:true}));

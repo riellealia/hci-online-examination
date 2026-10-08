@@ -1042,11 +1042,11 @@
   }
 
   function renderTable(data,tableId,headers,fields,type){
-    const headerRow='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'<th>Actions</th></tr>';
+    const headerRow='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
     const rows=data.map((item,i)=>`
-      <tr>
+      <tr tabindex="0">
         ${fields.map(f=>`<td>${Array.isArray(item[f])?item[f].join(', '):item[f]}</td>`).join('')}
-        <td>${rowActionMenu(type,i,item.code||item.id||type+' record')}</td>
+        <td class="row-actions-cell">${rowActionMenu(type,i,item.code||item.id||type+' record',true)}</td>
       </tr>`).join('');
     const el=document.getElementById(tableId);
     if(el) el.innerHTML=headerRow+rows;
@@ -1246,8 +1246,8 @@
       .map(({student,index})=>`<tr class="profile-row" role="button" tabindex="0" onclick="openStudentEnrollmentPage(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentEnrollmentPage(${index})}" aria-label="Manage ${student.first} ${student.last}"><td>${student.id}</td><td class="student-name-cell">${student.last}, ${student.first}${student.middle?` ${student.middle}.`:''}</td><td>Year ${studentYearFromRecord(student)}</td><td class="row-actions-cell">${rowActionMenu('students',index,student.id,true)}</td></tr>`).join('');
     document.getElementById('studentTable').innerHTML='<tr><th>ID</th><th>Student name</th><th>Year level</th></tr>'+studentRows;
     renderTable(subjects,'subjectTable',['Code','Name'],['code','name'],'subjects');
-    const sectionRows=sections.map((section,index)=>`<tr><td><strong>${section.id}</strong></td><td>${section.name}</td><td><strong class="section-count">${sectionStudentCount(section.id)}/${sectionStudentCapacity(section.id)}</strong></td><td><div class="section-action-wrap"><button class="table-icon-btn section-action-trigger" onclick="toggleSectionActionMenu(event)" aria-label="Settings for ${section.id}" title="Section settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a8 8 0 0 0-1.7-1L15 3.3h-4L10.6 6a8 8 0 0 0-1.7 1L6.5 6l-2 3.4L6.6 11a7.8 7.8 0 0 0 0 2l-2.1 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.4 2.7h4l.4-2.7a8 8 0 0 0 1.7-1l2.4 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></button><nav class="section-action-menu" role="menu" aria-label="Actions for ${section.id}"><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);openSectionSubjects(${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 2.4 1.2L14 5h3.5A2.5 2.5 0 0 1 20 7.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5.5Zm2.5-.5a.5.5 0 0 0-.5.5V18h12V7.5a.5.5 0 0 0-.5-.5H13l-1.2-1.6A1 1 0 0 0 11 5H6.5Z"/></svg><span>Assign subjects</span></button><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);editItem('sections',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>Edit section</span></button><button type="button" class="danger" role="menuitem" onclick="closeSectionActionMenu(event);deleteItem('sections',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete section</span></button></nav></div></td></tr>`).join('');
-    document.getElementById('sectionTable').innerHTML='<tr><th>Unique ID</th><th>Year Level</th><th>Curriculum</th><th>Section</th><th>Count</th><th>Actions</th></tr>'+sectionRows;
+    const sectionRows=sections.map((section,index)=>`<tr tabindex="0"><td><strong>${section.id}</strong></td><td>${section.name}</td><td><strong class="section-count">${sectionStudentCount(section.id)}/${sectionStudentCapacity(section.id)}</strong></td><td class="row-actions-cell"><div class="section-action-wrap"><button class="table-icon-btn section-action-trigger row-actions-trigger-hidden" tabindex="-1" aria-hidden="true" onclick="toggleSectionActionMenu(event)" aria-label="Settings for ${section.id}" title="Section settings" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a8 8 0 0 0-1.7-1L15 3.3h-4L10.6 6a8 8 0 0 0-1.7 1L6.5 6l-2 3.4L6.6 11a7.8 7.8 0 0 0 0 2l-2.1 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.4 2.7h4l.4-2.7a8 8 0 0 0 1.7-1l2.4 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></button><nav class="section-action-menu" role="menu" aria-label="Actions for ${section.id}"><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);openSectionSubjects(${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 2.4 1.2L14 5h3.5A2.5 2.5 0 0 1 20 7.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5.5Zm2.5-.5a.5.5 0 0 0-.5.5V18h12V7.5a.5.5 0 0 0-.5-.5H13l-1.2-1.6A1 1 0 0 0 11 5H6.5Z"/></svg><span>Assign subjects</span></button><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);editItem('sections',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>Edit section</span></button><button type="button" class="danger" role="menuitem" onclick="closeSectionActionMenu(event);deleteItem('sections',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete section</span></button></nav></div></td></tr>`).join('');
+    document.getElementById('sectionTable').innerHTML='<tr><th>Unique ID</th><th>Year Level</th><th>Curriculum</th><th>Section</th><th>Count</th></tr>'+sectionRows;
     [...document.querySelectorAll('#sectionTable tr')].slice(1).forEach((row,index)=>{const section=sections[index],details=SectionService.detailsFromId(section.id),program=section.program||details.program;row.cells[1].textContent=section.sectionNumber||details.sectionNumber||section.name||'—';row.insertCell(1).textContent=section.yearLevel||details.yearLevel||'—';row.insertCell(2).textContent=program||'—';});
 
     // Faculty–Subject table
@@ -1262,10 +1262,10 @@
   return `<tr>
     <td>${s ? `${s.code} - ${s.name}` : '(deleted subject)'}</td>
     <td>${facNames}</td>
-    <td>${rowActionMenu('subjectAssignments',i,a.subjectCode)}</td>
+    <td class="row-actions-cell">${rowActionMenu('subjectAssignments',i,a.subjectCode,true)}</td>
   </tr>`;
 }).join('');
-if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></tr>` + fsRows;
+if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
 
     // Student–Subject–Faculty table
     const allotEl = document.getElementById('allotTable');
@@ -1278,10 +1278,10 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
           <td>${st ? `${st.id} - ${st.last}, ${st.first}` : '(deleted student)'}</td>
           <td>${sub ? `${sub.code} - ${sub.name}` : '(deleted subject)'}</td>
           <td>${fac ? `${fac.id} - ${fac.last}, ${fac.first}` : '(deleted faculty)'}</td>
-          <td>${rowActionMenu('allotments',i,a.studentId)}</td>
+          <td class="row-actions-cell">${rowActionMenu('allotments',i,a.studentId,true)}</td>
         </tr>`;
       }).join('');
-      allotEl.innerHTML = `<tr><th>Student</th><th>Subject</th><th>Faculty</th><th>Actions</th></tr>` + allotRows;
+      allotEl.innerHTML = `<tr><th>Student</th><th>Subject</th><th>Faculty</th></tr>` + allotRows;
     }
     renderAuditLog();
     AdminTableTools.mount('faculty',document.getElementById('facultyTable'),document.querySelector('#facultySection .action-box'));
@@ -1449,14 +1449,16 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
   adminNav = mountSidebar({
     items: [
       { id: 'dashboardSection',      label: 'Dashboard',                 icon: '&#8962;' },
+      { divider: true, label: 'System settings' },
       { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' },
-      { id: 'loadPolicySection',     label: 'Subject Management',        icon: '&#128218;' },
       { id: 'academicPeriodsSection',label: 'Academic Periods',          icon: '&#9636;' },
       { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
-      { divider: true, label: 'School controls' },
+      { divider: true, label: 'School management' },
+      { id: 'loadPolicySection',     label: 'Subject Management',        icon: '&#128218;' },
       { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
       { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
       { id: 'accountLifecycleSection',label:'Account Lifecycle',         icon: '&#9817;' },
+      { divider: true, label: 'To be moved' },
       { id: 'sectionSection',        label: 'Section Management',        icon: '&#9638;' },
     ],
     titleEl: null,
@@ -1490,6 +1492,15 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th><th>Actions</th></
     e.preventDefault();
     e.stopPropagation();
     openAdminRowMenu(trigger,e.clientX,e.clientY);
+  });
+  window.addEventListener('keydown',function(e){
+    if(e.key!=='ContextMenu'&&!(e.shiftKey&&e.key==='F10'))return;
+    const row=e.target.closest('table tr'),trigger=row?.querySelector('.section-action-trigger');
+    if(!trigger)return;
+    e.preventDefault();
+    const rect=row.getBoundingClientRect();
+    openAdminRowMenu(trigger,rect.left+24,rect.top+24);
+    row.querySelector('.section-action-menu button')?.focus();
   });
 </script>
 

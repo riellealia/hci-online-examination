@@ -25,11 +25,13 @@ for(const [page,user,count,firstLabel] of pages){
 
 const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
-ok(adminLinks.slice(0,5).join(',')==='dashboardSection,systemSection,loadPolicySection,academicPeriodsSection,auditSection','Admin places System Management, Subject Management, Academic Periods, and Audit Log directly below Dashboard');
+ok(adminLinks.slice(0,5).join(',')==='dashboardSection,systemSection,academicPeriodsSection,auditSection,loadPolicySection','Admin navigation follows system settings before school management');
 ok(adminNavPage.d.querySelector('#sidebar [data-panel="loadPolicySection"]')?.textContent.includes('Subject Management'),'unified curriculum and load workspace is named Subject Management');
 ok(!adminNavPage.d.querySelector('#sidebar [data-panel="subjectSection"]'),'archived legacy Subject Management is removed from navigation');
-const adminDivider=adminNavPage.d.querySelector('#sidebar .sidebar-divider[role="separator"]');
-ok(adminDivider?.textContent.trim()==='School controls'&&adminDivider.nextElementSibling?.dataset.panel==='facultySection','Admin sidebar divider separates system controls from school controls');
+const adminDividers=[...adminNavPage.d.querySelectorAll('#sidebar .sidebar-divider[role="separator"]')];
+ok(adminDividers.map(item=>item.textContent.trim()).join('|')==='System settings|School management|To be moved','Admin sidebar exposes the three requested navigation categories');
+ok(adminDividers[0].nextElementSibling?.dataset.panel==='systemSection'&&adminDividers[1].nextElementSibling?.dataset.panel==='loadPolicySection','system and school management items start under the correct category');
+ok(adminDividers[2].nextElementSibling?.dataset.panel==='sectionSection','Section Management is clearly marked for transfer');
 adminNavPage.w.close();
 
 console.log('\n=== BBB. Drawer opens, closes, and switches sections ===');

@@ -65,7 +65,7 @@ The following lists are the default permissions. Any configurable exception must
 - **Curricula and term limits:** Manage.
 - **Professor assignments:** View requests and resulting assignments.
 - **Student enrollment and transfers:** View.
-- **Student overloads:** Approve or reject.
+- **Student overloads:** Configure load limits and view decisions.
 - **Examinations and grading:** View reports only; does not perform ordinary grading.
 - **Audit logs:** View all system audit records.
 
@@ -78,7 +78,7 @@ The following lists are the default permissions. Any configurable exception must
 - **Curricula and term limits:** View.
 - **Professor assignments:** Review, approve, or reject Faculty Coordinator requests.
 - **Student enrollment and transfers:** View.
-- **Student overloads:** View requests and decisions.
+- **Student overloads:** Approve or reject Faculty Coordinator applications.
 - **Examinations and grading:** View statistics; cannot edit examinations or grades.
 - **Audit logs:** View college-relevant personnel, approval, and academic activity.
 
@@ -91,7 +91,7 @@ The following lists are the default permissions. Any configurable exception must
 - **Curricula and term limits:** View and use them during academic management.
 - **Professor assignments:** Create and manage proposals for Dean review.
 - **Student enrollment and transfers:** Manage.
-- **Student overloads:** Submit requests to Admin.
+- **Student overloads:** Submit applications to the Dean.
 - **Examinations and grading:** View assignment or completion status only.
 - **Audit logs:** View their own actions and the workflows they manage.
 

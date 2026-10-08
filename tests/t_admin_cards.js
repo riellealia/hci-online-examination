@@ -23,10 +23,15 @@ const lifecycleCard=cards.find(card=>card.getAttribute('aria-label')==='Open Acc
 ok(!!periodCard&&!!lifecycleCard,'academic periods and account lifecycle have distinct dashboard cards');
 periodCard.dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
 ok(r.d.getElementById('academicPeriodsSection').style.display==='block'&&!!r.d.querySelector('#academicPeriodsRoot .workspace-summary'),'Academic Periods card opens its workspace');
+ok(/Guided rollover/.test(r.d.querySelector('#academicPeriodsRoot .workspace-rollover-guide')?.textContent||''),'Academic Periods explains the guided rollover sequence');
 lifecycleCard.dispatchEvent(new r.w.MouseEvent('click',{bubbles:true}));
 ok(r.d.getElementById('accountLifecycleSection').style.display==='block'&&!!r.d.querySelector('#accountLifecycleRoot .workspace-table'),'Account Lifecycle card opens its workspace');
 ok(r.d.querySelector('#accountLifecycleSection > .management-page-head')?.textContent.includes('Account lifecycle')&&!r.d.querySelector('#accountLifecycleRoot .management-page-head'),'Account Lifecycle title sits outside the content block');
-ok([...r.d.querySelectorAll('#accountLifecycleRoot .workspace-table th')].map(cell=>cell.textContent).join(',')==='ID,Name,Role,Created at,Status,History,Actions','lifecycle table places the account creation year between role and status');
+ok([...r.d.querySelectorAll('#accountLifecycleRoot .workspace-table th')].map(cell=>cell.textContent).join(',')==='ID,Name,Role,Created at,Status,History','lifecycle table has no visible Actions column');
+const lifecycleContextRow=r.d.querySelector('#accountLifecycleRoot .workspace-person-row');
+lifecycleContextRow.dispatchEvent(new r.w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:48,clientY:48}));
+ok(lifecycleContextRow.querySelector('.section-action-menu')?.classList.contains('open'),'right-clicking anywhere on an Account Lifecycle row opens its navigation options');
+r.d.body.click();
 ok(!!r.d.querySelector('#accountLifecycleRoot [aria-label="Import CSV"]')&&!!r.d.querySelector('#accountLifecycleRoot [aria-label="Export CSV"]'),'lifecycle CSV actions are on the left');
 const lifecycleCss=require('fs').readFileSync(require('path').join(__dirname,'../css/admin-workspaces.css'),'utf8');
 ok(/\.lifecycle-tools\s*\{[^}]*border:\s*0;/.test(lifecycleCss)&&/\.lifecycle-icon\s*\{[^}]*border:\s*1px/.test(lifecycleCss),'lifecycle toolbar has no enclosing border while icon buttons retain borders');

@@ -116,7 +116,7 @@ Record offering changes, assignment requests/replacements, enrollments, withdraw
 - Schedule input supports multiple days and times.
 - Conflicting schedules are rejected.
 - Normal enrollment updates both Student and offering views.
-- Overload remains pending until Admin approval.
+- Overload remains pending until Dean approval under the Admin-configured load limits.
 - Loads use Subject units and configured limits.
 - Availability thresholds and labels are consistent.
 - Material actions are logged.

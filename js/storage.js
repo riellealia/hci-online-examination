@@ -18,6 +18,10 @@ const _storageSeen = new Map();
 const SQLITE_BACKEND_ACTIVE = typeof location !== 'undefined'
   && /^https?:$/.test(location.protocol) && location.port === '3000';
 const SQLITE_LOCAL_ONLY = new Set(['currentUser','accessNotice']);
+const SQLITE_PERIOD_SCOPED = new Set([
+  'sectionSubjects', 'studentEnrollments', 'subjectAssignments', 'exams',
+  'questions', 'studentSubmissions', 'approvalRequests'
+]);
 function sqliteSessionToken() { try { return sessionStorage.getItem('serverSessionToken') || ''; } catch (_) { return ''; } }
 function resetSqliteLoginEntry() {
   if (!SQLITE_BACKEND_ACTIVE || typeof location === 'undefined' || !/(?:^|\/)login\.html$/.test(location.pathname || '')) return false;
@@ -54,6 +58,19 @@ function sqliteBootstrap() {
     if (request.status !== 200) throw new Error(`SQLite bootstrap returned ${request.status}.`);
     const response = JSON.parse(request.responseText || '{}');
     const records = response.records || {};
+    // Active workspaces must never hydrate closed-period operational records.
+    // Historical records remain available through the explicit period routes.
+    for (const key of SQLITE_PERIOD_SCOPED) {
+      if (!Object.hasOwn(records, key)) continue;
+      const scoped = new XMLHttpRequest();
+      scoped.open('GET', `/api/academic-periods/current/records/${encodeURIComponent(key)}`, false);
+      scoped.setRequestHeader('Authorization', `Bearer ${token}`);
+      scoped.send();
+      if (scoped.status === 200) records[key] = JSON.parse(scoped.responseText || '{}').records || [];
+      else if (scoped.status === 404) records[key] = [];
+      else if (scoped.status === 401 || scoped.status === 403) { invalidateSqliteSession(); return; }
+      else throw new Error(`Current-period ${key} bootstrap returned ${scoped.status}.`);
+    }
     let browserSession = null;
     try { browserSession = JSON.parse(localStorage.getItem('currentUser') || 'null'); } catch (_) {}
     const serverSession = response.session || null;
