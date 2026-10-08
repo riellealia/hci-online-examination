@@ -19,7 +19,7 @@ const context = vm.createContext({
 });
 vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'demo-data.js'), 'utf8') + '\nDemoData.install();', context);
 assert.deepStrictEqual(writes, [], 'hydrated SQLite pages must not reseed collections');
-assert.strictEqual(storage.get('demoCurriculumVersion'), '27');
+assert.strictEqual(storage.get('demoCurriculumVersion'), '28');
 
 const roleWrites = [];
 const roleContext = vm.createContext({

@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 27,
+  version: 28,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -93,7 +93,8 @@ const DemoData = {
       rows.forEach(item=>{if(!subjectByCode.has(item.subjectCode))subjectByCode.set(item.subjectCode,{code:item.subjectCode,name:item.subjectName,program,yearLevel,term:'first',units:Number(item.units)||0})});
       for(let sectionNumber=1;sectionNumber<=3;sectionNumber++){
         const id=`${yearLevel}${program}-${sectionNumber}`;
-        sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel,capacity:50});
+        const capacity=program==='BSCS'&&yearLevel===1&&sectionNumber===1?20:program==='BSCS'&&yearLevel===1&&sectionNumber===2?24:50;
+        sections.push({id,name:String(sectionNumber),sectionNumber,program,yearLevel,capacity});
         sectionSubjects.push({sectionId:id,assignments:rows.map(item=>{const number=offerNo++;return{id:`OFR-${String(number).padStart(4,'0')}`,subjectCode:item.subjectCode,facultyId:faculty[(number-1)%faculty.length].id}})});
       }
     }));
@@ -111,6 +112,8 @@ const DemoData = {
       }
     });
     const offers=sectionSubjects.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId}))),studentEnrollments=[];
+    const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday'],starts=['08:00','09:30','11:00','13:00','14:30','16:00'];
+    sectionSubjects.forEach((record,recordIndex)=>(record.assignments||[]).forEach((assignment,index)=>{const start=starts[(recordIndex+index)%starts.length],hour=Number(start.slice(0,2)),minute=start.slice(3),end=`${String(hour+1).padStart(2,'0')}:${minute}`;assignment.schedule={days:[weekdays[(recordIndex+index)%weekdays.length]],start,end,room:`CICS-${String(201+(recordIndex%8)).padStart(3,'0')}`};}));
     const maria=students.find(student=>student.id==='2025-00002');
     students.forEach(student=>offers.filter(offer=>student.sections.includes(offer.sectionId)).forEach((offer,index)=>studentEnrollments.push({id:`ENR-${student.id}-${index+1}`,studentId:student.id,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId})));
     const mariaCodes=offers.filter(item=>item.sectionId==='2BSCS-1').map(item=>item.subjectCode);
@@ -185,7 +188,14 @@ const DemoData = {
       }),total=paper.reduce((sum,question)=>sum+(question.points||2),0),score=answers.reduce((sum,answer)=>sum+answer.awarded,0);
       studentSubmissions.push({id:`DEMO-MARIA-SUB-${String(examIndex+1).padStart(2,'0')}`,studentId:'2025-00002',examId:exam.id,submittedAt:`${exam.date}T${String(9+examIndex%7).padStart(2,'0')}:${examIndex%2?'42':'18'}:00+08:00`,total,score,status:'graded',gradedAt:`${exam.date}T18:00:00+08:00`,remarks:examIndex%3===0?'Good work. Review the marked item for improvement.':'Well done. Keep practicing the key concepts.',answers});
     });
-    const auditEntry=(id,at,actorId,actorRole,action,entityType,entityId,details={})=>({id,at,actorId,actorRole,action,entityType,entityId,details});
+    const demoOverloadOffering=offers.find(offer=>offer.sectionId!=='2BSCS-1'&&!mariaCodes.includes(offer.subjectCode))||offers[0],demoCurrentOffering=offers.find(offer=>offer.sectionId==='2BSCS-1');
+    if(demoOverloadOffering&&demoCurrentOffering){const shared={days:['Wednesday'],start:'13:00',end:'14:30',room:'CICS-204'};const storedTarget=sectionSubjects.find(record=>record.sectionId===demoOverloadOffering.sectionId)?.assignments.find(item=>item.id===demoOverloadOffering.id),storedCurrent=sectionSubjects.find(record=>record.sectionId===demoCurrentOffering.sectionId)?.assignments.find(item=>item.id===demoCurrentOffering.id);if(storedTarget)storedTarget.schedule=shared;if(storedCurrent)storedCurrent.schedule={...shared,room:'CICS-205'};}
+    const submittedAt='2026-08-24T09:00:00+08:00',approvalRequests=[
+      {id:'DEMO-APR-001',type:'student-overload',requesterId:'coordinator.demo',requesterRole:'coordinator',targetType:'student-enrollment',targetId:`2025-00002:${demoOverloadOffering.id}`,proposedChange:{studentId:'2025-00002',offeringId:demoOverloadOffering.id,subjectCode:demoOverloadOffering.subjectCode,sectionId:demoOverloadOffering.sectionId,currentUnits:21,subjectUnits:3,proposedUnits:24,normalLimit:20,maximumLimit:30,program:'BSCS',yearLevel:2,term:'first'},reason:'Required subject for the Student’s graduation plan.',academicPeriod:'current',status:'pending',submittedAt,reviewerId:'',reviewerRole:'dean',reviewerRemarks:'',decisionAt:'',history:[{status:'pending',at:submittedAt,actorId:'coordinator.demo',actorRole:'coordinator',remarks:'Required subject for the Student’s graduation plan.'}]},
+      {id:'DEMO-APR-002',type:'professor-assignment',requesterId:'coord.001',requesterRole:'coordinator',targetType:'subject-offering',targetId:offers[1].id,proposedChange:{offeringId:offers[1].id,facultyId:faculty[1].id,expectedFacultyId:offers[1].facultyId},reason:'Balance the teaching assignments for this term.',academicPeriod:'current',status:'approved',submittedAt:'2026-08-18T08:30:00+08:00',reviewerId:'dean.demo',reviewerRole:'dean',reviewerRemarks:'Availability and load verified.',decisionAt:'2026-08-19T10:00:00+08:00',history:[{status:'pending',at:'2026-08-18T08:30:00+08:00',actorId:'coord.001',actorRole:'coordinator',remarks:'Balance the teaching assignments for this term.'},{status:'approved',at:'2026-08-19T10:00:00+08:00',actorId:'dean.demo',actorRole:'dean',remarks:'Availability and load verified.'}]},
+      {id:'DEMO-APR-003',type:'student-overload',requesterId:'coord.002',requesterRole:'coordinator',targetType:'student-enrollment',targetId:`${students[25].id}:${offers[4].id}`,proposedChange:{studentId:students[25].id,offeringId:offers[4].id,subjectCode:offers[4].subjectCode,sectionId:offers[4].sectionId,currentUnits:24,subjectUnits:3,proposedUnits:27,normalLimit:20,maximumLimit:30},reason:'Requested additional subject without a feasible schedule.',academicPeriod:'current',status:'rejected',submittedAt:'2026-08-16T09:00:00+08:00',reviewerId:'dean.demo',reviewerRole:'dean',reviewerRemarks:'The proposed schedule conflicts with an enrolled offering.',decisionAt:'2026-08-17T11:20:00+08:00',history:[{status:'pending',at:'2026-08-16T09:00:00+08:00',actorId:'coord.002',actorRole:'coordinator',remarks:'Requested additional subject without a feasible schedule.'},{status:'rejected',at:'2026-08-17T11:20:00+08:00',actorId:'dean.demo',actorRole:'dean',remarks:'The proposed schedule conflicts with an enrolled offering.'}]}
+    ];
+    const auditEntry=(id,at,actorId,actorRole,action,entityType,entityId,details={},category='',result='success',reason='')=>({id,at,actorId,actorRole,action,entityType,entityId,details,category:category||(entityType==='approval-request'?'approval':entityType.includes('exam')||entityType.includes('submission')?'examination/grading':entityType.includes('schedule')||entityType.includes('load')?'schedule/load':entityType.includes('offering')||entityType.includes('enrollment')||entityType.includes('assignment')?'assignment/enrollment':entityType==='session'?'authentication/session':'system/maintenance'),result,reason});
     const applicationAuditLog=[
       auditEntry('demo-a01','2026-08-05T07:51:00+08:00','23-32534-345','faculty','login','session','23-32534-345'),
       auditEntry('demo-a02','2026-08-17T08:14:00+08:00','23-32534-345','faculty','create','exam','DEMO-EXAM-004',{title:'Data Structures and Algorithms — Quick Quiz'}),
@@ -198,7 +208,12 @@ const DemoData = {
       auditEntry('demo-a09','2026-08-23T13:37:00+08:00','2025-00002','student','login','session','2025-00002'),
       auditEntry('demo-a10','2026-08-23T14:18:00+08:00','2025-00002','student','submit','exam','DEMO-EXAM-005'),
       auditEntry('demo-a11','2026-08-20T08:45:00+08:00','23-32534-345','faculty','release-grade','submission','DEMO-SUB-2'),
-      auditEntry('demo-a12','2026-08-24T18:12:00+08:00','2025-00002','student','login','session','2025-00002')
+      auditEntry('demo-a12','2026-08-24T18:12:00+08:00','2025-00002','student','login','session','2025-00002'),
+      auditEntry('demo-a13','2026-08-24T09:00:00+08:00','coordinator.demo','coordinator','submit','approval-request','DEMO-APR-001',{requesterId:'coordinator.demo',program:'BSCS'},'approval'),
+      auditEntry('demo-a14','2026-08-19T10:00:00+08:00','dean.demo','dean','approve','approval-request','DEMO-APR-002',{requesterId:'coord.001',program:'BSCS'},'approval'),
+      auditEntry('demo-a15','2026-08-17T11:20:00+08:00','dean.demo','dean','reject','approval-request','DEMO-APR-003',{requesterId:'coord.002',program:'BSCS'},'approval'),
+      auditEntry('demo-a16','2026-08-23T15:00:00+08:00','coordinator.demo','coordinator','update-schedule','offering-schedule',demoCurrentOffering.id,{days:['Wednesday'],start:'13:00',end:'14:30',program:'BSCS'},'schedule/load'),
+      auditEntry('demo-a17','2026-08-23T15:15:00+08:00','coordinator.demo','coordinator','update-capacity','section','1BSCS-1',{capacity:20,program:'BSCS'},'academic setup')
     ];
     const questionReports=[
       {id:'DEMO-REPORT-001',studentId:'2025-00002',examId:'DEMO-EXAM-004',questionId:'DEMO-EXAM-004-Q01',category:'Incorrect answer key',details:'The displayed answer appears different from the lesson example.',status:'open',createdAt:'2026-08-28T09:15:00+08:00',resolvedAt:null},
@@ -220,7 +235,8 @@ const DemoData = {
     ];
     const studentEmails=[{id:'DEMO-MAIL-001',studentId:'2025-00002',facultyId:'23-32534-345',subject:'CCS211-24 — Question about Skills Check',message:'May I clarify the feedback on question 4?',sentAt:'2026-08-28T15:42:00+08:00',read:false}];
     const studentNotifications=[{id:'DEMO-NOTICE-001',studentId:'2025-00002',reportId:'DEMO-REPORT-004',message:'Your scoring concern was resolved and the answer was reviewed.',createdAt:'2026-08-25T10:05:00+08:00',read:false}];
-    Object.entries({faculty,coordinators,students,subjects,curricula:seedCurricula,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,applicationAuditLog,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
+    const notifications=[{id:'DEMO-NTF-001',userId:'dean.demo',requestId:'DEMO-APR-001',message:'New Student-overload request awaiting review.',read:false,createdAt:submittedAt},{id:'DEMO-NTF-002',userId:'coord.001',requestId:'DEMO-APR-002',message:'Your Professor-assignment request was approved.',read:true,createdAt:'2026-08-19T10:00:00+08:00'}];
+    Object.entries({faculty,coordinators,students,subjects,curricula:seedCurricula,sections,sectionSubjects,studentEnrollments,subjectAssignments,users,allotments:[],exams,questions,studentSubmissions,approvalRequests,applicationAuditLog,notifications,questionReports,adminAnnouncements,studentEmails,studentNotifications}).forEach(([key,value])=>DB.write(key,value));
     localStorage.setItem('demoCurriculumVersion',String(this.version)); return true;
   }
 };

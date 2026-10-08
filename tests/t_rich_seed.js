@@ -8,7 +8,7 @@ const offers=records.flatMap(record=>record.assignments.map(item=>({...item,sect
 ok(faculty.length===28&&new Set(faculty.map(item=>item.id)).size===28&&faculty.every(item=>/^\d{2}-\d{5}-\d{3}$/.test(item.id)),'28 teachers use unique NN-NNNNN-NNN IDs');
 ok(new Set(sections.map(section=>section.program)).size===5&&sections.length===60&&students.length===1200,'five programs, 60 sections, and 1,200 students are seeded');
 ok(['BSCS','BSIT','BSIS','BSGAMEDEV','BSANIMATION'].every(program=>[1,2,3,4].every(year=>sections.filter(section=>section.program===program&&section.yearLevel===year).length===3)),'every course and year level has three sections');
-ok(sections.every(section=>section.capacity===50),'every seeded section has a 50-student capacity');
+ok(sections.some(section=>section.capacity===20)&&sections.some(section=>section.capacity===24)&&sections.some(section=>section.capacity===50),'seeded Sections include full, low-availability, and available capacity states');
 const curricula=r.read('curricula');
 ok(curricula.filter(item=>item.program==='BSGAMEDEV').length===59&&curricula.filter(item=>item.program==='BSANIMATION').length===59,'complete BSEMC Game Development and Digital Animation curricula are seeded');
 ok(curricula.some(item=>item.program==='BSGAMEDEV'&&item.yearLevel===4&&item.term==='second'&&item.subjectCode==='CEM4970'&&item.units===9),'BSEMC curriculum records retain year, term, subject, and unit data');
@@ -29,6 +29,15 @@ ok(/Every professor currently has an assigned subject/.test(direct.d.getElementB
 const demoUsers=direct.read('users'),demoAudit=direct.read('applicationAuditLog'),demoSubs=direct.read('studentSubmissions');
 const demoExams=direct.read('exams'),demoQuestions=direct.read('questions'),demoEnrollments=direct.read('studentEnrollments');
 const demoReports=direct.read('questionReports'),demoAnnouncements=direct.read('adminAnnouncements');
+const demoApprovals=direct.read('approvalRequests'),demoNotifications=direct.read('notifications');
+ok(['admin','dean','coordinator','faculty','student'].every(role=>demoUsers.some(user=>user.role===role)),'one or more labeled demo accounts exist for every application role');
+ok(['pending','approved','rejected'].every(status=>demoApprovals.some(request=>request.status===status)),'demo approvals cover pending, approved, and rejected decisions with retained histories');
+ok(demoApprovals.every(request=>(request.history||[]).length>=1)&&demoNotifications.some(item=>item.requestId==='DEMO-APR-001'),'approval histories and role notifications are seeded');
+const pendingOverload=demoApprovals.find(request=>request.id==='DEMO-APR-001'),scheduledOffers=direct.read('sectionSubjects').flatMap(record=>(record.assignments||[]).filter(item=>item.schedule).map(item=>({...item,sectionId:record.sectionId})));
+ok(pendingOverload?.proposedChange.currentUnits===21&&pendingOverload?.proposedChange.proposedUnits===24&&pendingOverload?.proposedChange.maximumLimit===30,'demo Student overload includes current, proposed, normal, and maximum load states');
+ok(scheduledOffers.length>20&&scheduledOffers.some(item=>item.schedule.days?.length&&item.schedule.start&&item.schedule.end&&item.schedule.room),'realistic offering schedules with rooms are seeded');
+const conflictTarget=scheduledOffers.find(item=>item.id===pendingOverload.proposedChange.offeringId),mariaScheduled=new Set(demoEnrollments.filter(item=>item.studentId==='2025-00002').map(item=>item.offeringId)),conflictExisting=scheduledOffers.find(item=>mariaScheduled.has(item.id)&&item.schedule.days.some(day=>conflictTarget.schedule.days.includes(day))&&item.schedule.start<conflictTarget.schedule.end&&conflictTarget.schedule.start<item.schedule.end);
+ok(!!conflictExisting,'an intentional Student schedule conflict is available for the Dean review demo');
 ok(['open','reviewed','resolved','dismissed'].every(status=>demoReports.some(report=>report.status===status)),'demo question reports cover open, reviewed, resolved, and dismissed statuses');
 ok(['open','reviewed','resolved','dismissed'].every(status=>demoReports.filter(report=>report.status===status).length===3),'demo queue provides three examples under every report-status filter');
 ok(demoAnnouncements.length>=2&&/Scheduled maintenance/.test(direct.d.querySelector('.header-inbox-panel')?.textContent||''),'Admin announcements are seeded and appear in the header inbox');
