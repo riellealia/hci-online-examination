@@ -11,6 +11,7 @@ const { parseCsv, stringifyCsv } = require('./server/csv');
 const { createAcademicPeriodService, initialFromSettings, normalizeOperationalWrite, validateSettingsWrite, ACTIVE_COLLECTIONS } = require('./server/academic-periods');
 const { createAccountLifecycleService, STATUS_BY_ACTION } = require('./server/account-lifecycle');
 const { createBackupRestoreService } = require('./server/backup-restore');
+const { createPersonnelService } = require('./server/personnel');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 3000);
@@ -36,6 +37,7 @@ const auth = createAuth(store);
 const academicPeriods = createAcademicPeriodService(store);
 const accountLifecycle = createAccountLifecycleService(store);
 const backupRestore = createBackupRestoreService(store);
+const personnel = createPersonnelService(store);
 
 function send(res, status, body, type='application/json; charset=utf-8', headers={}) { res.writeHead(status, {'Content-Type':type,'X-Content-Type-Options':'nosniff',...headers}); res.end(type.startsWith('application/json') ? JSON.stringify(body) : body); }
 function readBody(req) { return new Promise((resolve,reject)=>{let size=0,chunks=[];req.on('data',chunk=>{size+=chunk.length;if(size>MAX_BODY){reject(Object.assign(new Error('Request body is too large.'),{status:413}));req.destroy();}else chunks.push(chunk);});req.on('end',()=>resolve(Buffer.concat(chunks).toString('utf8')));req.on('error',reject);}); }
@@ -52,6 +54,10 @@ async function api(req,res,url) {
   const periodRecords=url.pathname.match(/^\/api\/academic-periods\/([^/]+)\/records\/([^/]+)$/);
   if(periodRecords&&req.method==='GET'){const session=auth.requireSession(req),id=decodeURIComponent(periodRecords[1]),key=cleanKey(periodRecords[2]);if(!ACTIVE_COLLECTIONS.includes(key))throw Object.assign(new Error('That collection is not period-scoped.'),{status:400});requireCollectionAccess(session,key,'GET');const period=id==='current'?academicPeriods.list().find(item=>item.status==='active'):academicPeriods.list().find(item=>item.id===id);if(!period)throw Object.assign(new Error('Academic period not found or not active.'),{status:404});const records=id==='current'?academicPeriods.activeRecords(key):academicPeriods.recordsForPeriod(key,id);const visible=visibleRecords(session,{[key]:records})[key]||[];return send(res,200,{period,collection:key,records:visible});}
   if(url.pathname==='/api/backups/restore'&&req.method==='POST'){const session=auth.requireSession(req,['admin']);const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,backupRestore.restore(parsed.backup,session));}
+  if(url.pathname==='/api/accounts'&&req.method==='POST'){const session=auth.requireSession(req,['admin']);return send(res,201,personnel.createAccount(JSON.parse(await readBody(req)||'{}'),session));}
+  if(url.pathname==='/api/personnel/professors'&&req.method==='POST'){const session=auth.requireSession(req,['dean']);return send(res,201,personnel.createAccount({...JSON.parse(await readBody(req)||'{}'),role:'faculty'},session,'dean'));}
+  const appointmentAction=url.pathname.match(/^\/api\/personnel\/([^/]+)\/appoint-coordinator$/);
+  if(appointmentAction&&req.method==='POST'){const session=auth.requireSession(req,['dean']);return send(res,200,personnel.appointCoordinator(decodeURIComponent(appointmentAction[1]),JSON.parse(await readBody(req)||'{}'),session));}
   const periodAction=url.pathname.match(/^\/api\/academic-periods\/([^/]+)\/(impact|activate|close|archive)$/);
   if(periodAction){const session=auth.requireSession(req,['admin']),id=decodeURIComponent(periodAction[1]),action=periodAction[2];if(req.method==='GET'&&action==='impact')return send(res,200,academicPeriods.impact(id));if(req.method==='POST'&&action!=='impact'){const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,action==='activate'?{period:academicPeriods.activate(id,session,parsed.reason)}:academicPeriods[action](id,parsed.reason,session));}}
   const accountAction=url.pathname.match(new RegExp(`^/api/accounts/([^/]+)/(${Object.keys(STATUS_BY_ACTION).join('|')})$`));

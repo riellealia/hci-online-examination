@@ -28,6 +28,8 @@ const STUDENT_CARD_TOOLS=fs.readFileSync(DIR+'../js/student-card-tools.js','utf8
 const ROLE_PROFILE=fs.readFileSync(DIR+'../js/role-profile.js','utf8');
 const SYSTEM_MANAGEMENT=fs.readFileSync(DIR+'../js/system-management.js','utf8');
 const ADMIN_WORKSPACES=fs.readFileSync(DIR+'../js/admin-workspaces.js','utf8');
+const ADMIN_GOVERNANCE=fs.readFileSync(DIR+'../js/admin-governance.js','utf8');
+const DEAN_PERSONNEL=fs.readFileSync(DIR+'../js/dean-personnel.js','utf8');
 
 function load(page, seed, opts={}){
   // Inline auth.js: jsdom will not fetch it from disk.
@@ -49,6 +51,8 @@ function load(page, seed, opts={}){
     .replace(/<script src="\.\.\/js\/ui\.js(?:\?[^\"]*)?"><\/script>/, `<script>${UI}</script>`)
     .replace('<script src="../js/system-management.js"></script>', `<script>${SYSTEM_MANAGEMENT}</script>`)
     .replace('<script src="../js/admin-workspaces.js"></script>', `<script>${ADMIN_WORKSPACES}</script>`)
+    .replace('<script src="../js/admin-governance.js"></script>', `<script>${ADMIN_GOVERNANCE}</script>`)
+    .replace('<script src="../js/dean-personnel.js"></script>', `<script>${DEAN_PERSONNEL}</script>`)
     .replace('<script src="../js/dates.js"></script>', `<script>${DATES}</script>`)
     .replace('<script src="../js/exam-timing.js"></script>', `<script>${TIMING}</script>`)
     .replace('<script src="../js/grading.js"></script>', `<script>${GRADING}</script>`);

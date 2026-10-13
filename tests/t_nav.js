@@ -1,7 +1,7 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 const pages=[
-  ['admin.html',  {username:'admin',role:'admin'},  9, 'Dashboard'],
+  ['admin.html',  {username:'admin',role:'admin'}, 11, 'Dashboard'],
   ['faculty.html',{username:'F1',role:'faculty'},   4, 'My Subjects'],
   ['student.html',{username:'S1',role:'student'},   4, 'Overview']
 ];
@@ -25,7 +25,7 @@ for(const [page,user,count,firstLabel] of pages){
 
 const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
-ok(adminLinks.slice(0,5).join(',')==='dashboardSection,systemSection,academicPeriodsSection,auditSection,loadPolicySection','Admin navigation follows system settings before school management');
+ok(adminLinks.slice(0,7).join(',')==='dashboardSection,systemSection,academicPeriodsSection,rolePermissionsSection,auditSection,loadPolicySection,facultySection','Admin navigation includes governance under system settings before school management');
 ok(adminNavPage.d.querySelector('#sidebar [data-panel="loadPolicySection"]')?.textContent.includes('Subject Management'),'unified curriculum and load workspace is named Subject Management');
 ok(!adminNavPage.d.querySelector('#sidebar [data-panel="subjectSection"]'),'archived legacy Subject Management is removed from navigation');
 const adminDividers=[...adminNavPage.d.querySelectorAll('#sidebar .sidebar-divider[role="separator"]')];

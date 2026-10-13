@@ -10,7 +10,10 @@ No currently claimed tasks are in active implementation.
 
 ## Review
 
-No tasks are currently awaiting review.
+- [#8 Account creation and role management](https://github.com/riellealia/hci-online-examination/issues/8) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#9 Role permissions and limits page](https://github.com/riellealia/hci-online-examination/issues/9) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#13 Student and Professor load limits](https://github.com/riellealia/hci-online-examination/issues/13) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#18 Professor hiring and Coordinator appointment](https://github.com/riellealia/hci-online-examination/issues/18) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
 
 ## Claimed, not started
 
@@ -24,12 +27,8 @@ These have a named owner in the claim file but still say `Unclaimed` there. Thei
 - [#22 Subject-offering management](https://github.com/riellealia/hci-online-examination/issues/22) — Alyssa · P0.
 - [#5 Permission-aware profiles](https://github.com/riellealia/hci-online-examination/issues/5) — Alyssa · P1.
 - [#6 Shared notifications](https://github.com/riellealia/hci-online-examination/issues/6) — Alyssa · P1.
-- [#8 Account creation and role management](https://github.com/riellealia/hci-online-examination/issues/8) — Marron · P1.
-- [#9 Role permissions and limits page](https://github.com/riellealia/hci-online-examination/issues/9) — Marron · P1.
 - [#12 Curriculum and Subject units](https://github.com/riellealia/hci-online-examination/issues/12) — Alyssa in claim file · P1.
-- [#13 Student and Professor load limits](https://github.com/riellealia/hci-online-examination/issues/13) — Marron · P1.
 - [#17 Dean member management](https://github.com/riellealia/hci-online-examination/issues/17) — Alyssa · P1.
-- [#18 Professor hiring and Coordinator appointment](https://github.com/riellealia/hci-online-examination/issues/18) — Marron · P1.
 - [#19 Dean Professor-assignment approvals](https://github.com/riellealia/hci-online-examination/issues/19) — Alyssa · P1.
 - [#23 Professor assignment requests](https://github.com/riellealia/hci-online-examination/issues/23) — Alyssa · P1.
 - [#25 Schedule editor](https://github.com/riellealia/hci-online-examination/issues/25) — Alyssa · P1.

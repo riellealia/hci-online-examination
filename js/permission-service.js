@@ -49,8 +49,11 @@ const PermissionService = (() => {
       && !['deactivated', 'archived', 'graduated', 'transferred'].includes(status);
   }
   function roleAllows(role, permission) {
-    const allowed = grants[normalizeRole(role)] || [];
-    return allowed.includes('*') || allowed.includes(permission);
+    const normalized = normalizeRole(role), allowed = grants[normalized] || [];
+    if (allowed.includes('*')) return true;
+    const baseline = allowed.includes(permission);
+    const override = typeof DB !== 'undefined' ? DB.read('systemSettings', {})?.permissionOverrides?.[normalized]?.[permission] : undefined;
+    return override === undefined ? baseline : baseline && override !== false;
   }
   function can(permission, context = {}) {
     const actor = session(context.actor);
@@ -66,7 +69,12 @@ const PermissionService = (() => {
     error.permission = permission;
     throw error;
   }
-  function permissionsFor(role) { return [...(grants[normalizeRole(role)] || [])]; }
+  function permissionsFor(role, options = {}) {
+    const normalized=normalizeRole(role), baseline=[...(grants[normalized]||[])];
+    if(options.baselineOnly||baseline.includes('*')||typeof DB==='undefined')return baseline;
+    const overrides=DB.read('systemSettings',{})?.permissionOverrides?.[normalized]||{};
+    return baseline.filter(permission=>overrides[permission]!==false);
+  }
   return { can, require: requirePermission, active, permissionsFor, normalizeRole, grants };
 })();
 
