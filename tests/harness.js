@@ -30,6 +30,9 @@ const SYSTEM_MANAGEMENT=fs.readFileSync(DIR+'../js/system-management.js','utf8')
 const ADMIN_WORKSPACES=fs.readFileSync(DIR+'../js/admin-workspaces.js','utf8');
 const ADMIN_GOVERNANCE=fs.readFileSync(DIR+'../js/admin-governance.js','utf8');
 const DEAN_PERSONNEL=fs.readFileSync(DIR+'../js/dean-personnel.js','utf8');
+const SECTION_MANAGEMENT=fs.readFileSync(DIR+'../js/section-management.js','utf8');
+const PROFESSOR_MANAGEMENT=fs.readFileSync(DIR+'../js/professor-management.js','utf8');
+const SUBJECT_SCHEDULE=fs.readFileSync(DIR+'../js/subject-schedule.js','utf8');
 
 function load(page, seed, opts={}){
   // Inline auth.js: jsdom will not fetch it from disk.
@@ -53,6 +56,9 @@ function load(page, seed, opts={}){
     .replace('<script src="../js/admin-workspaces.js"></script>', `<script>${ADMIN_WORKSPACES}</script>`)
     .replace('<script src="../js/admin-governance.js"></script>', `<script>${ADMIN_GOVERNANCE}</script>`)
     .replace('<script src="../js/dean-personnel.js"></script>', `<script>${DEAN_PERSONNEL}</script>`)
+    .replace('<script src="../js/section-management.js"></script>', `<script>${SECTION_MANAGEMENT}</script>`)
+    .replace('<script src="../js/professor-management.js"></script>', `<script>${PROFESSOR_MANAGEMENT}</script>`)
+    .replace('<script src="../js/subject-schedule.js"></script>', `<script>${SUBJECT_SCHEDULE}</script>`)
     .replace('<script src="../js/dates.js"></script>', `<script>${DATES}</script>`)
     .replace('<script src="../js/exam-timing.js"></script>', `<script>${TIMING}</script>`)
     .replace('<script src="../js/grading.js"></script>', `<script>${GRADING}</script>`);

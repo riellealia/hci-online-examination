@@ -17,6 +17,171 @@ body[data-role="dean"],body[data-role="coordinator"]{background:#eef2f7;color:#1
 .role-action-icon{display:grid;place-items:center;width:38px;height:38px;margin-bottom:20px;border-radius:11px;background:#eaf1f9;color:#416fa9;font-size:19px}
 .role-action-card strong{display:block;color:#223047;font-size:16px}
 .role-action-card span:last-child{display:block;margin-top:7px;color:#718096;font-size:12px;line-height:1.5}
+body[data-role="coordinator"] .role-action-card-wide{display:grid;grid-column:1/-1;grid-template-columns:52px minmax(0,1fr);grid-template-rows:auto auto;align-content:center;column-gap:16px;min-height:112px}
+body[data-role="coordinator"] .role-action-card-wide .role-action-icon{grid-row:1/3;margin:0;align-self:center}
+body[data-role="coordinator"] .role-action-card-wide strong{align-self:end}
+body[data-role="coordinator"] .role-action-card-wide span:last-child{align-self:start}
+body[data-role="coordinator"] .professor-load-list .professor-offering{justify-content:flex-start;text-align:left}
+body[data-role="coordinator"] .professor-load-list .professor-offering>input{width:17px;height:17px;flex:0 0 17px;margin:0;align-self:center}
+body[data-role="coordinator"] .professor-load-list .professor-offering>span{flex:1;min-width:0;text-align:left}
+body[data-role="coordinator"] .professor-load-list .professor-offering :is(strong,small){text-align:left}
+body[data-role="coordinator"] .professor-load-pill{display:inline-grid;min-width:38px;height:28px;padding:0 10px;place-items:center;border:1px solid #d8e3ee;border-radius:999px;background:#f2f6fa;color:#29405b;font-size:12px;font-weight:850;line-height:1}
+body[data-role="coordinator"] .professor-load-pill.combined{min-width:58px;background:#eaf1f8;color:#315f8d}
+body[data-role="coordinator"] .professor-load-list{display:block;padding:20px 22px;text-align:left}
+body[data-role="coordinator"] .professor-assigned-overview{overflow:hidden;margin-bottom:14px;border:1px solid #dfe6ef;border-radius:13px;background:#fff}
+body[data-role="coordinator"] .professor-assigned-overview>header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 15px;border-bottom:1px solid #e5eaf1;background:#f8fafc}
+body[data-role="coordinator"] .professor-assigned-overview h4,body[data-role="coordinator"] .professor-assigned-overview p{margin:0;text-align:left}
+body[data-role="coordinator"] .professor-assigned-overview p{margin-top:3px;color:#718096;font-size:10px}
+body[data-role="coordinator"] .professor-assigned-overview>header>span{padding:5px 8px;border-radius:999px;background:#eaf6ef;color:#2f7654;font-size:9px;font-weight:800}
+body[data-role="coordinator"] .professor-assigned-overview>header>span.has-draft{background:#fff3dc;color:#92621e}
+body[data-role="coordinator"] .professor-assigned-list{overflow:visible}
+body[data-role="coordinator"] .professor-assigned-row{display:grid;grid-template-columns:minmax(240px,1fr) minmax(150px,.45fr) auto;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #e9edf2}
+body[data-role="coordinator"] .professor-assigned-row:last-child{border-bottom:0}
+body[data-role="coordinator"] .professor-assigned-row :is(strong,small){display:block;text-align:left}
+body[data-role="coordinator"] .professor-assigned-row small{margin-top:3px;color:#718096;font-size:10px}
+body[data-role="coordinator"] .professor-assigned-title{display:flex;align-items:center;gap:7px}
+body[data-role="coordinator"] .professor-assigned-title em{padding:3px 6px;border-radius:999px;background:#fff3dc;color:#92621e;font-size:8px;font-style:normal;font-weight:850;text-transform:uppercase}
+body[data-role="coordinator"] .professor-assigned-row label{display:grid;gap:4px;color:#718096;font-size:9px;font-weight:800;text-transform:uppercase}
+body[data-role="coordinator"] .professor-assigned-row select{min-height:36px;padding:7px 9px;border:1px solid #ced8e5;border-radius:8px;background:#fff;color:#26364b}
+body[data-role="coordinator"] .professor-assigned-row button{min-height:36px;padding:7px 10px;border:1px solid #ead2d2;border-radius:8px;background:#fff5f4;color:#ad3737;font-weight:800;cursor:pointer}
+body[data-role="coordinator"] .professor-load-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+body[data-role="coordinator"] .professor-load-summary article{padding:14px 16px;border:1px solid #dfe6ef;border-radius:13px;background:#fff;box-shadow:0 5px 16px rgba(24,39,64,.055)}
+body[data-role="coordinator"] .professor-load-summary :is(span,strong,small){display:block;text-align:left}
+body[data-role="coordinator"] .professor-load-summary span{color:#64748b;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+body[data-role="coordinator"] .professor-load-summary strong{margin:5px 0 2px;color:#1f3046;font-size:25px}
+body[data-role="coordinator"] .professor-load-summary small{color:#8793a4;font-size:10px}
+body[data-role="coordinator"] .professor-assignment-workspace{display:grid;grid-template-columns:minmax(260px,.82fr) minmax(380px,1.35fr);gap:14px;align-items:start}
+body[data-role="coordinator"] .professor-subject-catalog,body[data-role="coordinator"] #professorSubjectSections,body[data-role="coordinator"] .professor-draft-block{overflow:hidden;border:1px solid #dfe6ef;border-radius:13px;background:#fff}
+body[data-role="coordinator"] .professor-subject-catalog>header,body[data-role="coordinator"] #professorSubjectSections>header,body[data-role="coordinator"] .professor-draft-block>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid #e5eaf1;background:#f8fafc}
+body[data-role="coordinator"] .professor-subject-catalog>header{display:block}
+body[data-role="coordinator"] .professor-assignment-workspace h4,body[data-role="coordinator"] .professor-assignment-workspace p{margin:0;text-align:left}
+body[data-role="coordinator"] .professor-assignment-workspace header p{margin-top:3px;color:#718096;font-size:10px}
+body[data-role="coordinator"] .professor-assignment-workspace header>span{color:#315f8d;font-size:10px;font-weight:800}
+body[data-role="coordinator"] .professor-year-group{padding:13px 14px}
+body[data-role="coordinator"] .professor-year-group+.professor-year-group{border-top:1px solid #e9edf2}
+body[data-role="coordinator"] .professor-year-group h5{margin:0 0 8px;color:#64748b;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+body[data-role="coordinator"] .professor-year-group>div{display:grid;gap:7px}
+body[data-role="coordinator"] .professor-subject-button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:11px 12px;border:1px solid #e0e7ef;border-radius:10px;background:#fbfcfe;color:#27364b;text-align:left;cursor:pointer;transition:border-color .16s ease,background .16s ease,box-shadow .16s ease}
+body[data-role="coordinator"] .professor-subject-button:hover,body[data-role="coordinator"] .professor-subject-button.active{border-color:#a9bfd8;background:#edf5fc;box-shadow:0 5px 14px rgba(49,95,141,.08)}
+body[data-role="coordinator"] .professor-subject-button :is(strong,small){display:block;text-align:left}
+body[data-role="coordinator"] .professor-subject-button small{margin-top:3px;color:#718096;font-size:10px}
+body[data-role="coordinator"] .professor-subject-button em{min-width:34px;padding:4px 7px;border-radius:999px;background:#e8eef6;color:#41698f;font-size:10px;font-style:normal;font-weight:800;text-align:center}
+body[data-role="coordinator"] .professor-section-panel{display:grid;gap:14px}
+body[data-role="coordinator"] .professor-section-options{display:grid;grid-template-columns:1fr;gap:8px;padding:14px}
+body[data-role="coordinator"] .professor-offering-card{overflow:hidden;border:1px solid #e1e7ef;border-radius:11px;background:#f8fafc}
+body[data-role="coordinator"] .professor-offering-card>.professor-offering{border:0;border-radius:0;background:transparent}
+body[data-role="coordinator"] .professor-offering-card:has(.professor-offering.current){border-color:#9ebbd9;background:#edf5fc}
+body[data-role="coordinator"] .professor-offering-card.occupied{border-color:#ead7d7;background:#fbf8f8}
+body[data-role="coordinator"] .professor-schedule-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+body[data-role="coordinator"] .professor-schedule-fields label{display:grid;gap:4px;color:#617087;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+body[data-role="coordinator"] .professor-schedule-fields label.weekdays{grid-column:1/-1}
+body[data-role="coordinator"] .professor-schedule-fields input{width:100%;min-width:0;padding:8px 9px;border:1px solid #ced9e6;border-radius:8px;background:#fff;color:#26364b;font:inherit;font-size:11px;font-weight:500;letter-spacing:0;text-transform:none}
+body[data-role="coordinator"] .professor-schedule-fields input:focus{border-color:#7fa5ca;outline:3px solid rgba(65,111,169,.12)}
+body[data-role="coordinator"] .professor-draft-block>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:180px;overflow:auto;padding:12px}
+body[data-role="coordinator"] .professor-draft-block article{padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc}
+body[data-role="coordinator"] .professor-draft-block article :is(strong,span){display:block;text-align:left}
+body[data-role="coordinator"] .professor-draft-block article span{margin-top:3px;color:#718096;font-size:10px;line-height:1.4}
+body[data-role="coordinator"] .professor-load-list .professor-offering-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+body[data-role="coordinator"] .professor-offering-state{display:inline-flex;flex:none;padding:4px 7px;border-radius:999px;font-size:9px;font-style:normal;font-weight:850;letter-spacing:.04em;text-transform:uppercase}
+body[data-role="coordinator"] .professor-offering-state.available{background:#e9f5ef;color:#2f7654}
+body[data-role="coordinator"] .professor-offering-state.current{background:#e5effa;color:#315f8d}
+body[data-role="coordinator"] .professor-offering-state.taken{background:#fff0ef;color:#ad3737}
+body[data-role="coordinator"] .professor-offering.occupied{border-color:#ead7d7;background:#fbf8f8;color:#7d8795;cursor:not-allowed}
+body[data-role="coordinator"] .professor-offering.occupied>input{cursor:not-allowed;opacity:.55}
+body[data-role="coordinator"] .professor-offering.current{border-color:#9ebbd9;background:#edf5fc}
+body[data-role="coordinator"] .professor-profile-tabs{display:flex;gap:6px;padding:12px 22px 0;border-bottom:1px solid #e4e9f0;background:#fff}
+body[data-role="coordinator"] .professor-profile-card{width:min(1120px,100%);height:calc(100vh - 40px);height:calc(100dvh - 40px);border-radius:22px;background:#f6f8fb}
+body[data-role="coordinator"] .professor-profile-card>header{background:#fff}
+body[data-role="coordinator"] .professor-profile-identity{display:flex;align-items:center;gap:16px;text-align:left}
+body[data-role="coordinator"] .professor-profile-avatar{display:grid;width:62px;height:62px;flex:0 0 62px;place-items:center;border:3px solid #fff;border-radius:50%;background:linear-gradient(145deg,#ddf3ee,#abd8cd);color:#25675a;box-shadow:0 0 0 1px #c5ded8,0 8px 20px rgba(37,103,90,.16);font-size:19px;font-weight:850}
+body[data-role="coordinator"] .professor-profile-tabs button{padding:11px 15px;border:0;border-bottom:3px solid transparent;background:transparent;color:#66758a;font:inherit;font-weight:750;cursor:pointer}
+body[data-role="coordinator"] .professor-profile-tabs button.active{border-bottom-color:#315f8d;color:#315f8d}
+body[data-role="coordinator"] .professor-profile-pane[hidden]{display:none}
+body[data-role="coordinator"] .professor-profile-pane{min-height:calc(100dvh - 205px)}
+body[data-role="coordinator"] #professorLoadPane:not([hidden]){display:flex;flex-direction:column}
+body[data-role="coordinator"] #professorLoadPane .professor-load-list{flex:1}
+body[data-role="coordinator"] #professorProfileOverview{display:grid;gap:18px;padding:20px 22px;text-align:left}
+body[data-role="coordinator"] .professor-admin-identity{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+body[data-role="coordinator"] .professor-admin-identity>div{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border:1px solid #e2e8f0;border-radius:14px;background:#fff}
+body[data-role="coordinator"] .professor-admin-identity span{color:#718096;font-size:11px;font-weight:750;text-transform:uppercase}
+body[data-role="coordinator"] .professor-admin-identity strong{color:#20334a}
+body[data-role="coordinator"] .professor-admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+body[data-role="coordinator"] .professor-admin-stats>div{padding:18px;border:1px solid #e2e8f0;border-radius:14px;background:#fff}
+body[data-role="coordinator"] .professor-admin-stats strong,body[data-role="coordinator"] .professor-admin-stats span{display:block;text-align:left}
+body[data-role="coordinator"] .professor-admin-stats strong{color:#20334a;font-size:24px}
+body[data-role="coordinator"] .professor-admin-stats span{margin-top:4px;color:#718096;font-size:11px;text-transform:uppercase}
+body[data-role="coordinator"] .professor-admin-stats.login-stats{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:18px}
+body[data-role="coordinator"] .professor-admin-columns{display:grid;grid-template-columns:minmax(420px,1.35fr) minmax(280px,.8fr);gap:18px;align-items:start}
+body[data-role="coordinator"] .professor-admin-columns>article{overflow:hidden;border:1px solid #e2e8f0;border-radius:16px;background:#fff}
+body[data-role="coordinator"] .professor-admin-columns>article>h3,body[data-role="coordinator"] .professor-admin-columns>article>header{margin:0;padding:17px 19px;border-bottom:1px solid #edf0f4}
+body[data-role="coordinator"] .professor-admin-columns>article>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+body[data-role="coordinator"] .professor-admin-columns h3,body[data-role="coordinator"] .professor-admin-columns p{margin:0;text-align:left}
+body[data-role="coordinator"] .professor-admin-columns p{margin-top:3px;color:#718096;font-size:10px}
+body[data-role="coordinator"] .professor-admin-columns header>span{padding:5px 8px;border-radius:999px;background:#eaf6ef;color:#2f7654;font-size:9px;font-weight:800}
+body[data-role="coordinator"] .professor-admin-columns header>span.has-draft{background:#fff3dc;color:#92621e}
+body[data-role="coordinator"] .professor-section-link{display:flex;width:100%;min-height:auto;flex-direction:column;align-items:flex-start;gap:4px;padding:13px 19px;border:0;border-bottom:1px solid #edf0f4;border-radius:0;background:transparent;color:#263b53;text-align:left;cursor:pointer}
+body[data-role="coordinator"] .professor-section-link:hover{background:#f7fafe;color:#315f8d}
+body[data-role="coordinator"] .professor-section-link span{color:#718096;font-size:11px;font-weight:400}
+body[data-role="coordinator"] .professor-profile-table{overflow:auto;border:1px solid #dfe6ef;border-radius:12px;background:#fff}
+body[data-role="coordinator"] .professor-profile-table table{width:100%;min-width:620px;border-collapse:collapse}
+body[data-role="coordinator"] .professor-profile-table :is(th,td){padding:13px 15px;border-bottom:1px solid #e5eaf1;text-align:left}
+body[data-role="coordinator"] .professor-profile-table th{background:#f4f7fa;color:#526174;font-size:10px;text-transform:uppercase}
+body[data-role="coordinator"] .professor-profile-table td{color:#526174;font-size:12px}
+body[data-role="coordinator"] .professor-profile-empty{padding:28px;color:#718096;text-align:center}
+body[data-role="coordinator"] .professor-profile-identity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+body[data-role="coordinator"] .professor-profile-identity-grid>div{padding:14px;border:1px solid #e1e7ef;border-radius:11px;background:#fff}
+body[data-role="coordinator"] .professor-profile-identity-grid :is(span,strong){display:block;text-align:left}
+body[data-role="coordinator"] .professor-profile-identity-grid span{color:#718096;font-size:11px}.professor-profile-identity-grid strong{margin-top:4px;color:#26364b}
+body[data-role="coordinator"] .professor-profile-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+body[data-role="coordinator"] .professor-profile-summary article{padding:14px;border:1px solid #e1e7ef;border-radius:11px;background:#f8fafc}
+body[data-role="coordinator"] .professor-profile-summary span,body[data-role="coordinator"] .professor-profile-summary strong{display:block;text-align:left}
+body[data-role="coordinator"] .professor-profile-summary span{color:#718096;font-size:10px;text-transform:uppercase}
+body[data-role="coordinator"] .professor-profile-summary strong{margin-top:5px;color:#26364b;font-size:13px}
+body[data-role="coordinator"] .professor-profile-load{overflow:hidden;border:1px solid #e1e7ef;border-radius:13px}
+body[data-role="coordinator"] .professor-profile-load>header{align-items:center;padding:15px 17px;background:#f8fafc}
+body[data-role="coordinator"] .professor-profile-load h4,body[data-role="coordinator"] .professor-profile-load p{margin:0;text-align:left}
+body[data-role="coordinator"] .professor-profile-load p{margin-top:3px;color:#718096;font-size:11px}
+body[data-role="coordinator"] .professor-profile-load button{min-height:38px;padding:8px 12px;border:1px solid #c8d7e8;border-radius:9px;background:#edf4fb;color:#315f8d;font-weight:800;cursor:pointer}
+body[data-role="coordinator"] .professor-profile-load>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:14px}
+body[data-role="coordinator"] .professor-profile-load>div article{padding:12px;border:1px solid #e1e7ef;border-radius:9px;background:#fff}
+body[data-role="coordinator"] .professor-profile-load>div :is(strong,span){display:block;text-align:left}
+body[data-role="coordinator"] .professor-profile-load>div span{margin-top:3px;color:#718096;font-size:11px}
+body[data-role="coordinator"] .professor-profile-load dl{display:grid;gap:5px;margin:10px 0 0;padding-top:9px;border-top:1px solid #edf0f4}
+body[data-role="coordinator"] .professor-profile-load dl>div{display:grid;grid-template-columns:70px 1fr;gap:8px}
+body[data-role="coordinator"] .professor-profile-load :is(dt,dd){margin:0;text-align:left;font-size:10px}
+body[data-role="coordinator"] .professor-profile-load dt{color:#8390a2;font-weight:750}
+body[data-role="coordinator"] .professor-profile-load dd{color:#46576c}
+body[data-role="coordinator"] .subject-schedule-head{margin-bottom:18px}
+body[data-role="coordinator"] .subject-schedule-head p{margin:0;color:#416fa9;font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+body[data-role="coordinator"] .subject-schedule-head h2{margin:4px 0;color:#26364b}
+body[data-role="coordinator"] .subject-schedule-head span{color:#6c7a8e;font-size:13px}
+body[data-role="coordinator"] .subject-schedule-tools{display:flex;gap:9px;padding:12px;border:1px solid #dfe6ef;border-radius:13px 13px 0 0;background:#f8fafc}
+body[data-role="coordinator"] .subject-schedule-tools input,body[data-role="coordinator"] .subject-schedule-tools select{min-height:40px;padding:8px 11px;border:1px solid #ced8e5;border-radius:9px;background:#fff;color:#26364b}
+body[data-role="coordinator"] .subject-schedule-tools input{flex:1}
+body[data-role="coordinator"] .subject-schedule-list{overflow:hidden;border:1px solid #dfe6ef;border-top:0;border-radius:0 0 13px 13px;background:#fff}
+body[data-role="coordinator"] .subject-schedule-row{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(430px,2fr) auto;align-items:end;gap:14px;padding:15px;border-bottom:1px solid #e5eaf1}
+body[data-role="coordinator"] .subject-schedule-row:last-child{border-bottom:0}
+body[data-role="coordinator"] .subject-schedule-identity :is(strong,span,small){display:block;text-align:left}
+body[data-role="coordinator"] .subject-schedule-identity strong{color:#26364b}
+body[data-role="coordinator"] .subject-schedule-identity span{margin-top:4px;color:#66758a;font-size:11px}
+body[data-role="coordinator"] .subject-schedule-identity small{margin-top:5px;color:#8793a4;font-size:10px}
+body[data-role="coordinator"] .subject-schedule-fields{display:grid;grid-template-columns:1fr 1.35fr .75fr .75fr;gap:8px}
+body[data-role="coordinator"] .subject-schedule-fields label{display:grid;gap:5px;color:#617087;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+body[data-role="coordinator"] .subject-schedule-fields input{width:100%;min-width:0;min-height:38px;padding:8px 9px;border:1px solid #ced9e6;border-radius:8px;background:#fff;color:#26364b;font:inherit;font-size:11px;font-weight:500;letter-spacing:0;text-transform:none}
+body[data-role="coordinator"] .subject-schedule-save{min-height:38px;padding:8px 12px;border:1px solid #c8d7e8;border-radius:9px;background:#edf4fb;color:#315f8d;font-weight:800;cursor:pointer}
+body[data-role="coordinator"] :is(#professorProfilePerformance,#professorProfileActivity,#professorProfileLogin){padding:22px;text-align:left}
+body[data-role="coordinator"] .professor-performance-list,body[data-role="coordinator"] .professor-activity-list{display:grid;gap:10px}
+body[data-role="coordinator"] .professor-performance-list article,body[data-role="coordinator"] .professor-activity-list article{padding:16px;border:1px solid #e1e7ef;border-radius:12px;background:#fff}
+body[data-role="coordinator"] .professor-performance-list header,body[data-role="coordinator"] .professor-activity-list article{display:flex;align-items:center;justify-content:space-between;gap:14px}
+body[data-role="coordinator"] .professor-performance-list header button{padding:0;border:0;background:transparent;color:#315f8d;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+body[data-role="coordinator"] .professor-performance-list header span,body[data-role="coordinator"] .professor-activity-list span,body[data-role="coordinator"] .professor-activity-list time{color:#718096;font-size:11px}
+body[data-role="coordinator"] .professor-performance-list article>div{height:12px;margin:12px 0 8px;overflow:hidden;border-radius:999px;background:#e8edf3}
+body[data-role="coordinator"] .professor-performance-list article>div span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#6f9bc4,#315f8d)}
+body[data-role="coordinator"] .professor-activity-list article>div :is(strong,span){display:block;text-align:left}
+@media(max-width:800px){body[data-role="coordinator"] .professor-assignment-workspace{grid-template-columns:1fr}}
+@media(max-width:760px){body[data-role="coordinator"] .professor-assigned-overview>header{align-items:flex-start;flex-direction:column}body[data-role="coordinator"] .professor-assigned-row{grid-template-columns:1fr}body[data-role="coordinator"] .professor-assigned-row button{justify-self:start}}
+@media(max-width:980px){body[data-role="coordinator"] .subject-schedule-row{grid-template-columns:1fr}body[data-role="coordinator"] .subject-schedule-fields{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-role="coordinator"] .subject-schedule-save{justify-self:start}}
+@media(max-width:700px){body[data-role="coordinator"] .professor-profile-card{height:100vh;height:100dvh;border-radius:0}body[data-role="coordinator"] .professor-profile-tabs{overflow-x:auto}body[data-role="coordinator"] .professor-profile-summary,body[data-role="coordinator"] .professor-load-summary,body[data-role="coordinator"] .professor-admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-role="coordinator"] .professor-profile-identity-grid,body[data-role="coordinator"] .professor-profile-load>div,body[data-role="coordinator"] .professor-section-options,body[data-role="coordinator"] .professor-draft-block>div,body[data-role="coordinator"] .professor-admin-identity,body[data-role="coordinator"] .professor-admin-columns{grid-template-columns:1fr}}
 .role-workspace{width:min(1380px,calc(100% - 48px));margin:24px auto;padding:26px;border:1px solid #dfe6ef;border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(24,39,64,.07)}
 .role-workspace h2{margin:0;color:#1d2a3d;font-size:24px}.role-workspace>p{margin:7px 0 22px;color:#718096}
 .role-placeholder-list{display:grid;gap:10px}.role-placeholder-list article{padding:15px 17px;border:1px solid #e0e7f0;border-radius:11px;background:#f8fafc}.role-placeholder-list strong{display:block;color:#2b3a4f}.role-placeholder-list span{display:block;margin-top:4px;color:#758296;font-size:12px;line-height:1.45}

@@ -46,6 +46,7 @@ const PermissionService = (() => {
     const status = String(account?.status || 'active').toLowerCase();
     return !!account && normalizeRole(account.role) === normalizeRole(actor.role)
       && account.disabled !== true
+      && account.permissionsDisabled !== true
       && !['deactivated', 'archived', 'graduated', 'transferred'].includes(status);
   }
   function roleAllows(role, permission) {

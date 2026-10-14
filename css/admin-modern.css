@@ -191,6 +191,20 @@ body[data-role="admin"] .table-group-row td { padding:8px 16px !important; backg
 body[data-role="admin"] .table-group-row td { justify-content:space-between; }
 body[data-role="admin"] .table-group-row strong { float:right; font-size:11px; color:#687e94; }
 body[data-role="admin"] .management-page-head { margin-bottom:12px; padding:2px 2px 14px; border-bottom:1px solid #e7ecf2; }
+body[data-role="admin"] .dashboard-card-separator { display:flex; grid-column:1/-1; align-items:center; gap:12px; min-height:24px; margin:8px 2px 0; color:#7a889b; font-size:10px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
+body[data-role="admin"] .dashboard-card-separator::after { content:""; height:1px; flex:1; background:#dce4ed; }
+body[data-role="admin"] .dashboard-card-separator:first-child { margin-top:0; }
+body[data-role="admin"] .card-grid > [data-archived="true"] { display:none !important; }
+body[data-role="admin"] .dashboard-card-separator[aria-label="System settings"] { order:10; margin-top:0; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open System Management"] { order:11; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Academic Periods"] { order:12; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Accounts, Roles and Permissions"] { order:13; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Audit Log"] { order:14; }
+body[data-role="admin"] .dashboard-card-separator[aria-label="School management"] { order:20; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Subject Management"] { order:21; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Faculty Management"] { order:22; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Student Management"] { order:23; }
+body[data-role="admin"] .admin-dashboard-link[aria-label="Open Account Lifecycle"] { order:24; }
 body[data-role="admin"] .management-page-head h3 { margin:0 0 4px; color:#1d2b3d; font-size:21px; }
 body[data-role="admin"] .management-page-head p { margin:0; color:#718096; }
 body[data-role="admin"] .secondary-table-head { margin-top:28px; }
@@ -206,9 +220,11 @@ body[data-role="admin"] .section-action-menu { position:fixed; z-index:1200; dis
 body[data-role="admin"] .section-action-menu.open { display:grid; gap:2px; }
 body[data-role="admin"] .section-action-menu button { display:flex; align-items:center; gap:10px; width:100%; min-height:40px; padding:9px 10px; border:0; border-radius:8px; background:transparent; color:var(--ink,#26384d); font:inherit; text-align:left; cursor:pointer; }
 body[data-role="admin"] .section-action-menu button:hover { background:var(--accent-soft,#edf5fc); color:var(--accent,#315f8d); }
-body[data-role="admin"] .section-action-menu button.danger { color:#b63838; }
+body[data-role="admin"] .section-action-menu button.danger { margin-top:3px; border-top:1px solid #f3dddd; border-radius:0 0 8px 8px; color:#b63838; }
 body[data-role="admin"] .section-action-menu button.danger:hover { background:#fff0f0; color:#a52424; }
 body[data-role="admin"] .section-action-menu svg { width:18px; height:18px; flex:none; fill:currentColor; }
+body[data-role="admin"] .section-action-menu { width:210px; padding:7px; border-radius:13px; box-shadow:0 12px 28px rgba(26,43,62,.16); }
+body[data-role="admin"] .section-action-menu button { min-height:43px; padding:10px 11px; }
 /* Right-click-only row actions: the trigger button and its column take no
    visible space, but the popped-open .section-action-menu is position:fixed
    so it still renders normally once a right-click opens it. */

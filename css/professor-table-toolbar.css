@@ -1,0 +1,66 @@
+.professor-table-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 68px;
+  padding: 12px;
+  border-bottom: 1px solid #e5eaf1;
+  background: #fff;
+}
+.professor-table-actions-left,
+.professor-table-actions .table-tools { display: flex; align-items: center; gap: 6px; }
+.professor-table-actions #professorTableTools { margin-left: auto; }
+.professor-icon-action,
+.professor-table-actions .tool-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid #d8e1eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #315f8d;
+  box-shadow: 0 3px 10px rgba(37,64,91,.08);
+  cursor: pointer;
+}
+.professor-table-actions .tool-icon { width: 40px; height: 40px; min-height: 40px; border-radius: 11px; color: #52677e; }
+.professor-icon-action:hover,
+.professor-table-actions .tool-icon:hover { border-color: #91adca; background: #edf5fc; color: #244e77; transform: translateY(-1px); }
+.professor-icon-action > span { font-size: 23px; font-weight: 800; line-height: 1; }
+.professor-file-action { position: relative; }
+.professor-file-action input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.professor-table-actions .tool-icon svg { width: 18px; height: 18px; fill: currentColor; }
+.professor-table-actions .tool-icon.active { border-color: #7d9fbe; background: #e5f0fa; color: #264f76; }
+.professor-table-actions .table-direction svg { transition: transform .22s ease; }
+.professor-table-actions .table-direction.descending svg { transform: rotate(180deg); }
+.professor-table-actions .table-search-box,
+.professor-table-actions .table-tool-select {
+  position: absolute;
+  top: 58px;
+  right: 12px;
+  z-index: 8;
+  padding: 9px;
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(25,42,62,.16);
+}
+.professor-table-actions .table-search-box input { width: min(280px,70vw); min-height: 40px; border: 1px solid #ccd7e3; border-radius: 9px; padding: 0 11px; }
+.professor-table-actions .table-tool-select { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.professor-table-actions .table-tool-select[hidden],
+.professor-table-actions .table-search-box[hidden] { display: none; }
+.professor-table-actions .table-tool-select select { min-height: 38px; border: 1px solid #ccd7e3; border-radius: 9px; background: #fff; padding: 0 8px; }
+.professor-table-scroll .table-group-row td { padding: 8px 16px; background: #eaf1f8; color: #315f8d; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.professor-table-scroll .table-group-row strong { float: right; color: #687e94; font-size: 11px; }
+@media (max-width: 650px) {
+  .professor-table-actions { align-items: flex-start; }
+  .professor-table-actions-left { gap: 5px; }
+  .professor-icon-action { width: 40px; height: 40px; min-height: 40px; }
+  .professor-table-actions .table-tools { flex-wrap: wrap; justify-content: flex-end; }
+  .professor-table-actions .table-search-box,
+  .professor-table-actions .table-tool-select { top: 62px; }
+}

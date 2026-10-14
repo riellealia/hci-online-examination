@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../css/curriculum-management.css?v=20260920-unified">
     <link rel="stylesheet" href="../css/role-dashboard.css">
     <link rel="stylesheet" href="../css/governance.css">
+    <link rel="stylesheet" href="../css/management-menus.css">
     <script src="../js/storage.js"></script>
     <script src="../js/demo-data.js"></script>
     <script src="../js/section-service.js"></script>
@@ -68,11 +69,12 @@
       </div>
     </div>
     <div class="card-grid">
-      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySection')" onkeydown="activateAdminCard(event,'facultySection')" aria-label="Open Faculty Management">
+      <div class="dashboard-card-separator" role="separator" aria-label="School management" style="order:20"><span>School management</span></div>
+      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'facultySection')" onkeydown="activateAdminCard(event,'facultySection')" aria-label="Open Faculty Management" style="order:22">
         <div class="card-top"><div class="card-icon">👤</div><div class="card-count" id="countFaculty">0</div></div>
         <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Faculty</div><div class="card-note">Accounts and teaching records</div></div><button class="plus-circle" onclick="event.stopPropagation();openFacultyModal()" aria-label="Add faculty" title="Add faculty">＋</button></div>
       </div>
-      <div class="card beige admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'studentSection')" onkeydown="activateAdminCard(event,'studentSection')" aria-label="Open Student Management">
+      <div class="card beige admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'studentSection')" onkeydown="activateAdminCard(event,'studentSection')" aria-label="Open Student Management" style="order:23">
         <div class="card-top"><div class="card-icon">👥</div><div class="card-count" id="countStudents">0</div></div>
         <div class="card-bottom beige"><div class="card-copy"><div class="card-label">Students</div><div class="card-note">Profiles and enrollments</div></div><button class="plus-circle" onclick="event.stopPropagation();openStudentModal()" aria-label="Add student" title="Add student">＋</button></div>
       </div>
@@ -80,27 +82,28 @@
         <div class="card-top"><div class="card-icon">📚</div><div class="card-count" id="countSubjects">0</div></div>
         <div class="card-bottom green"><div class="card-copy"><div class="card-label">Subjects</div><div class="card-note">Course catalog and offerings</div></div><button class="plus-circle" onclick="event.stopPropagation();openModal('subjectModal')" aria-label="Add subject" title="Add subject">＋</button></div>
       </div>
-      <div class="card orange admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'auditSection')" onkeydown="activateAdminCard(event,'auditSection')" aria-label="Open Audit Log">
+      <div class="dashboard-card-separator" role="separator" aria-label="System settings" style="order:10"><span>System settings</span></div>
+      <div class="card orange admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'auditSection')" onkeydown="activateAdminCard(event,'auditSection')" aria-label="Open Audit Log" style="order:14">
         <div class="card-top"><div class="card-icon">◷</div><div class="card-count" id="countAudit">0</div></div>
         <div class="card-bottom orange"><div class="card-copy"><div class="card-label">Audit events</div><div class="card-note">Changes and sign-in history</div></div><span class="card-arrow" aria-hidden="true">→</span></div>
       </div>
-      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'sectionSection')" onkeydown="activateAdminCard(event,'sectionSection')" aria-label="Open Section Management">
-        <div class="card-top"><div class="card-icon">▦</div><div class="card-count" id="countSections">0</div></div>
-        <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Sections</div><div class="card-note">Programs and memberships</div></div><button class="plus-circle" onclick="event.stopPropagation();openSectionModal()" aria-label="Add section" title="Add section">＋</button></div>
-      </div>
-      <div class="card green admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'systemSection')" onkeydown="activateAdminCard(event,'systemSection')" aria-label="Open System Management">
+      <div class="card green admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'systemSection')" onkeydown="activateAdminCard(event,'systemSection')" aria-label="Open System Management" style="order:11">
         <div class="card-top"><div class="card-icon">&#9881;</div><div class="card-count">6</div></div>
         <div class="card-bottom green"><div class="card-copy"><div class="card-label">System management</div><div class="card-note">Announcements, access, and data tools</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
       </div>
-      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'loadPolicySection')" onkeydown="activateAdminCard(event,'loadPolicySection')" aria-label="Open Subject Management">
+      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'loadPolicySection')" onkeydown="activateAdminCard(event,'loadPolicySection')" aria-label="Open Subject Management" style="order:21">
         <div class="card-top"><div class="card-icon">&#9636;</div><div class="card-count">5</div></div>
         <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Subject management</div><div class="card-note">Curricula, subjects, units, and load limits</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
       </div>
-      <div class="card beige admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'academicPeriodsSection')" onkeydown="activateAdminCard(event,'academicPeriodsSection')" aria-label="Open Academic Periods">
+      <div class="card beige admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'academicPeriodsSection')" onkeydown="activateAdminCard(event,'academicPeriodsSection')" aria-label="Open Academic Periods" style="order:12">
         <div class="card-top"><div class="card-icon" aria-hidden="true">▤</div><div class="card-count" id="countAcademicPeriods">—</div></div>
         <div class="card-bottom beige"><div class="card-copy"><div class="card-label">Academic periods</div><div class="card-note">Terms, status, and rollover</div></div><span class="card-arrow" aria-hidden="true">→</span></div>
       </div>
-      <div class="card orange admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'accountLifecycleSection')" onkeydown="activateAdminCard(event,'accountLifecycleSection')" aria-label="Open Account Lifecycle">
+      <div class="card blue admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'governanceSection')" onkeydown="activateAdminCard(event,'governanceSection')" aria-label="Open Accounts, Roles and Permissions" style="order:13">
+        <div class="card-top"><div class="card-icon" aria-hidden="true">&#9881;</div><div class="card-count" id="countGovernanceAccounts">0</div></div>
+        <div class="card-bottom blue"><div class="card-copy"><div class="card-label">Accounts &amp; permissions</div><div class="card-note">Create accounts, assign roles, and control capabilities</div></div><span class="card-arrow" aria-hidden="true">&#8594;</span></div>
+      </div>
+      <div class="card orange admin-dashboard-link" role="link" tabindex="0" onclick="openAdminCard(event,'accountLifecycleSection')" onkeydown="activateAdminCard(event,'accountLifecycleSection')" aria-label="Open Account Lifecycle" style="order:24">
         <div class="card-top"><div class="card-icon" aria-hidden="true">♙</div><div class="card-count" id="countLifecycleAccounts">0</div></div>
         <div class="card-bottom orange"><div class="card-copy"><div class="card-label">Account lifecycle</div><div class="card-note">Account status and history</div></div><span class="card-arrow" aria-hidden="true">→</span></div>
       </div>
@@ -108,7 +111,7 @@
   </div>
 
   <div id="facultySection" class="panel">
-    <div class="management-page-head"><h3>Faculty</h3><p>Manage professor accounts, profiles, and teaching records.</p></div>
+    <div class="management-page-head"><h3>Faculty accounts</h3><p>Right-click a Faculty row to manage identity, account access, or lifecycle status. Teaching loads are managed by the Faculty Coordinator.</p></div>
     <div class="management-table-shell">
     <div class="action-box">
       <button class="icon-action" onclick="openFacultyModal()" aria-label="Add faculty" title="Add faculty"><span aria-hidden="true">＋</span><span class="sr-only">Add faculty</span></button>
@@ -118,11 +121,6 @@
     <div class="table-scroll">
       <table id="facultyTable"></table>
     </div>
-    </div>
-    <div class="management-page-head secondary-table-head"><h3>Professors without an assigned subject</h3><p>Faculty who are not assigned to any section-subject offering.</p></div>
-    <div class="management-table-shell">
-      <div class="action-box" id="unassignedFacultyTools"><button class="icon-action export-action" onclick="exportTableCsv('unassignedFacultyTable','unassigned-faculty.csv')" aria-label="Export unassigned faculty CSV" title="Export unassigned faculty CSV"><span aria-hidden="true">⇩</span><span class="sr-only">Export unassigned faculty CSV</span></button></div>
-      <div class="table-scroll"><table id="unassignedFacultyTable"></table></div>
     </div>
   </div>
 
@@ -140,7 +138,7 @@
     </div>
   </div>
 
-  <div id="sectionSection" class="panel">
+  <div id="sectionSection" class="panel" hidden aria-hidden="true" data-archived="true">
     <div class="section-management-head">
       <div><h3>Sections</h3><p class="panel-help">Create sections and manage the subjects available to their students.</p></div>
     </div>
@@ -191,8 +189,15 @@
     <header class="management-page-head"><h3>Account lifecycle</h3><p>Review account access and status independently from faculty and student profiles.</p></header>
     <div id="accountLifecycleRoot"></div>
   </div>
-  <div id="accountManagementSection" class="panel"><div id="accountManagementRoot"></div></div>
-  <div id="rolePermissionsSection" class="panel"><div id="rolePermissionsRoot"></div></div>
+  <div id="governanceSection" class="panel">
+    <header class="management-page-head"><h3>Accounts, roles, and permissions</h3><p>Create identities, assign roles, and manage role capabilities from one workspace.</p></header>
+    <nav class="governance-tabs" role="tablist" aria-label="Account and permission management">
+      <button type="button" class="governance-tab active" role="tab" aria-selected="true" aria-controls="accountManagementPane" onclick="AdminGovernance.show('accounts')">Accounts &amp; Roles</button>
+      <button type="button" class="governance-tab" role="tab" aria-selected="false" aria-controls="rolePermissionsPane" onclick="AdminGovernance.show('permissions')">Roles &amp; Permissions</button>
+    </nav>
+    <div id="accountManagementPane" class="governance-pane" role="tabpanel"><div id="accountManagementRoot"></div></div>
+    <div id="rolePermissionsPane" class="governance-pane" role="tabpanel" hidden><div id="rolePermissionsRoot"></div></div>
+  </div>
 
   <div id="loadPolicySection" class="panel">
     <div id="loadPolicyRoot"></div>
@@ -673,7 +678,7 @@
     else if(tab==='performance')host.innerHTML=p.sectionRows.length?`<section class="performance-list">${p.sectionRows.map(section=>`<article><header><button onclick="openSectionFromProfile('${section.id}')">${section.id}</button><span>${section.students.length} students · ${section.submissions.length} submissions</span></header><div class="performance-track"><span style="width:${section.average===null?0:section.average}%"></span></div><strong>${section.average===null?'No graded submissions':section.average.toFixed(1)+'% average'}</strong></article>`).join('')}</section>`:'<div class="profile-empty">No section performance available.</div>';
     else if(tab==='activity')host.innerHTML=activityMarkup(p.actions,'No recorded faculty actions.'); else host.innerHTML=loginMarkup(p.logins);
   }
-  function openSectionFromProfile(sectionId){ closeModal('facultyProfileModal'); showSection('sectionSection'); const row=[...document.querySelectorAll('#sectionTable tr')].find(item=>item.cells[0]?.textContent.trim()===sectionId); if(row){row.classList.add('profile-target-row');row.scrollIntoView({block:'center'});setTimeout(()=>row.classList.remove('profile-target-row'),1800);} }
+  function openSectionFromProfile(sectionId){ closeModal('facultyProfileModal'); notify(`${sectionId} is managed in the Faculty Coordinator workspace.`,'info'); }
 
   /* ===== Save Item (CRUD) ===== */
   function saveItem(type){
@@ -1040,10 +1045,14 @@
   /* ===== Tables ===== */
   function rowActionMenu(type,index,label='record',hiddenTrigger=false){
     const studentActions=type==='students'?`<button type="button" role="menuitem" onclick="closeSectionActionMenu(event);AdminWorkspaces.editAccountStatus(students[${index}].id)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5l-8-3Zm-1.2 14.2-3.2-3.2 1.4-1.4 1.8 1.8 4.6-4.6 1.4 1.4-6 6Z"/></svg><span>Edit status</span></button>`:'';
+    const facultyAccount=type==='faculty'?DB.read('users',[]).find(user=>user.username===faculty[index]?.id):null;
+    const facultyActions=type==='faculty'?`<button type="button" role="menuitem" onclick="closeSectionActionMenu(event);toggleFacultyPermissions(${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5l-8-3Zm0 5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Zm-4 9.4c.8-2 2.15-3 4-3s3.2 1 4 3A8.5 8.5 0 0 1 12 19a8.5 8.5 0 0 1-4-2.6Z"/></svg><span>${facultyAccount?.permissionsDisabled?'Restore permissions':'Remove permissions'}</span></button><button type="button" class="danger faculty-archive-action" role="menuitem" onclick="closeSectionActionMenu(event);AdminWorkspaces.editAccountStatus(faculty[${index}].id)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v4H4V5Zm2 6h12v9H6v-9Zm4 2v2h4v-2h-4Z"/></svg><span>Archive or edit status</span></button>`:'';
     const triggerAttrs=hiddenTrigger?' tabindex="-1" aria-hidden="true"':'';
-    const deleteAction=type==='students'?'':`<button type="button" class="danger" role="menuitem" onclick="closeSectionActionMenu(event);deleteItem('${type}',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete</span></button>`;
-    return `<div class="section-action-wrap admin-row-action"><button class="table-icon-btn section-action-trigger${hiddenTrigger?' row-actions-trigger-hidden':''}" onclick="toggleSectionActionMenu(event)" aria-label="Settings for ${label}" title="Settings" aria-haspopup="menu" aria-expanded="false"${triggerAttrs}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a8 8 0 0 0-1.7-1L15 3.3h-4L10.6 6a8 8 0 0 0-1.7 1L6.5 6l-2 3.4L6.6 11a7.8 7.8 0 0 0 0 2l-2.1 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.4 2.7h4l.4-2.7a8 8 0 0 0 1.7-1l2.4 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></button><nav class="section-action-menu" role="menu" aria-label="Actions for ${label}"><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);editItem('${type}',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>Edit</span></button>${studentActions}${deleteAction}</nav></div>`;
+    const deleteAction=type==='students'||type==='faculty'?'':`<button type="button" class="danger" role="menuitem" onclick="closeSectionActionMenu(event);deleteItem('${type}',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l1 2h4v2H3V5h4l1-2Zm-2 6h12l-1 12H7L6 9Z"/></svg><span>Delete</span></button>`;
+    return `<div class="section-action-wrap admin-row-action"><button class="table-icon-btn section-action-trigger${hiddenTrigger?' row-actions-trigger-hidden':''}" onclick="toggleSectionActionMenu(event)" aria-label="Settings for ${label}" title="Settings" aria-haspopup="menu" aria-expanded="false"${triggerAttrs}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a8 8 0 0 0-1.7-1L15 3.3h-4L10.6 6a8 8 0 0 0-1.7 1L6.5 6l-2 3.4L6.6 11a7.8 7.8 0 0 0 0 2l-2.1 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.4 2.7h4l.4-2.7a8 8 0 0 0 1.7-1l2.4 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></button><nav class="section-action-menu" role="menu" aria-label="Actions for ${label}"><button type="button" role="menuitem" onclick="closeSectionActionMenu(event);editItem('${type}',${index})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/></svg><span>${type==='faculty'?'Edit user':'Edit'}</span></button>${studentActions}${facultyActions}${deleteAction}</nav></div>`;
   }
+
+  function toggleFacultyPermissions(index){const person=faculty[index],users=DB.read('users',[]),account=users.find(user=>user.username===person?.id&&PermissionService.normalizeRole(user.role)==='faculty');if(!account)return notify('Faculty login account was not found.','error');account.permissionsDisabled=!account.permissionsDisabled;if(!DB.write('users',users))return;AuditLog.record(account.permissionsDisabled?'remove-permissions':'restore-permissions','account',account.username,{},session);loadAll();notify(account.permissionsDisabled?'Faculty permissions removed.':'Faculty permissions restored.','success')}
 
   function renderTable(data,tableId,headers,fields,type){
     const headerRow='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
@@ -1238,13 +1247,11 @@
     setText('countSections', sections.length);
     setText('countAudit', AuditLog.read().length);
     setText('countLifecycleAccounts', (DB.read('users',[]) || []).length);
+    setText('countGovernanceAccounts', (DB.read('users',[]) || []).length);
 
     // Core tables
-    const facultyRows=faculty.map((person,index)=>`<tr class="profile-row" role="button" tabindex="0" aria-label="Manage ${person.first} ${person.last}" onclick="if(!event.target.closest('button'))openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}${person.middle?` ${person.middle}.`:''}</td><td class="row-actions-cell">${rowActionMenu('faculty',index,person.id,true)}</td></tr>`).join('');
+    const facultyRows=faculty.map((person,index)=>`<tr data-faculty-index="${index}"><td>${person.id}</td><td>${person.last}</td><td>${person.first}${person.middle?` ${person.middle}.`:''}</td><td class="row-actions-cell">${rowActionMenu('faculty',index,person.id,true)}</td></tr>`).join('');
     document.getElementById('facultyTable').innerHTML='<tr><th>ID</th><th>Last name</th><th>First name</th></tr>'+facultyRows;
-    const assignedFaculty=new Set([...SectionService.offerings(sectionSubjects).map(item=>item.facultyId),...subjectAssignments.flatMap(item=>item.facultyIds||(item.facultyId?[item.facultyId]:[]))].filter(Boolean));
-    const unassignedRows=faculty.map((person,index)=>({person,index})).filter(item=>!assignedFaculty.has(item.person.id)).map(({person,index})=>`<tr class="profile-row" tabindex="0" onclick="openFacultyProfile(${index})" onkeydown="if(event.key==='Enter')openFacultyProfile(${index})"><td>${person.id}</td><td>${person.last}</td><td>${person.first}</td><td><span class="assignment-status unassigned">Unassigned</span></td></tr>`).join('');
-    document.getElementById('unassignedFacultyTable').innerHTML='<tr><th>ID</th><th>Last name</th><th>First name</th><th>Status</th></tr>'+(unassignedRows||'<tr><td colspan="4" class="profile-empty">Every professor currently has an assigned subject.</td></tr>');
     const studentRows=students.map((student,index)=>({student,index,status:studentAccountStatus(student)}))
       .filter(row=>!['Archived','Graduated','Transferred'].includes(row.status))
       .map(({student,index})=>`<tr class="profile-row" role="button" tabindex="0" onclick="openStudentEnrollmentPage(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentEnrollmentPage(${index})}" aria-label="Manage ${student.first} ${student.last}"><td>${student.id}</td><td class="student-name-cell">${student.last}, ${student.first}${student.middle?` ${student.middle}.`:''}</td><td>Year ${studentYearFromRecord(student)}</td><td class="row-actions-cell">${rowActionMenu('students',index,student.id,true)}</td></tr>`).join('');
@@ -1289,7 +1296,6 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
     }
     renderAuditLog();
     AdminTableTools.mount('faculty',document.getElementById('facultyTable'),document.querySelector('#facultySection .action-box'));
-    AdminTableTools.mount('unassignedFaculty',document.getElementById('unassignedFacultyTable'),document.getElementById('unassignedFacultyTools'));
     AdminTableTools.mount('students',document.getElementById('studentTable'),document.querySelector('#studentSection .action-box'));
     AdminTableTools.mount('sections',document.getElementById('sectionTable'),document.querySelector('#sectionSection .table-corner-actions'));
     AdminTableTools.mount('subjects',document.getElementById('subjectTable'),document.querySelector('#subjectSection .action-box'));
@@ -1456,16 +1462,13 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
       { divider: true, label: 'System settings' },
       { id: 'systemSection',         label: 'System Management',         icon: '&#9881;' },
       { id: 'academicPeriodsSection',label: 'Academic Periods',          icon: '&#9636;' },
-      { id: 'rolePermissionsSection',label:'Roles & Permissions',        icon: '&#9881;' },
+      { id: 'governanceSection',     label:'Accounts & Permissions',     icon: '&#9881;' },
       { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
       { divider: true, label: 'School management' },
       { id: 'loadPolicySection',     label: 'Subject Management',        icon: '&#128218;' },
       { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
       { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
-      { id: 'accountManagementSection',label:'Accounts & Roles',         icon: '&#9786;' },
       { id: 'accountLifecycleSection',label:'Account Lifecycle',         icon: '&#9817;' },
-      { divider: true, label: 'To be moved' },
-      { id: 'sectionSection',        label: 'Section Management',        icon: '&#9638;' },
     ],
     titleEl: null,
     onSelect(id) {
@@ -1473,8 +1476,7 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
       else stopMonitoring();
       if (id === 'academicPeriodsSection') AdminWorkspaces.periods();
       if (id === 'accountLifecycleSection') AdminWorkspaces.accounts();
-      if (id === 'accountManagementSection') AdminGovernance.accounts();
-      if (id === 'rolePermissionsSection') AdminGovernance.permissions();
+      if (id === 'governanceSection') AdminGovernance.show('accounts');
     }
   });
   SystemManagement.mount();

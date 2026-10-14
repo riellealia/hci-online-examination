@@ -1,0 +1,57 @@
+/* Shared management-menu treatment for Admin and Faculty Coordinator workspaces. */
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav),
+body[data-role="coordinator"] .section-command-menu{
+  width:210px;
+  padding:7px;
+  border:1px solid var(--line,#dbe3ec);
+  border-radius:13px;
+  background:var(--surface,#fff);
+  box-shadow:0 12px 28px rgba(26,43,62,.16);
+}
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) button,
+body[data-role="coordinator"] .section-command-menu button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:43px;
+  margin:0;
+  padding:10px 11px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:var(--ink,#26384d);
+  font:inherit;
+  font-weight:400;
+  text-align:left;
+  cursor:pointer;
+}
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) button:hover,
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) button:focus-visible,
+body[data-role="coordinator"] .section-command-menu button:hover,
+body[data-role="coordinator"] .section-command-menu button:focus-visible{
+  background:var(--accent-soft,#edf5fc);
+  color:var(--accent,#315f8d);
+  outline:none;
+}
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) button.danger,
+body[data-role="coordinator"] .section-command-menu button.danger{
+  margin-top:3px;
+  border-top:1px solid #f3dddd;
+  border-radius:0 0 8px 8px;
+  color:#b63838;
+}
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) button.danger:hover,
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.student-command-menu>nav,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) button.danger:focus-visible,
+body[data-role="coordinator"] .section-command-menu button.danger:hover,
+body[data-role="coordinator"] .section-command-menu button.danger:focus-visible{
+  background:#fff0f0;
+  color:#a52424;
+}
+body[data-role="admin"] :is(.section-action-menu,.curriculum-context-menu,.announcement-actions-menu>nav,.curriculum-toolbar-settings>nav) svg,
+body[data-role="coordinator"] .section-command-menu svg{
+  width:18px;
+  height:18px;
+  flex:none;
+  fill:currentColor;
+}

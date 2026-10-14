@@ -1,7 +1,7 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 const pages=[
-  ['admin.html',  {username:'admin',role:'admin'}, 11, 'Dashboard'],
+  ['admin.html',  {username:'admin',role:'admin'}, 9, 'Dashboard'],
   ['faculty.html',{username:'F1',role:'faculty'},   4, 'My Subjects'],
   ['student.html',{username:'S1',role:'student'},   4, 'Overview']
 ];
@@ -25,13 +25,18 @@ for(const [page,user,count,firstLabel] of pages){
 
 const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
-ok(adminLinks.slice(0,7).join(',')==='dashboardSection,systemSection,academicPeriodsSection,rolePermissionsSection,auditSection,loadPolicySection,facultySection','Admin navigation includes governance under system settings before school management');
+ok(adminLinks.slice(0,7).join(',')==='dashboardSection,systemSection,academicPeriodsSection,governanceSection,auditSection,loadPolicySection,facultySection','Admin navigation includes merged governance under system settings before school management');
 ok(adminNavPage.d.querySelector('#sidebar [data-panel="loadPolicySection"]')?.textContent.includes('Subject Management'),'unified curriculum and load workspace is named Subject Management');
 ok(!adminNavPage.d.querySelector('#sidebar [data-panel="subjectSection"]'),'archived legacy Subject Management is removed from navigation');
 const adminDividers=[...adminNavPage.d.querySelectorAll('#sidebar .sidebar-divider[role="separator"]')];
-ok(adminDividers.map(item=>item.textContent.trim()).join('|')==='System settings|School management|To be moved','Admin sidebar exposes the three requested navigation categories');
+ok(adminDividers.map(item=>item.textContent.trim()).join('|')==='System settings|School management','Admin sidebar contains only Admin-owned navigation categories');
 ok(adminDividers[0].nextElementSibling?.dataset.panel==='systemSection'&&adminDividers[1].nextElementSibling?.dataset.panel==='loadPolicySection','system and school management items start under the correct category');
-ok(adminDividers[2].nextElementSibling?.dataset.panel==='sectionSection','Section Management is clearly marked for transfer');
+ok(!adminNavPage.d.querySelector('#sidebar [data-panel="sectionSection"]'),'Section Management is removed from Admin navigation');
+const coordinatorSeed=SEED();coordinatorSeed.users.push({username:'coordinator.demo',role:'coordinator',status:'active'});
+const coordinatorNavPage=load('coordinator.html',{...coordinatorSeed,currentUser:{username:'coordinator.demo',role:'coordinator'}});
+ok(coordinatorNavPage.d.querySelector('#sidebar [data-panel="sectionManagementSection"]')?.textContent.includes('Section Management'),'Section Management is owned by the Faculty Coordinator');
+ok(coordinatorNavPage.d.querySelectorAll('.role-action-card').length===7&&coordinatorNavPage.d.querySelector('.role-action-card-wide')?.textContent.includes('Coordinator logs'),'Coordinator dashboard keeps six operational cards and a balanced full-width Logs card');
+coordinatorNavPage.w.close();
 adminNavPage.w.close();
 
 console.log('\n=== BBB. Drawer opens, closes, and switches sections ===');

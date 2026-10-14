@@ -25,7 +25,7 @@ r.w.close();
 const old={users:[{username:'admin',password:'admin123',role:'admin'}],faculty:[{id:'12-34567-890',last:'Reyes',first:'Maria'}],students:[{id:'2024-00001',last:'Dela Cruz',first:'Juan',sections:['BSCS-3A']}],subjects:[],demoCurriculumVersion:5,currentUser:{username:'admin',role:'admin'}};
 const direct=load('admin.html',old);
 ok(direct.read('students').length===1200&&direct.d.getElementById('countStudents').textContent==='1200','direct Admin refresh migrates and renders the latest demo data');
-ok(/Every professor currently has an assigned subject/.test(direct.d.getElementById('unassignedFacultyTable').textContent),'Admin reports that every seeded professor has an assignment');
+ok(!direct.d.getElementById('unassignedFacultyTable'),'Admin does not render the operational Professors-without-load list');
 const demoUsers=direct.read('users'),demoAudit=direct.read('applicationAuditLog'),demoSubs=direct.read('studentSubmissions');
 const demoExams=direct.read('exams'),demoQuestions=direct.read('questions'),demoEnrollments=direct.read('studentEnrollments');
 const demoReports=direct.read('questionReports'),demoAnnouncements=direct.read('adminAnnouncements');

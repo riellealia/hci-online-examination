@@ -18,7 +18,7 @@ function createAuth(store, options = {}) {
   };
   function active(user) {
     const status = String(user?.status || 'active').toLowerCase();
-    return !!user && user.disabled !== true && !['deactivated', 'archived', 'graduated', 'transferred'].includes(status);
+    return !!user && user.disabled !== true && user.permissionsDisabled !== true && !['deactivated', 'archived', 'graduated', 'transferred'].includes(status);
   }
   function attemptKey(username, address) { return `${address || 'local'}:${String(username || '').toLowerCase()}`; }
   function rateState(key) {
