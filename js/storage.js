@@ -108,7 +108,12 @@ function sqliteBootstrap() {
       if (migration.status !== 200) throw new Error(`SQLite migration returned ${migration.status}.`);
     }
   } catch (error) {
-    console.warn('[storage] SQLite unavailable; continuing with browser cache.', error);
+    // A server-backed page must never display an old operational snapshot as
+    // though it were current. Clear term-scoped cache when hydration fails;
+    // identity remains intact so a reload can retry the authenticated sync.
+    for (const key of SQLITE_PERIOD_SCOPED) localStorage.removeItem(key);
+    try { localStorage.setItem('accessNotice', JSON.stringify('Current academic data could not be refreshed. Reload the page to retry.')); } catch (_) {}
+    console.warn('[storage] SQLite hydration failed; stale academic cache was cleared.', error);
   }
 }
 

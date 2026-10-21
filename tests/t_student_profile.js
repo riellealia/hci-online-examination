@@ -4,11 +4,11 @@ console.log('=== ADMIN STUDENT PROFILE. Identity, tabs, relationships, and stati
 const seed=SEED();
 seed.sections=[{id:'1BSCS-1',name:'Section A',program:'BSCS',yearLevel:1,capacity:50}];
 seed.students[0].sections=['1BSCS-1'];
-seed.subjects.push({code:'SUB3',name:'New Subject'});
+seed.subjects.push({code:'SUB3',name:'New Subject'},{code:'SUB4',name:'Next Semester Subject'});
 seed.subjects.find(subject=>subject.code==='SUB2').yearLevel=1;
 seed.subjects.find(subject=>subject.code==='SUB3').yearLevel=1;
-seed.curricula=[{program:'BSCS',yearLevel:1,term:'first',subjectCode:'SUB2',subjectName:'SE',units:3,status:'active'}];
-seed.sectionSubjects=[{sectionId:'1BSCS-1',assignments:[{id:'O-SUB2-A',subjectCode:'SUB2',facultyId:'F2'},{id:'O-SUB3-A',subjectCode:'SUB3',facultyId:'F1'}]}];
+seed.curricula=[{program:'BSCS',yearLevel:1,term:'first',subjectCode:'SUB2',subjectName:'SE',units:3,status:'active'},{program:'BSCS',yearLevel:1,term:'first',subjectCode:'SUB3',subjectName:'New Subject',units:3,status:'active'},{program:'BSCS',yearLevel:1,term:'second',subjectCode:'SUB4',subjectName:'Next Semester Subject',units:3,status:'active'}];
+seed.sectionSubjects=[{sectionId:'1BSCS-1',assignments:[{id:'O-SUB2-A',subjectCode:'SUB2',facultyId:'F2'},{id:'O-SUB3-A',subjectCode:'SUB3',facultyId:'F1'},{id:'O-SUB4-A',subjectCode:'SUB4',facultyId:'F1'}]}];
 seed.studentSubmissions=[{studentId:'S1',examId:'e1',submittedAt:'2026-08-20T10:00:00Z',total:10,answers:[{awarded:8,needsManualGrading:false}]}];
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 const link=[...r.d.querySelectorAll('#studentTable tr')].find(row=>/Cruz, Juan/.test(row.textContent));
@@ -45,6 +45,7 @@ ok(!r.d.querySelector('.available-subjects').open,'available subjects are collap
 r.d.querySelector('.available-subjects').open=true;
 const availableRow=[...r.d.querySelectorAll('.subject-only-table tbody tr[role="button"]')].find(row=>/SUB3/.test(row.textContent));
 ok(!!availableRow&&!/SECTION|PROFESSOR/.test(r.d.querySelector('.subject-only-table thead').textContent),'available table lists subjects only');
+ok(!/SUB4/.test(r.d.querySelector('.subject-only-table tbody').textContent),'student assignment hides subjects that belong to another semester');
 availableRow.click();
 ok(r.d.getElementById('studentSectionPickerModal').style.display==='flex'&&/Select a section/.test(r.d.getElementById('studentSectionPickerTitle').textContent),'clicking a subject opens the section picker');
 const sectionChoice=r.d.querySelector('#studentSectionPickerOptions .student-section-choice');

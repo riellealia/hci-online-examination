@@ -5,7 +5,7 @@ console.log('=== CURRICULUM SAMPLE DATA. Programs, years, offerings, and IDs ===
 const r=load('login.html',{users:[],faculty:[],students:[],subjects:[],subjectAssignments:[],allotments:[],exams:[],questions:[],curricula:officialCurricula},{query:'?role=admin'});
 const faculty=r.read('faculty'),students=r.read('students'),subjects=r.read('subjects'),sections=r.read('sections'),records=r.read('sectionSubjects'),enrollments=r.read('studentEnrollments');
 const offers=records.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId})));
-ok(faculty.length===28&&new Set(faculty.map(item=>item.id)).size===28&&faculty.every(item=>/^\d{2}-\d{5}-\d{3}$/.test(item.id)),'28 teachers use unique NN-NNNNN-NNN IDs');
+ok(faculty.length===Math.ceil(offers.length/6)&&new Set(faculty.map(item=>item.id)).size===faculty.length&&faculty.every(item=>/^\d{2}-\d{5}-\d{3}$/.test(item.id)),'the Professor roster scales to the timetable with unique NN-NNNNN-NNN IDs');
 ok(new Set(sections.map(section=>section.program)).size===5&&sections.length===60&&students.length===1200,'five programs, 60 sections, and 1,200 students are seeded');
 ok(['BSCS','BSIT','BSIS','BSGAMEDEV','BSANIMATION'].every(program=>[1,2,3,4].every(year=>sections.filter(section=>section.program===program&&section.yearLevel===year).length===3)),'every course and year level has three sections');
 ok(sections.some(section=>section.capacity===20)&&sections.some(section=>section.capacity===24)&&sections.some(section=>section.capacity===50),'seeded Sections include full, low-availability, and available capacity states');
@@ -19,6 +19,9 @@ ok(students.every(student=>{const section=sections.find(item=>item.id===student.
 ok(sections.every(section=>new Set(enrollments.filter(item=>item.sectionId===section.id).map(item=>item.studentId)).size<=section.capacity),'student enrollment never exceeds section capacity');
 ok(enrollments.every(enrollment=>{const section=sections.find(item=>item.id===enrollment.sectionId);return curricula.some(item=>item.program===section.program&&Number(item.yearLevel)===section.yearLevel&&item.term==='first'&&item.subjectCode===enrollment.subjectCode)}),'no student is enrolled in second-semester or summer subjects');
 ok(faculty.every(person=>offers.some(item=>item.facultyId===person.id)),'all seeded professors receive at least one first-semester offering');
+const mariaReyesId='23-32534-345',mariaReyesOffers=offers.filter(item=>item.facultyId===mariaReyesId),otherProfessorMaximum=Math.max(...faculty.filter(person=>person.id!==mariaReyesId).map(person=>offers.filter(item=>item.facultyId===person.id).length));
+ok(mariaReyesOffers.length===19&&mariaReyesOffers.every(item=>Number(subjects.find(subject=>subject.code===item.subjectCode)?.units)===3),'Maria Reyes retains the requested 57-unit exception');
+ok(otherProfessorMaximum<=6,'no seeded Professor except Maria Reyes exceeds six active offerings');
 ok(new Set(students.flatMap(item=>item.sections.map(section=>section.charAt(0)))).size===4,'students span all four year levels');
 ok(sections.every(section=>/^\d(?:BSCS|BSIT|BSIS|BSGAMEDEV|BSANIMATION)-[1-3]$/.test(section.id)),'section IDs use year-course-section format for all five courses');
 r.w.close();
@@ -36,6 +39,11 @@ ok(demoApprovals.every(request=>(request.history||[]).length>=1)&&demoNotificati
 const pendingOverload=demoApprovals.find(request=>request.id==='DEMO-APR-001'),scheduledOffers=direct.read('sectionSubjects').flatMap(record=>(record.assignments||[]).filter(item=>item.schedule).map(item=>({...item,sectionId:record.sectionId})));
 ok(pendingOverload?.proposedChange.currentUnits===21&&pendingOverload?.proposedChange.proposedUnits===24&&pendingOverload?.proposedChange.maximumLimit===30,'demo Student overload includes current, proposed, normal, and maximum load states');
 ok(scheduledOffers.length>20&&scheduledOffers.some(item=>item.schedule.days?.length&&item.schedule.start&&item.schedule.end&&item.schedule.room),'realistic offering schedules with rooms are seeded');
+const minutes=value=>{const [hour,minute]=String(value).split(':').map(Number);return hour*60+minute},durationFor=item=>minutes(item.schedule.end)-minutes(item.schedule.start),scheduleConflicts=items=>items.some((item,index)=>items.slice(index+1).some(other=>item.schedule.days.some(day=>other.schedule.days.includes(day))&&item.schedule.start<other.schedule.end&&other.schedule.start<item.schedule.end));
+const directFaculty=direct.read('faculty'),directSections=direct.read('sections'),directOfferingCount=direct.read('sectionSubjects').reduce((sum,record)=>sum+(record.assignments||[]).length,0);
+ok(scheduledOffers.length===directOfferingCount&&scheduledOffers.every(item=>[60,90,120].includes(durationFor(item))&&minutes(item.schedule.start)>=7*60&&minutes(item.schedule.end)<=19*60),'every first-semester subject offering receives a one-to-two-hour schedule between 7 AM and 7 PM');
+ok(directFaculty.every(person=>!scheduleConflicts(scheduledOffers.filter(item=>item.facultyId===person.id))),'Professor schedules never overlap, including Maria Reyes');
+ok(directSections.every(section=>!scheduleConflicts(scheduledOffers.filter(item=>item.sectionId===section.id))),'Section schedules never overlap');
 const conflictTarget=scheduledOffers.find(item=>item.id===pendingOverload.proposedChange.offeringId),mariaScheduled=new Set(demoEnrollments.filter(item=>item.studentId==='2025-00002').map(item=>item.offeringId)),conflictExisting=scheduledOffers.find(item=>mariaScheduled.has(item.id)&&item.schedule.days.some(day=>conflictTarget.schedule.days.includes(day))&&item.schedule.start<conflictTarget.schedule.end&&conflictTarget.schedule.start<item.schedule.end);
 ok(!!conflictExisting,'an intentional Student schedule conflict is available for the Dean review demo');
 ok(['open','reviewed','resolved','dismissed'].every(status=>demoReports.some(report=>report.status===status)),'demo question reports cover open, reviewed, resolved, and dismissed statuses');

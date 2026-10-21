@@ -10,6 +10,10 @@ const AcademicWorkflowService = (() => {
     }
     return null;
   }
+  function activeOfferingExists(records, offeringId) {
+    if(typeof SectionService==='undefined'||typeof SectionService.assignmentOfferings!=='function')return Boolean(offeringById(records,offeringId));
+    return SectionService.assignmentOfferings(records,DB.read('sections',[]),DB.read('curricula',[])).some(item=>item.id===offeringId);
+  }
   function activeAccount(username, role) {
     return DB.read('users', []).some(user => user.username === username && user.role === role
       && user.disabled !== true && !['deactivated', 'archived', 'graduated', 'transferred'].includes(String(user.status || 'active').toLowerCase()));
@@ -64,6 +68,7 @@ const AcademicWorkflowService = (() => {
   function requestProfessorAssignment({ offeringId, facultyId, reason, academicPeriod = '' }, actor = null) {
     const sectionSubjects = DB.read('sectionSubjects', []), located = offeringById(sectionSubjects, offeringId);
     if (!located) fail('The selected subject offering does not exist.', 'NOT_FOUND');
+    if (!activeOfferingExists(sectionSubjects, offeringId)) fail('The selected subject is not offered in the active academic period and semester.', 'INACTIVE_SEMESTER');
     if (!DB.read('faculty', []).some(person => person.id === facultyId) || !activeAccount(facultyId, 'faculty')) fail('The selected Professor is not active.');
     return ApprovalService.submit({
       type: 'professor-assignment', targetType: 'subject-offering', targetId: offeringId,
@@ -74,6 +79,7 @@ const AcademicWorkflowService = (() => {
   function applyProfessorAssignment(change, request, actor) {
     const records = DB.read('sectionSubjects', []), located = offeringById(records, change.offeringId);
     if (!located) fail('The subject offering was removed after this request was submitted.', 'STALE_TARGET');
+    if (!activeOfferingExists(records, change.offeringId)) fail('The subject offering is no longer active in this academic period and semester.', 'STALE_TARGET');
     if ((located.assignment.facultyId || '') !== (change.expectedFacultyId || '')) fail('The Professor assignment changed after submission. Review the request again.', 'STALE_TARGET');
     if (!DB.read('faculty', []).some(person => person.id === change.facultyId) || !activeAccount(change.facultyId, 'faculty')) fail('The proposed Professor is no longer active.', 'STALE_TARGET');
     const previousValue = { facultyId: located.assignment.facultyId || '' };
@@ -85,6 +91,7 @@ const AcademicWorkflowService = (() => {
   function requestStudentOverload({ studentId, offeringId, proposedUnits, normalLimit, maximumLimit, reason, academicPeriod = '' }, actor = null) {
     const located = offeringById(DB.read('sectionSubjects', []), offeringId);
     if (!located) fail('The selected subject offering does not exist.', 'NOT_FOUND');
+    if (!activeOfferingExists(DB.read('sectionSubjects', []), offeringId)) fail('The selected subject is not offered in the active academic period and semester.', 'INACTIVE_SEMESTER');
     if (!DB.read('students', []).some(student => student.id === studentId) || !activeAccount(studentId, 'student')) fail('The selected Student is not active.');
     if (DB.read('studentEnrollments', []).some(item => item.studentId === studentId && (item.offeringId === offeringId || item.subjectCode === located.assignment.subjectCode))) fail('The Student is already enrolled in this subject.');
     const calculated=proposedStudentLoad(studentId,located.assignment.subjectCode),policy=loadPolicyForStudent(studentId),effectiveProposedUnits=calculated?.proposedUnits??Number(proposedUnits);
@@ -101,6 +108,7 @@ const AcademicWorkflowService = (() => {
   function applyStudentOverload(change, request, actor) {
     const located = offeringById(DB.read('sectionSubjects', []), change.offeringId);
     if (!located || located.assignment.subjectCode !== change.subjectCode || located.section.sectionId !== change.sectionId) fail('The subject offering changed after submission. Review the request again.', 'STALE_TARGET');
+    if (!activeOfferingExists(DB.read('sectionSubjects', []), change.offeringId)) fail('The subject offering is no longer active in this academic period and semester.', 'STALE_TARGET');
     if (!activeAccount(change.studentId, 'student')) fail('The Student is no longer active.', 'STALE_TARGET');
     const enrollments = DB.read('studentEnrollments', []);
     if (enrollments.some(item => item.studentId === change.studentId && (item.offeringId === change.offeringId || item.subjectCode === change.subjectCode))) fail('The Student has already been enrolled.', 'STALE_TARGET');

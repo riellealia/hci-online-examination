@@ -33,11 +33,12 @@ const DEAN_PERSONNEL=fs.readFileSync(DIR+'../js/dean-personnel.js','utf8');
 const SECTION_MANAGEMENT=fs.readFileSync(DIR+'../js/section-management.js','utf8');
 const PROFESSOR_MANAGEMENT=fs.readFileSync(DIR+'../js/professor-management.js','utf8');
 const SUBJECT_SCHEDULE=fs.readFileSync(DIR+'../js/subject-schedule.js','utf8');
+const DASHBOARD_CHARTS=fs.readFileSync(DIR+'../js/dashboard-charts.js','utf8');
 
 function load(page, seed, opts={}){
   // Inline auth.js: jsdom will not fetch it from disk.
   let html=fs.readFileSync(DIR+page,'utf8')
-    .replace('<script src="../js/storage.js"></script>', `<script>${STORAGE}</script>`)
+    .replace(/<script src="\.\.\/js\/storage\.js(?:\?[^\"]*)?"><\/script>/, `<script>${STORAGE}</script>`)
     .replace('<script src="../js/section-service.js"></script>', () => `<script>${SECTION_SERVICE}</script>`)
     .replace('<script src="../js/student-profile.js"></script>', `<script>${STUDENT_PROFILE}</script>`)
     .replace('<script src="../js/faculty-profile.js"></script>', `<script>${FACULTY_PROFILE}</script>`)
@@ -59,6 +60,7 @@ function load(page, seed, opts={}){
     .replace('<script src="../js/section-management.js"></script>', `<script>${SECTION_MANAGEMENT}</script>`)
     .replace('<script src="../js/professor-management.js"></script>', `<script>${PROFESSOR_MANAGEMENT}</script>`)
     .replace('<script src="../js/subject-schedule.js"></script>', `<script>${SUBJECT_SCHEDULE}</script>`)
+    .replace('<script src="../js/dashboard-charts.js"></script>', `<script>${DASHBOARD_CHARTS}</script>`)
     .replace('<script src="../js/dates.js"></script>', `<script>${DATES}</script>`)
     .replace('<script src="../js/exam-timing.js"></script>', `<script>${TIMING}</script>`)
     .replace('<script src="../js/grading.js"></script>', `<script>${GRADING}</script>`);

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Online Examination</title>
 <link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard-charts.css">
 <script src="../js/storage.js"></script>
 <script src="../js/section-service.js"></script>
 <script src="../js/audit-service.js"></script>
@@ -398,6 +399,8 @@
         <div class="stat-lbl">Exams Completed</div>
       </button>
     </div>
+
+    <section id="studentDashboardCharts" class="dashboard-charts student-dashboard-charts" aria-label="Student dashboard charts"></section>
 
     <div class="section-card">
       <h3>📌 Next up</h3>
@@ -2387,5 +2390,6 @@ StudentCardTools.mount({toolsHost:document.getElementById('studentExamTools'),co
 StudentCardTools.mount({toolsHost:document.getElementById('studentResultTools'),container:document.getElementById('resultSubjectCards'),cardSelector:'.subject-card',values:card=>[card.dataset.subject,card.querySelector('.subject-card-title strong')?.textContent||'',card.textContent,'']});
 StudentCardTools.mount({toolsHost:document.getElementById('studentSubjectTools'),container:document.getElementById('studentSubjectCards'),cardSelector:'.enrolled-subject-card',values:card=>[card.dataset.subject,card.querySelector('h4')?.textContent||'',card.querySelector('.enrolled-subject-meta strong:nth-of-type(1)')?.textContent||card.textContent,card.querySelector('.enrolled-subject-meta div:nth-child(2) strong')?.textContent||'']});
 </script>
+<script src="../js/dashboard-charts.js"></script>
 </body>
 </html>

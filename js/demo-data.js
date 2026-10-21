@@ -1,7 +1,7 @@
 /* Canonical, versioned curriculum demo data. Replaces only the known legacy
    sample set; custom installations are left untouched. */
 const DemoData = {
-  version: 28,
+  version: 31,
   ensureLearningContent() {
     const key='subjectWorkspaceContent',current=DB.read(key,[]);
     const cleaned=current.filter(item=>!(item.subjectCode==='CCS211-24'&&(!item.title||item.title==='Untitled')));
@@ -112,12 +112,28 @@ const DemoData = {
       }
     });
     const offers=sectionSubjects.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId}))),studentEnrollments=[];
-    const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday'],starts=['08:00','09:30','11:00','13:00','14:30','16:00'];
-    sectionSubjects.forEach((record,recordIndex)=>(record.assignments||[]).forEach((assignment,index)=>{const start=starts[(recordIndex+index)%starts.length],hour=Number(start.slice(0,2)),minute=start.slice(3),end=`${String(hour+1).padStart(2,'0')}:${minute}`;assignment.schedule={days:[weekdays[(recordIndex+index)%weekdays.length]],start,end,room:`CICS-${String(201+(recordIndex%8)).padStart(3,'0')}`};}));
+    // Staff the generated timetable instead of silently overloading the small
+    // starter roster. Six offerings is the normal demo ceiling per Professor.
+    const maxProfessorOfferings=6,requiredFaculty=Math.ceil(offers.length/maxProfessorOfferings);
+    for(let index=faculty.length;index<requiredFaculty;index++){
+      const extra=index-28,first=facultyFirst[(extra+7)%facultyFirst.length],last=facultyLast[Math.floor(extra/facultyFirst.length)%facultyLast.length];
+      faculty.push({id:`${String(60+extra%40).padStart(2,'0')}-${String(20000+extra*137).padStart(5,'0')}-${String(300+extra*11).padStart(3,'0')}`,first,last});
+    }
+    const reyesId='23-32534-345',reserved=[],threeUnitCodes=new Set(subjects.filter(item=>Number(item.units)===3).map(item=>item.code));
+    const mariaOffer=offers.find(item=>item.sectionId==='2BSCS-1'&&threeUnitCodes.has(item.subjectCode));if(mariaOffer)reserved.push(mariaOffer);
+    for(const offer of offers){if(reserved.length>=19)break;if(reserved.includes(offer)||!threeUnitCodes.has(offer.subjectCode))continue;reserved.push(offer)}
+    if(reserved.length!==19)throw new Error('Maria Reyes requires exactly 19 three-unit offerings for the requested 57-unit exception.');
+    offers.forEach(offer=>{offer.facultyId='';const stored=sectionSubjects.find(record=>record.sectionId===offer.sectionId)?.assignments.find(item=>item.id===offer.id);if(stored)stored.facultyId=''});
+    const professorLoads=new Map(faculty.map(person=>[person.id,0]));
+    reserved.forEach(offer=>{offer.facultyId=reyesId;professorLoads.set(reyesId,(professorLoads.get(reyesId)||0)+1);const stored=sectionSubjects.find(record=>record.sectionId===offer.sectionId)?.assignments.find(item=>item.id===offer.id);if(stored)stored.facultyId=reyesId});
+    offers.filter(offer=>!offer.facultyId).forEach(offer=>{const professor=faculty.filter(person=>(professorLoads.get(person.id)||0)<maxProfessorOfferings).sort((a,b)=>(professorLoads.get(a.id)||0)-(professorLoads.get(b.id)||0)||a.id.localeCompare(b.id))[0];offer.facultyId=professor.id;professorLoads.set(professor.id,(professorLoads.get(professor.id)||0)+1);const stored=sectionSubjects.find(record=>record.sectionId===offer.sectionId)?.assignments.find(item=>item.id===offer.id);if(stored)stored.facultyId=professor.id});
+    const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],startMinutes=[];for(let minute=7*60;minute<=18*60;minute+=30)startMinutes.push(minute);
+    const busy=new Map(),used=(resource,day,start,end)=>(busy.get(resource)||[]).some(slot=>slot.day===day&&start<slot.end&&slot.start<end),reserve=(resource,day,start,end)=>busy.set(resource,[...(busy.get(resource)||[]),{day,start,end}]),formatTime=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
+    const scheduledOffers=sectionSubjects.flatMap(record=>(record.assignments||[]).map(item=>({item,sectionId:record.sectionId}))).sort((a,b)=>a.item.facultyId.localeCompare(b.item.facultyId)||a.sectionId.localeCompare(b.sectionId)||a.item.subjectCode.localeCompare(b.item.subjectCode));
+    scheduledOffers.forEach((offer,index)=>{const duration=[60,90,120][index%3],dayOffset=index%weekdays.length,startOffset=(index*3)%startMinutes.length;let selected=null;for(let d=0;d<weekdays.length&&!selected;d++){const day=weekdays[(dayOffset+d)%weekdays.length];for(let s=0;s<startMinutes.length;s++){const start=startMinutes[(startOffset+s)%startMinutes.length],end=start+duration;if(end>19*60)continue;const professor=`faculty:${offer.item.facultyId}`,section=`section:${offer.sectionId}`;if(!used(professor,day,start,end)&&!used(section,day,start,end)){selected={day,start,end,professor,section};break}}}if(!selected)throw new Error(`No conflict-free slot for ${offer.item.subjectCode} in ${offer.sectionId}.`);reserve(selected.professor,selected.day,selected.start,selected.end);reserve(selected.section,selected.day,selected.start,selected.end);offer.item.schedule={days:[selected.day],start:formatTime(selected.start),end:formatTime(selected.end),room:`CICS-${String(201+(index%12)).padStart(3,'0')}`}});
     const maria=students.find(student=>student.id==='2025-00002');
     students.forEach(student=>offers.filter(offer=>student.sections.includes(offer.sectionId)).forEach((offer,index)=>studentEnrollments.push({id:`ENR-${student.id}-${index+1}`,studentId:student.id,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId})));
     const mariaCodes=offers.filter(item=>item.sectionId==='2BSCS-1').map(item=>item.subjectCode);
-    offers.filter(item=>item.sectionId==='2BSCS-1').slice(0,3).forEach(item=>{item.facultyId='23-32534-345';const stored=sectionSubjects.find(record=>record.sectionId===item.sectionId)?.assignments.find(assignment=>assignment.id===item.id);if(stored)stored.facultyId=item.facultyId});
     const subjectAssignments=subjects.map(subject=>({subjectCode:subject.code,facultyIds:[...new Set(offers.filter(offer=>offer.subjectCode===subject.code).map(offer=>offer.facultyId))]}));
     const passwordName=value=>value.toLowerCase().replace(/\s+/g,'');
     const coordinators=[
@@ -188,8 +204,10 @@ const DemoData = {
       }),total=paper.reduce((sum,question)=>sum+(question.points||2),0),score=answers.reduce((sum,answer)=>sum+answer.awarded,0);
       studentSubmissions.push({id:`DEMO-MARIA-SUB-${String(examIndex+1).padStart(2,'0')}`,studentId:'2025-00002',examId:exam.id,submittedAt:`${exam.date}T${String(9+examIndex%7).padStart(2,'0')}:${examIndex%2?'42':'18'}:00+08:00`,total,score,status:'graded',gradedAt:`${exam.date}T18:00:00+08:00`,remarks:examIndex%3===0?'Good work. Review the marked item for improvement.':'Well done. Keep practicing the key concepts.',answers});
     });
-    const demoOverloadOffering=offers.find(offer=>offer.sectionId!=='2BSCS-1'&&!mariaCodes.includes(offer.subjectCode))||offers[0],demoCurrentOffering=offers.find(offer=>offer.sectionId==='2BSCS-1');
-    if(demoOverloadOffering&&demoCurrentOffering){const shared={days:['Wednesday'],start:'13:00',end:'14:30',room:'CICS-204'};const storedTarget=sectionSubjects.find(record=>record.sectionId===demoOverloadOffering.sectionId)?.assignments.find(item=>item.id===demoOverloadOffering.id),storedCurrent=sectionSubjects.find(record=>record.sectionId===demoCurrentOffering.sectionId)?.assignments.find(item=>item.id===demoCurrentOffering.id);if(storedTarget)storedTarget.schedule=shared;if(storedCurrent)storedCurrent.schedule={...shared,room:'CICS-205'};}
+    const storedOffers=sectionSubjects.flatMap(record=>(record.assignments||[]).map(item=>({...item,sectionId:record.sectionId}))),demoCurrentOffering=storedOffers.find(offer=>offer.sectionId==='2BSCS-1'),currentSlot=demoCurrentOffering?.schedule;
+    const overlaps=(left,right)=>left&&right&&(left.days||[]).some(day=>(right.days||[]).includes(day))&&left.start<right.end&&right.start<left.end;
+    const demoOverloadOffering=currentSlot?storedOffers.find(offer=>offer.sectionId!=='2BSCS-1'&&!mariaCodes.includes(offer.subjectCode)&&offer.facultyId!==demoCurrentOffering.facultyId&&!storedOffers.some(other=>other.id!==offer.id&&(other.facultyId===offer.facultyId||other.sectionId===offer.sectionId)&&overlaps(currentSlot,other.schedule))):null;
+    if(demoOverloadOffering&&demoCurrentOffering){const storedTarget=sectionSubjects.find(record=>record.sectionId===demoOverloadOffering.sectionId)?.assignments.find(item=>item.id===demoOverloadOffering.id);if(storedTarget)storedTarget.schedule={...currentSlot,days:[...currentSlot.days],room:storedTarget.schedule.room};}
     const submittedAt='2026-08-24T09:00:00+08:00',approvalRequests=[
       {id:'DEMO-APR-001',type:'student-overload',requesterId:'coordinator.demo',requesterRole:'coordinator',targetType:'student-enrollment',targetId:`2025-00002:${demoOverloadOffering.id}`,proposedChange:{studentId:'2025-00002',offeringId:demoOverloadOffering.id,subjectCode:demoOverloadOffering.subjectCode,sectionId:demoOverloadOffering.sectionId,currentUnits:21,subjectUnits:3,proposedUnits:24,normalLimit:20,maximumLimit:30,program:'BSCS',yearLevel:2,term:'first'},reason:'Required subject for the Student’s graduation plan.',academicPeriod:'current',status:'pending',submittedAt,reviewerId:'',reviewerRole:'dean',reviewerRemarks:'',decisionAt:'',history:[{status:'pending',at:submittedAt,actorId:'coordinator.demo',actorRole:'coordinator',remarks:'Required subject for the Student’s graduation plan.'}]},
       {id:'DEMO-APR-002',type:'professor-assignment',requesterId:'coord.001',requesterRole:'coordinator',targetType:'subject-offering',targetId:offers[1].id,proposedChange:{offeringId:offers[1].id,facultyId:faculty[1].id,expectedFacultyId:offers[1].facultyId},reason:'Balance the teaching assignments for this term.',academicPeriod:'current',status:'approved',submittedAt:'2026-08-18T08:30:00+08:00',reviewerId:'dean.demo',reviewerRole:'dean',reviewerRemarks:'Availability and load verified.',decisionAt:'2026-08-19T10:00:00+08:00',history:[{status:'pending',at:'2026-08-18T08:30:00+08:00',actorId:'coord.001',actorRole:'coordinator',remarks:'Balance the teaching assignments for this term.'},{status:'approved',at:'2026-08-19T10:00:00+08:00',actorId:'dean.demo',actorRole:'dean',remarks:'Availability and load verified.'}]},

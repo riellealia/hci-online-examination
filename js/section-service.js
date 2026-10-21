@@ -34,13 +34,28 @@ const SectionService = {
     return record ? [...new Set(record.assignments?.map(item=>item.subjectCode) || record.subjectCodes || (record.subjectCode ? [record.subjectCode] : []))] : [];
   },
   offerings(sectionSubjects) {
-    return (sectionSubjects || []).flatMap(record => (record.assignments || (record.subjectCodes || []).map(subjectCode=>({subjectCode,facultyId:null}))).map(item=>({id:item.id||`${record.sectionId}_${item.subjectCode}`,sectionId:record.sectionId,subjectCode:item.subjectCode,facultyId:item.facultyId||null})));
+    return (sectionSubjects || []).flatMap(record => (record.assignments || (record.subjectCodes || []).map(subjectCode=>({subjectCode,facultyId:null}))).map(item=>({...item,id:item.id||`${record.sectionId}_${item.subjectCode}`,sectionId:record.sectionId,subjectCode:item.subjectCode,facultyId:item.facultyId||null,academicPeriodId:item.academicPeriodId||record.academicPeriodId||'',periodStatus:item.periodStatus||record.periodStatus||''})));
+  },
+  currentAcademicContext() {
+    if(typeof DB==='undefined')return{periodId:'',term:'first',schoolYear:'',active:true};
+    const settings=DB.read('systemSettings',{})||{},periods=DB.read('academicPeriods',[])||[],period=periods.find(item=>item.status==='active')||periods.find(item=>item.id===settings.currentAcademicPeriodId),label=String(period?.term||settings.semester||'First Semester').toLowerCase(),term=label.includes('second')?'second':label.includes('summer')?'summer':label.includes('special')?'special':'first';
+    return{periodId:period?.id||settings.currentAcademicPeriodId||'',term,schoolYear:period?.schoolYear||settings.schoolYear||'',active:periods.length?period?.status==='active':settings.academicPeriodStatus!=='closed'};
+  },
+  assignmentOfferings(sectionSubjects, sections, curricula) {
+    const context=this.currentAcademicContext();if(!context.active)return[];
+    const sectionRows=sections||(typeof DB!=='undefined'?DB.read('sections',[]):[]),curriculum=curricula||(typeof DB!=='undefined'?DB.read('curricula',[]):[]);
+    return this.offerings(sectionSubjects).filter(offer=>{
+      if(offer.periodStatus&&offer.periodStatus!=='active')return false;
+      if(context.periodId&&offer.academicPeriodId&&offer.academicPeriodId!==context.periodId)return false;
+      const stored=sectionRows.find(item=>this.normaliseId(item.id)===this.normaliseId(offer.sectionId))||{},section={...this.detailsFromId(offer.sectionId),...stored},scoped=curriculum.filter(item=>item.program===section.program&&Number(item.yearLevel)===Number(section.yearLevel)&&item.status!=='archived'&&item.removed!==true);
+      return !scoped.length||scoped.some(item=>item.subjectCode===offer.subjectCode&&item.term===context.term);
+    });
   },
   offeringFor(sectionId, subjectCode, sectionSubjects) {
     return this.offerings(sectionSubjects).find(item=>item.sectionId===sectionId&&item.subjectCode===subjectCode)||null;
   },
   offeringsForFaculty(facultyId, sectionSubjects, subjectAssignments) {
-    return this.offerings(sectionSubjects).filter(offer => {
+    return this.assignmentOfferings(sectionSubjects).filter(offer => {
       if (offer.facultyId) return offer.facultyId === facultyId;
       const legacy=(subjectAssignments||[]).find(item=>item.subjectCode===offer.subjectCode);
       return (legacy?.facultyIds || (legacy?.facultyId?[legacy.facultyId]:[])).includes(facultyId);

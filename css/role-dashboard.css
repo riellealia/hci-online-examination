@@ -53,13 +53,29 @@ body[data-role="coordinator"] .professor-load-summary small{color:#8793a4;font-s
 body[data-role="coordinator"] .professor-assignment-workspace{display:grid;grid-template-columns:minmax(260px,.82fr) minmax(380px,1.35fr);gap:14px;align-items:start}
 body[data-role="coordinator"] .professor-subject-catalog,body[data-role="coordinator"] #professorSubjectSections,body[data-role="coordinator"] .professor-draft-block{overflow:hidden;border:1px solid #dfe6ef;border-radius:13px;background:#fff}
 body[data-role="coordinator"] .professor-subject-catalog>header,body[data-role="coordinator"] #professorSubjectSections>header,body[data-role="coordinator"] .professor-draft-block>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid #e5eaf1;background:#f8fafc}
-body[data-role="coordinator"] .professor-subject-catalog>header{display:block}
+body[data-role="coordinator"] .professor-subject-catalog>header{position:relative;display:flex}
+body[data-role="coordinator"] .professor-subject-catalog>header>div:first-child{min-width:0}
+body[data-role="coordinator"] .professor-catalog-tools{display:flex;align-items:center;gap:5px;margin-left:auto}
+body[data-role="coordinator"] .professor-catalog-tools .tool-icon{display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:1px solid #d8e1eb;border-radius:10px;background:#fff;color:#52677e;box-shadow:0 3px 10px rgba(37,64,91,.08);cursor:pointer}
+body[data-role="coordinator"] .professor-catalog-tools .tool-icon:hover,body[data-role="coordinator"] .professor-catalog-tools .tool-icon.active{border-color:#91adca;background:#edf5fc;color:#244e77}
+body[data-role="coordinator"] .professor-catalog-tools .tool-icon svg{width:17px;height:17px;fill:currentColor}
+body[data-role="coordinator"] .professor-catalog-tools .table-direction svg{transition:transform .2s ease}
+body[data-role="coordinator"] .professor-catalog-tools .table-direction.descending svg{transform:rotate(180deg)}
+body[data-role="coordinator"] .professor-catalog-tools .table-search-box,body[data-role="coordinator"] .professor-catalog-tools .table-tool-select{position:absolute;top:58px;right:14px;z-index:8;padding:9px;border:1px solid #dbe3ec;border-radius:11px;background:#fff;box-shadow:0 12px 28px rgba(25,42,62,.16)}
+body[data-role="coordinator"] .professor-catalog-tools .table-search-box[hidden],body[data-role="coordinator"] .professor-catalog-tools .table-tool-select[hidden]{display:none}
+body[data-role="coordinator"] .professor-catalog-tools .table-search-box input{width:min(250px,65vw);min-height:38px;padding:0 10px;border:1px solid #ccd7e3;border-radius:9px}
+body[data-role="coordinator"] .professor-catalog-tools .table-tool-select{display:flex;align-items:center;gap:8px;white-space:nowrap;color:#526174;font-size:11px;font-weight:700}
+body[data-role="coordinator"] .professor-catalog-tools .table-tool-select select{min-height:36px;padding:0 8px;border:1px solid #ccd7e3;border-radius:8px;background:#fff;color:#26364b}
 body[data-role="coordinator"] .professor-assignment-workspace h4,body[data-role="coordinator"] .professor-assignment-workspace p{margin:0;text-align:left}
 body[data-role="coordinator"] .professor-assignment-workspace header p{margin-top:3px;color:#718096;font-size:10px}
 body[data-role="coordinator"] .professor-assignment-workspace header>span{color:#315f8d;font-size:10px;font-weight:800}
 body[data-role="coordinator"] .professor-year-group{padding:13px 14px}
 body[data-role="coordinator"] .professor-year-group+.professor-year-group{border-top:1px solid #e9edf2}
-body[data-role="coordinator"] .professor-year-group h5{margin:0 0 8px;color:#64748b;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+body[data-role="coordinator"] .professor-year-group summary{display:flex;align-items:center;justify-content:space-between;margin:0;color:#64748b;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;list-style:none}
+body[data-role="coordinator"] .professor-year-group summary::-webkit-details-marker{display:none}
+body[data-role="coordinator"] .professor-year-group summary::after{content:'›';font-size:15px;line-height:1;transform:rotate(90deg);transition:transform .16s ease}
+body[data-role="coordinator"] .professor-year-group:not([open]) summary::after{transform:rotate(0)}
+body[data-role="coordinator"] .professor-year-group[open] summary{margin-bottom:8px}
 body[data-role="coordinator"] .professor-year-group>div{display:grid;gap:7px}
 body[data-role="coordinator"] .professor-subject-button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:11px 12px;border:1px solid #e0e7ef;border-radius:10px;background:#fbfcfe;color:#27364b;text-align:left;cursor:pointer;transition:border-color .16s ease,background .16s ease,box-shadow .16s ease}
 body[data-role="coordinator"] .professor-subject-button:hover,body[data-role="coordinator"] .professor-subject-button.active{border-color:#a9bfd8;background:#edf5fc;box-shadow:0 5px 14px rgba(49,95,141,.08)}
@@ -85,10 +101,12 @@ body[data-role="coordinator"] .professor-load-list .professor-offering-title{dis
 body[data-role="coordinator"] .professor-offering-state{display:inline-flex;flex:none;padding:4px 7px;border-radius:999px;font-size:9px;font-style:normal;font-weight:850;letter-spacing:.04em;text-transform:uppercase}
 body[data-role="coordinator"] .professor-offering-state.available{background:#e9f5ef;color:#2f7654}
 body[data-role="coordinator"] .professor-offering-state.current{background:#e5effa;color:#315f8d}
+body[data-role="coordinator"] .professor-offering-state.assigned{background:#dff3e8;color:#26704d}
 body[data-role="coordinator"] .professor-offering-state.taken{background:#fff0ef;color:#ad3737}
 body[data-role="coordinator"] .professor-offering.occupied{border-color:#ead7d7;background:#fbf8f8;color:#7d8795;cursor:not-allowed}
 body[data-role="coordinator"] .professor-offering.occupied>input{cursor:not-allowed;opacity:.55}
 body[data-role="coordinator"] .professor-offering.current{border-color:#9ebbd9;background:#edf5fc}
+body[data-role="coordinator"] .professor-offering.assigned{border-color:#9fd0b4;background:#edf9f2;box-shadow:inset 4px 0 #3b8b63}
 body[data-role="coordinator"] .professor-profile-tabs{display:flex;gap:6px;padding:12px 22px 0;border-bottom:1px solid #e4e9f0;background:#fff}
 body[data-role="coordinator"] .professor-profile-card{width:min(1120px,100%);height:calc(100vh - 40px);height:calc(100dvh - 40px);border-radius:22px;background:#f6f8fb}
 body[data-role="coordinator"] .professor-profile-card>header{background:#fff}
@@ -155,20 +173,47 @@ body[data-role="coordinator"] .subject-schedule-head{margin-bottom:18px}
 body[data-role="coordinator"] .subject-schedule-head p{margin:0;color:#416fa9;font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
 body[data-role="coordinator"] .subject-schedule-head h2{margin:4px 0;color:#26364b}
 body[data-role="coordinator"] .subject-schedule-head span{color:#6c7a8e;font-size:13px}
+body[data-role="coordinator"] .subject-week{margin-bottom:14px;padding:14px;border:1px solid #dfe6ef;border-radius:14px;background:linear-gradient(145deg,#fbfdff,#f4f7fb);box-shadow:0 7px 18px rgba(31,52,79,.05)}
+body[data-role="coordinator"] .subject-week>header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:11px}
+body[data-role="coordinator"] .subject-week>header p{margin:0;color:#416fa9;font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+body[data-role="coordinator"] .subject-week>header h3{margin:3px 0 0;color:#26364b;font-size:15px}
+body[data-role="coordinator"] .subject-week>header span{color:#8390a2;font-size:10px}
+body[data-role="coordinator"] .subject-week-grid{display:grid;grid-template-columns:repeat(7,minmax(112px,1fr));gap:7px;overflow-x:auto;padding-bottom:2px}
+body[data-role="coordinator"] .subject-week-day{min-width:0;padding:8px;border:1px solid #e1e7ef;border-radius:10px;background:#fff}
+body[data-role="coordinator"] .subject-week-day h4{margin:0 0 7px;color:#63748a;font-size:9px;font-weight:850;letter-spacing:.08em;text-align:left;text-transform:uppercase}
+body[data-role="coordinator"] .subject-week-events{display:grid;max-height:154px;gap:5px;overflow-y:auto;scrollbar-width:thin}
+body[data-role="coordinator"] .subject-calendar-event{display:grid;grid-template-columns:1fr auto;gap:1px 5px;width:100%;padding:6px 7px;border:0;border-left:3px solid var(--event,#416fa9);border-radius:7px;background:color-mix(in srgb,var(--event,#416fa9) 9%,white);color:#34465d;text-align:left;cursor:pointer}
+body[data-role="coordinator"] .subject-calendar-event strong{min-width:0;overflow:hidden;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+body[data-role="coordinator"] .subject-calendar-event small{color:#66778d;font-size:8px;white-space:nowrap}
+body[data-role="coordinator"] .subject-calendar-event span{grid-column:1/-1;color:#8090a3;font-size:8px}
+body[data-role="coordinator"] .subject-calendar-event:hover,body[data-role="coordinator"] .subject-calendar-event:focus{outline:2px solid color-mix(in srgb,var(--event,#416fa9) 35%,white);transform:translateY(-1px)}
+body[data-role="coordinator"] .subject-calendar-event[data-tone="0"]{--event:#416fa9}body[data-role="coordinator"] .subject-calendar-event[data-tone="1"]{--event:#6d5bd0}body[data-role="coordinator"] .subject-calendar-event[data-tone="2"]{--event:#168a78}body[data-role="coordinator"] .subject-calendar-event[data-tone="3"]{--event:#d17a22}body[data-role="coordinator"] .subject-calendar-event[data-tone="4"]{--event:#b95070}body[data-role="coordinator"] .subject-calendar-event[data-tone="5"]{--event:#477f9e}
+body[data-role="coordinator"] .subject-calendar-empty{display:block;padding:12px 2px;color:#a0aaba;font-size:8px;text-align:center}
 body[data-role="coordinator"] .subject-schedule-tools{display:flex;gap:9px;padding:12px;border:1px solid #dfe6ef;border-radius:13px 13px 0 0;background:#f8fafc}
 body[data-role="coordinator"] .subject-schedule-tools input,body[data-role="coordinator"] .subject-schedule-tools select{min-height:40px;padding:8px 11px;border:1px solid #ced8e5;border-radius:9px;background:#fff;color:#26364b}
 body[data-role="coordinator"] .subject-schedule-tools input{flex:1}
-body[data-role="coordinator"] .subject-schedule-list{overflow:hidden;border:1px solid #dfe6ef;border-top:0;border-radius:0 0 13px 13px;background:#fff}
-body[data-role="coordinator"] .subject-schedule-row{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(430px,2fr) auto;align-items:end;gap:14px;padding:15px;border-bottom:1px solid #e5eaf1}
-body[data-role="coordinator"] .subject-schedule-row:last-child{border-bottom:0}
-body[data-role="coordinator"] .subject-schedule-identity :is(strong,span,small){display:block;text-align:left}
-body[data-role="coordinator"] .subject-schedule-identity strong{color:#26364b}
-body[data-role="coordinator"] .subject-schedule-identity span{margin-top:4px;color:#66758a;font-size:11px}
-body[data-role="coordinator"] .subject-schedule-identity small{margin-top:5px;color:#8793a4;font-size:10px}
-body[data-role="coordinator"] .subject-schedule-fields{display:grid;grid-template-columns:1fr 1.35fr .75fr .75fr;gap:8px}
-body[data-role="coordinator"] .subject-schedule-fields label{display:grid;gap:5px;color:#617087;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
-body[data-role="coordinator"] .subject-schedule-fields input{width:100%;min-width:0;min-height:38px;padding:8px 9px;border:1px solid #ced9e6;border-radius:8px;background:#fff;color:#26364b;font:inherit;font-size:11px;font-weight:500;letter-spacing:0;text-transform:none}
-body[data-role="coordinator"] .subject-schedule-save{min-height:38px;padding:8px 12px;border:1px solid #c8d7e8;border-radius:9px;background:#edf4fb;color:#315f8d;font-weight:800;cursor:pointer}
+body[data-role="coordinator"] .subject-schedule-table-shell{overflow:auto;border:1px solid #dfe6ef;border-top:0;border-radius:0 0 13px 13px;background:#fff}
+body[data-role="coordinator"] .subject-schedule-table{width:100%;min-width:850px;border-collapse:collapse;text-align:left}
+body[data-role="coordinator"] .subject-schedule-table th{padding:12px 15px;background:#f3f6fa;color:#60718a;font-size:10px;font-weight:850;letter-spacing:.05em;text-transform:uppercase}
+body[data-role="coordinator"] .subject-schedule-table td{padding:13px 15px;border-top:1px solid #e5eaf1;color:#53647a;font-size:12px;vertical-align:middle}
+body[data-role="coordinator"] .subject-schedule-table td :is(strong,small){display:block;text-align:left}
+body[data-role="coordinator"] .subject-schedule-table td strong{color:#26364b;font-size:12px}
+body[data-role="coordinator"] .subject-schedule-table td small{margin-top:3px;color:#8390a2;font-size:10px}
+body[data-role="coordinator"] .subject-schedule-row{cursor:pointer;transition:background .16s ease,box-shadow .16s ease}
+body[data-role="coordinator"] .subject-schedule-row:hover,body[data-role="coordinator"] .subject-schedule-row:focus{outline:0;background:#f3f8fd;box-shadow:inset 3px 0 #416fa9}
+body[data-role="coordinator"] .subject-schedule-dialog{position:fixed;inset:0;z-index:1600;display:grid;place-items:center;padding:24px;background:rgba(17,29,46,.42);backdrop-filter:blur(3px)}
+body[data-role="coordinator"] .subject-schedule-editor-card{width:min(620px,100%);padding:22px;border:1px solid #dce5ef;border-radius:16px;background:#fff;box-shadow:0 24px 70px rgba(20,38,63,.22)}
+body[data-role="coordinator"] .subject-schedule-editor-card>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:18px;border-bottom:1px solid #e5eaf1}
+body[data-role="coordinator"] .subject-schedule-editor-card header p{margin:0;color:#416fa9;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+body[data-role="coordinator"] .subject-schedule-editor-card header h3{margin:4px 0;color:#26364b;font-size:20px}
+body[data-role="coordinator"] .subject-schedule-editor-card header span{color:#718096;font-size:12px}
+body[data-role="coordinator"] .subject-schedule-close{width:34px;height:34px;border:1px solid #dbe4ee;border-radius:9px;background:#f7f9fc;color:#52647a;font-size:22px;cursor:pointer}
+body[data-role="coordinator"] .subject-schedule-editor-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px 0}
+body[data-role="coordinator"] .subject-schedule-editor-fields label{display:grid;gap:6px;color:#617087;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+body[data-role="coordinator"] .subject-schedule-editor-fields input{width:100%;min-width:0;min-height:42px;padding:9px 11px;border:1px solid #ced9e6;border-radius:9px;background:#fff;color:#26364b;font:inherit;font-size:12px;font-weight:500;letter-spacing:0;text-transform:none}
+body[data-role="coordinator"] .subject-schedule-editor-card footer{display:flex;justify-content:flex-end;gap:9px;padding-top:17px;border-top:1px solid #e5eaf1}
+body[data-role="coordinator"] .subject-schedule-editor-card footer button{min-height:40px;padding:8px 15px;border:1px solid #c8d7e8;border-radius:9px;background:#edf4fb;color:#315f8d;font-weight:800;cursor:pointer}
+body[data-role="coordinator"] .subject-schedule-editor-card footer .secondary{background:#fff;color:#62738a}
 body[data-role="coordinator"] :is(#professorProfilePerformance,#professorProfileActivity,#professorProfileLogin){padding:22px;text-align:left}
 body[data-role="coordinator"] .professor-performance-list,body[data-role="coordinator"] .professor-activity-list{display:grid;gap:10px}
 body[data-role="coordinator"] .professor-performance-list article,body[data-role="coordinator"] .professor-activity-list article{padding:16px;border:1px solid #e1e7ef;border-radius:12px;background:#fff}
@@ -180,7 +225,7 @@ body[data-role="coordinator"] .professor-performance-list article>div span{displ
 body[data-role="coordinator"] .professor-activity-list article>div :is(strong,span){display:block;text-align:left}
 @media(max-width:800px){body[data-role="coordinator"] .professor-assignment-workspace{grid-template-columns:1fr}}
 @media(max-width:760px){body[data-role="coordinator"] .professor-assigned-overview>header{align-items:flex-start;flex-direction:column}body[data-role="coordinator"] .professor-assigned-row{grid-template-columns:1fr}body[data-role="coordinator"] .professor-assigned-row button{justify-self:start}}
-@media(max-width:980px){body[data-role="coordinator"] .subject-schedule-row{grid-template-columns:1fr}body[data-role="coordinator"] .subject-schedule-fields{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-role="coordinator"] .subject-schedule-save{justify-self:start}}
+@media(max-width:700px){body[data-role="coordinator"] .subject-schedule-editor-fields{grid-template-columns:1fr}}
 @media(max-width:700px){body[data-role="coordinator"] .professor-profile-card{height:100vh;height:100dvh;border-radius:0}body[data-role="coordinator"] .professor-profile-tabs{overflow-x:auto}body[data-role="coordinator"] .professor-profile-summary,body[data-role="coordinator"] .professor-load-summary,body[data-role="coordinator"] .professor-admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-role="coordinator"] .professor-profile-identity-grid,body[data-role="coordinator"] .professor-profile-load>div,body[data-role="coordinator"] .professor-section-options,body[data-role="coordinator"] .professor-draft-block>div,body[data-role="coordinator"] .professor-admin-identity,body[data-role="coordinator"] .professor-admin-columns{grid-template-columns:1fr}}
 .role-workspace{width:min(1380px,calc(100% - 48px));margin:24px auto;padding:26px;border:1px solid #dfe6ef;border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(24,39,64,.07)}
 .role-workspace h2{margin:0;color:#1d2a3d;font-size:24px}.role-workspace>p{margin:7px 0 22px;color:#718096}

@@ -39,7 +39,7 @@ const accountLifecycle = createAccountLifecycleService(store);
 const backupRestore = createBackupRestoreService(store);
 const personnel = createPersonnelService(store);
 
-function send(res, status, body, type='application/json; charset=utf-8', headers={}) { res.writeHead(status, {'Content-Type':type,'X-Content-Type-Options':'nosniff',...headers}); res.end(type.startsWith('application/json') ? JSON.stringify(body) : body); }
+function send(res, status, body, type='application/json; charset=utf-8', headers={}) { res.writeHead(status, {'Content-Type':type,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store, no-cache, must-revalidate','Pragma':'no-cache','Expires':'0',...headers}); res.end(type.startsWith('application/json') ? JSON.stringify(body) : body); }
 function readBody(req) { return new Promise((resolve,reject)=>{let size=0,chunks=[];req.on('data',chunk=>{size+=chunk.length;if(size>MAX_BODY){reject(Object.assign(new Error('Request body is too large.'),{status:413}));req.destroy();}else chunks.push(chunk);});req.on('end',()=>resolve(Buffer.concat(chunks).toString('utf8')));req.on('error',reject);}); }
 function cleanKey(value) { const key=decodeURIComponent(value||''); if(!KEY_RE.test(key)) throw Object.assign(new Error('Invalid collection name.'),{status:400}); return key; }
 function collectionFromCsvPath(pathname) { const match=pathname.match(/^\/api\/csv\/([^/]+)\/(import|export)$/); if(!match)return null;const key=cleanKey(match[1]);if(!CSV_COLLECTIONS.has(key))throw Object.assign(new Error('CSV is not enabled for this collection.'),{status:400});return{key,action:match[2]}; }
