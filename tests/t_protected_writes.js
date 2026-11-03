@@ -4,6 +4,7 @@ const { validateAudit, validateApprovals, validateProtectedWrite } = require('..
 const coordinator = { username: 'coord.001', role: 'coordinator' };
 const dean = { username: 'dean.demo', role: 'dean' };
 const admin = { username: 'admin', role: 'admin' };
+const faculty = { username: 'F1', role: 'faculty' };
 const log = [{ id: 'a1', actorId: 'coord.001', actorRole: 'coordinator' }];
 assert.doesNotThrow(() => validateAudit(log, [...log, { id: 'a2', actorId: 'coord.001', actorRole: 'coordinator' }], coordinator));
 assert.throws(() => validateAudit(log, [], coordinator), /append-only/i);
@@ -11,11 +12,17 @@ assert.throws(() => validateAudit(log, [{ ...log[0], actorId: 'someone' }], coor
 const pending = { id:'APR-1', type:'professor-assignment', requesterId:'coord.001', requesterRole:'coordinator', targetType:'subject-offering', targetId:'OFR-1', proposedChange:{facultyId:'F2'}, reason:'Coverage required.', academicPeriod:'2026-1', submittedAt:'2026-09-21T08:00:00Z', status:'pending', reviewerId:'', reviewerRole:'dean', reviewerRemarks:'', decisionAt:'', history:[{status:'pending',at:'2026-09-21T08:00:00Z',actorId:'coord.001',actorRole:'coordinator',remarks:'Coverage required.'}] };
 assert.doesNotThrow(() => validateApprovals([], [pending], coordinator));
 assert.throws(() => validateApprovals([], [{ ...pending, requesterId:'other' }], coordinator), /owned pending/i);
+const facultyPending={...pending,id:'APR-F1',type:'faculty-student-enrollment',requesterId:'F1',requesterRole:'faculty',targetType:'student-enrollment',targetId:'S1:SUB1',proposedChange:{action:'add',studentId:'S1',subjectCode:'SUB1',offeringId:'OFR-1',sectionId:'A',expectedEnrollment:null},history:[{...pending.history[0],actorId:'F1',actorRole:'faculty'}]};
+assert.doesNotThrow(()=>validateApprovals([], [facultyPending], faculty));
+assert.throws(()=>validateApprovals([], [{...facultyPending,requesterRole:'coordinator'}], faculty),/for this role/i);
 const decided={...pending,status:'approved',reviewerId:'dean.demo',reviewerRole:'dean',reviewerRemarks:'Verified.',decisionAt:'2026-09-21T09:00:00Z',history:[...pending.history,{status:'approved',at:'2026-09-21T09:00:00Z',actorId:'dean.demo',actorRole:'dean',remarks:'Verified.'}]};
 assert.doesNotThrow(() => validateApprovals([pending], [decided], dean));
 assert.throws(() => validateApprovals([pending], [{ ...decided, proposedChange:{facultyId:'F9'} }], dean), /cannot alter/i);
 assert.throws(() => validateApprovals([pending], [{ ...decided, reviewerId:'other' }], dean), /limited/i);
 assert.throws(() => validateProtectedWrite({read:()=>[]}, admin, 'academicPeriods', []), /protected academic-period workflow/i);
+const enrollmentStore={read:(key,fallback)=>key==='approvalRequests'?[facultyPending]:fallback};
+assert.doesNotThrow(()=>validateProtectedWrite(enrollmentStore,dean,'studentEnrollments',[{id:'E1',studentId:'S1',subjectCode:'SUB1',offeringId:'OFR-1',sectionId:'A',facultyEnrollmentApprovalId:'APR-F1'}]));
+assert.throws(()=>validateProtectedWrite(enrollmentStore,dean,'studentEnrollments',[{id:'E1',studentId:'S1',subjectCode:'SUB1',offeringId:'OFR-X',sectionId:'A'}]),/exactly match/i);
 const cancelled={...pending,status:'cancelled',history:[...pending.history,{status:'cancelled',at:'2026-09-21T09:00:00Z',actorId:'admin',actorRole:'admin',remarks:'Obsolete request.'}]};
 assert.doesNotThrow(() => validateApprovals([pending], [cancelled], admin));
 assert.throws(() => validateApprovals([pending], [{...cancelled,proposedChange:{facultyId:'F9'}}], admin), /cannot decide or alter/i);

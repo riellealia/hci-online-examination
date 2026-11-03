@@ -11,14 +11,16 @@ const records = {
     { username: 'F1', role: 'faculty', status: 'active' },
     { username: 'F2', role: 'faculty', status: 'active' },
     { username: 'S1', role: 'student', status: 'active' },
-    { username: 'S2', role: 'student', status: 'active' }
+    { username: 'S2', role: 'student', status: 'active' },
+    { username: 'S3', role: 'student', status: 'active' }
   ],
-  faculty: [{ id: 'F1' }, { id: 'F2' }], students: [{ id: 'S1' }, { id: 'S2' }],
-  sections: [{ id: 'SEC-1', capacity: 2 }],
+  faculty: [{ id: 'F1' }, { id: 'F2' }], students: [{ id: 'S1' }, { id: 'S2' }, { id: 'S3' }],
+  subjects: [{code:'SUB-1',units:3},{code:'SUB-2',units:3}],
+  sections: [{ id: 'SEC-1', capacity: 3 }, { id: 'SEC-2', capacity: 3 }],
   sectionSubjects: [{ sectionId: 'SEC-1', assignments: [
     { id: 'OFR-1', subjectCode: 'SUB-1', facultyId: 'F1' },
     { id: 'OFR-2', subjectCode: 'SUB-2', facultyId: 'F1' }
-  ] }],
+  ] }, {sectionId:'SEC-2',assignments:[{id:'OFR-3',subjectCode:'SUB-1',facultyId:'F2'}]}],
   studentEnrollments: [], approvalRequests: [], applicationAuditLog: [], notifications: []
 };
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -38,11 +40,26 @@ const workflows = context.window.AcademicWorkflowService;
 const coordinator = { username: 'coord.001', role: 'coordinator' };
 const dean = { username: 'dean.demo', role: 'dean' };
 const admin = { username: 'admin', role: 'admin' };
+const faculty = { username: 'F2', role: 'faculty' };
 
 const assignment = workflows.requestProfessorAssignment({ offeringId: 'OFR-1', facultyId: 'F2', reason: 'Balanced teaching load.', academicPeriod: '2026-1' }, coordinator);
 assert.strictEqual(records.sectionSubjects[0].assignments[0].facultyId, 'F1', 'submission must not apply the proposal early');
 approvals.approve(assignment.id, 'Schedule and load verified.', dean);
 assert.strictEqual(records.sectionSubjects[0].assignments[0].facultyId, 'F2', 'Dean approval must apply the exact Professor assignment');
+
+const facultyAdd=workflows.requestFacultyStudentEnrollment({action:'add',studentId:'S3',offeringId:'OFR-1',subjectCode:'SUB-1',reason:'Add Student to my approved group.'},faculty);
+assert.strictEqual(records.studentEnrollments.length,0,'Faculty submission must never enroll the Student early');
+approvals.approve(facultyAdd.id,'Enrollment checked.',dean);
+assert.strictEqual(records.studentEnrollments.find(item=>item.studentId==='S3').offeringId,'OFR-1');
+const facultyMove=workflows.requestFacultyStudentEnrollment({action:'move',studentId:'S3',offeringId:'OFR-3',subjectCode:'SUB-1',reason:'Move Student to my other approved group.'},faculty);
+assert.strictEqual(records.studentEnrollments.find(item=>item.studentId==='S3').offeringId,'OFR-1','move remains pending without changing enrollment');
+approvals.approve(facultyMove.id,'Move checked.',dean);
+assert.strictEqual(records.studentEnrollments.find(item=>item.studentId==='S3').offeringId,'OFR-3');
+const facultyRemove=workflows.requestFacultyStudentEnrollment({action:'remove',studentId:'S3',subjectCode:'SUB-1',reason:'Remove Student from my approved group.'},faculty);
+approvals.approve(facultyRemove.id,'Removal checked.',dean);
+assert.ok(!records.studentEnrollments.some(item=>item.studentId==='S3'),'approved removal changes only the saved proposal');
+assert.strictEqual(approvals.queryFor(faculty).filter(item=>item.type==='faculty-student-enrollment').length,3,'Professor sees owned request history');
+delete records.subjects;
 
 const stale = workflows.requestProfessorAssignment({ offeringId: 'OFR-2', facultyId: 'F2', reason: 'Coverage update.' }, coordinator);
 records.sectionSubjects[0].assignments[1].facultyId = 'F2';
@@ -72,7 +89,8 @@ assert.strictEqual(records.approvalRequests.find(item=>item.id===calculatedOverl
 assert.throws(() => workflows.requestStudentOverload({ studentId: 'S1', offeringId: 'OFR-1', proposedUnits: 25, normalLimit: 21, reason: 'Duplicate.' }, coordinator), /already enrolled/i);
 
 const appliedEvents = records.applicationAuditLog.filter(item => item.action.startsWith('apply-approved'));
-assert.strictEqual(appliedEvents.length, 2);
+assert.strictEqual(appliedEvents.length, 5);
 assert.ok(appliedEvents.every(item => item.category === 'assignment/enrollment'));
-assert.ok(appliedEvents.every(item => item.academicPeriod === '2026-1'));
+assert.strictEqual(appliedEvents.filter(item=>item.action.startsWith('apply-approved-faculty-enrollment-')).length,3);
+assert.ok(appliedEvents.filter(item=>!item.action.startsWith('apply-approved-faculty-enrollment-')).every(item => item.academicPeriod === '2026-1'));
 console.log('✅ approved academic changes, stale-request protection, overload validation, and audit linkage pass');

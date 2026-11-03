@@ -25,12 +25,13 @@ function validHistoryTransition(prior, item, session, status) {
 }
 function validNewRequest(item, session) {
   const history = Array.isArray(item.history) ? item.history : [];
-  return item?.id && ['professor-assignment', 'student-overload'].includes(item.type)
-    && item.requesterId === session.username && item.requesterRole === 'coordinator'
+  const submitRole = item.type === 'faculty-student-enrollment' ? 'faculty' : 'coordinator';
+  return item?.id && ['professor-assignment', 'student-overload', 'faculty-student-enrollment'].includes(item.type)
+    && item.requesterId === session.username && item.requesterRole === submitRole && session.role === submitRole
     && item.status === 'pending' && item.targetType && item.targetId && item.reason
     && item.proposedChange && typeof item.proposedChange === 'object' && !Array.isArray(item.proposedChange)
     && item.submittedAt && item.reviewerRole === 'dean' && history.length === 1
-    && history[0]?.status === 'pending' && history[0]?.actorId === session.username && history[0]?.actorRole === 'coordinator';
+    && history[0]?.status === 'pending' && history[0]?.actorId === session.username && history[0]?.actorRole === submitRole;
 }
 
 function validateApprovals(existing, next, session) {
@@ -40,20 +41,20 @@ function validateApprovals(existing, next, session) {
   if (after.size !== next.length || [...before.keys()].some(id => !after.has(id))) forbidden('Approval records cannot be removed or duplicated.');
   const added = next.filter(item => !before.has(item.id));
   const changed = next.filter(item => before.has(item.id) && !same(before.get(item.id), item));
-  if (session.role === 'coordinator') {
+  if (['coordinator', 'faculty'].includes(session.role)) {
     if (changed.length) {
       if (added.length || changed.length !== 1) forbidden('Only one owned approval may be withdrawn at a time.');
       const prior = before.get(changed[0].id), item = changed[0];
       if (prior.requesterId !== session.username || prior.status !== 'pending' || item.status !== 'withdrawn'
-        || !sameApprovalPayload(prior, item) || !validHistoryTransition(prior, item, session, 'withdrawn')) forbidden('Coordinators may only withdraw their own pending requests without changing the proposal.');
+        || !sameApprovalPayload(prior, item) || !validHistoryTransition(prior, item, session, 'withdrawn')) forbidden('Requesters may only withdraw their own pending requests without changing the proposal.');
     }
-    added.forEach(item => { if (!validNewRequest(item, session)) forbidden('Coordinator submissions must be complete owned pending requests.'); });
+    added.forEach(item => { if (!validNewRequest(item, session)) forbidden('Submissions must be complete owned pending requests for this role.'); });
     return;
   }
   if (session.role === 'dean') {
     if (added.length || changed.length !== 1) forbidden('A Dean may decide one existing request at a time.');
     const prior = before.get(changed[0].id), item = changed[0];
-    if (!['professor-assignment','student-overload'].includes(prior.type) || prior.status !== 'pending' || !['approved','rejected'].includes(item.status)
+    if (!['professor-assignment','student-overload','faculty-student-enrollment'].includes(prior.type) || prior.status !== 'pending' || !['approved','rejected'].includes(item.status)
       || item.reviewerId !== session.username || item.reviewerRole !== 'dean' || !item.decisionAt
       || item.status === 'rejected' && !String(item.reviewerRemarks || '').trim()
       || !sameApprovalPayload(prior, item) || !validHistoryTransition(prior, item, session, item.status)) forbidden('Dean decisions are limited to pending academic applications and cannot alter the proposal.');
@@ -69,19 +70,31 @@ function validateApprovals(existing, next, session) {
   forbidden('This role cannot change approval records.');
 }
 
+function enrollmentIdentity(item) { return item?.id || `${item?.studentId}|${item?.subjectCode}|${item?.sectionId}`; }
+function enrollmentSnapshot(item) { return item ? { id:item.id||'', studentId:item.studentId, offeringId:item.offeringId||'', subjectCode:item.subjectCode, sectionId:item.sectionId } : null; }
+function sameEnrollmentSnapshot(item, snapshot) { return same(enrollmentSnapshot(item), snapshot); }
+function validateDeanEnrollment(existing, next, session, store) {
+  if (!Array.isArray(existing) || !Array.isArray(next)) forbidden('Enrollment records must be an array.');
+  const before=new Map(existing.map(item=>[enrollmentIdentity(item),item])),after=new Map(next.map(item=>[enrollmentIdentity(item),item]));
+  const removed=existing.filter(item=>!after.has(enrollmentIdentity(item))),added=next.filter(item=>!before.has(enrollmentIdentity(item))),changed=next.filter(item=>before.has(enrollmentIdentity(item))&&!same(before.get(enrollmentIdentity(item)),item));
+  const pending=(store.read('approvalRequests',[])||[]).filter(item=>item.status==='pending'&&item.reviewerRole==='dean');
+  const authorized=pending.some(request=>{
+    const change=request.proposedChange||{};
+    if(request.type==='student-overload')return removed.length===0&&changed.length===0&&added.length===1&&added[0].studentId===change.studentId&&added[0].offeringId===change.offeringId&&added[0].overloadApprovalId===request.id;
+    if(request.type!=='faculty-student-enrollment')return false;
+    if(change.action==='add')return removed.length===0&&changed.length===0&&added.length===1&&added[0].studentId===change.studentId&&added[0].offeringId===change.offeringId&&added[0].facultyEnrollmentApprovalId===request.id;
+    if(change.action==='remove')return added.length===0&&changed.length===0&&removed.length===1&&sameEnrollmentSnapshot(removed[0],change.expectedEnrollment);
+    return added.length===0&&removed.length===0&&changed.length===1&&sameEnrollmentSnapshot(before.get(enrollmentIdentity(changed[0])),change.expectedEnrollment)&&changed[0].offeringId===change.offeringId&&changed[0].facultyEnrollmentApprovalId===request.id;
+  });
+  if(!authorized)forbidden('Dean enrollment changes must exactly match one pending approved workflow proposal.');
+}
+
 function validateProtectedWrite(store, session, key, next) {
   const existing = store.read(key, []);
   if (key === 'applicationAuditLog') validateAudit(existing, next, session);
   if (key === 'approvalRequests') validateApprovals(existing, next, session);
-  if (key === 'studentEnrollments' && session.role === 'faculty') {
-    if (!Array.isArray(existing) || !Array.isArray(next)) forbidden('Enrollment records must be an array.');
-    const owned = new Set((store.read('sectionSubjects', []) || []).flatMap(record => (record.assignments || []).filter(item => item.facultyId === session.username).map(item => item.id || `${record.sectionId}_${item.subjectCode}`)));
-    const keyFor = item => item.offeringId || `${item.sectionId}_${item.subjectCode}`;
-    const identity = item => item.id || `${item.studentId}|${item.subjectCode}|${item.sectionId}`;
-    const before = new Map(existing.map(item => [identity(item), item])), after = new Map(next.map(item => [identity(item), item]));
-    const touched = [...existing.filter(item => !after.has(identity(item)) || !same(item, after.get(identity(item)))), ...next.filter(item => !before.has(identity(item)) || !same(item, before.get(identity(item))))];
-    if (touched.some(item => !owned.has(keyFor(item)))) forbidden('Faculty may only manage enrollment in their own subject offerings.');
-  }
+  if (key === 'studentEnrollments' && session.role === 'faculty') forbidden('Faculty enrollment changes must be submitted for Dean approval.');
+  if (key === 'studentEnrollments' && session.role === 'dean') validateDeanEnrollment(existing, next, session, store);
   if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
 module.exports = { validateProtectedWrite, validateAudit, validateApprovals };

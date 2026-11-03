@@ -47,10 +47,10 @@ const AcademicWorkflowService = (() => {
     return raw.map(slot=>({days:[...(Array.isArray(slot.days)?slot.days:[slot.day])].filter(Boolean).map(String),start:String(slot.start||slot.startTime||''),end:String(slot.end||slot.endTime||''),room:String(slot.room||'')})).filter(slot=>slot.days.length&&slot.start&&slot.end);
   }
   function overlap(left,right){return left.days.some(day=>right.days.includes(day))&&left.start<right.end&&right.start<left.end;}
-  function studentScheduleConflicts(studentId, offeringId) {
+  function studentScheduleConflicts(studentId, offeringId, ignoredOfferingIds = []) {
     const records=DB.read('sectionSubjects',[]),target=offeringById(records,offeringId),targetSlots=scheduleSlots(target?.assignment);
     if(!target||!targetSlots.length)return[];
-    const enrollments=DB.read('studentEnrollments',[]).filter(item=>item.studentId===studentId),conflicts=[];
+    const ignored=new Set(ignoredOfferingIds),enrollments=DB.read('studentEnrollments',[]).filter(item=>item.studentId===studentId&&!ignored.has(item.offeringId)),conflicts=[];
     for(const enrollment of enrollments){const existing=offeringById(records,enrollment.offeringId);if(!existing||existing.assignment.id===offeringId)continue;for(const proposed of targetSlots)for(const current of scheduleSlots(existing.assignment))if(overlap(proposed,current))conflicts.push({offeringId:existing.assignment.id,subjectCode:existing.assignment.subjectCode,days:proposed.days.filter(day=>current.days.includes(day)),time:`${current.start}-${current.end}`});}
     return conflicts;
   }
@@ -117,6 +117,64 @@ const AcademicWorkflowService = (() => {
       reason, academicPeriod
     }, actor);
   }
+  function facultyOwnedOffering(records, offeringId, facultyId) {
+    const located=offeringById(records,offeringId);
+    return located&&located.assignment.facultyId===facultyId&&activeOfferingExists(records,offeringId)?located:null;
+  }
+  function enrollmentSnapshot(item) {
+    return item?{id:item.id||'',studentId:item.studentId,offeringId:item.offeringId||'',subjectCode:item.subjectCode,sectionId:item.sectionId}:null;
+  }
+  function sameEnrollment(item, snapshot) {
+    return Boolean(item&&snapshot&&item.studentId===snapshot.studentId&&(item.id||'')===(snapshot.id||'')&&(item.offeringId||'')===(snapshot.offeringId||'')&&item.subjectCode===snapshot.subjectCode&&item.sectionId===snapshot.sectionId);
+  }
+  function validateFacultyStudentEnrollment(change, requesterId) {
+    const action=String(change.action||''),records=DB.read('sectionSubjects',[]),enrollments=DB.read('studentEnrollments',[]);
+    if(!['add','move','remove'].includes(action))fail('Choose add, move, or remove for the enrollment request.');
+    if(!activeAccount(change.studentId,'student'))fail('The selected Student is not active.','STALE_TARGET');
+    if(!activeAccount(requesterId,'faculty'))fail('The requesting Professor is no longer active.','STALE_TARGET');
+    const existing=enrollments.find(item=>item.studentId===change.studentId&&item.subjectCode===change.subjectCode);
+    if(action==='add'&&existing)fail('The Student is already enrolled in this subject.','STALE_TARGET');
+    if(action!=='add'&&!sameEnrollment(existing,change.expectedEnrollment))fail('The Student enrollment changed after this request was submitted.','STALE_TARGET');
+    const source=action==='add'?null:facultyOwnedOffering(records,existing.offeringId,requesterId);
+    if(action!=='add'&&!source)fail('The current enrollment is no longer in the Professor\'s approved offering.','STALE_TARGET');
+    const target=action==='remove'?null:facultyOwnedOffering(records,change.offeringId,requesterId);
+    if(action!=='remove'&&!target)fail('The proposed offering is no longer assigned to this Professor.','STALE_TARGET');
+    if(target&&target.assignment.subjectCode!==change.subjectCode)fail('The proposed Subject offering changed.','STALE_TARGET');
+    if(action==='move'&&existing.offeringId===change.offeringId)fail('Choose a different Section for the move request.');
+    if(target){
+      const section=DB.read('sections',[]).find(item=>item.id===target.section.sectionId),occupied=new Set(enrollments.filter(item=>item.sectionId===target.section.sectionId&&item.studentId!==change.studentId).map(item=>item.studentId)).size;
+      if(section&&Number(section.capacity)>0&&occupied>=Number(section.capacity))fail('The selected Section is already full.','STALE_TARGET');
+      const conflicts=studentScheduleConflicts(change.studentId,change.offeringId,action==='move'?[existing.offeringId]:[]);
+      if(conflicts.length)fail(`The proposed offering conflicts with ${conflicts.map(item=>`${item.subjectCode||item.offeringId} at ${item.days.join('/')} ${item.time}`).join(', ')}.`,'SCHEDULE_CONFLICT');
+      if(action==='add'){
+        const load=proposedStudentLoad(change.studentId,change.subjectCode),policy=loadPolicyForStudent(change.studentId);
+        if(!load)fail('The Subject unit value is unavailable.','STALE_TARGET');
+        if(load.proposedUnits>policy.normalLimit)fail('This enrollment exceeds the normal load and must use the overload approval workflow.','OVERLOAD_REQUIRED');
+      }
+    }
+    return{action,existing,target};
+  }
+  function requestFacultyStudentEnrollment({ action, studentId, offeringId = '', subjectCode = '', reason, academicPeriod = '' }, actor = null) {
+    const acting=actor||DB.read('currentUser',null),facultyId=acting?.username;
+    if(PermissionService.normalizeRole(acting?.role)!=='faculty')fail('Only a Professor may submit this enrollment request.','PERMISSION_DENIED');
+    const enrollments=DB.read('studentEnrollments',[]),existing=enrollments.find(item=>item.studentId===studentId&&item.subjectCode===subjectCode);
+    const change={action:String(action||''),studentId,offeringId,subjectCode,expectedEnrollment:enrollmentSnapshot(existing)};
+    const reviewed=validateFacultyStudentEnrollment(change,facultyId);
+    if(reviewed.target)change.sectionId=reviewed.target.section.sectionId;
+    return ApprovalService.submit({type:'faculty-student-enrollment',targetType:'student-enrollment',targetId:`${studentId}:${subjectCode}`,proposedChange:change,reason,academicPeriod},acting);
+  }
+  function applyFacultyStudentEnrollment(change, request, actor) {
+    const reviewed=validateFacultyStudentEnrollment(change,request.requesterId),enrollments=DB.read('studentEnrollments',[]),saved=reviewed.existing?enrollments.find(item=>sameEnrollment(item,change.expectedEnrollment)):null,before=enrollmentSnapshot(saved);let after=null;
+    if(reviewed.action==='remove')enrollments.splice(enrollments.indexOf(saved),1);
+    else if(reviewed.action==='move'){
+      saved.offeringId=change.offeringId;saved.sectionId=reviewed.target.section.sectionId;saved.facultyEnrollmentApprovalId=request.id;after=enrollmentSnapshot(saved);
+    }else{
+      const enrollment={id:`ENR-${change.studentId}-${Date.now()}`,studentId:change.studentId,offeringId:change.offeringId,subjectCode:change.subjectCode,sectionId:reviewed.target.section.sectionId,facultyEnrollmentApprovalId:request.id};
+      enrollments.push(enrollment);after=enrollmentSnapshot(enrollment);
+    }
+    if(!DB.write('studentEnrollments',enrollments))fail('The approved enrollment change could not be saved.','SAVE_FAILED');
+    if(typeof AuditLog!=='undefined')AuditLog.record(`apply-approved-faculty-enrollment-${reviewed.action}`,'student-enrollment',after?.id||before?.id||request.targetId,{requestId:request.id,studentId:change.studentId,facultyId:request.requesterId},actor,{category:'assignment/enrollment',previousValue:before,newValue:after,result:'success',academicPeriod:request.academicPeriod});
+  }
   function applyStudentOverload(change, request, actor) {
     const located = offeringById(DB.read('sectionSubjects', []), change.offeringId);
     if (!located || located.assignment.subjectCode !== change.subjectCode || located.section.sectionId !== change.sectionId) fail('The subject offering changed after submission. Review the request again.', 'STALE_TARGET');
@@ -137,9 +195,10 @@ const AcademicWorkflowService = (() => {
   function install() {
     ApprovalService.registerApplyHandler('professor-assignment', applyProfessorAssignment);
     ApprovalService.registerApplyHandler('student-overload', applyStudentOverload);
+    ApprovalService.registerApplyHandler('faculty-student-enrollment', applyFacultyStudentEnrollment);
     return true;
   }
-  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, requestProfessorAssignment, requestStudentOverload, applyProfessorAssignment, applyStudentOverload };
+  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
 })();
 
 AcademicWorkflowService.install();

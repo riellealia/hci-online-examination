@@ -17,11 +17,11 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 1 — Shared request contract and server boundary
 
-- [ ] Add a `faculty-student-enrollment` approval type submitted by Professor and reviewed by Dean.
-- [ ] Support proposed actions `add`, `move`, and `remove` without mutating enrollment while pending.
-- [ ] Add submit-time and approval-time validation plus an apply handler.
-- [ ] Remove direct Faculty write permission for `studentEnrollments`.
-- [ ] Extend protected-write rules, permissions, query visibility, audit events, and notifications.
+- [x] Add a `faculty-student-enrollment` approval type submitted by Professor and reviewed by Dean.
+- [x] Support proposed actions `add`, `move`, and `remove` without mutating enrollment while pending.
+- [x] Add submit-time and approval-time validation plus an apply handler.
+- [x] Remove direct Faculty write permission for `studentEnrollments`.
+- [x] Extend protected-write rules, permissions, query visibility, audit events, and notifications.
 
 ### Task 2 — Faculty request-only interface
 

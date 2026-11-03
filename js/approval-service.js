@@ -4,7 +4,8 @@ const ApprovalService = (() => {
   const statuses = Object.freeze(['pending', 'approved', 'rejected', 'cancelled', 'withdrawn']);
   const types = Object.freeze({
     'professor-assignment': { submit: 'coordinator', review: 'dean' },
-    'student-overload': { submit: 'coordinator', review: 'dean' }
+    'student-overload': { submit: 'coordinator', review: 'dean' },
+    'faculty-student-enrollment': { submit: 'faculty', review: 'dean' }
   });
   const applyHandlers = new Map();
   const now = () => new Date().toISOString();
@@ -103,7 +104,7 @@ const ApprovalService = (() => {
     const actingRole = role(actingUser.role);
     if (actingRole === 'admin') return filterRecords(filters);
     if (actingRole === 'dean') return filterRecords(filters).filter(item => item.reviewerRole === 'dean');
-    if (actingRole === 'coordinator') return filterRecords(filters).filter(item => item.requesterId === actingUser.username);
+    if (['coordinator', 'faculty'].includes(actingRole)) return filterRecords(filters).filter(item => item.requesterId === actingUser.username);
     return [];
   }
   function query(filters = {}, suppliedActor = null) { return queryFor(suppliedActor, filters); }
