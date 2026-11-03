@@ -4,7 +4,7 @@ const ApprovalService = (() => {
   const statuses = Object.freeze(['pending', 'approved', 'rejected', 'cancelled', 'withdrawn']);
   const types = Object.freeze({
     'professor-assignment': { submit: 'coordinator', review: 'dean' },
-    'student-overload': { submit: 'coordinator', review: 'dean' },
+    'student-overload': { submit: ['coordinator', 'admin'], review: 'dean' },
     'faculty-student-enrollment': { submit: 'faculty', review: 'dean' }
   });
   const applyHandlers = new Map();
@@ -32,7 +32,8 @@ const ApprovalService = (() => {
   function submit(input, suppliedActor = null) {
     const actingUser = actor(suppliedActor), config = types[input?.type];
     if (!config) fail('Unsupported approval request type.');
-    if (!PermissionService.active(actingUser) || role(actingUser.role) !== config.submit) fail('This role cannot submit that request.', 'PERMISSION_DENIED');
+    const submitRoles=Array.isArray(config.submit)?config.submit:[config.submit];
+    if (!PermissionService.active(actingUser) || !submitRoles.includes(role(actingUser.role))) fail('This role cannot submit that request.', 'PERMISSION_DENIED');
     PermissionService.require(`approval.${input.type}.submit`, { actor: actingUser });
     if (!input.targetType || !input.targetId || !input.reason?.trim()) fail('Target and reason are required.');
     if (!input.proposedChange || typeof input.proposedChange !== 'object' || Array.isArray(input.proposedChange)) fail('A proposed change object is required.');

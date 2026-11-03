@@ -159,6 +159,25 @@ const AcademicWorkflowService = (() => {
     const problems=[];try{validateFacultyStudentEnrollment(change,request?.requesterId)}catch(error){problems.push(error.message)}
     return{action:change.action,currentSection:change.expectedEnrollment?.sectionId||'',proposedSection:target?.section.sectionId||'',subjectCode:change.subjectCode,offering:target?.assignment||null,schedule:scheduleSlots(target?.assignment),occupied,capacity:Number(section?.capacity)||null,currentUnits:load?.currentUnits??studentLoad(change.studentId),proposedUnits:load?.proposedUnits??studentLoad(change.studentId),policy,problems,canApprove:problems.length===0};
   }
+  function reviewAdminEnrollmentBatch(studentId, offerings) {
+    const records=DB.read('sectionSubjects',[]),enrollments=DB.read('studentEnrollments',[]),policy=loadPolicyForStudent(studentId),problems=[],normal=[],overload=[],seen=new Set(),selected=[];let runningUnits=studentLoad(studentId);
+    if(!activeAccount(studentId,'student'))problems.push('The selected Student is not active.');
+    for(const proposed of offerings||[]){
+      const located=offeringById(records,proposed.id),units=unitRecord(proposed.subjectCode)?.units;
+      if(!located||!activeOfferingExists(records,proposed.id)){problems.push(`${proposed.subjectCode} is no longer offered in the active academic period.`);continue}
+      if(seen.has(proposed.subjectCode)||enrollments.some(item=>item.studentId===studentId&&item.subjectCode===proposed.subjectCode)){problems.push(`The Student is already enrolled or selected for ${proposed.subjectCode}.`);continue}
+      seen.add(proposed.subjectCode);
+      if(!Number.isFinite(units)){problems.push(`The unit value for ${proposed.subjectCode} is unavailable.`);continue}
+      const conflicts=studentScheduleConflicts(studentId,proposed.id);
+      if(conflicts.length)problems.push(`${proposed.subjectCode} conflicts with the Student's current schedule.`);
+      const proposedSlots=scheduleSlots(located.assignment);
+      if(selected.some(item=>item.slots.some(slot=>proposedSlots.some(candidate=>overlap(slot,candidate)))))problems.push(`${proposed.subjectCode} conflicts with another selected Subject.`);
+      selected.push({subjectCode:proposed.subjectCode,slots:proposedSlots});runningUnits+=units;
+      if(runningUnits>policy.maximumLimit)problems.push(`${proposed.subjectCode} would exceed the absolute maximum of ${policy.maximumLimit} units.`);
+      else if(runningUnits>policy.normalLimit)overload.push(proposed);else normal.push(proposed);
+    }
+    return{normal,overload,currentUnits:studentLoad(studentId),proposedUnits:runningUnits,policy,problems,canSave:problems.length===0};
+  }
   function requestFacultyStudentEnrollment({ action, studentId, offeringId = '', subjectCode = '', reason, academicPeriod = '' }, actor = null) {
     const acting=actor||DB.read('currentUser',null),facultyId=acting?.username;
     if(PermissionService.normalizeRole(acting?.role)!=='faculty')fail('Only a Professor may submit this enrollment request.','PERMISSION_DENIED');
@@ -203,7 +222,7 @@ const AcademicWorkflowService = (() => {
     ApprovalService.registerApplyHandler('faculty-student-enrollment', applyFacultyStudentEnrollment);
     return true;
   }
-  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, reviewFacultyStudentEnrollment, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
+  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, reviewFacultyStudentEnrollment, reviewAdminEnrollmentBatch, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
 })();
 
 AcademicWorkflowService.install();

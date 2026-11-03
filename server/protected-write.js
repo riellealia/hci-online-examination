@@ -25,7 +25,7 @@ function validHistoryTransition(prior, item, session, status) {
 }
 function validNewRequest(item, session) {
   const history = Array.isArray(item.history) ? item.history : [];
-  const submitRole = item.type === 'faculty-student-enrollment' ? 'faculty' : 'coordinator';
+  const submitRole = item.type === 'faculty-student-enrollment' ? 'faculty' : item.type === 'student-overload' && session.role === 'admin' ? 'admin' : 'coordinator';
   return item?.id && ['professor-assignment', 'student-overload', 'faculty-student-enrollment'].includes(item.type)
     && item.requesterId === session.username && item.requesterRole === submitRole && session.role === submitRole
     && item.status === 'pending' && item.targetType && item.targetId && item.reason
@@ -61,6 +61,10 @@ function validateApprovals(existing, next, session) {
     return;
   }
   if (session.role === 'admin') {
+    if (added.length) {
+      if (changed.length || added.length !== 1 || added[0].type !== 'student-overload' || !validNewRequest(added[0], session)) forbidden('Administrators may only submit complete Student-overload requests for Dean review.');
+      return;
+    }
     if (added.length || changed.length !== 1) forbidden('An Administrator may cancel one existing request at a time.');
     const prior = before.get(changed[0].id), item = changed[0];
     if (prior.status !== 'pending' || item.status !== 'cancelled' || !sameApprovalPayload(prior, item)

@@ -12,9 +12,9 @@ w.loadAll=()=>{};
 w.eval(fs.readFileSync(require('path').join(__dirname,'..','js','system-management.js'),'utf8'));
 w.SystemManagement.mount();
 
-ok(data.subjects.some(item=>item.code==='SUB1'&&item.name==='HCI'&&item.units===3),'Load Management derives the active subject catalog');
-ok(data.sectionSubjects[0].assignments.map(item=>item.subjectCode).join('|')==='SUB1','Load Management derives section offerings');
-ok(data.studentEnrollments.map(item=>item.subjectCode).join('|')==='SUB1','Load Management derives current-semester student enrollment');
+ok(data.subjects.map(item=>item.code).join('|')==='OLD','rendering Load Management does not rewrite the subject catalog');
+ok(data.sectionSubjects[0].assignments.map(item=>item.subjectCode).join('|')==='OLD','rendering Load Management does not rewrite section offerings');
+ok(data.studentEnrollments.map(item=>item.subjectCode).join('|')==='OLD','rendering Load Management does not rewrite Student enrollment');
 
 const toolbar=w.document.querySelector('.curriculum-admin-toolbar');
 ok(!!toolbar,'curriculum toolbar renders');

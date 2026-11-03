@@ -19,7 +19,6 @@ var SystemManagement=(()=>{
     root.querySelectorAll('#loadPolicyRoot .load-program-tabs button').forEach(button=>{const code=button.dataset.program||button.textContent.trim();const label=curriculumProgramName(code);button.dataset.program=code;if(button.textContent!==label)button.textContent=label});
     root.querySelectorAll('.curriculum-editor-modal select[name="program"] option').forEach(option=>{const label=curriculumProgramName(option.value);if(option.textContent!==label)option.textContent=label});
     root.querySelectorAll('#loadPolicyRoot .semester-heading-copy>span').forEach(meta=>{meta.textContent=meta.textContent.replace(/\s*·\s*\d+\s+curriculum units\s*$/i,'')});
-    syncLoadManagementSource();
     installCurriculumDragAndDrop(root)
   }
 
@@ -47,8 +46,6 @@ var SystemManagement=(()=>{
     });
     const offeringMap=new Map(records.flatMap(record=>record.assignments.map(offer=>[`${record.sectionId}|${offer.subjectCode}`,{...offer,sectionId:record.sectionId}]))),studentSections=new Map(students.map(student=>[student.id,new Set(student.sections||[])]));
     const enrollments=existingEnrollments.filter(enrollment=>studentSections.get(enrollment.studentId)?.has(enrollment.sectionId)&&offeringMap.has(`${enrollment.sectionId}|${enrollment.subjectCode}`));
-    const enrolled=new Set(enrollments.map(item=>`${item.studentId}|${item.sectionId}|${item.subjectCode}`));
-    students.forEach(student=>(student.sections||[]).forEach(sectionId=>{const record=records.find(item=>item.sectionId===sectionId);(record?.assignments||[]).forEach(offer=>{const key=`${student.id}|${sectionId}|${offer.subjectCode}`;if(!enrolled.has(key)){enrollments.push({id:`ENR-${student.id}-${sectionId}-${offer.subjectCode}`,studentId:student.id,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId});enrolled.add(key)}})}));
     return DB.write('subjects',[...subjectMap.values()])&&DB.write('sectionSubjects',records)&&DB.write('studentEnrollments',enrollments);
   }
   function curriculumLoad(items){return items.reduce((total,item)=>total+(Number(item.units)||0),0);}

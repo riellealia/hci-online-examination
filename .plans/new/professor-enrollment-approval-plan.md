@@ -38,10 +38,10 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 4 — Admin enrollment ownership
 
-- [ ] Keep Admin's direct add/move/remove workflow for normal-load enrollment.
-- [ ] Apply capacity, duplicate, active-period, schedule, and load checks consistently.
-- [ ] Route overload attempts into the existing Dean approval flow without creating enrollment early.
-- [ ] Make Admin history distinguish direct enrollment from approved Professor requests.
+- [x] Keep Admin's direct add/move/remove workflow for normal-load enrollment.
+- [x] Apply capacity, duplicate, active-period, schedule, and load checks consistently.
+- [x] Route overload attempts into the existing Dean approval flow without creating enrollment early.
+- [x] Make Admin history distinguish direct enrollment from approved Professor requests.
 
 ### Task 5 — Faculty Coordinator cleanup
 
