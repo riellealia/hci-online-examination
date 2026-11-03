@@ -25,10 +25,10 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 2 — Faculty request-only interface
 
-- [ ] Keep the existing Student/Subject/Section picker layout.
-- [ ] Replace Add, Change, and Remove writes with request submission.
-- [ ] Show Pending/Approved/Rejected/Withdrawn history and prevent duplicate pending proposals.
-- [ ] Keep Faculty restricted to owned approved active offerings.
+- [x] Keep the existing Student/Subject/Section picker layout.
+- [x] Replace Add, Change, and Remove writes with request submission.
+- [x] Show Pending/Approved/Rejected/Withdrawn history and prevent duplicate pending proposals.
+- [x] Keep Faculty restricted to owned approved active offerings.
 
 ### Task 3 — Dean enrollment-request review
 
