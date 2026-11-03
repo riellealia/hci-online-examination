@@ -1,0 +1,30 @@
+const {load,SEED}=require('./harness');
+const assert=require('assert');
+
+const seed=SEED();
+seed.students.push({id:'S2',last:'Reyes',first:'Ana',sections:['A']});
+seed.sections=[{id:'A',program:'BSCS',yearLevel:1,capacity:2},{id:'B',program:'BSCS',yearLevel:1,capacity:2}];
+seed.curricula=[{program:'BSCS',yearLevel:1,term:'first',subjectCode:'SUB1',status:'active'},{program:'BSCS',yearLevel:1,term:'second',subjectCode:'SUB2',status:'active'}];
+seed.systemSettings={semester:'First Semester'};
+seed.sectionSubjects=[{sectionId:'A',assignments:[{id:'O-A',subjectCode:'SUB1',facultyId:'F1'},{id:'O-OTHER',subjectCode:'SUB2',facultyId:'F1'}]},{sectionId:'B',assignments:[{id:'O-B',subjectCode:'SUB1',facultyId:'F1'}]}];
+seed.studentEnrollments=[];
+const page=load('faculty.html',{...seed,currentUser:{username:'F1',role:'faculty'}}),w=page.w,d=page.d;
+
+w.displayMyStudents();
+assert.ok(d.querySelector('.roster-manage-button.primary'),'Faculty roster exposes student subject management');
+w.openStudentAssignModal('S2');
+assert.ok(d.getElementById('studentAssignModal').classList.contains('active'));
+assert.match(d.getElementById('subjectCheckboxList').textContent,/SUB1/);
+assert.doesNotMatch(d.getElementById('subjectCheckboxList').textContent,/SUB2/,'off-semester subjects stay hidden');
+w.openFacultySectionPicker('SUB1','add','');
+assert.equal(d.querySelectorAll('#facultySectionPickerOptions .faculty-section-option').length,2,'all owned sections are selectable');
+w.saveFacultyStudentOffering('O-B');
+let enrollment=page.read('studentEnrollments').find(item=>item.studentId==='S2');
+assert.equal(enrollment.sectionId,'B','Faculty can add a student to an owned offering');
+w.openFacultySectionPicker('SUB1','change',enrollment.id);
+w.saveFacultyStudentOffering('O-A');
+enrollment=page.read('studentEnrollments').find(item=>item.studentId==='S2');
+assert.equal(enrollment.sectionId,'A','Faculty can change the enrolled section');
+assert.equal(page.read('studentEnrollments').filter(item=>item.studentId==='S2'&&item.subjectCode==='SUB1').length,1,'changing a section does not duplicate the subject');
+page.w.close();
+console.log('✅ Faculty student subject management adds and changes active owned offerings');

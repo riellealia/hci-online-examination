@@ -35,7 +35,7 @@ ok(!adminNavPage.d.querySelector('#sidebar [data-panel="sectionSection"]'),'Sect
 const coordinatorSeed=SEED();coordinatorSeed.users.push({username:'coordinator.demo',role:'coordinator',status:'active'});
 const coordinatorNavPage=load('coordinator.html',{...coordinatorSeed,currentUser:{username:'coordinator.demo',role:'coordinator'}});
 ok(coordinatorNavPage.d.querySelector('#sidebar [data-panel="sectionManagementSection"]')?.textContent.includes('Section Management'),'Section Management is owned by the Faculty Coordinator');
-ok(coordinatorNavPage.d.querySelectorAll('.role-action-card').length===7&&coordinatorNavPage.d.querySelector('.role-action-card-wide')?.textContent.includes('Coordinator logs'),'Coordinator dashboard keeps six operational cards and a balanced full-width Logs card');
+ok(coordinatorNavPage.d.querySelectorAll('.role-action-card').length===6&&coordinatorNavPage.d.querySelector('.role-action-card-wide')?.textContent.includes('Coordinator logs'),'Coordinator dashboard combines assignment and enrollment applications while keeping Logs full-width');
 coordinatorNavPage.w.close();
 adminNavPage.w.close();
 

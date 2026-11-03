@@ -54,6 +54,16 @@ const AcademicWorkflowService = (() => {
     for(const enrollment of enrollments){const existing=offeringById(records,enrollment.offeringId);if(!existing||existing.assignment.id===offeringId)continue;for(const proposed of targetSlots)for(const current of scheduleSlots(existing.assignment))if(overlap(proposed,current))conflicts.push({offeringId:existing.assignment.id,subjectCode:existing.assignment.subjectCode,days:proposed.days.filter(day=>current.days.includes(day)),time:`${current.start}-${current.end}`});}
     return conflicts;
   }
+  function professorScheduleConflicts(facultyId, offeringId) {
+    const records=DB.read('sectionSubjects',[]),target=offeringById(records,offeringId),targetSlots=scheduleSlots(target?.assignment);
+    if(!target||!targetSlots.length)return[];
+    const conflicts=[];
+    for(const section of records)for(const assignment of section.assignments||[]){
+      if(assignment.id===offeringId||assignment.facultyId!==facultyId)continue;
+      for(const proposed of targetSlots)for(const current of scheduleSlots(assignment))if(overlap(proposed,current))conflicts.push({offeringId:assignment.id,subjectCode:assignment.subjectCode,sectionId:section.sectionId,days:proposed.days.filter(day=>current.days.includes(day)),time:`${current.start}-${current.end}`});
+    }
+    return conflicts;
+  }
   function reviewStudentOverload(input) {
     const request=input?.proposedChange?input:{proposedChange:input||{}},change=request.proposedChange||{},located=offeringById(DB.read('sectionSubjects',[]),change.offeringId);
     const policy=loadPolicyForStudent(change.studentId),calculated=located?proposedStudentLoad(change.studentId,located.assignment.subjectCode):null;
@@ -70,6 +80,7 @@ const AcademicWorkflowService = (() => {
     if (!located) fail('The selected subject offering does not exist.', 'NOT_FOUND');
     if (!activeOfferingExists(sectionSubjects, offeringId)) fail('The selected subject is not offered in the active academic period and semester.', 'INACTIVE_SEMESTER');
     if (!DB.read('faculty', []).some(person => person.id === facultyId) || !activeAccount(facultyId, 'faculty')) fail('The selected Professor is not active.');
+    const conflicts=professorScheduleConflicts(facultyId,offeringId);if(conflicts.length)fail(`The proposed offering conflicts with ${conflicts.map(item=>`${item.subjectCode} in ${item.sectionId} at ${item.days.join('/')} ${item.time}`).join(', ')}.`,'SCHEDULE_CONFLICT');
     return ApprovalService.submit({
       type: 'professor-assignment', targetType: 'subject-offering', targetId: offeringId,
       proposedChange: { offeringId, facultyId, expectedFacultyId: located.assignment.facultyId || '' },
@@ -82,6 +93,7 @@ const AcademicWorkflowService = (() => {
     if (!activeOfferingExists(records, change.offeringId)) fail('The subject offering is no longer active in this academic period and semester.', 'STALE_TARGET');
     if ((located.assignment.facultyId || '') !== (change.expectedFacultyId || '')) fail('The Professor assignment changed after submission. Review the request again.', 'STALE_TARGET');
     if (!DB.read('faculty', []).some(person => person.id === change.facultyId) || !activeAccount(change.facultyId, 'faculty')) fail('The proposed Professor is no longer active.', 'STALE_TARGET');
+    const conflicts=professorScheduleConflicts(change.facultyId,change.offeringId);if(conflicts.length)fail(`The proposed Professor now has a schedule conflict with ${conflicts.map(item=>`${item.subjectCode} in ${item.sectionId} at ${item.days.join('/')} ${item.time}`).join(', ')}.`,'SCHEDULE_CONFLICT');
     const previousValue = { facultyId: located.assignment.facultyId || '' };
     located.assignment.facultyId = change.facultyId;
     if (!DB.write('sectionSubjects', records)) fail('The approved Professor assignment could not be saved.', 'SAVE_FAILED');
@@ -127,7 +139,7 @@ const AcademicWorkflowService = (() => {
     ApprovalService.registerApplyHandler('student-overload', applyStudentOverload);
     return true;
   }
-  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, reviewStudentOverload, requestProfessorAssignment, requestStudentOverload, applyProfessorAssignment, applyStudentOverload };
+  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, requestProfessorAssignment, requestStudentOverload, applyProfessorAssignment, applyStudentOverload };
 })();
 
 AcademicWorkflowService.install();

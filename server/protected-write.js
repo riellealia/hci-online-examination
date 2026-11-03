@@ -73,6 +73,15 @@ function validateProtectedWrite(store, session, key, next) {
   const existing = store.read(key, []);
   if (key === 'applicationAuditLog') validateAudit(existing, next, session);
   if (key === 'approvalRequests') validateApprovals(existing, next, session);
+  if (key === 'studentEnrollments' && session.role === 'faculty') {
+    if (!Array.isArray(existing) || !Array.isArray(next)) forbidden('Enrollment records must be an array.');
+    const owned = new Set((store.read('sectionSubjects', []) || []).flatMap(record => (record.assignments || []).filter(item => item.facultyId === session.username).map(item => item.id || `${record.sectionId}_${item.subjectCode}`)));
+    const keyFor = item => item.offeringId || `${item.sectionId}_${item.subjectCode}`;
+    const identity = item => item.id || `${item.studentId}|${item.subjectCode}|${item.sectionId}`;
+    const before = new Map(existing.map(item => [identity(item), item])), after = new Map(next.map(item => [identity(item), item]));
+    const touched = [...existing.filter(item => !after.has(identity(item)) || !same(item, after.get(identity(item)))), ...next.filter(item => !before.has(identity(item)) || !same(item, before.get(identity(item))))];
+    if (touched.some(item => !owned.has(keyFor(item)))) forbidden('Faculty may only manage enrollment in their own subject offerings.');
+  }
   if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
 module.exports = { validateProtectedWrite, validateAudit, validateApprovals };

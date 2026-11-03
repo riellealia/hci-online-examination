@@ -62,6 +62,7 @@ assert.strictEqual(calculatedOverload.proposedChange.currentUnits,21);assert.str
 records.sections[0].capacity=10;
 records.sectionSubjects[0].assignments[0].schedule={days:['Monday'],start:'09:00',end:'10:00'};
 records.sectionSubjects[0].assignments[1].schedule={days:['Monday'],start:'09:30',end:'10:30'};
+assert.throws(()=>workflows.requestProfessorAssignment({offeringId:'OFR-2',facultyId:'F2',reason:'Conflicting claim.'},coordinator),error=>error.code==='SCHEDULE_CONFLICT','Professor assignment requests must reject overlapping schedules outside the UI');
 records.studentEnrollments.push({id:'S2-CONFLICT',studentId:'S2',offeringId:'OFR-1',subjectCode:'SUB-1',sectionId:'SEC-1'});
 const overloadReview=workflows.reviewStudentOverload(calculatedOverload);
 assert.strictEqual(overloadReview.policy.maximumLimit,30,'Dean review uses the current configured absolute maximum');

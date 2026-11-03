@@ -1,6 +1,7 @@
 'use strict';
 const assert = require('assert');
 const { permitted, requireCollectionAccess, visibleRecords } = require('../server/access-policy');
+const { validateProtectedWrite } = require('../server/protected-write');
 
 const session = role => ({ username: `${role}.demo`, role });
 assert.strictEqual(permitted(session('admin'), 'anything', 'PUT'), true);
@@ -8,9 +9,14 @@ assert.strictEqual(permitted(session('student'), 'studentSubmissions', 'PUT'), t
 assert.strictEqual(permitted(session('student'), 'users', 'GET'), false);
 assert.strictEqual(permitted(session('student'), 'exams', 'PUT'), false);
 assert.strictEqual(permitted(session('faculty'), 'questions', 'PUT'), true);
+assert.strictEqual(permitted(session('faculty'), 'studentEnrollments', 'PUT'), true);
 assert.strictEqual(permitted(session('faculty'), 'users', 'PUT'), false);
 assert.strictEqual(permitted(session('dean'), 'approvalRequests', 'PUT'), true);
 assert.strictEqual(permitted(session('coordinator'), 'studentEnrollments', 'PUT'), true);
 assert.throws(() => requireCollectionAccess(session('student'), 'users', 'GET'), error => error.status === 403 && error.code === 'COLLECTION_FORBIDDEN');
 assert.deepStrictEqual(visibleRecords(session('student'), { users: [], exams: [], applicationAuditLog: [] }), { exams: [] });
+const records={studentEnrollments:[{id:'E1',studentId:'S1',offeringId:'OWN'}],sectionSubjects:[{sectionId:'A',assignments:[{id:'OWN',subjectCode:'SUB1',facultyId:'faculty.demo'},{id:'OTHER',subjectCode:'SUB2',facultyId:'another.faculty'}]}]};
+const store={read:(key,fallback)=>records[key]||fallback};
+assert.doesNotThrow(()=>validateProtectedWrite(store,session('faculty'),'studentEnrollments',[...records.studentEnrollments,{id:'E2',studentId:'S2',offeringId:'OWN'}]));
+assert.throws(()=>validateProtectedWrite(store,session('faculty'),'studentEnrollments',[...records.studentEnrollments,{id:'E3',studentId:'S2',offeringId:'OTHER'}]),/own subject offerings/i);
 console.log('✅ server collection access policy defaults sensitive and unauthorized actions to denial');

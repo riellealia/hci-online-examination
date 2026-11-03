@@ -4,7 +4,7 @@ const WRITE_ACCESS = Object.freeze({
   admin: '*',
   dean: new Set(['approvalRequests', 'notifications', 'sectionSubjects', 'applicationAuditLog', 'inboxReadReceipts']),
   coordinator: new Set(['approvalRequests', 'notifications', 'sections', 'sectionSubjects', 'studentEnrollments', 'applicationAuditLog', 'inboxReadReceipts']),
-  faculty: new Set(['exams', 'questions', 'studentSubmissions', 'subjects', 'subjectWorkspaceContent', 'questionReports', 'reportBlockedStudents', 'studentNotifications', 'studentEmails', 'applicationAuditLog', 'inboxReadReceipts', 'questionDrafts']),
+  faculty: new Set(['exams', 'questions', 'studentSubmissions', 'studentEnrollments', 'subjects', 'subjectWorkspaceContent', 'questionReports', 'reportBlockedStudents', 'studentNotifications', 'studentEmails', 'applicationAuditLog', 'inboxReadReceipts', 'questionDrafts']),
   student: new Set(['studentSubmissions', 'subjectContentViews', 'studentEmails', 'questionReports', 'studentNotifications', 'inboxReadReceipts', 'examAttempts'])
 });
 

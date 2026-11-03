@@ -1273,27 +1273,28 @@
 
 <!-- Student Assignment Modal -->
 <div id="studentAssignModal" class="modal-bg">
-    <div class="modal">
-        <h3>Assign Subjects to Student</h3>
-        <div style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; color: #666;">
-            <strong>How it works:</strong> Select a student → Select subjects to enroll them in
-        </div>
+    <div class="modal faculty-enrollment-modal">
+        <h3>Manage Student Subjects</h3>
+        <p class="faculty-enrollment-help">Add, move, or remove the selected student from your active-semester subject offerings.</p>
         <div class="form-group">
             <label>Student:</label>
             <select id="assignStudent" onchange="loadSubjectsForStudent()">
                 <option value="">-- Select Student --</option>
             </select>
         </div>
-        <div class="form-group">
-            <label>Available Subjects (for your subjects):</label>
-            <div id="subjectCheckboxList" style="background: #f9f9f9; padding: 12px; border-radius: 6px; max-height: 250px; overflow-y: auto; border: 1px solid #ddd;">
-                <!-- Will be populated by JS -->
-            </div>
-        </div>
+        <div id="subjectCheckboxList" class="faculty-enrollment-content"><p class="muted-cell">Choose a student to view subject details.</p></div>
         <div class="modal-buttons">
-            <button class="save-btn" onclick="saveSubjectAssignments()">✓ Enroll in Subjects</button>
-            <button class="cancel-btn" onclick="closeStudentAssignModal()">✕ Cancel</button>
+            <button class="cancel-btn" onclick="closeStudentAssignModal()">Close</button>
         </div>
+    </div>
+</div>
+
+<div id="facultySectionPickerModal" class="modal-bg">
+    <div class="modal faculty-section-picker">
+        <h3 id="facultySectionPickerTitle">Choose Section</h3>
+        <p id="facultySectionPickerCopy" class="faculty-enrollment-help"></p>
+        <div id="facultySectionPickerOptions" class="faculty-section-options"></div>
+        <div class="modal-buttons"><button class="cancel-btn" onclick="closeFacultySectionPicker()">Cancel</button></div>
     </div>
 </div>
 
@@ -3117,6 +3118,7 @@ function closeGradingModal() {
 // ======= STUDENT MANAGEMENT FUNCTIONS =======
 let activeStudentRosterSection = null;
 let activeStudentRosterSubject = null;
+let facultyEnrollmentAction = null;
 function selectStudentRosterSubject(subjectCode) {
     activeStudentRosterSubject = subjectCode;
     activeStudentRosterSection = null;
@@ -3141,9 +3143,9 @@ function renderStudentSectionTable() {
     const roster=studentsForSection(activeStudentRosterSection);
     const subjectTabs=subjectCodes.map(code=>{const subject=freshSubjects.find(item=>item.code===code);return `<button type="button" class="student-section-tab ${code===activeStudentRosterSubject?'active':''}" onclick="selectStudentRosterSubject('${code}')" title="${subject?.name||code}">${code}</button>`}).join('');
     const sectionTabs=sectionIds.map(id=>`<button type="button" class="student-section-tab ${id===activeStudentRosterSection?'active':''}" onclick="selectStudentRosterSection('${id}')">${id}<span class="student-section-count">${studentsForSection(id).length}</span></button>`).join('');
-    const rows=roster.map(student=>`<tr role="link" tabindex="0" aria-label="Open profile for ${student.first} ${student.last}" onclick="RoleProfileViewer.openStudent('${student.id}',{viewerRole:'faculty',viewerId:'${facultyId}',subjectCode:'${activeStudentRosterSubject}',sectionId:'${activeStudentRosterSection}'})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><td><strong>${student.id}</strong></td><td><span class="roster-name">${student.last}, ${student.first}</span></td><td><span class="roster-subject-chip">${activeStudentRosterSection}</span></td></tr>`).join('');
+    const rows=roster.map(student=>`<tr role="link" tabindex="0" aria-label="Open profile for ${student.first} ${student.last}" onclick="RoleProfileViewer.openStudent('${student.id}',{viewerRole:'faculty',viewerId:'${facultyId}',subjectCode:'${activeStudentRosterSubject}',sectionId:'${activeStudentRosterSection}'})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><td><strong>${student.id}</strong></td><td><span class="roster-name">${student.last}, ${student.first}</span></td><td><span class="roster-subject-chip">${activeStudentRosterSection}</span></td><td><button type="button" class="roster-manage-button" onclick="event.stopPropagation();openStudentAssignModal('${student.id}')">Manage subjects</button></td></tr>`).join('');
     const activeSubject=freshSubjects.find(item=>item.code===activeStudentRosterSubject);
-    studentsView.innerHTML=`<div class="exams-section"><header class="roster-page-head"><h2>My Students</h2><p>Browse students enrolled in the subjects and sections you currently handle.</p></header><div class="roster-tab-label">Subjects</div><div class="student-section-tabs" role="tablist" aria-label="Subjects">${subjectTabs}</div><div class="roster-subject-context"><strong>${activeSubject?.name||activeStudentRosterSubject}</strong><span>${activeStudentRosterSubject}</span></div><div class="roster-tab-label">Sections</div><div class="student-section-tabs" role="tablist" aria-label="Sections in ${activeStudentRosterSubject}">${sectionTabs}</div><div class="table-scroll student-roster-shell"><table class="student-roster-table"><thead><tr><th>Student ID</th><th>Student</th><th>Section</th></tr></thead><tbody>${rows||'<tr><td colspan="3" class="muted-cell">No students enrolled in this subject and section.</td></tr>'}</tbody></table></div></div>`;
+    studentsView.innerHTML=`<div class="exams-section"><header class="roster-page-head"><div><h2>My Students</h2><p>Browse students enrolled in your subjects, open profiles, or manage their enrollment.</p></div><button type="button" class="roster-manage-button primary" onclick="openStudentAssignModal()">Manage student subjects</button></header><div class="roster-tab-label">Subjects</div><div class="student-section-tabs" role="tablist" aria-label="Subjects">${subjectTabs}</div><div class="roster-subject-context"><strong>${activeSubject?.name||activeStudentRosterSubject}</strong><span>${activeStudentRosterSubject}</span></div><div class="roster-tab-label">Sections</div><div class="student-section-tabs" role="tablist" aria-label="Sections in ${activeStudentRosterSubject}">${sectionTabs}</div><div class="table-scroll student-roster-shell"><table class="student-roster-table"><thead><tr><th>Student ID</th><th>Student</th><th>Section</th><th>Subject management</th></tr></thead><tbody>${rows||'<tr><td colspan="4" class="muted-cell">No students enrolled in this subject and section.</td></tr>'}</tbody></table></div></div>`;
 }
 
 function displayMyStudents() {
@@ -3214,90 +3216,44 @@ function displayMyStudents() {
     studentsView.innerHTML = html;
 }
 
-function openStudentAssignModal() {
-    const studentSelect = document.getElementById('assignStudent');
-   
-    // Populate with ALL students
-    studentSelect.innerHTML = '<option value="">-- Select Student --</option>' +
-        students.map(s => `<option value="${s.id}">${s.id} - ${s.last}, ${s.first}</option>`).join('');
-   
-    document.getElementById('subjectCheckboxList').innerHTML = '';
-    document.getElementById('studentAssignModal').classList.add('active');
+function facultyActiveOfferings(){return SectionService.offeringsForFaculty(facultyId,DB.read('sectionSubjects',[]),DB.read('subjectAssignments',[]))}
+function facultyEnrollmentMatches(enrollment,offer){return enrollment.offeringId===offer.id||(enrollment.sectionId===offer.sectionId&&enrollment.subjectCode===offer.subjectCode)}
+function facultyOfferingCount(offer,ignoreStudentId=''){return new Set(DB.read('studentEnrollments',[]).filter(item=>item.studentId!==ignoreStudentId&&facultyEnrollmentMatches(item,offer)).map(item=>item.studentId)).size}
+function facultyOfferingCapacity(offer){const section=DB.read('sections',[]).find(item=>SectionService.normaliseId(item.id)===SectionService.normaliseId(offer.sectionId));return Math.max(1,Number(section?.capacity)||50)}
+function openStudentAssignModal(studentId=''){
+    const fresh=DB.read('students',students).slice().sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first)),select=document.getElementById('assignStudent');
+    select.innerHTML='<option value="">-- Select Student --</option>'+fresh.map(s=>`<option value="${s.id}" ${s.id===studentId?'selected':''}>${s.id} - ${s.last}, ${s.first}</option>`).join('');
+    document.getElementById('studentAssignModal').classList.add('active');loadSubjectsForStudent();
 }
-
-function loadSubjectsForStudent() {
-    const selectedStudent = document.getElementById('assignStudent').value;
-    const checkboxList = document.getElementById('subjectCheckboxList');
-
-    if (!selectedStudent) {
-        checkboxList.innerHTML = '';
-        return;
-    }
-
-    // Get already assigned subjects for this student+faculty
-    const alreadyAssigned = allotments
-        .filter(a => a.studentId === selectedStudent && a.facultyId === facultyId)
-        .map(a => a.subjectCode);
-
-    let html = '';
-    mySubjects.forEach(subject => {
-        const isChecked = alreadyAssigned.includes(subject.code);
-        html += `
-            <div style="padding: 8px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee;">
-                <input type="checkbox" id="subject_${subject.code}" value="${subject.code}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
-                <label for="subject_${subject.code}" style="cursor: pointer; flex: 1; margin: 0;">
-                    <strong>${subject.code}</strong> - ${subject.name}
-                </label>
-            </div>
-        `;
-    });
-
-    checkboxList.innerHTML = html;
-}
-
-function saveSubjectAssignments() {
-    const selectedStudent = document.getElementById('assignStudent').value;
-
-    if (!selectedStudent) {
-        notify('Please select a student', 'error');
-        return;
-    }
-
-    const checkboxes = document.querySelectorAll('#subjectCheckboxList input[type="checkbox"]');
-    const selectedSubjects = Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-
-    if (selectedSubjects.length === 0) {
-        notify('Please select at least one subject', 'error');
-        return;
-    }
-
-    // Remove existing assignments for this student+faculty combination
-    const filteredAllotments = allotments.filter(
-        a => !(a.studentId === selectedStudent && a.facultyId === facultyId)
-    );
-
-    // Add new assignments
-    selectedSubjects.forEach(subjectCode => {
-        filteredAllotments.push({
-            studentId: selectedStudent,
-            subjectCode: subjectCode,
-            facultyId: facultyId
-        });
-    });
-
-    localStorage.setItem('allotments', JSON.stringify(filteredAllotments));
-    allotments.length = 0;
-    allotments.push(...filteredAllotments);
-   
-    closeStudentAssignModal();
-    displayMyStudents();
-    notify(`${selectedStudent} enrolled in ${selectedSubjects.length} subject(s).`, 'success');
+function loadSubjectsForStudent(){
+    const studentId=document.getElementById('assignStudent').value,host=document.getElementById('subjectCheckboxList');if(!studentId){host.innerHTML='<p class="muted-cell">Choose a student to view subject details.</p>';return}
+    const offers=facultyActiveOfferings(),enrollments=DB.read('studentEnrollments',[]),catalog=DB.read('subjects',[]),owned=enrollments.filter(item=>item.studentId===studentId&&offers.some(offer=>facultyEnrollmentMatches(item,offer))),enrolledCodes=new Set(enrollments.filter(item=>item.studentId===studentId).map(item=>item.subjectCode)),available=[...new Set(offers.map(item=>item.subjectCode).filter(code=>!enrolledCodes.has(code)))].sort();
+    const rows=owned.map(item=>{const subject=catalog.find(entry=>entry.code===item.subjectCode);return `<tr><td><strong>${item.subjectCode}</strong><small>${subject?.name||'Subject'}</small></td><td>${item.sectionId}</td><td><button type="button" class="roster-manage-button" onclick="openFacultySectionPicker('${item.subjectCode}','change','${item.id||''}')">Change section</button> <button type="button" class="roster-remove-button" onclick="removeStudentEnrollment('${item.id||''}','${item.subjectCode}','${item.sectionId}')">Remove</button></td></tr>`}).join('');
+    const choices=available.map(code=>{const subject=catalog.find(item=>item.code===code),count=offers.filter(item=>item.subjectCode===code).length;return `<button type="button" class="faculty-available-subject" onclick="openFacultySectionPicker('${code}','add','')"><span><strong>${code}</strong><small>${subject?.name||'Subject'}</small></span><em>${count} section${count===1?'':'s'} ›</em></button>`}).join('');
+    host.innerHTML=`<section class="faculty-enrollment-panel"><header><h4>Enrolled with you</h4><span>${owned.length}</span></header><div class="table-scroll"><table class="faculty-enrollment-table"><thead><tr><th>Subject</th><th>Section</th><th>Change</th></tr></thead><tbody>${rows||'<tr><td colspan="3" class="muted-cell">No subjects under you yet.</td></tr>'}</tbody></table></div></section><section class="faculty-enrollment-panel"><header><h4>Available subjects</h4><span>Active semester</span></header><div class="faculty-available-list">${choices||'<p class="muted-cell">No additional active-semester subjects are available.</p>'}</div></section>`;
 }
 
 function closeStudentAssignModal() {
     document.getElementById('studentAssignModal').classList.remove('active');
+}
+
+function openFacultySectionPicker(subjectCode,mode,enrollmentId=''){
+    const studentId=document.getElementById('assignStudent').value,offers=facultyActiveOfferings().filter(item=>item.subjectCode===subjectCode),records=DB.read('studentEnrollments',[]),current=records.find(item=>item.id===enrollmentId);facultyEnrollmentAction={studentId,subjectCode,mode,enrollmentId};
+    document.getElementById('facultySectionPickerTitle').textContent=`${mode==='change'?'Change':'Add'} ${subjectCode}`;document.getElementById('facultySectionPickerCopy').textContent='Choose one of your sections. Capacity is checked again when you save.';
+    document.getElementById('facultySectionPickerOptions').innerHTML=offers.map(offer=>{const count=facultyOfferingCount(offer,studentId),capacity=facultyOfferingCapacity(offer),full=count>=capacity,isCurrent=current&&facultyEnrollmentMatches(current,offer);return `<button type="button" class="faculty-section-option ${isCurrent?'current':''}" onclick="saveFacultyStudentOffering('${offer.id}')" ${full&&!isCurrent?'disabled':''}><span><strong>${offer.sectionId}</strong><small>${count} / ${capacity} students</small></span><em>${isCurrent?'Current':full?'Full':'Select'}</em></button>`}).join('')||'<p class="muted-cell">No active sections are assigned to you for this subject.</p>';
+    document.getElementById('facultySectionPickerModal').classList.add('active');
+}
+function closeFacultySectionPicker(){document.getElementById('facultySectionPickerModal').classList.remove('active');facultyEnrollmentAction=null}
+function saveFacultyStudentOffering(offeringId){
+    const action=facultyEnrollmentAction,offer=facultyActiveOfferings().find(item=>item.id===offeringId);if(!action||!offer)return notify('That offering is no longer available.','error');const records=DB.read('studentEnrollments',[]),capacity=facultyOfferingCapacity(offer);if(facultyOfferingCount(offer,action.studentId)>=capacity)return notify(`${offer.sectionId} is full.`,'error');
+    if(records.some(item=>item.studentId===action.studentId&&item.subjectCode===offer.subjectCode&&item.id!==action.enrollmentId))return notify('This student is already enrolled in that subject.','error');const context=SectionService.currentAcademicContext();
+    if(action.mode==='change'){const index=records.findIndex(item=>item.id===action.enrollmentId);if(index<0)return notify('The enrollment could not be found.','error');records[index]={...records[index],offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId}}
+    else records.push({id:`ENR-${action.studentId}-${Date.now()}`,studentId:action.studentId,offeringId:offer.id,subjectCode:offer.subjectCode,sectionId:offer.sectionId,...(context.periodId?{academicPeriodId:context.periodId,periodStatus:'active'}:{})});
+    if(!DB.write('studentEnrollments',records))return;AuditLog.record(action.mode==='change'?'move-enrollment':'enroll','student-subject',`${action.studentId}:${offer.subjectCode}`,{studentId:action.studentId,subjectCode:offer.subjectCode,sectionId:offer.sectionId,facultyId});closeFacultySectionPicker();loadSubjectsForStudent();renderStudentSectionTable();notify(`${offer.subjectCode} ${action.mode==='change'?'moved':'added'} successfully.`,'success');
+}
+async function removeStudentEnrollment(enrollmentId,subjectCode,sectionId){
+    const studentId=document.getElementById('assignStudent').value;if(!facultyActiveOfferings().some(item=>item.subjectCode===subjectCode&&item.sectionId===sectionId))return notify('You can only manage your own subject offerings.','error');if(!(await confirmDialog({title:'Remove this subject?',message:`Remove <strong>${subjectCode}</strong> from this student?`,confirmLabel:'Remove',danger:true})))return;
+    const records=DB.read('studentEnrollments',[]),next=records.filter(item=>item.id!==enrollmentId);if(next.length===records.length)return notify('The enrollment could not be found.','error');if(!DB.write('studentEnrollments',next))return;AuditLog.record('remove-enrollment','student-subject',`${studentId}:${subjectCode}`,{studentId,subjectCode,sectionId,facultyId});loadSubjectsForStudent();renderStudentSectionTable();notify(`${subjectCode} removed.`,'success');
 }
 
 async function removeStudentFromSubject(studentId, subjectCode) {
