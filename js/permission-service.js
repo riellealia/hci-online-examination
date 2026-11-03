@@ -12,7 +12,7 @@ const PermissionService = (() => {
     ],
     coordinator: [
       'dashboard.coordinator.view', 'offering.manage', 'schedule.manage',
-      'enrollment.manage', 'load.view', 'profile.faculty.view',
+      'enrollment.view', 'load.view', 'profile.faculty.view',
       'profile.student.view', 'approval.professor-assignment.submit',
       'approval.student-overload.submit', 'approval.own.withdraw',
       'audit.own.view'

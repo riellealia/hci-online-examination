@@ -45,9 +45,9 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 5 — Faculty Coordinator cleanup
 
-- [ ] Remove direct enrollment mutation controls from Coordinator Student Management.
-- [ ] Preserve read-only Student profile, enrollment, capacity, load, and application visibility.
-- [ ] Keep Professor-assignment and overload responsibilities unchanged unless separately instructed.
+- [x] Remove direct enrollment mutation controls from Coordinator Student Management.
+- [x] Preserve read-only Student profile, enrollment, capacity, load, and application visibility.
+- [x] Keep Professor-assignment and overload responsibilities unchanged unless separately instructed.
 
 ### Task 6 — Exam group restriction
 

@@ -98,6 +98,7 @@ function validateProtectedWrite(store, session, key, next) {
   if (key === 'applicationAuditLog') validateAudit(existing, next, session);
   if (key === 'approvalRequests') validateApprovals(existing, next, session);
   if (key === 'studentEnrollments' && session.role === 'faculty') forbidden('Faculty enrollment changes must be submitted for Dean approval.');
+  if (key === 'studentEnrollments' && session.role === 'coordinator') forbidden('Faculty Coordinators have read-only enrollment oversight. Admin manages normal enrollment.');
   if (key === 'studentEnrollments' && session.role === 'dean') validateDeanEnrollment(existing, next, session, store);
   if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
