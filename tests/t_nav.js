@@ -91,6 +91,7 @@ r.w.close();
 
 const today=new Date().toLocaleDateString('en-CA');
 const s=SEED();
+s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
 s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Live Quiz',desc:'',date:today,start:'00:01',end:'23:59'}];
 r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});
 const nu=r.d.getElementById('nextUp').textContent;

@@ -5,6 +5,7 @@ const toasts=r=>[...r.d.querySelectorAll('.toast-body')].map(t=>t.textContent.re
 
 function stu(examOverrides={}){
   const s=SEED();
+  s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
   s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Midterm',
             desc:'Answer all questions.',date:today,start:'00:01',end:'23:59',
             durationMinutes:60,passingPercent:75,materials:'One A4 sheet',...examOverrides}];
@@ -55,6 +56,7 @@ r.w.close();
 
 console.log('\n=== UUU1. Draft and repeat-attempt actions are explicit ===');
 let draftSeed=SEED();
+draftSeed.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
 draftSeed.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Practice',date:'',start:'',end:'',durationMinutes:0,maxAttempts:99,scoreRelease:'immediate',answerRelease:'immediate',showSubmittedAnswers:true}];
 draftSeed.examAttempts={'S1::e1':{studentId:'S1',examId:'e1',answers:{q1:{type:'mcq',selectedIndex:0}},currentIndex:0,flagged:[],startedAt:new Date().toISOString()}};
 r=load('student.html',{...draftSeed,currentUser:{username:'S1',role:'student'}}); r.w.openExamDetails('e1');

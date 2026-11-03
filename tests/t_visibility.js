@@ -5,6 +5,7 @@ const today=new Date().toLocaleDateString('en-CA');
 (async()=>{
 console.log('=== RESULT VISIBILITY. Faculty policy is enforced everywhere ===');
 let s=SEED();
+s.sectionSubjects=[{sectionId:'A',assignments:[{id:'A_SUB1',subjectCode:'SUB1',facultyId:'F1'}]}];
 let r=load('faculty.html',{...s,currentUser:{username:'F1',role:'faculty'}});
 r.w.editExam('e1');
 r.d.getElementById('examScoreRelease').value='never';

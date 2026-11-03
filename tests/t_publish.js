@@ -5,6 +5,7 @@ const today=new Date().toLocaleDateString('en-CA');
 (async()=>{
 console.log('=== PUBLISH REVIEW. Draft validation to Student visibility ===');
 let s=SEED();
+s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
 const draft={id:'draft1',facultyId:'F1',subjectCode:'SUB1',title:'Draft Quiz',desc:'',date:today,start:'00:01',end:'23:59',status:'draft'};
 s.exams=[...s.exams,draft];
 let r=load('student.html',{...s,currentUser:{username:'S1',role:'student'}});

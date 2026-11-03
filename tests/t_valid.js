@@ -49,7 +49,9 @@ ok(n()===before+1,'valid allotment accepted');
 r.w.close();
 
 console.log('\n=== NN. Exam schedule validation (plan: Module 3) ===');
-let f=load('faculty.html',{...SEED(),currentUser:{username:'F1',role:'faculty'}});
+const examSeed=SEED();
+examSeed.sectionSubjects=[{sectionId:'A',assignments:[{id:'A_SUB1',subjectCode:'SUB1',facultyId:'F1'}]}];
+let f=load('faculty.html',{...examSeed,currentUser:{username:'F1',role:'faculty'}});
 const ex=()=>f.read('exams').length;
 const eb=ex();
 f.w.openExamModal('SUB1');

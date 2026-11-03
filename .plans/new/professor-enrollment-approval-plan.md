@@ -51,9 +51,9 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 6 — Exam group restriction
 
-- [ ] Restrict exam groups to the Professor's approved active Subject offerings.
-- [ ] Restrict eligible Students to active enrollments in the selected groups.
-- [ ] Verify that no additional Dean approval is requested during exam creation.
+- [x] Restrict exam groups to the Professor's approved active Subject offerings.
+- [x] Restrict eligible Students to active enrollments in the selected groups.
+- [x] Verify that no additional Dean approval is requested during exam creation.
 
 ### Task 7 — End-to-end regression and tracker reconciliation
 

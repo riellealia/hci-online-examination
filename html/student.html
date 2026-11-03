@@ -824,7 +824,7 @@ function loadStudentSubjects() {
     const fac = assignedFacultyId ? faculty.find(f => f.id === assignedFacultyId) : null;
     const sectionLabel = enrollment?.sectionId || (currentStudent.sections||[]).join(', ') || '—';
     const instructorLabel = fac ? `Prof. ${fac.first} ${fac.last}` : 'To be assigned';
-    const subjectExams=exams.filter(exam=>exam.status!=='draft'&&exam.subjectCode===code&&(!(exam.sections||[]).length||(enrollment?.sectionId&&(exam.sections||[]).includes(enrollment.sectionId))));
+    const subjectExams=exams.filter(exam=>exam.status!=='draft'&&exam.subjectCode===code&&studentCanTakeExam(exam));
     const examCount=subjectExams.length;
     const completedExamIds=new Set(submissions.filter(submission=>submission.studentId===currentStudent.id).map(submission=>submission.examId));
     const completedExamCount=subjectExams.filter(exam=>completedExamIds.has(exam.id)).length;
@@ -954,6 +954,14 @@ function openStudentSubject(code) {
 let relevantExams = [];
 function attemptsForExam(examId){return submissions.filter(item=>item.studentId===currentStudent.id&&item.examId===examId).length;}
 function attemptsAllowed(exam){return Math.max(1,Number(exam?.maxAttempts)||1);}
+function studentCanTakeExam(exam) {
+  const enrollments = SectionService.enrollmentsForStudent(currentStudent.id);
+  const selectedOfferings = new Set(exam.offeringIds || []);
+  return enrollments.some(enrollment => enrollment.subjectCode === exam.subjectCode &&
+    (selectedOfferings.size
+      ? (enrollment.offeringId ? selectedOfferings.has(enrollment.offeringId) : (exam.sections || []).includes(enrollment.sectionId))
+      : (!(exam.sections || []).length || (exam.sections || []).includes(enrollment.sectionId))));
+}
 
 /* Resolves an exam's scheduled window and whether it is open right now.
    Previously the countdown was decorative: "Take Exam" was clickable even
@@ -975,10 +983,7 @@ function loadExams() {
   const tbody = document.querySelector('#examTable tbody');
   tbody.innerHTML = '';
 
-  relevantExams = exams.filter(ex => 
-    ex.status !== 'draft' && (studentSubjectCodes.includes(ex.subjectCode) || 
-    (ex.sections && ex.sections.some(sec => currentStudent.sections && currentStudent.sections.includes(sec))))
-  );
+  relevantExams = exams.filter(ex => ex.status !== 'draft' && studentCanTakeExam(ex));
 
   document.getElementById('statExams').textContent = relevantExams.length;
   

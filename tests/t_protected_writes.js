@@ -28,4 +28,9 @@ assert.throws(()=>validateProtectedWrite(enrollmentStore,dean,'studentEnrollment
 const cancelled={...pending,status:'cancelled',history:[...pending.history,{status:'cancelled',at:'2026-09-21T09:00:00Z',actorId:'admin',actorRole:'admin',remarks:'Obsolete request.'}]};
 assert.doesNotThrow(() => validateApprovals([pending], [cancelled], admin));
 assert.throws(() => validateApprovals([pending], [{...cancelled,proposedChange:{facultyId:'F9'}}], admin), /cannot decide or alter/i);
+const examStore={read:(key,fallback)=>key==='sectionSubjects'?[{sectionId:'A',assignments:[{id:'OFR-1',subjectCode:'SUB1',facultyId:'F1'},{id:'OFR-2',subjectCode:'SUB1',facultyId:'F2'}]}]:fallback};
+const ownedExam={id:'EX-1',facultyId:'F1',subjectCode:'SUB1',title:'Quiz',sections:['A'],offeringIds:['OFR-1']};
+assert.doesNotThrow(()=>validateProtectedWrite(examStore,faculty,'exams',[ownedExam]));
+assert.throws(()=>validateProtectedWrite(examStore,faculty,'exams',[{...ownedExam,offeringIds:['OFR-2']}]),/assigned to this Faculty/i);
+assert.throws(()=>validateProtectedWrite(examStore,faculty,'exams',[{...ownedExam,facultyId:'F2'}]),/own exams/i);
 console.log('✅ approval transitions are role-bound and audit history is append-only');

@@ -55,7 +55,7 @@ ok(r.d.getElementById('emailComposerModal').style.display==='none','composer clo
 r.w.close();
 
 console.log('\n=== L. Exam window is enforced ===');
-s=SEED(); s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Future',date:future,start:'08:00',end:'10:00'}];
+s=SEED(); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}]; s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Future',date:future,start:'08:00',end:'10:00'}];
 r=stu(s);
 ok(/Not yet open/.test(r.d.querySelector('#examTable tbody').textContent),'upcoming exam not launchable');
 r.w.startExam('e1');
@@ -63,7 +63,7 @@ ok(/opens on/i.test(r.rec.alerts.join('|')),'direct call blocked, and says when 
 ok(r.d.getElementById('examQuestionsContainer').innerHTML==='','no paper was rendered');
 r.w.close();
 
-s=SEED(); s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Past',date:past,start:'08:00',end:'10:00'}];
+s=SEED(); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}]; s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Past',date:past,start:'08:00',end:'10:00'}];
 r=stu(s);
 ok(/Closed/.test(r.d.querySelector('#examTable tbody').textContent),'closed exam not launchable');
 r.w.startExam('e1');
@@ -71,13 +71,13 @@ ok(/closed on/i.test(r.rec.alerts.join('|')),'direct call blocked, and says when
 ok(r.d.getElementById('examQuestionsContainer').innerHTML==='','no paper was rendered');
 r.w.close();
 
-s=SEED(); s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Now',date:today,start:'00:01',end:'23:59'}];
+s=SEED(); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}]; s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Now',date:today,start:'00:01',end:'23:59'}];
 r=stu(s);
 ok(/Active \/ Open/.test(r.d.querySelector('#examTable tbody').textContent),'in-window exam IS open');
 r.w.close();
 
 console.log('\n=== M. Grading: written answers no longer auto-score full marks ===');
-s=SEED(); s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Mixed',date:today,start:'00:01',end:'23:59'}];
+s=SEED(); s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}]; s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Mixed',date:today,start:'00:01',end:'23:59'}];
 r=stu(s);
 r.w.startExam('e1');
 r.d.querySelector('input[name="q_q1"]').checked=true;      // correct MCQ (10 pts)

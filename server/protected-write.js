@@ -93,6 +93,39 @@ function validateDeanEnrollment(existing, next, session, store) {
   if(!authorized)forbidden('Dean enrollment changes must exactly match one pending approved workflow proposal.');
 }
 
+function validateFacultyExams(existing, next, session, store) {
+  if (!Array.isArray(existing) || !Array.isArray(next)) forbidden('Exam records must be an array.');
+  const before = new Map(existing.map(item => [item.id, item]));
+  const after = new Map(next.map(item => [item.id, item]));
+  if (after.size !== next.length) forbidden('Exam records cannot be duplicated.');
+  existing.forEach(item => {
+    if (item.facultyId !== session.username && !same(item, after.get(item.id))) forbidden('Faculty may only change their own exams.');
+  });
+  const periods = store.read('academicPeriods', []) || [];
+  const settings = store.read('systemSettings', {}) || {};
+  const active = periods.find(item => item.status === 'active') || periods.find(item => item.id === settings.currentAcademicPeriodId);
+  const offerings = (store.read('sectionSubjects', []) || []).flatMap(record =>
+    (record.assignments || (record.subjectCodes || []).map(subjectCode => ({ subjectCode }))).map(item => ({
+      id:item.id || `${record.sectionId}_${item.subjectCode}`,
+      sectionId:record.sectionId,
+      subjectCode:item.subjectCode,
+      facultyId:item.facultyId || null,
+      academicPeriodId:item.academicPeriodId || record.academicPeriodId || '',
+      periodStatus:item.periodStatus || record.periodStatus || ''
+    }))
+  ).filter(item => item.facultyId === session.username && (!item.periodStatus || item.periodStatus === 'active')
+    && (!active?.id || !item.academicPeriodId || item.academicPeriodId === active.id));
+  const allowed = new Map(offerings.map(item => [item.id, item]));
+  next.filter(item => !before.has(item.id) || !same(before.get(item.id), item)).forEach(item => {
+    if (item.facultyId !== session.username) forbidden('Faculty may only create or change their own exams.');
+    if (!Array.isArray(item.offeringIds) || !item.offeringIds.length) forbidden('An exam requires at least one active approved Subject offering.');
+    const selected = item.offeringIds.map(id => allowed.get(id));
+    if (selected.some(value => !value) || selected.some(value => value.subjectCode !== item.subjectCode)) forbidden('Exam groups must be active Subject offerings assigned to this Faculty account.');
+    const sections = new Set(item.sections || []);
+    if (selected.some(value => !sections.has(value.sectionId)) || sections.size !== new Set(selected.map(value => value.sectionId)).size) forbidden('Exam sections must match the selected approved offerings.');
+  });
+}
+
 function validateProtectedWrite(store, session, key, next) {
   const existing = store.read(key, []);
   if (key === 'applicationAuditLog') validateAudit(existing, next, session);
@@ -100,6 +133,7 @@ function validateProtectedWrite(store, session, key, next) {
   if (key === 'studentEnrollments' && session.role === 'faculty') forbidden('Faculty enrollment changes must be submitted for Dean approval.');
   if (key === 'studentEnrollments' && session.role === 'coordinator') forbidden('Faculty Coordinators have read-only enrollment oversight. Admin manages normal enrollment.');
   if (key === 'studentEnrollments' && session.role === 'dean') validateDeanEnrollment(existing, next, session, store);
+  if (key === 'exams' && session.role === 'faculty') validateFacultyExams(existing, next, session, store);
   if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
-module.exports = { validateProtectedWrite, validateAudit, validateApprovals };
+module.exports = { validateProtectedWrite, validateAudit, validateApprovals, validateFacultyExams };

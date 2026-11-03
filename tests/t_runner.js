@@ -4,6 +4,7 @@ const today=new Date().toLocaleDateString('en-CA');
 
 function seed(extra={}){
   const s=SEED();
+  s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
   s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Paged Exam',
     desc:'Work carefully.',date:today,start:'00:01',end:'23:59'}];
   return {...s,...extra,currentUser:{username:'S1',role:'student'}};
@@ -85,6 +86,7 @@ r.w.close();
 
 console.log('\n=== FACULTY SETTINGS. Presentation and navigation are persisted ===');
 let facultySeed=SEED();
+facultySeed.sectionSubjects=[{sectionId:'A',assignments:[{id:'A_SUB1',subjectCode:'SUB1',facultyId:'F1'}]}];
 let f=load('faculty.html',{...facultySeed,currentUser:{username:'F1',role:'faculty'}});
 f.w.openExamModal('SUB1');
 f.d.getElementById('examTitle').value='Configured exam';

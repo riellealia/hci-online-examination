@@ -3,9 +3,9 @@ var FacultySubjectWorkspace=(()=>{
   const readContent=()=>DB.read('subjectWorkspaceContent',[]);
   const writeContent=value=>DB.write('subjectWorkspaceContent',value);
   const esc=value=>typeof escapeQuestionMedia==='function'?escapeQuestionMedia(String(value??'')):String(value??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  const mine=()=>{const direct=SectionService.offeringsForFaculty(facultyId,sectionSubjects,DB.read('subjectAssignments',[])).filter(o=>o.subjectCode===subjectCode);if(direct.length)return direct;const ids=[...new Set([...studentEnrollments.filter(e=>e.subjectCode===subjectCode).map(e=>e.sectionId),...exams.filter(e=>e.subjectCode===subjectCode).flatMap(e=>e.sections||[]),...students.filter(s=>SectionService.subjectCodesForStudent(s,allotments,sectionSubjects).includes(subjectCode)).flatMap(s=>s.sections||[])].filter(Boolean))];return ids.map(id=>({id:`${id}_${subjectCode}`,sectionId:id,subjectCode,facultyId}))};
+  const mine=()=>SectionService.offeringsForFaculty(facultyId,sectionSubjects,DB.read('subjectAssignments',[])).filter(o=>o.subjectCode===subjectCode);
   const sections=()=>[...new Set(mine().map(o=>o.sectionId))];
-  const studentsIn=id=>students.filter(s=>(s.sections||[]).includes(id)||studentEnrollments.some(e=>e.studentId===s.id&&e.subjectCode===subjectCode&&e.sectionId===id));
+  const studentsIn=id=>{const offeringIds=new Set(mine().filter(o=>o.sectionId===id).map(o=>o.id));return students.filter(s=>studentEnrollments.some(e=>e.studentId===s.id&&e.subjectCode===subjectCode&&e.sectionId===id&&(!e.offeringId||offeringIds.has(e.offeringId))))};
   const course=()=>subjects.find(s=>s.code===subjectCode)||{code:subjectCode,name:subjectCode};
   const iconPaths={book:'M4 4h6.5A3.5 3.5 0 0 1 14 7.5V20a4.5 4.5 0 0 0-3.5-1.5H4V4Zm16 0h-3.5A3.5 3.5 0 0 0 14 5.1a5.5 5.5 0 0 1 1 3.2V20a4.5 4.5 0 0 1 3.5-1.5H20V4Z',code:'m8 9-4 3 4 3v3l-8-6 8-6v3Zm8 0V6l8 6-8 6v-3l4-3-4-3ZM10 20 13 4h2l-3 16h-2Z',science:'M9 2h6v2h-1v5.1l5.4 8.1A3 3 0 0 1 16.9 22H7.1a3 3 0 0 1-2.5-4.8L10 9.1V4H9V2Zm3 8-2.7 4h5.4L12 10Zm-4 6-1.7 2.3a1 1 0 0 0 .8 1.7h9.8a1 1 0 0 0 .8-1.7L16 16H8Z',chart:'M4 20V10h4v10H4Zm6 0V4h4v16h-4Zm6 0v-7h4v7h-4Z'};
   const iconSvg=name=>`<svg viewBox="0 0 24 24"><path d="${iconPaths[name]||iconPaths.book}"/></svg>`;
@@ -19,7 +19,7 @@ var FacultySubjectWorkspace=(()=>{
   function main(){
     const records=readContent().filter(x=>x.subjectCode===subjectCode).sort((a,b)=>a.week-b.week||new Date(a.createdAt)-new Date(b.createdAt));
     const weeks=[...new Set(records.map(x=>x.week))];
-    const subjectExams=exams.filter(e=>e.subjectCode===subjectCode);
+    const subjectExams=exams.filter(e=>e.facultyId===facultyId&&e.subjectCode===subjectCode);
     const related=SectionService.offerings(sectionSubjects).filter(o=>o.subjectCode===subjectCode);
     const professorIds=[...new Set(related.map(o=>o.facultyId).filter(Boolean))];
     const professors=professorIds.map(id=>faculty.find(person=>person.id===id)).filter(Boolean);

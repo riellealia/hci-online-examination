@@ -1339,9 +1339,9 @@ let mySubjects = []; // Will store subjects assigned to this faculty
         });
 
 
-        // Get allotted subjects from subjectAssignments (Faculty-Subject mapping)
+        // Keep the existing subject workspace sourced from Faculty-Subject
+        // assignments. Exam authoring applies the stricter active-group rule.
         const subjectAssignments = DB.read('subjectAssignments', []);
-       
         const allottedSubjects = subjectAssignments
             .filter(a => {
                 const facList = Array.isArray(a.facultyIds) ? a.facultyIds : [a.facultyId];
@@ -1559,6 +1559,23 @@ function eligibleExamSections(subjectCode) {
     ).filter(item => item.subjectCode === subjectCode).map(item => item.sectionId).filter(Boolean))].sort();
 }
 
+function eligibleExamOfferings(subjectCode) {
+    return SectionService.offeringsForFaculty(
+        facultyId,
+        DB.read('sectionSubjects', sectionSubjects),
+        DB.read('subjectAssignments', [])
+    ).filter(item => item.subjectCode === subjectCode && item.sectionId);
+}
+
+function eligibleExamSubjects() {
+    const codes = new Set(SectionService.offeringsForFaculty(
+        facultyId,
+        DB.read('sectionSubjects', sectionSubjects),
+        DB.read('subjectAssignments', [])
+    ).map(item => item.subjectCode));
+    return mySubjects.filter(subject => codes.has(subject.code));
+}
+
 function renderExamSectionChoices(subjectCode, selected = null) {
     const host = document.getElementById('examSectionChoices');
     const ids = eligibleExamSections(subjectCode);
@@ -1603,7 +1620,7 @@ function openExamModal(subjectCode = null) {
 
     // Populate subject dropdown with faculty's subjects
     const subjectSelect = document.getElementById('examSubject');
-    subjectSelect.innerHTML = mySubjects.map(s =>
+    subjectSelect.innerHTML = eligibleExamSubjects().map(s =>
         `<option value="${s.code}" ${s.code === subjectCode ? 'selected' : ''}>${s.code} - ${s.name}</option>`
     ).join('');
     subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
@@ -1637,7 +1654,7 @@ function editExam(examId) {
     document.getElementById('examShowFeedback').checked = exam.showFeedback !== false;
 
     const subjectSelect = document.getElementById('examSubject');
-    subjectSelect.innerHTML = mySubjects.map(s =>
+    subjectSelect.innerHTML = eligibleExamSubjects().map(s =>
         `<option value="${s.code}" ${s.code === exam.subjectCode ? 'selected' : ''}>${s.code} - ${s.name}</option>`
     ).join('');
     subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
@@ -1680,16 +1697,28 @@ async function saveExam() {
     const showSubmittedAnswers = document.getElementById('examShowSubmittedAnswers').checked;
     const showFeedback = document.getElementById('examShowFeedback').checked;
     const sections = [...document.querySelectorAll('#examSectionChoices input:checked')].map(input => input.value);
+    const eligibleOfferings = eligibleExamOfferings(subjectCode);
+    const eligibleSections = new Set(eligibleOfferings.map(item => item.sectionId));
     if ((scoreRelease === 'date' || answerRelease === 'date') && !resultReleaseAt) { notify('Choose a result release date and time.', 'error'); return false; }
 
     if (!subjectCode || !title || !date || !start || !end) {
         notify('Please fill all required fields', 'error');
         return;
     }
-    if (eligibleExamSections(subjectCode).length && !sections.length) {
+    if (!eligibleOfferings.length) {
+        notify('You do not have an active approved group for that subject.', 'error');
+        return false;
+    }
+    if (!sections.length) {
         notify('Select at least one section that can take this exam.', 'error');
         return false;
     }
+    if (sections.some(sectionId => !eligibleSections.has(sectionId))) {
+        notify('One or more selected groups are no longer assigned to you.', 'error');
+        renderExamSectionChoices(subjectCode, sections.filter(sectionId => eligibleSections.has(sectionId)));
+        return false;
+    }
+    const offeringIds = eligibleOfferings.filter(item => sections.includes(item.sectionId)).map(item => item.id);
 
     // Schedule rule: an exam cannot end before (or exactly when) it starts,
     // which would leave students a window they can never enter.
@@ -1756,6 +1785,7 @@ async function saveExam() {
             exam.scoreRelease = scoreRelease; exam.answerRelease = answerRelease; exam.resultReleaseAt = resultReleaseAt;
             exam.showSubmittedAnswers = showSubmittedAnswers; exam.showFeedback = showFeedback;
             exam.sections = sections;
+            exam.offeringIds = offeringIds;
         }
     } else {
         // Create new exam
@@ -1774,7 +1804,7 @@ async function saveExam() {
             questionLayout: questionLayout,
             navigationMode: navigationMode,
             status: 'draft',
-            scoreRelease, answerRelease, resultReleaseAt, showSubmittedAnswers, showFeedback, sections
+            scoreRelease, answerRelease, resultReleaseAt, showSubmittedAnswers, showFeedback, sections, offeringIds
         };
         nextExams.push(newExam);
     }

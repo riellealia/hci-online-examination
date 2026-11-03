@@ -4,6 +4,7 @@ const today=new Date().toLocaleDateString('en-CA');
 
 function base(){
   const s=SEED();
+  s.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
   s.exams=[{id:'e1',facultyId:'F1',subjectCode:'SUB1',title:'Mixed Exam',desc:'',date:today,start:'00:01',end:'23:59',showSubmittedAnswers:true,answerRelease:'immediate'}];
   return s;
 }
