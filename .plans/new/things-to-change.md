@@ -25,7 +25,7 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
 
 1. **Admin** — manages the system, accounts, permissions, academic periods, curricula, archives, limits, and system-wide logs.
 2. **Dean** — supervises the college, manages Faculty Coordinators and Professors, reviews assignment requests, and views college statistics and logs.
-3. **Faculty Coordinator** — manages subject offerings, sections, schedules, Professor assignments, Student enrollment, and academic loads within the college.
+3. **Faculty Coordinator** — manages subject offerings, sections, schedules, Professor-assignment requests, and read-only enrollment/load oversight within the college.
 4. **Professor** — creates examinations and grades Students only for assigned subject offerings.
 5. **Student** — views enrolled subjects and takes assigned examinations.
 
@@ -63,7 +63,7 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
 
 ### Faculty Coordinator
 
-- Move Professor subject/section assignment and Student enrollment management from Admin to the Faculty Coordinator.
+- Move Professor subject/section assignment coordination to the Faculty Coordinator. Keep normal Student enrollment with Admin; Professors submit enrollment-change requests for Dean review, while the Coordinator has read-only oversight.
 - Do not allow the Faculty Coordinator to delete accounts or change protected identity fields.
 - Add subject-offering schedules using weekday checkboxes and start/end time controls.
 - Check Professor, Student, Section, and optional Room schedule conflicts.
@@ -99,10 +99,13 @@ The current system has Admin, Faculty, and Student accounts. The planned system 
   - Submitted by: Faculty Coordinator
   - Reviewed by: Dean
 - **Student enrollment within the normal load**
-  - Submitted by: Faculty Coordinator
+  - Performed by: Admin
   - Reviewed by: No additional approval by default
+- **Professor-requested Student enrollment change**
+  - Submitted by: Professor
+  - Reviewed by: Dean
 - **Student overload**
-  - Submitted by: Faculty Coordinator
+  - Submitted by: Admin
   - Reviewed by: Dean
 - **Appoint a Professor as Faculty Coordinator**
   - Submitted by: Dean
@@ -116,14 +119,14 @@ All approval records use Pending, Approved, Rejected, Cancelled, or Withdrawn st
 2. Implement shared authentication, roles, permissions, audit records, and academic periods.
 3. Implement Admin account, lifecycle, curriculum, and limit controls.
 4. Implement Dean personnel and approval workflows.
-5. Implement Faculty Coordinator assignments, schedules, enrollment, and load checks.
+5. Implement Faculty Coordinator assignments and schedules, Admin enrollment/load checks, and Professor enrollment requests.
 6. Integrate the existing Professor and Student examination workflows.
 7. Consider optional features only after the required workflows work across roles.
 
 ## Needs confirmation
 
 - Whether appointing a Faculty Coordinator requires Admin approval or takes effect immediately.
-- Whether normal Student enrollment requires approval; the current proposal requires approval only for overloads.
+- Normal Admin Student enrollment requires no approval within the configured load; Professor-requested changes and overloads require Dean review.
 - Whether room scheduling is part of the prototype.
 - Whether the term called “Additionals” should be named “Additional Term” or “Special Term.”
 - Exact Student and Professor load limits and whether laboratory units count differently.

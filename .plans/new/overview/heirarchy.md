@@ -18,7 +18,7 @@ College-level supervisory role responsible for Faculty Coordinator and Professor
 
 ### Faculty Coordinator
 
-Academic coordination role responsible for subject offerings, sections, schedules, Professor assignment requests, Student enrollment, transfers, and load management. Earlier notes that say “Faculty” refer to this role.
+Academic coordination role responsible for subject offerings, sections, schedules, Professor-assignment requests, and read-only enrollment/load oversight. Earlier notes that say “Faculty” refer to this role.
 
 ### Professor
 
@@ -64,7 +64,7 @@ The following lists are the default permissions. Any configurable exception must
 - **Account lifecycle:** Archive, deactivate, reactivate, and restore.
 - **Curricula and term limits:** Manage.
 - **Professor assignments:** View requests and resulting assignments.
-- **Student enrollment and transfers:** View.
+- **Student enrollment and transfers:** Manage normal-load enrollment; route overloads to Dean review.
 - **Student overloads:** Configure load limits and view decisions.
 - **Examinations and grading:** View reports only; does not perform ordinary grading.
 - **Audit logs:** View all system audit records.
@@ -90,8 +90,8 @@ The following lists are the default permissions. Any configurable exception must
 - **Account lifecycle:** Cannot archive or deactivate accounts.
 - **Curricula and term limits:** View and use them during academic management.
 - **Professor assignments:** Create and manage proposals for Dean review.
-- **Student enrollment and transfers:** Manage.
-- **Student overloads:** Submit applications to the Dean.
+- **Student enrollment and transfers:** View profiles, enrollment, capacity, load, and applications; no direct mutation.
+- **Student overloads:** View applications and decisions.
 - **Examinations and grading:** View assignment or completion status only.
 - **Audit logs:** View their own actions and the workflows they manage.
 
@@ -103,7 +103,7 @@ The following lists are the default permissions. Any configurable exception must
 - **Account lifecycle:** Cannot archive or deactivate accounts.
 - **Curricula and term limits:** View information relevant to assigned offerings.
 - **Professor assignments:** View their own approved and pending assignments.
-- **Student enrollment and transfers:** View class lists for assigned offerings.
+- **Student enrollment and transfers:** View class lists and submit add, move, or remove requests for assigned active offerings.
 - **Student overloads:** No approval or request authority.
 - **Examinations and grading:** Manage examinations and grades for approved assignments.
 - **Audit logs:** View their own relevant activity when provided.

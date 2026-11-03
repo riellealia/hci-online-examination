@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The Faculty Coordinator manages subject offerings, sections, Professor assignment requests, Student enrollment and transfers, schedules, capacity, and loads. This replaces the ambiguous “Faculty” management role in earlier notes.
+The Faculty Coordinator manages subject offerings, sections, Professor assignment requests, schedules, capacity, and read-only enrollment/load oversight. Admin owns normal Student enrollment, while Professors request Student enrollment changes for Dean review. This replaces the ambiguous “Faculty” management role in earlier notes.
 
 ## Priority legend
 
@@ -47,7 +47,7 @@ Professor choices must identify available, near limit, schedule conflict, load c
 
 ### Student enrollment and sections
 
-The Coordinator may view enrollments, enroll a Student, transfer Sections, withdraw with a reason, view load, filter regular/irregular status if implemented, and submit overload requests.
+The Coordinator may view Student profiles, enrollments, Sections, capacity, load, and applications, but cannot add, move, or remove enrollment records. Admin performs normal enrollment and submits overload requests. A Professor may request add, move, or remove changes only within approved active offerings; the Dean reviews those requests.
 
 The Coordinator cannot change protected identity or lifecycle status.
 
@@ -61,7 +61,7 @@ Validation:
 - no schedule conflict;
 - load within limit or approved overload.
 
-Normal enrollment is active without additional approval by default. Overloads remain pending until Dean approval and cannot create the additional enrollment early.
+Normal Admin enrollment is active without additional approval by default. Professor-requested changes and overloads remain pending until Dean approval and cannot change enrollment early.
 
 ### Scheduling
 

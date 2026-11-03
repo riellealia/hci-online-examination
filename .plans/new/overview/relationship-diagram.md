@@ -64,13 +64,19 @@ Faculty Coordinator selects an offering and Professor
 ## Student enrollment and overload flow
 
 ```text
-Faculty Coordinator selects Student and offering
+Admin selects Student and offering
 → system checks curriculum, capacity, duplicate enrollment, load, and schedule
 → within limit: enrollment becomes active
 → above limit: overload request becomes Pending
-→ Admin approves or rejects with remarks
+→ Dean approves or rejects with remarks
 → approved enrollment becomes active
 → decision and resulting change are logged
+
+Professor selects a Student and one of the Professor's approved active offerings
+→ add, move, or remove is saved as Pending without changing enrollment
+→ Dean approves or rejects with remarks
+→ approval revalidates and applies the exact proposal
+→ Professor and affected Student are notified
 ```
 
 ## Academic-period rollover

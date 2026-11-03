@@ -57,9 +57,9 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 7 — End-to-end regression and tracker reconciliation
 
-- [ ] Test direct Admin enrollment, pending Faculty request, Dean approval/rejection, stale approval, overload, notifications, audit history, and exam eligibility.
-- [ ] Run the complete test suite and document any environment-only cleanup failures separately.
-- [ ] Reconcile local task statuses without changing GitHub ownership unless explicitly requested.
+- [x] Test direct Admin enrollment, pending Faculty request, Dean approval/rejection, stale approval, overload, notifications, audit history, and exam eligibility.
+- [x] Run the complete test suite and document any environment-only cleanup failures separately.
+- [x] Reconcile local task statuses without changing GitHub ownership unless explicitly requested.
 
 ## Non-goals for this migration
 

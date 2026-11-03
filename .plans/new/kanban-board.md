@@ -14,6 +14,10 @@ No currently claimed tasks are in active implementation.
 - [#9 Role permissions and limits page](https://github.com/riellealia/hci-online-examination/issues/9) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
 - [#13 Student and Professor load limits](https://github.com/riellealia/hci-online-examination/issues/13) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
 - [#18 Professor hiring and Coordinator appointment](https://github.com/riellealia/hci-online-examination/issues/18) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#24 Student enrollment and transfers](https://github.com/riellealia/hci-online-examination/issues/24) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#30 Professor workflow integration](https://github.com/riellealia/hci-online-examination/issues/30) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#31 Student workflow integration](https://github.com/riellealia/hci-online-examination/issues/31) — Natalia · P1 · implemented and verified locally; GitHub unchanged.
+- [#33 Cross-role testing](https://github.com/riellealia/hci-online-examination/issues/33) — Natalia · P2 · clarified enrollment workflow verified locally; GitHub unchanged.
 
 ## Claimed, not started
 
@@ -38,17 +42,13 @@ These have a named owner in the claim file but still say `Unclaimed` there. Thei
 
 - [#14 Dean Student-overload approvals](https://github.com/riellealia/hci-online-examination/issues/14) · P1.
 - [#21 Faculty Coordinator dashboard](https://github.com/riellealia/hci-online-examination/issues/21) · P1.
-- [#24 Student enrollment and transfers](https://github.com/riellealia/hci-online-examination/issues/24) · P1.
 - [#27 Load calculation and overload requests](https://github.com/riellealia/hci-online-examination/issues/27) · P1.
-- [#30 Professor workflow integration](https://github.com/riellealia/hci-online-examination/issues/30) · P1.
-- [#31 Student workflow integration](https://github.com/riellealia/hci-online-examination/issues/31) · P1.
 - [#15 Admin filterable logs](https://github.com/riellealia/hci-online-examination/issues/15) · P2.
 - [#16 Dean dashboard](https://github.com/riellealia/hci-online-examination/issues/16) · P2.
 - [#20 Dean logs and statistics](https://github.com/riellealia/hci-online-examination/issues/20) · P2.
 - [#28 Availability cards and filters](https://github.com/riellealia/hci-online-examination/issues/28) · P2.
 - [#29 Faculty Coordinator logs](https://github.com/riellealia/hci-online-examination/issues/29) · P2.
 - [#32 Demo accounts and filler data](https://github.com/riellealia/hci-online-examination/issues/32) · P2.
-- [#33 Cross-role testing](https://github.com/riellealia/hci-online-examination/issues/33) · P2.
 - [#34 Documentation and screenshots](https://github.com/riellealia/hci-online-examination/issues/34) · P2.
 
 ## Blocked optional work
