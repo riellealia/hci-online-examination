@@ -15,6 +15,9 @@ This document is the short overview for the next development phase of the Online
 - [Faculty Coordinator detailed plan](extended-detailed.plans/faculty-extended-plan.md)
 - [Shared features and rules](extended-detailed.plans/shared-extended-plan.md)
 - [Optional extensions](extended-detailed.plans/optional-extended-plan.md)
+- [Professor instruction: enrollment and Dean-approval migration](professor-enrollment-approval-plan.md)
+
+> Latest classroom clarification: Admin owns normal Student enrollment; Professor enrollment changes are Dean-approved requests. The linked migration plan supersedes the earlier enrollment-owner summary while this change is implemented locally.
 
 ## Main change
 
