@@ -32,9 +32,9 @@ Each task receives its own test run, commit, and push to `origin/oogabooga`. Do 
 
 ### Task 3 — Dean enrollment-request review
 
-- [ ] Add clear request cards for Student, Professor, action, Subject, current Section, proposed Section, schedule, capacity, load, reason, and history.
-- [ ] Revalidate on approval and leave stale/conflicting requests pending with an audited failure.
-- [ ] Notify the Professor and affected Student after a decision.
+- [x] Add clear request cards for Student, Professor, action, Subject, current Section, proposed Section, schedule, capacity, load, reason, and history.
+- [x] Revalidate on approval and leave stale/conflicting requests pending with an audited failure.
+- [x] Notify the Professor and affected Student after a decision.
 
 ### Task 4 — Admin enrollment ownership
 

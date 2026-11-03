@@ -73,6 +73,7 @@ const ApprovalService = (() => {
     request.history.push({ status: decision, at: changedAt, actorId: actingUser.username, actorRole: role(actingUser.role), remarks: remarks.trim() });
     save(records); audit(decision === 'approved' ? 'approve' : 'reject', request, { remarks: remarks.trim() }, actingUser);
     notice(request.requesterId, `Your ${request.type} request was ${decision}.`, request.id);
+    if (request.type === 'faculty-student-enrollment' && request.proposedChange?.studentId) notice(request.proposedChange.studentId, `Your ${request.proposedChange.subjectCode} enrollment ${request.proposedChange.action} request was ${decision}.`, request.id);
     return clone(request);
   }
   function closeOwn(requestId, nextStatus, remarks = '', suppliedActor = null) {

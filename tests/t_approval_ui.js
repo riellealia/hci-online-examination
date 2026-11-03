@@ -9,15 +9,16 @@ const base = {
     { username: 'coord.001', password: 'c', role: 'coordinator', status: 'active' },
     { username: 'F1', password: 'p', role: 'faculty', status: 'active' },
     { username: 'F2', password: 'p', role: 'faculty', status: 'active' },
-    { username: 'S1', password: 'p', role: 'student', status: 'active' }
+    { username: 'S1', password: 'p', role: 'student', status: 'active' },
+    { username: 'S2', password: 'p', role: 'student', status: 'active' }
   ],
   coordinators: [{ id: 'coord.001', username: 'coord.001', first: 'Andrea', last: 'Cruz' }],
   faculty: [{ id: 'F1', first: 'Maria', last: 'Reyes' }, { id: 'F2', first: 'Jose', last: 'Santos' }],
-  students: [{ id: 'S1', first: 'Juan', last: 'Cruz', sections: ['SEC-1'] }],
-  subjects: [{ code: 'SUB-1', name: 'Human Computer Interaction' }],
+  students: [{ id: 'S1', first: 'Juan', last: 'Cruz', sections: ['SEC-1'] }, { id: 'S2', first: 'Ana', last: 'Reyes', sections: ['SEC-1'] }],
+  subjects: [{ code: 'SUB-1', name: 'Human Computer Interaction', units: 3 }, ...Array.from({length:7},(_,index)=>({code:`BASE-${index}`,name:`Base ${index}`,units:3}))],
   sections: [{ id: 'SEC-1', capacity: 50 }],
   sectionSubjects: [{ sectionId: 'SEC-1', assignments: [{ id: 'OFR-1', subjectCode: 'SUB-1', facultyId: 'F1' }] }],
-  studentEnrollments: [], subjectAssignments: [], allotments: [], exams: [], questions: [], studentSubmissions: [],
+  studentEnrollments: Array.from({length:7},(_,index)=>({id:`BASE-${index}`,studentId:'S1',subjectCode:`BASE-${index}`,sectionId:'SEC-1'})), subjectAssignments: [], allotments: [], exams: [], questions: [], studentSubmissions: [],
   approvalRequests: [], applicationAuditLog: [], notifications: []
 };
 const snapshot = runner => Object.fromEntries(Object.keys(base).map(key => [key, runner.read(key)]));
@@ -47,6 +48,7 @@ coordinator.d.getElementById('coordinatorRequestStatus').dispatchEvent(new coord
 ok(/No matching assignment requests/.test(coordinator.d.getElementById('assignmentRequestList').textContent), 'Coordinator request status filter updates the list');
 
 const shared = snapshot(coordinator);
+shared.approvalRequests.push({id:'APR-FACULTY-1',type:'faculty-student-enrollment',requesterId:'F2',requesterRole:'faculty',targetType:'student-enrollment',targetId:'S2:SUB-1',proposedChange:{action:'add',studentId:'S2',offeringId:'OFR-1',subjectCode:'SUB-1',sectionId:'SEC-1',expectedEnrollment:null},reason:'Place the Student in my active HCI group.',academicPeriod:'2026-1',status:'pending',submittedAt:'2026-09-21T08:00:00Z',reviewerId:'',reviewerRole:'dean',reviewerRemarks:'',decisionAt:'',history:[{status:'pending',at:'2026-09-21T08:00:00Z',actorId:'F2',actorRole:'faculty',remarks:'Place the Student in my active HCI group.'}]});
 let dean = load('dean.html', { ...shared, currentUser: { username: 'dean.demo', role: 'dean' } });
 ok(!dean.blocked && dean.rec.errors.length === 0, 'Dean approval page loads without runtime errors');
 const assignmentId = dean.read('approvalRequests').find(item => item.type === 'professor-assignment').id;
@@ -65,6 +67,15 @@ dean.d.getElementById(`remarks-${overloadId}`).value = 'Academic need and config
 dean.w.reviewAssignment(overloadId, 'approved');
 ok(dean.read('studentEnrollments').some(item => item.studentId === 'S1' && item.overloadApprovalId === overloadId), 'Dean approval creates the additional enrollment');
 ok(dean.read('approvalRequests').find(item => item.id === overloadId).status === 'approved', 'Dean overload decision is retained in request history');
+
+const facultyRequestId='APR-FACULTY-1',facultyCard=dean.d.querySelector('[data-request-type="faculty-student-enrollment"]');
+ok(/Student: Ana Reyes · S2/.test(facultyCard.textContent)&&/Professor: Jose Santos · F2/.test(facultyCard.textContent),'Dean sees the affected Student and requesting Professor');
+ok(/Action: add/.test(facultyCard.textContent)&&/Subject: SUB-1/.test(facultyCard.textContent)&&/Section: Add to SEC-1/.test(facultyCard.textContent),'Dean sees the exact proposed enrollment change');
+ok(/Capacity: 1 \/ 50/.test(facultyCard.textContent)&&/Student load: 0 current · 3 proposed/.test(facultyCard.textContent),'Dean sees current capacity and load checks');
+dean.d.getElementById(`remarks-${facultyRequestId}`).value='Ownership, capacity, schedule, and load verified.';
+dean.w.reviewAssignment(facultyRequestId,'approved');
+ok(dean.read('studentEnrollments').some(item=>item.studentId==='S2'&&item.facultyEnrollmentApprovalId===facultyRequestId),'Dean approval applies the exact Faculty enrollment proposal');
+ok(dean.read('notifications').some(item=>item.userId==='S2'&&item.requestId===facultyRequestId),'affected Student receives the enrollment decision notice');
 
 const afterDean = snapshot(dean);
 let admin = load('admin.html', { ...afterDean, currentUser: { username: 'admin', role: 'admin' } });

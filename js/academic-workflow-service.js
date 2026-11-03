@@ -154,6 +154,11 @@ const AcademicWorkflowService = (() => {
     }
     return{action,existing,target};
   }
+  function reviewFacultyStudentEnrollment(request) {
+    const change=request?.proposedChange||{},records=DB.read('sectionSubjects',[]),enrollments=DB.read('studentEnrollments',[]),target=offeringById(records,change.offeringId),section=DB.read('sections',[]).find(item=>item.id===target?.section.sectionId),occupied=target?new Set(enrollments.filter(item=>item.sectionId===target.section.sectionId&&item.studentId!==change.studentId).map(item=>item.studentId)).size:0,policy=loadPolicyForStudent(change.studentId),load=change.action==='add'?proposedStudentLoad(change.studentId,change.subjectCode):{currentUnits:studentLoad(change.studentId),proposedUnits:studentLoad(change.studentId)};
+    const problems=[];try{validateFacultyStudentEnrollment(change,request?.requesterId)}catch(error){problems.push(error.message)}
+    return{action:change.action,currentSection:change.expectedEnrollment?.sectionId||'',proposedSection:target?.section.sectionId||'',subjectCode:change.subjectCode,offering:target?.assignment||null,schedule:scheduleSlots(target?.assignment),occupied,capacity:Number(section?.capacity)||null,currentUnits:load?.currentUnits??studentLoad(change.studentId),proposedUnits:load?.proposedUnits??studentLoad(change.studentId),policy,problems,canApprove:problems.length===0};
+  }
   function requestFacultyStudentEnrollment({ action, studentId, offeringId = '', subjectCode = '', reason, academicPeriod = '' }, actor = null) {
     const acting=actor||DB.read('currentUser',null),facultyId=acting?.username;
     if(PermissionService.normalizeRole(acting?.role)!=='faculty')fail('Only a Professor may submit this enrollment request.','PERMISSION_DENIED');
@@ -198,7 +203,7 @@ const AcademicWorkflowService = (() => {
     ApprovalService.registerApplyHandler('faculty-student-enrollment', applyFacultyStudentEnrollment);
     return true;
   }
-  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
+  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, reviewFacultyStudentEnrollment, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
 })();
 
 AcademicWorkflowService.install();
