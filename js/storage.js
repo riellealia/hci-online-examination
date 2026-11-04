@@ -99,7 +99,11 @@ function sqliteBootstrap() {
     const migrationRecords = keys.length
       ? Object.fromEntries(Object.entries(local).filter(([key]) => !Object.hasOwn(records, key)))
       : local;
-    if (Object.keys(migrationRecords).length) {
+    // Importing browser-only legacy collections is an Administrator migration.
+    // A Student or Professor may inherit cache keys from a previous login in
+    // the same browser; attempting /api/migrate for those keys makes the
+    // otherwise successful hydration fail and clears their active records.
+    if (serverSession?.role === 'admin' && Object.keys(migrationRecords).length) {
       const migration = new XMLHttpRequest();
       migration.open('POST', '/api/migrate', false);
       migration.setRequestHeader('Content-Type', 'application/json');

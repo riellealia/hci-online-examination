@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Faculty Coordinator Dashboard | New Era University</title>
   <link rel="stylesheet" href="../css/coordinator-student-management.css?v=3">
-  <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/shared-ui.css"><link rel="stylesheet" href="../css/role-dashboard.css?v=32"><link rel="stylesheet" href="../css/dashboard-charts.css"><link rel="stylesheet" href="../css/section-management.css"><link rel="stylesheet" href="../css/professor-management.css"><link rel="stylesheet" href="../css/professor-table-toolbar.css"><link rel="stylesheet" href="../css/professor-overview-table.css"><link rel="stylesheet" href="../css/management-menus.css">
+  <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/shared-ui.css"><link rel="stylesheet" href="../css/role-dashboard.css?v=32"><link rel="stylesheet" href="../css/section-management.css"><link rel="stylesheet" href="../css/professor-management.css"><link rel="stylesheet" href="../css/professor-table-toolbar.css"><link rel="stylesheet" href="../css/professor-overview-table.css"><link rel="stylesheet" href="../css/management-menus.css">
   <script src="../js/storage.js?v=30"></script><script src="../js/demo-data.js"></script><script src="../js/section-service.js"></script><script src="../js/audit-service.js"></script><script src="../js/permission-service.js"></script><script src="../js/approval-service.js"></script><script src="../js/academic-workflow-service.js"></script><script src="../js/grading.js"></script><script src="../js/student-profile.js"></script><script src="../js/auth.js"></script><script src="../js/ui.js"></script><script src="../js/admin-table-tools.js"></script><script src="../js/section-management.js"></script><script src="../js/professor-management.js?v=32"></script><script src="../js/subject-schedule.js?v=32"></script><script src="../js/coordinator-student-management.js?v=2"></script>
 </head>
 <body data-role="coordinator">
@@ -26,7 +26,6 @@
       <button class="role-action-card" onclick="coordinatorNav.show('schedulesSection')"><span class="role-action-icon">&#9716;</span><strong>Subject Schedule</strong><span>Set each subject-Section place, weekdays, and meeting time.</span></button>
       <button class="role-action-card role-action-card-wide" onclick="coordinatorNav.show('logsSection')"><span class="role-action-icon">&#9719;</span><strong>Coordinator logs</strong><span>Review assignment, enrollment, schedule, and load actions.</span></button>
     </section>
-    <section id="coordinatorDashboardCharts" class="dashboard-charts" aria-label="Faculty Coordinator dashboard charts"></section>
   </main>
   <section id="sectionManagementSection" class="role-workspace"><div id="coordinatorSectionsRoot"></div></section>
   <section id="professorManagementSection" class="role-workspace"><div id="professorManagementRoot"></div></section>
@@ -78,6 +77,5 @@
     SubjectSchedule.mount();
     CoordinatorStudentManagement.render();
   </script>
-  <script src="../js/dashboard-charts.js"></script>
 </body>
 </html>

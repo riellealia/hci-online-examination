@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/shared-ui.css">
   <link rel="stylesheet" href="../css/role-dashboard.css">
-  <link rel="stylesheet" href="../css/dashboard-charts.css">
   <link rel="stylesheet" href="../css/governance.css">
   <script src="../js/storage.js"></script><script src="../js/demo-data.js"></script><script src="../js/audit-service.js"></script><script src="../js/permission-service.js"></script><script src="../js/approval-service.js"></script><script src="../js/academic-workflow-service.js"></script><script src="../js/auth.js"></script><script src="../js/ui.js"></script><script src="../js/dean-personnel.js"></script>
 </head>
@@ -27,7 +26,6 @@
       <button class="role-action-card" onclick="deanNav.show('statisticsSection')"><span class="role-action-icon">&#8645;</span><strong>College statistics</strong><span>Inspect personnel, teaching-load, examination, and grading summaries.</span></button>
       <button class="role-action-card" onclick="deanNav.show('logsSection')"><span class="role-action-icon">&#9719;</span><strong>Activity logs</strong><span>Review college-relevant personnel and approval activity.</span></button>
     </section>
-    <section id="deanDashboardCharts" class="dashboard-charts" aria-label="Dean dashboard charts"></section>
   </main>
   <section id="membersSection" class="role-workspace"><h2>Member management</h2><p>Hire Professors and appoint Faculty Coordinators under Administrator-configured authority.</p><div id="deanPersonnelRoot"></div></section>
   <section id="approvalsSection" class="role-workspace"><h2>Professor-assignment approvals</h2><p>Review Coordinator proposals. Rejections require remarks, and stale requests remain pending.</p><div class="role-filter-bar"><input id="deanApprovalSearch" type="search" placeholder="Search requests"><select id="deanApprovalStatus"><option value="">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="withdrawn">Withdrawn</option><option value="cancelled">Cancelled</option></select></div><div class="role-workflow-list"><div id="deanApprovalList" class="role-request-list"></div></div></section>
@@ -70,6 +68,5 @@
     renderDeanStatistics();
     renderDeanLogs();
   </script>
-  <script src="../js/dashboard-charts.js"></script>
 </body>
 </html>

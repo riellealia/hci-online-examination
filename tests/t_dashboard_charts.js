@@ -1,33 +1,22 @@
-const {load,SEED}=require('./harness');
+const fs=require('fs'),path=require('path');
+const root=path.join(__dirname,'..');
 const ok=(condition,message)=>{if(!condition)throw new Error(message);console.log(`  ✅ ${message}`)};
-console.log('=== ROLE DASHBOARD CHARTS. Role-specific operational detail ===');
+console.log('=== ROLE DASHBOARD RESTORATION. Preserve the original working views ===');
 
-function rolePage(page,role,username){
-  const seed=SEED();
-  seed.currentUser={username,role};
-  if(!seed.users.some(user=>user.username===username))seed.users.push({username,password:'p',role,status:'active'});
-  seed.sections=[{id:'A',program:'BSCS',yearLevel:1,capacity:40}];
-  seed.sectionSubjects=[{sectionId:'A',assignments:[{subjectCode:'SUB1',facultyId:'F1'},{subjectCode:'SUB2',facultyId:''}]}];
-  seed.studentEnrollments=[{studentId:'S1',subjectCode:'SUB1',sectionId:'A'}];
-  seed.approvalRequests=[{id:'R1',status:'pending'},{id:'R2',status:'approved'}];
-  seed.studentSubmissions=[{examId:'e1',studentId:'S1',submittedAt:'2026-10-20T10:00:00+08:00',total:10,answers:[{awarded:8}]}];
-  return load(page,seed);
-}
+const pages=['dean','coordinator','faculty','student'].map(name=>({name,html:fs.readFileSync(path.join(root,'html',`${name}.html`),'utf8')}));
+pages.forEach(({name,html})=>{
+  ok(!html.includes('dashboard-charts.css')&&!html.includes('dashboard-charts.js'),`${name} no longer loads the replacement chart dashboard`);
+  ok(!html.includes(`${name}DashboardCharts`),`${name} no longer inserts a chart panel before the working content`);
+});
 
-const dean=rolePage('dean.html','dean','dean.demo');
-ok(dean.rec.errors.length===0&&dean.d.querySelectorAll('#deanDashboardCharts article').length===5,'Dean sees the five-area academic bento dashboard');
-ok(/Application completion/.test(dean.d.getElementById('deanDashboardCharts').textContent),'Dean dashboard exposes detailed application progress');
+const faculty=pages.find(page=>page.name==='faculty').html;
+ok(/<div class="subjects-grid" id="subjectList">/.test(faculty),'Professor dashboard keeps the original Subject cells');
+ok(faculty.indexOf('id="subjectList"')<faculty.indexOf('id="exams-tab"'),'Professor Subjects remain the first working dashboard view');
 
-const coordinator=rolePage('coordinator.html','coordinator','coord.demo');
-ok(coordinator.rec.errors.length===0&&coordinator.d.querySelectorAll('#coordinatorDashboardCharts article').length===5,'Coordinator sees the five-area academic bento dashboard');
-ok(/Assigned/.test(coordinator.d.getElementById('coordinatorDashboardCharts').textContent)&&/BSCS/.test(coordinator.d.getElementById('coordinatorDashboardCharts').textContent),'Coordinator dashboard uses assignment and program data');
+const student=pages.find(page=>page.name==='student').html;
+ok(/class="stats-grid"/.test(student),'Student dashboard keeps the original statistics cells');
+ok(/id="studentSubjectCards"/.test(student)&&/id="resultSubjectCards"/.test(student),'Student Subjects and Results cells remain available');
 
-const faculty=rolePage('faculty.html','faculty','F1');
-ok(faculty.rec.errors.length===0&&faculty.d.querySelectorAll('#facultyDashboardCharts article').length===5,'Professor sees the five-area teaching bento dashboard');
-ok(/SUB1 80/.test(faculty.d.querySelector('#facultyDashboardCharts .dashboard-vertical-bars').getAttribute('aria-label')),'Professor performance chart reports calculated percentages');
-
-const student=rolePage('student.html','student','S1');
-ok(student.rec.errors.length===0&&student.d.querySelectorAll('#studentDashboardCharts article').length===5,'Student sees the five-area learning bento dashboard');
-ok(/SUB1 80/.test(student.d.querySelector('#studentDashboardCharts .dashboard-vertical-bars').getAttribute('aria-label')),'Student performance chart reports the latest awarded percentage');
-
-[dean,coordinator,faculty,student].forEach(page=>page.w.close());
+const dean=pages.find(page=>page.name==='dean').html,coordinator=pages.find(page=>page.name==='coordinator').html;
+ok(/class="role-action-grid"/.test(dean)&&/class="role-action-grid"/.test(coordinator),'Dean and Coordinator keep their original action-card dashboards');
+ok(!fs.existsSync(path.join(root,'css','dashboard-charts.css'))&&!fs.existsSync(path.join(root,'js','dashboard-charts.js')),'Unused replacement dashboard assets were removed');

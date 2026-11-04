@@ -15,7 +15,7 @@ assert.strictEqual(permitted(session('faculty'), 'users', 'PUT'), false);
 assert.strictEqual(permitted(session('dean'), 'approvalRequests', 'PUT'), true);
 assert.strictEqual(permitted(session('coordinator'), 'studentEnrollments', 'PUT'), false);
 assert.throws(() => requireCollectionAccess(session('student'), 'users', 'GET'), error => error.status === 403 && error.code === 'COLLECTION_FORBIDDEN');
-assert.deepStrictEqual(visibleRecords(session('student'), { users: [], exams: [], applicationAuditLog: [] }), { exams: [] });
+assert.deepStrictEqual(visibleRecords(session('student'), { users: [{username:'student.demo',role:'student'},{username:'other.student',role:'student'}], exams: [], applicationAuditLog: [] }), { exams: [], users: [{username:'student.demo',role:'student'}] });
 const records={studentEnrollments:[{id:'E1',studentId:'S1',offeringId:'OWN'}],sectionSubjects:[{sectionId:'A',assignments:[{id:'OWN',subjectCode:'SUB1',facultyId:'faculty.demo'},{id:'OTHER',subjectCode:'SUB2',facultyId:'another.faculty'}]}],approvalRequests:[]};
 const store={read:(key,fallback)=>records[key]||fallback};
 assert.throws(()=>validateProtectedWrite(store,session('faculty'),'studentEnrollments',[...records.studentEnrollments,{id:'E2',studentId:'S2',offeringId:'OWN'}]),/Dean approval/i);

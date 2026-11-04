@@ -34,7 +34,6 @@ const SECTION_MANAGEMENT=fs.readFileSync(DIR+'../js/section-management.js','utf8
 const PROFESSOR_MANAGEMENT=fs.readFileSync(DIR+'../js/professor-management.js','utf8');
 const SUBJECT_SCHEDULE=fs.readFileSync(DIR+'../js/subject-schedule.js','utf8');
 const COORDINATOR_STUDENT_MANAGEMENT=fs.readFileSync(DIR+'../js/coordinator-student-management.js','utf8');
-const DASHBOARD_CHARTS=fs.readFileSync(DIR+'../js/dashboard-charts.js','utf8');
 
 function load(page, seed, opts={}){
   // Inline auth.js: jsdom will not fetch it from disk.
@@ -62,7 +61,6 @@ function load(page, seed, opts={}){
     .replace(/<script src="\.\.\/js\/professor-management\.js(?:\?[^\"]*)?"><\/script>/, `<script>${PROFESSOR_MANAGEMENT}</script>`)
     .replace(/<script src="\.\.\/js\/subject-schedule\.js(?:\?[^\"]*)?"><\/script>/, `<script>${SUBJECT_SCHEDULE}</script>`)
     .replace(/<script src="\.\.\/js\/coordinator-student-management\.js(?:\?[^\"]*)?"><\/script>/, `<script>${COORDINATOR_STUDENT_MANAGEMENT}</script>`)
-    .replace('<script src="../js/dashboard-charts.js"></script>', `<script>${DASHBOARD_CHARTS}</script>`)
     .replace('<script src="../js/dates.js"></script>', `<script>${DATES}</script>`)
     .replace('<script src="../js/exam-timing.js"></script>', `<script>${TIMING}</script>`)
     .replace('<script src="../js/grading.js"></script>', `<script>${GRADING}</script>`);

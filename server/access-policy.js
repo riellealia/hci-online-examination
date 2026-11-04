@@ -32,7 +32,13 @@ function requireCollectionAccess(session, key, method) {
 }
 
 function visibleRecords(session, records) {
-  return Object.fromEntries(Object.entries(records).filter(([key]) => permitted(session, key, 'GET')));
+  const visible = Object.fromEntries(Object.entries(records).filter(([key]) => permitted(session, key, 'GET')));
+  // requireRole() verifies that the signed-in account still exists. Students
+  // must receive that one record without gaining access to the user directory.
+  if (session?.role === 'student' && Array.isArray(records.users)) {
+    visible.users = records.users.filter(item => item.username === session.username);
+  }
+  return visible;
 }
 
 module.exports = { permitted, requireCollectionAccess, visibleRecords, WRITE_ACCESS, READ_DENY };
