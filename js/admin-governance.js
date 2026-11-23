@@ -45,7 +45,7 @@ const AdminGovernance = (() => {
     const n = names();
     return read('users').map(u => {
       const sys = norm(u.role), status = u.disabled === true ? 'Disabled' : String(u.status || u.lifecycleStatus || 'active').replace(/^\w/, c => c.toUpperCase());
-      return { username: u.username, name: `${u.first || ''} ${u.last || ''}`.trim() || n.get(u.username) || u.username, sys, status, custom: roleOfUser(u.username, sys) };
+      return { username: u.username, name: `${u.first || ''} ${u.last || ''}`.trim() || n.get(u.username) || u.username, sys, status, custom: roleOfUser(u.username, sys), managed: Boolean(u.createdBy) || (Boolean(u.effectiveDate) && !/^DEMO-/i.test(String(u.username || ''))) };
     });
   }
   function builtinRoles() {
@@ -179,9 +179,46 @@ const AdminGovernance = (() => {
   function manageUser(username, after) {
     const u = users().find(x => x.username === username); if (!u) return;
     const options = customRoles().filter(r => norm(r.baseRole) === u.sys);
-    const m = modal('Manage access', `<div class="gv-user-head">${avatar(u.name, sysColor(u.sys))}<div><strong>${esc(u.name)}</strong><small>${esc(u.username)} · ${esc(sysLabel(u.sys))}</small></div>${statusPill(u.status)}</div><label class="gv-form-row">Permission role<select id="gvUserRole"><option value="">Default ${esc(sysLabel(u.sys))}</option>${options.map(r => `<option value="${esc(r.id)}"${u.custom?.id === r.id ? ' selected' : ''}>${esc(r.name)}</option>`).join('')}</select></label><p class="gv-note">${options.length ? 'Only roles built on this account’s system role are listed.' : `No custom roles are built on ${esc(sysLabel(u.sys))} yet. <button type="button" class="gv-inline-link" data-gv-create-for="${esc(u.sys)}">Create one now</button>.`} Account status is changed in Account Lifecycle.</p>`, `<button type="button" class="gv-btn" data-gv-close>Cancel</button><button type="button" class="gv-btn gv-primary" data-gv-save>Save</button>`);
+    const m = modal('Manage access', `<div class="gv-user-head">${avatar(u.name, sysColor(u.sys))}<div><strong>${esc(u.name)}</strong><small>${esc(u.username)} · ${esc(sysLabel(u.sys))}</small></div>${statusPill(u.status)}</div><label class="gv-form-row">Permission role<select id="gvUserRole"><option value="">Default ${esc(sysLabel(u.sys))}</option>${options.map(r => `<option value="${esc(r.id)}"${u.custom?.id === r.id ? ' selected' : ''}>${esc(r.name)}</option>`).join('')}</select></label><p class="gv-note">${options.length ? 'Only roles built on this account’s system role are listed.' : `No custom roles are built on ${esc(sysLabel(u.sys))} yet. <button type="button" class="gv-inline-link" data-gv-create-for="${esc(u.sys)}">Create one now</button>.`} Account status is changed in Account Lifecycle.</p>${u.managed ? `<hr style="margin:14px 0;border:0;border-top:1px solid rgba(128,128,128,.25)"><label class="gv-form-row">System role<select id="gvChangeSys">${SYSTEM.map(([k, l]) => `<option value="${k}"${u.sys === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label><label class="gv-form-row">Reason for change<input id="gvChangeReason" placeholder="Required, e.g. Appointed as coordinator"></label><p class="gv-note">Changing the system role moves the account and its profile to the new role, clears its permission role, signs the user out, and is recorded in the audit log. It is refused if the account still has enrollments, submissions, exams or subject assignments.</p><p id="gvChangeMsg" class="gv-note" role="alert"></p><button type="button" class="gv-btn" data-gv-change-role>Change system role</button>` : `<hr style="margin:14px 0;border:0;border-top:1px solid rgba(128,128,128,.25)"><p class="gv-note">This is a demo or seeded account, so its system role is locked. Accounts you create with Add user can have their role changed.</p>`}`, `<button type="button" class="gv-btn" data-gv-close>Cancel</button><button type="button" class="gv-btn gv-primary" data-gv-save>Save</button>`);
     m.querySelector('[data-gv-create-for]')?.addEventListener('click', () => { m.remove(); state.tab = 'roles'; show('roles'); newRole(u.sys); });
-    m.querySelector('[data-gv-save]').addEventListener('click', () => { setMembership(username, m.querySelector('#gvUserRole').value, u.sys); m.remove(); (after || renderUsers)(); });
+    const applySystemRole = async () => {
+      const role = m.querySelector('#gvChangeSys').value, reason = m.querySelector('#gvChangeReason').value.trim(), msg = m.querySelector('#gvChangeMsg');
+      msg.textContent = ''; msg.style.cssText = '';
+      if (!reason) { msg.textContent = 'Please enter a reason for the change.'; msg.style.cssText = 'color:#b42318;font-weight:600'; msg.scrollIntoView?.({ block: 'center' }); return false; }
+      if (!confirm(`Change ${u.name} from ${sysLabel(u.sys)} to ${sysLabel(role)}?`)) return false;
+      return changeSystemRole(username, role, reason, msg);
+    };
+    m.querySelector('[data-gv-save]').addEventListener('click', async () => {
+      const picked = m.querySelector('#gvChangeSys')?.value;
+      if (u.managed && picked && picked !== u.sys) { if (await applySystemRole()) { m.remove(); (after || renderUsers)(); } return; }
+      setMembership(username, m.querySelector('#gvUserRole').value, u.sys); m.remove(); (after || renderUsers)();
+    });
+    m.querySelector('[data-gv-change-role]').addEventListener('click', async () => {
+      const role = m.querySelector('#gvChangeSys').value, reason = m.querySelector('#gvChangeReason').value.trim(), msg = m.querySelector('#gvChangeMsg');
+      msg.textContent = ''; msg.style.cssText = '';
+      if (role === u.sys) { msg.textContent = 'Pick a different system role first.'; return; }
+      if (!reason) { msg.textContent = 'Please enter a reason for the change.'; return; }
+      if (!confirm(`Change ${u.name} from ${sysLabel(u.sys)} to ${sysLabel(role)}?`)) return;
+      if (await changeSystemRole(username, role, reason, msg)) { m.remove(); (after || renderUsers)(); }
+    });
+  }
+  async function changeSystemRole(username, role, reason, msgEl) {
+    try {
+      if (!(/^https?:$/.test(location.protocol) && typeof fetch === 'function' && location.port === '3000')) throw new Error('Changing a system role needs the server. Open the app at http://localhost:3000.');
+      const token = sessionStorage.getItem('serverSessionToken');
+      const r = await fetch(`/api/accounts/${encodeURIComponent(username)}/change-role`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ role, reason }) });
+      const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || 'The change was rejected.');
+      if (typeof sqliteBootstrap === 'function') await sqliteBootstrap();
+      if (typeof loadAll === 'function') loadAll();
+      if (typeof notify === 'function') notify(`${username} is now a ${sysLabel(role)}.`, 'success');
+      return true;
+    } catch (error) {
+      let text = error.message || 'The change was rejected.';
+      if (/route not found/i.test(text)) text += ' The server is running old code. Stop it with Ctrl+C, run npm start again, and reload this page.';
+      if (msgEl) { msgEl.textContent = text; msgEl.style.cssText = 'color:#b42318;font-weight:600'; msgEl.scrollIntoView?.({ block: 'center' }); }
+      if (typeof notify === 'function') notify(text, 'error');
+      return false;
+    }
   }
   function setMembership(username, roleId, sys) {
     const roles = customRoles().map(r => norm(r.baseRole) === sys ? { ...r, members: r.members.filter(x => x !== username) } : r);

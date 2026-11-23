@@ -92,6 +92,8 @@ async function api(req,res,url) {
   if(url.pathname==='/api/backups/restore'&&req.method==='POST'){const session=auth.requireSession(req,['admin']);const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,backupRestore.restore(parsed.backup,session));}
   if(url.pathname==='/api/accounts'&&req.method==='POST'){const session=auth.requireSession(req,['admin']);return send(res,201,personnel.createAccount(JSON.parse(await readBody(req)||'{}'),session));}
   if(url.pathname==='/api/personnel/professors'&&req.method==='POST'){const session=auth.requireSession(req,['dean']);return send(res,201,personnel.createAccount({...JSON.parse(await readBody(req)||'{}'),role:'faculty'},session,'dean'));}
+  const roleChange=url.pathname.match(/^\/api\/accounts\/([^/]+)\/change-role$/);
+  if(roleChange&&req.method==='POST'){const session=auth.requireSession(req,['admin']);return send(res,200,personnel.changeRole(decodeURIComponent(roleChange[1]),JSON.parse(await readBody(req)||'{}'),session));}
   const appointmentAction=url.pathname.match(/^\/api\/personnel\/([^/]+)\/appoint-coordinator$/);
   if(appointmentAction&&req.method==='POST'){const session=auth.requireSession(req,['dean']);return send(res,200,personnel.appointCoordinator(decodeURIComponent(appointmentAction[1]),JSON.parse(await readBody(req)||'{}'),session));}
   const periodAction=url.pathname.match(/^\/api\/academic-periods\/([^/]+)\/(impact|activate|close|archive)$/);
