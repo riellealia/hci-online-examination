@@ -48,8 +48,50 @@ const SectionService = {
       if(offer.periodStatus&&offer.periodStatus!=='active')return false;
       if(context.periodId&&offer.academicPeriodId&&offer.academicPeriodId!==context.periodId)return false;
       const stored=sectionRows.find(item=>this.normaliseId(item.id)===this.normaliseId(offer.sectionId))||{},section={...this.detailsFromId(offer.sectionId),...stored},scoped=curriculum.filter(item=>item.program===section.program&&Number(item.yearLevel)===Number(section.yearLevel)&&item.status!=='archived'&&item.removed!==true);
-      return !scoped.length||scoped.some(item=>item.subjectCode===offer.subjectCode&&item.term===context.term);
+      if(!scoped.length)return true;
+      const matched=scoped.filter(item=>item.subjectCode===offer.subjectCode);
+      return !matched.length||matched.some(item=>item.term===context.term);
     });
+  },
+  ensureOfferingsForSection(section, sectionSubjects, curricula) {
+    const context=this.currentAcademicContext();
+    const list=Array.isArray(sectionSubjects)?sectionSubjects.map(r=>({...r,assignments:[...(r.assignments||[])]})):[];
+    if(!section?.id||!context.active)return{records:list,added:0};
+    const info={...this.detailsFromId(section.id),...section};
+    const curriculum=Array.isArray(curricula)?curricula:(typeof DB!=='undefined'?DB.read('curricula',[]):[]);
+    const subjects=curriculum.filter(item=>item.program===info.program&&Number(item.yearLevel)===Number(info.yearLevel)&&item.term===context.term&&item.status!=='archived'&&item.removed!==true);
+    if(!subjects.length)return{records:list,added:0};
+    let record=list.find(item=>this.normaliseId(item.sectionId)===this.normaliseId(section.id));
+    if(!record){record={sectionId:section.id,assignments:[]};list.push(record);}
+    const known=new Set(record.assignments.map(a=>String(a.subjectCode||'').toUpperCase()));
+    let added=0;
+    subjects.forEach((subject,index)=>{
+      const code=String(subject.subjectCode||'').toUpperCase();
+      if(!code||known.has(code))return;
+      known.add(code);
+      record.assignments.push({id:`OFR-${section.id}-${code}-${record.assignments.length+1}`,subjectCode:code,facultyId:''});
+      added++;
+    });
+    return{records:list,added};
+  },
+  ensureOfferingsForSubject(entry, sections, sectionSubjects) {
+    const context=this.currentAcademicContext();
+    const list=Array.isArray(sectionSubjects)?sectionSubjects.map(r=>({...r,assignments:[...(r.assignments||[])]})):[];
+    const code=String(entry?.subjectCode||entry?.code||'').trim().toUpperCase();
+    if(!code||!context.active||(entry?.term&&entry.term!==context.term))return{records:list,added:0};
+    const sectionRows=Array.isArray(sections)?sections:(typeof DB!=='undefined'?DB.read('sections',[]):[]);
+    let added=0;
+    sectionRows.forEach(section=>{
+      if(section.status==='archived')return;
+      const info={...this.detailsFromId(section.id),...section};
+      if(info.program!==entry.program||Number(info.yearLevel)!==Number(entry.yearLevel))return;
+      let record=list.find(item=>this.normaliseId(item.sectionId)===this.normaliseId(section.id));
+      if(!record){record={sectionId:section.id,assignments:[]};list.push(record);}
+      if(record.assignments.some(a=>String(a.subjectCode||'').toUpperCase()===code))return;
+      record.assignments.push({id:`OFR-${section.id}-${code}-${record.assignments.length+1}`,subjectCode:code,facultyId:''});
+      added++;
+    });
+    return{records:list,added};
   },
   offeringFor(sectionId, subjectCode, sectionSubjects) {
     return this.offerings(sectionSubjects).find(item=>item.sectionId===sectionId&&item.subjectCode===subjectCode)||null;
