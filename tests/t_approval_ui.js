@@ -1,4 +1,5 @@
 const { load } = require('./harness');
+const assert = require('node:assert/strict');
 const ok = (condition, message) => console.log(`  ${condition ? '✅' : '❌'} ${message}`);
 
 const base = {
@@ -25,12 +26,19 @@ const snapshot = runner => Object.fromEntries(Object.keys(base).map(key => [key,
 
 console.log('=== APPROVAL UI. Coordinator submission and reviewer decisions ===');
 let coordinator = load('coordinator.html', { ...base, currentUser: { username: 'coord.001', role: 'coordinator' } });
+coordinator.w.RequestActions.mount();
 ok(!coordinator.blocked && coordinator.rec.errors.length === 0, 'Coordinator workflow page loads without runtime errors');
 coordinator.d.getElementById('assignmentOffering').value = 'OFR-1';
 coordinator.d.getElementById('assignmentProfessor').value = 'F2';
 coordinator.d.getElementById('assignmentReason').value = 'Balance the current teaching load.';
 coordinator.d.getElementById('assignmentRequestForm').dispatchEvent(new coordinator.w.Event('submit', { bubbles: true, cancelable: true }));
 let requests = coordinator.read('approvalRequests');
+const application = coordinator.d.querySelector('#allRequestList [data-request-type="professor-assignment"]');
+assert.match(application.querySelector('header strong').textContent, /Santos, Jose/);
+const state = application.querySelector('.rq-application-state');
+assert.equal(state.firstElementChild.textContent, 'Pending');
+assert.ok(state.querySelector('button[aria-label="Withdraw request"] svg'));
+assert.match(application.querySelector('summary').textContent, /History \(1\)/);
 ok(requests.length === 1 && requests[0].status === 'pending', 'Coordinator submits a pending Professor-assignment request');
 ok(coordinator.read('sectionSubjects')[0].assignments[0].facultyId === 'F1', 'submission does not change the Professor before approval');
 
@@ -56,6 +64,8 @@ dean.d.getElementById(`remarks-${assignmentId}`).value = 'Schedule and load veri
 dean.w.reviewAssignment(assignmentId, 'approved');
 ok(dean.read('sectionSubjects')[0].assignments[0].facultyId === 'F2', 'Dean approval applies the proposed Professor assignment');
 ok(dean.read('approvalRequests').find(item => item.id === assignmentId).status === 'approved', 'Dean decision is retained in request history');
+const decisionMail = dean.read('notifications').filter(item => item.requestId === assignmentId && item.title);
+assert.deepEqual(Array.from(decisionMail, item => item.userId).sort(), ['F2', 'coord.001']);
 ok(dean.d.querySelector('#deanApprovalList .role-history'), 'Dean can inspect retained request history');
 ok(dean.d.querySelectorAll('#deanLogTable tbody tr').length >= 1, 'Dean activity log refreshes after a decision');
 
@@ -82,4 +92,8 @@ let admin = load('admin.html', { ...afterDean, currentUser: { username: 'admin',
 ok(!admin.d.querySelector('#sidebar [data-panel="overloadApprovalSection"]'), 'Admin no longer has an overload approval queue');
 ok(dean.read('applicationAuditLog').some(item => item.details?.requestId === overloadId), 'Dean overload approval creates a linked audit event');
 
-coordinator.dom.window.close(); dean.dom.window.close(); admin.dom.window.close();
+setImmediate(() => {
+  coordinator.dom.window.close();
+  dean.dom.window.close();
+  admin.dom.window.close();
+});

@@ -8,8 +8,13 @@
 <script src="../js/section-service.js"></script>
 <script src="../js/audit-service.js"></script>
 <script src="../js/permission-service.js?v=20261120-tri"></script>
-<script src="../js/approval-service.js?v=20261120-roles"></script>
+<script src="../js/approval-service.js?v=20261126-decision-mail"></script>
 <script src="../js/academic-workflow-service.js"></script>
+<link rel="stylesheet" href="../css/section-management.css">
+<link rel="stylesheet" href="../css/coordinator-pages.css">
+<script src="../js/section-management.js"></script>
+<script src="../js/request-actions.js"></script>
+<script src="../js/coordinator-pages.js"></script>
 <script src="../js/admin-table-tools.js?v=20261125-inline"></script><script src="../js/student-card-tools.js"></script>
 <script src="../js/auth.js?v=20261119-keep"></script><script src="../js/page-permissions.js?v=20261120-exp"></script>
 <script src="../js/role-access.js?v=20261120-exp"></script>
@@ -932,7 +937,7 @@
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
 <script src="../js/grading.js?v=20261125-attempts"></script>
-<script src="../js/ui.js?v=20261120-mail"></script>
+<script src="../js/ui.js?v=20261126-decision-mail"></script>
 <script src="../js/role-profile.js?v=20261125-preview2"></script>
 <link rel="stylesheet" href="../css/course-editor.css?v=20261125-rules2"><script src="../js/rich-text.js?v=20261125-img"></script><script src="../js/course-editor.js?v=20261125-rules2"></script><script src="../js/faculty-subject-workspace.js?v=20261125-rules"></script>
 <script src="../js/faculty-dashboard.js?v=20261118-5"></script>
@@ -1126,6 +1131,7 @@
     <div id="students-tab" class="tab-content">
         <div id="studentsView"></div>
     </div>
+    <section id="sectionManagementSection" class="tab-content"><div id="coordinatorSectionsRoot"></div></section>
     <div id="reports-tab" class="tab-content">
         <div id="reportsView"></div>
     </div>
@@ -1498,6 +1504,7 @@ function switchTab(tabName, btnEl) {
 }
 
 function onFacultySection(id) {
+    if (id === 'sectionManagementSection') SectionManagement.render();
     if (leaveExamWorkspace()) return;
     // Keep the nested subject highlighted only while its workspace is open.
     if (typeof FacultySubjectNav !== 'undefined' && id !== 'subject-workspace-tab') FacultySubjectNav.mark(null);
@@ -4041,11 +4048,14 @@ facultyNav = mountSidebar({
         { id: 'exams-tab',    label: 'My Exams',    icon: '📝' },
         { id: 'students-tab', label: 'My Students', icon: '🎓' }
         ,{ id: 'reports-tab', label: 'Reports', icon: '⚑' }
+        ,{ id: 'sectionManagementSection', label: 'Section Management', icon: '▤' }
     ],
-    panels: ['dashboard-tab', 'subjects-tab', 'exams-tab', 'students-tab', 'reports-tab', 'subject-workspace-tab'],
+    panels: ['dashboard-tab', 'subjects-tab', 'exams-tab', 'students-tab', 'reports-tab', 'subject-workspace-tab', 'sectionManagementSection'],
     titleEl: null,
     onSelect: onFacultySection
 });
+SectionManagement.mount();
+CoordinatorPages.mount();
 if(typeof FacultySubjectNav!=='undefined')FacultySubjectNav.mount();
 if(pendingFacultyReportCount){const reportLink=document.querySelector('#sidebar [data-panel="reports-tab"]');reportLink?.insertAdjacentHTML('beforeend',`<span class="nav-count" aria-label="${pendingFacultyReportCount} pending reports">${pendingFacultyReportCount}</span>`);}
 const facultyRouteParts=location.hash.replace(/^#/,'').split('/');

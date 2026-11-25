@@ -1557,6 +1557,7 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
   AdminWorkspaces.mount();
   AdminGovernance.mount();
   SectionManagement.mount();
+  if (typeof CoordinatorPages !== 'undefined') CoordinatorPages.mount();
 
   // Close modals when clicking outside
   window.addEventListener('click',function(e){

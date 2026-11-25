@@ -2,11 +2,11 @@
    card table with initials, mini load bars and table tools. */
 /* The page banner already names the page: hide the repeated title,
    keep its action button (Add section). */
-body.role-shell-ready[data-role="coordinator"] .ck-page :is(.section-workspace-head,.professor-workspace-head,.student-management-head)>div:first-child{display:none!important}
-body.role-shell-ready[data-role="coordinator"] .ck-page :is(.section-workspace-head,.professor-workspace-head,.student-management-head){display:flex;justify-content:flex-end;min-height:0;margin:0 0 12px!important;padding:0!important;border:0!important;background:none!important}
-body.role-shell-ready[data-role="coordinator"] .ck-page :is(.professor-workspace-head,.student-management-head):not(:has(button)){display:none!important}
+body.role-shell-ready:is([data-role="coordinator"],[data-role="admin"],[data-role="dean"]) .ck-page :is(.section-workspace-head,.professor-workspace-head,.student-management-head)>div:first-child{display:none!important}
+body.role-shell-ready:is([data-role="coordinator"],[data-role="admin"],[data-role="dean"]) .ck-page :is(.section-workspace-head,.professor-workspace-head,.student-management-head){display:flex;justify-content:flex-end;min-height:0;margin:0 0 12px!important;padding:0!important;border:0!important;background:none!important}
+body.role-shell-ready:is([data-role="coordinator"],[data-role="admin"],[data-role="dean"]) .ck-page :is(.professor-workspace-head,.student-management-head):not(:has(button)){display:none!important}
 /* Stat tiles are replaced by the charts. */
-body.role-shell-ready[data-role="coordinator"] .ck-page :is(.section-summary,.professor-summary){display:none!important}
+body.role-shell-ready:is([data-role="coordinator"],[data-role="admin"],[data-role="dean"]) .ck-page :is(.section-summary,.professor-summary){display:none!important}
 
 .ck-insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0 0 18px}
 .ck-card{min-width:0;padding:18px 20px;border:1px solid var(--pr-line);border-radius:18px;background:var(--pr-surface);box-shadow:0 7px 20px rgba(28,36,42,.06);color:var(--pr-ink);font-family:var(--pr-font)}
@@ -63,3 +63,5 @@ body.role-shell-ready[data-role="coordinator"] .ck-page :is(.section-summary,.pr
 /* Student Management: search bar and table read as one card. */
 .ck-page .student-management-tools{margin:0!important;border:1px solid var(--pr-line)!important;border-bottom:0!important;border-radius:18px 18px 0 0!important;background:var(--pr-surface)!important}
 .ck-page .student-management-table-shell{border-top:1px solid var(--pr-line)!important;border-radius:0 0 18px 18px!important}
+/* Section Management: the toolbar's + adds a section, so the separate Add/Request button is not shown. */
+body.role-shell-ready .ck-page .section-workspace-head{display:none!important}

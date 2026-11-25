@@ -10,7 +10,7 @@ function validateAudit(existing, next, session) {
   });
 }
 
-const APPROVAL_TYPES = ['professor-assignment', 'student-overload', 'faculty-student-enrollment', 'role-assignment', 'student-enrollment', 'professor-overload', 'section-create'];
+const APPROVAL_TYPES = ['professor-assignment', 'student-overload', 'faculty-student-enrollment', 'role-assignment', 'student-enrollment', 'professor-overload', 'section-create', 'section-archive'];
 const APPROVAL_MUTABLE_FIELDS = new Set(['status', 'reviewerId', 'reviewerRole', 'reviewerRemarks', 'decisionAt', 'history']);
 function sameApprovalPayload(prior, item) {
   const before = Object.fromEntries(Object.entries(prior).filter(([key]) => !APPROVAL_MUTABLE_FIELDS.has(key)));
@@ -26,7 +26,8 @@ function validHistoryTransition(prior, item, session, status) {
 }
 function validNewRequest(item, session) {
   const history = Array.isArray(item.history) ? item.history : [];
-  const submitRole = item.type === 'faculty-student-enrollment' ? 'faculty' : item.type === 'student-overload' && session.role === 'admin' ? 'admin' : 'coordinator';
+  const facultyRequest = item.type === 'faculty-student-enrollment' || (['section-create', 'section-archive'].includes(item.type) && session.role === 'faculty');
+  const submitRole = facultyRequest ? 'faculty' : item.type === 'student-overload' && session.role === 'admin' ? 'admin' : 'coordinator';
   return item?.id && APPROVAL_TYPES.includes(item.type)
     && item.requesterId === session.username && item.requesterRole === submitRole && session.role === submitRole
     && item.status === 'pending' && item.targetType && item.targetId && item.reason
@@ -138,6 +139,10 @@ function validateProtectedWrite(store, session, key, next) {
   if (key === 'exams' && session.role === 'faculty') validateFacultyExams(existing, next, session, store);
   // New Sections from a Faculty Coordinator go through Dean approval; edits and deletes stay direct.
   if (key === 'sections' && session.role === 'coordinator' && Array.isArray(existing) && Array.isArray(next) && next.length > existing.length) forbidden('New sections need Dean approval. Send a section request instead.');
+  if (key === 'sections' && session.role === 'coordinator' && Array.isArray(existing) && Array.isArray(next)) {
+    const archived = rows => rows.filter(section => section.status === 'archived');
+    if (!same(archived(existing), archived(next))) forbidden('Section archives need Dean approval.');
+  }
   if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
 module.exports = { validateProtectedWrite, validateAudit, validateApprovals, validateFacultyExams };

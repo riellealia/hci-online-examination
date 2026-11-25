@@ -16,6 +16,18 @@
 .section-request.status-rejected{border-left-color:#e53e3e}.section-request.status-rejected .section-request-status{background:#fee2e2;color:#991b1b}
 .section-request button,.section-requests.is-notice button{flex:none;min-height:34px;padding:6px 12px;border:1px solid #c8d7e8;border-radius:9px;background:#fff;color:#315f8d;font-weight:750;cursor:pointer}
 .section-request button:hover,.section-requests.is-notice button:hover{background:#edf4fb}
+.section-request-card{padding:18px 20px;border:1px solid var(--pr-line,var(--line-strong,#dfe6ef));border-left:3px solid var(--request-tone,#8a8f99);border-radius:16px;background:var(--pr-surface,var(--surface,#fff));color:var(--pr-ink,var(--ink,#26364b));box-shadow:0 7px 20px rgba(44,40,35,.07);overflow-wrap:anywhere}
+.section-request-card[data-status="pending"]{--request-tone:#d39a2c}
+.section-request-card[data-status="approved"]{--request-tone:#2f8d83}
+.section-request-card[data-status="rejected"]{--request-tone:#b5534b}
+.section-request-card header{display:grid;gap:3px}
+.section-request-card h4{margin:10px 0 7px;font-size:13px}
+.section-request-card p,.section-request-card details{margin:8px 0;font-size:12px}
+.section-request-card small{color:var(--pr-muted,var(--muted,#6c7a8e));font-size:11px}
+.section-request-card summary{cursor:pointer}
+body[data-role="faculty"] #sectionManagementSection.ck-page :is(.section-summary,.section-workspace-head>div){display:none}
+body[data-role="faculty"] #sectionManagementSection.ck-page .section-workspace-head{justify-content:flex-end}
+.section-dialog-actions [data-archive-edit]{margin-right:auto}
 .section-requests.is-notice{display:flex;align-items:center;justify-content:space-between;gap:14px;border-color:#f6d58e;background:#fffbeb;color:#5f4b12}
 .section-reason-field{display:grid;gap:6px;margin:0 22px 18px;color:#26364b;font-weight:700;font-size:13px}
 .section-reason-field[hidden]{display:none}
@@ -24,10 +36,6 @@
 :root[data-theme="dark"] :is(.section-requests,.section-request){background:var(--surface,#1f2937);border-color:var(--line-strong,#374151)}
 :root[data-theme="dark"] :is(.section-requests>header h3,.section-request strong,.section-reason-field){color:var(--ink,#e5e7eb)}
 @media(max-width:600px){.section-request{flex-wrap:wrap}.section-requests.is-notice{flex-direction:column;align-items:flex-start}}
-/* Admin and Dean: the page banner already names the page, so the module keeps only its action; colors follow the role accent. */
-body:is([data-role="admin"],[data-role="dean"]) #sectionManagementSection .section-workspace-head{justify-content:flex-end;margin-bottom:14px}
-body:is([data-role="admin"],[data-role="dean"]) #sectionManagementSection .section-workspace-head>div:first-child{display:none}
-body:is([data-role="admin"],[data-role="dean"]) #sectionManagementSection .section-add{border-color:color-mix(in srgb,var(--accent) 35%,transparent);background:color-mix(in srgb,var(--accent) 10%,#fff);color:var(--accent)}
-body:is([data-role="admin"],[data-role="dean"]) #sectionManagementSection .section-add:hover{background:color-mix(in srgb,var(--accent) 16%,#fff)}
-body:is([data-role="admin"],[data-role="dean"]) #sectionManagementSection .section-capacity{background:color-mix(in srgb,var(--accent) 10%,#fff);color:var(--accent)}
-body:is([data-role="admin"],[data-role="dean"]) .section-requests.is-notice button{border-color:color-mix(in srgb,var(--accent) 35%,transparent);color:var(--accent)}
+/* Admin and Dean: colors follow the role accent. */
+body:is([data-role="admin"],[data-role="dean"]) #sectionManagementSection .section-capacity{background:color-mix(in srgb,var(--pr-accent,var(--accent)) 10%,#fff);color:var(--pr-accent,var(--accent))}
+body:is([data-role="admin"],[data-role="dean"]) .section-requests.is-notice button{border-color:color-mix(in srgb,var(--pr-accent,var(--accent)) 35%,transparent);color:var(--pr-accent,var(--accent))}

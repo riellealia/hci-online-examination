@@ -35,12 +35,22 @@ const DeanPages = (() => {
     if (!host.querySelector('.dp-requests')) {
       const card = document.createElement('section'); card.className = 'dp-table-card dp-requests';
       const head = document.createElement('header'); head.className = 'dp-table-head';
-      head.innerHTML = '<div><h3>Requests</h3><p>Roles, subjects and loads for Professors and Students · Faculty enrollment changes</p></div>';
+      head.innerHTML = '<div><h3>Requests</h3><p>Roles, subjects and loads for Professors and Students · Faculty enrollment changes · New sections</p></div>';
       const search = document.getElementById('deanApprovalSearch'), status = document.getElementById('deanApprovalStatus');
       const label = document.createElement('label'); label.innerHTML = '<span>Status</span>'; if (status) label.appendChild(status);
-      head.appendChild(W().toolbar([{ name: 'search', label: 'Search requests', icon: W().ICONS.search, panel: [search] }, { name: 'filter', label: 'Filter by status', icon: W().ICONS.filter, panel: [label] }]));
+      // Group by: status (default), kind of request, or none.
+      const group = document.createElement('label'); group.innerHTML = '<span>Group by</span><select id="deanApprovalGroup"><option value="">Status</option><option value="type">Kind of request</option><option value="none">No grouping</option></select>';
+      group.querySelector('select').addEventListener('change', () => { if (typeof renderDeanApprovals === 'function') renderDeanApprovals(); });
+      const GROUP_ICON = '<path d="M3 4h8v7H3V4Zm2 2v3h4V6H5Zm8-2h8v7h-8V4Zm2 2v3h4V6h-4ZM3 13h8v7H3v-7Zm2 2v3h4v-3H5Zm8-2h8v7h-8v-7Zm2 2v3h4v-3h-4Z"/>';
+      const tools = W().toolbar([{ name: 'search', label: 'Search requests', icon: W().ICONS.search, panel: [search] }, { name: 'filter', label: 'Filter by status', icon: W().ICONS.filter, panel: [label] }, { name: 'group', label: 'Group by', icon: GROUP_ICON, panel: [group] }]);
+      // Underlined tabs by kind of request on the left, the toolbar on the right.
+      const tabbar = document.createElement('div'); tabbar.className = 'rq2-tabbar';
+      const tabs = document.getElementById('deanRequestTabs') || Object.assign(document.createElement('nav'), { id: 'deanRequestTabs', className: 'rq2-tabs' });
+      tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', 'Request kinds');
+      tabbar.append(tabs, tools);
       const body = document.createElement('div'); body.className = 'dp-requests-body';
-      list.parentElement.before(card); body.appendChild(list.closest('.role-workflow-list') || list); card.append(head, body);
+      list.parentElement.before(card); body.append(tabbar, list.closest('.role-workflow-list') || list); card.append(head, body);
+      if (typeof renderDeanApprovals === 'function') renderDeanApprovals();
       bar?.classList.add('cw-emptied');
       status?.addEventListener('change', stats);
     }
@@ -50,8 +60,7 @@ const DeanPages = (() => {
     const box = document.querySelector('#approvalsSection .cw-stats'); if (!box) return;
     const all = requests(), chosen = document.getElementById('deanApprovalStatus')?.value || '';
     const of = status => all.filter(r => status === 'withdrawn' ? ['withdrawn', 'cancelled'].includes(r.status) : r.status === status);
-    const split = rows => [...new Set(Object.values(TYPE))].map(l => `${rows.filter(r => TYPE[r.type] === l).length} ${l}`).join(' · ');
-    box.innerHTML = STATUS.map(([key, label, sub]) => { const rows = of(key); return `<button type="button" class="cw-stat${chosen === key ? ' active' : ''}" data-cw-status="${key}" data-tone="${key}" aria-pressed="${chosen === key}"><span>${label}</span><strong>${rows.length}</strong><small>${split(rows)}</small><em>${sub}</em></button>`; }).join('');
+    box.innerHTML = STATUS.map(([key, label, sub]) => { const rows = of(key); return `<button type="button" class="cw-stat${chosen === key ? ' active' : ''}" data-cw-status="${key}" data-tone="${key}" aria-pressed="${chosen === key}"><span>${label}</span><strong>${rows.length}</strong><em>${sub}</em></button>`; }).join('');
   }
 
   /* ---------- Statistics ---------- */

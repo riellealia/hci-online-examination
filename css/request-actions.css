@@ -83,5 +83,26 @@ body .rq-dialog .rq-check::before,body .rq-dialog .rq-check::after{content:none!
 .rq-icon.rq-role{background:color-mix(in srgb,#7c6bd6 16%,transparent)}.rq-icon.rq-role svg{fill:#7c6bd6}
 .rq-icon.rq-load{background:color-mix(in srgb,#d39a3a 18%,transparent)}.rq-icon.rq-load svg{fill:#b07b22}
 .rq-meta span b{margin-right:4px;color:var(--pr-ink);font-weight:700}
+.rq-meta .rq-sender{flex-basis:100%}
 .rq-pane-note{margin:0 0 12px;color:var(--pr-muted);font:400 12.5px/1.5 var(--pr-font,inherit)}
+#applicationsSection .rq-application-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;padding:18px 20px;border:1px solid var(--pr-line);border-left:3px solid var(--request-tone,#8a8f99);border-radius:16px;background:var(--pr-surface);box-shadow:0 7px 20px rgba(44,40,35,.07);color:var(--pr-ink)}
+#applicationsSection .rq-application-card[data-status="pending"]{--request-tone:#d39a2c}
+#applicationsSection .rq-application-card[data-status="approved"]{--request-tone:#2f8d83}
+#applicationsSection .rq-application-card[data-status="rejected"]{--request-tone:#b5534b}
+.rq-application-main header{display:grid;gap:3px;font-size:15px}
+.rq-application-main header small,.rq-application-state small{color:var(--pr-muted);font-size:11px}
+.rq-application-main h4{margin:10px 0 6px;font-size:13px;font-weight:600}
+.rq-application-kind{display:inline-block;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--pr-accent) 16%,var(--pr-surface));font-size:11px;font-weight:800}
+#applicationsSection .rq-application-reason{margin:8px 0 0;color:var(--pr-ink);font-size:12.5px}
+.rq-application-main .rq-meta{margin-top:10px;gap:4px 10px;color:var(--pr-muted)}
+.rq-application-main .rq-meta b{color:inherit;font-weight:400}
+.rq-application-main .rq-meta b::after{content:":"}
+.rq-application-history{margin-top:8px;font-size:11px}
+.rq-application-history summary{cursor:pointer;color:var(--pr-accent)}
+.rq-application-state{display:grid;justify-items:end;gap:3px;color:var(--request-tone);font-size:12px}
+#applicationsSection .rq-application-card[data-status="pending"] .rq-application-state{align-self:start;gap:8px}
+#applicationsSection .rq-withdraw-icon{display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid var(--pr-line);border-radius:8px;background:transparent;color:var(--pr-muted);cursor:pointer}
+#applicationsSection .rq-withdraw-icon:is(:hover,:focus-visible){border-color:var(--pr-accent);color:var(--pr-accent)}
+.rq-withdraw-icon svg{width:16px;height:16px}
+@media(max-width:640px){#applicationsSection .rq-application-card{grid-template-columns:minmax(0,1fr);gap:10px}.rq-application-state{justify-self:end}}
 @media (max-width:640px){.rq-roles{grid-template-columns:1fr}.rq-role-text{padding-right:0}.rq-badge{position:static;margin-left:auto}}

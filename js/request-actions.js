@@ -26,7 +26,7 @@ const RequestDetails = (() => {
     'workspace.view': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>'
   };
   function personName(id) {
-    const p = [...read('students'), ...read('faculty')].find(x => x.id === id), u = read('users').find(x => x.username === id);
+    const p = [...read('students'), ...read('faculty'), ...read('coordinators')].find(x => x.id === id || x.username === id), u = read('users').find(x => x.username === id);
     return `${p?.first || u?.first || ''} ${p?.last || u?.last || ''}`.trim() || id;
   }
   const subjectName = code => read('subjects').find(s => s.code === code)?.name || '';
@@ -37,7 +37,6 @@ const RequestDetails = (() => {
     let who = c.username || c.studentId || c.facultyId || '', title = LABEL[request.type] || request.type, review = null;
     if (request.type === 'role-assignment') {
       title = `Role · ${c.roleName || c.roleId}`;
-      chips.push(['Subject', c.subjectCode === '*' || !c.subjectCode ? 'All subjects' : `${c.subjectCode} ${subjectName(c.subjectCode)}`.trim()]);
     } else if (['professor-assignment', 'professor-overload'].includes(request.type) && W?.reviewProfessorLoad) {
       review = W.reviewProfessorLoad({ ...request, proposedChange: { ...c, overload: request.type === 'professor-overload' } });
       title = `${LABEL[request.type]} · ${review.subjectCode || c.offeringId}`;
@@ -56,16 +55,15 @@ const RequestDetails = (() => {
     }
     // A decided request shows the load as it was when it was sent, not today's.
     if (request.status && request.status !== 'pending' && Number.isFinite(c.currentUnits) && Number.isFinite(c.proposedUnits)) chips.forEach(chip => { if (chip[0] === 'Load') chip[1] = `${c.currentUnits} → ${c.proposedUnits} units`; });
-    const slots = c.offeringId && W ? W.scheduleSlots(read('sectionSubjects').flatMap(r => r.assignments || []).find(a => a.id === c.offeringId)) : [];
-    if (slots.length) chips.push(['Schedule', slots.map(s => `${s.days.map(d => d.slice(0, 3)).join('/')} ${s.start}–${s.end}${s.room ? ` · ${s.room}` : ''}`).join('; ')]);
     return { title, kind: kindOf(request.type), label: LABEL[request.type] || request.type, who, whoName: who ? personName(who) : '', chips, review };
   }
   /* Detail block used inside the request cards on both pages. */
-  function detailsHtml(request, { forDean = false } = {}) {
+  function detailsHtml(request, { forDean = false, compact = false } = {}) {
     const d = describe(request), blocked = forDean && request.status === 'pending' && d.review && d.review.canApprove === false;
-    const chips = [...(d.who || request.type !== 'section-create' ? [[`For`, d.who ? `${d.whoName} · ${d.who}` : '—']] : []), ...d.chips, ['Sent by', request.requesterId], ['Sent', new Date(request.submittedAt).toLocaleString()]];
-    if (request.reviewerRemarks) chips.push(['Dean remarks', request.reviewerRemarks]);
-    return `<div class="role-request-meta rq-meta">${chips.map(([k, v]) => `<span><b>${esc(k)}</b> ${esc(v)}</span>`).join('')}</div>${blocked ? `<p class="role-review-blocked"><strong>Approval blocked:</strong> ${esc(d.review.problems.join(' '))}</p>` : ''}`;
+    const chips = [...(!compact && (d.who || request.type !== 'section-create') ? [[`For`, d.who ? `${d.whoName} · ${d.who}` : '—']] : []), ...d.chips];
+    const sender = personName(request.requesterId);
+    if (request.reviewerRemarks && !compact) chips.push(['Dean remarks', request.reviewerRemarks]);
+    return `<div class="role-request-meta rq-meta">${chips.map(([k, v]) => `<span><b>${esc(k)}</b> ${esc(v)}</span>`).join('')}<span class="rq-sender"><b>Sent by</b> ${esc(sender)}</span><span><b>Sent</b> ${esc(new Date(request.submittedAt).toLocaleString())}</span></div>${blocked ? `<p class="role-review-blocked"><strong>Approval blocked:</strong> ${esc(d.review.problems.join(' '))}</p>` : ''}`;
   }
   function titleHtml(request) { const d = describe(request); return `<span class="rq-title"><span class="rq-icon rq-${d.kind}">${ICON[d.kind]}</span>${esc(d.title)}</span>`; }
   return { describe, detailsHtml, titleHtml, LABEL, ICON, personName, esc };
@@ -243,11 +241,40 @@ const RequestActions = (() => {
   }
 
   /* ---------- Applications → All requests (every type the Coordinator sent) ---------- */
+  function applicationCard(request) {
+    const detail = RequestDetails.describe(request);
+    const change = request.proposedChange || {};
+    const section = change.section || {};
+    const code = detail.review?.subjectCode || change.subjectCode;
+    const subject = read('subjects').find(item => item.code === code);
+    const person = [...read('faculty'), ...read('students')].find(item => item.id === detail.who);
+    const name = person?.last && person?.first ? `${person.last}, ${person.first}` : detail.whoName || section.id || request.targetId;
+    const context = [detail.who, detail.review?.sectionId || change.sectionId, code === '*' ? 'All subjects' : code, section.program].filter(Boolean);
+    if (subject?.name && context.at(-1) === code) context[context.length - 1] = `${code} — ${subject.name}`;
+    const kind = ({'role-assignment':'Role','section-create':'Section','section-archive':'Section','faculty-student-enrollment':'Enrollment'})[request.type] || (detail.kind === 'load' ? 'Overload' : 'Subject');
+    const history = request.history || [];
+    const pending = request.status === 'pending';
+    const status = String(request.status || '');
+    return `<article class="role-request-card rq-application-card" data-status="${esc(status)}" data-request-type="${esc(request.type)}">
+      <div class="rq-application-main">
+        <header><strong>${esc(name)}</strong><small>${esc(context.join(' · '))}</small></header>
+        <h4>${esc(detail.title)}</h4><span class="rq-application-kind">${esc(kind)}</span>
+        ${request.reason ? `<p class="rq-application-reason">${esc(request.reason)}</p>` : ''}
+        ${RequestDetails.detailsHtml(request, { compact: true })}
+        ${request.reviewerRemarks ? `<p class="rq-application-remarks">Dean remarks: ${esc(request.reviewerRemarks)}</p>` : ''}
+        <details class="rq-application-history"><summary>History (${history.length})</summary><ol>${history.map(entry => `<li>${esc(entry.status)} · ${esc(new Date(entry.at).toLocaleString())} · ${esc(entry.actorId)}${entry.remarks ? ` — ${esc(entry.remarks)}` : ''}</li>`).join('')}</ol></details>
+      </div>
+      <div class="rq-application-state"><strong>${esc(status.charAt(0).toUpperCase() + status.slice(1))}</strong>
+        ${request.decisionAt ? `<small>${esc(new Date(request.decisionAt).toLocaleDateString())}</small>` : ''}
+        ${pending ? `<button type="button" class="rq-withdraw-icon" aria-label="Withdraw request" title="Withdraw request" onclick="withdrawCoordinatorRequest('${esc(request.id)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5-5 5 5 5M4 10h10a5 5 0 0 1 0 10"/></svg></button>` : ''}
+      </div>
+    </article>`;
+  }
   function renderAllRequests() {
     const host = document.getElementById('allRequestList'); if (!host) return;
     const s = session(), status = document.getElementById('coordinatorRequestStatus')?.value || '', text = (document.getElementById('coordinatorRequestSearch')?.value || '').trim().toLowerCase();
     const list = ApprovalService.queryFor(s, { status }).filter(r => !text || JSON.stringify(r).toLowerCase().includes(text) || RequestDetails.describe(r).whoName.toLowerCase().includes(text));
-    host.innerHTML = list.map(r => `<article class="role-request-card rq-card" data-status="${esc(r.status)}" data-request-type="${esc(r.type)}"><div class="role-request-head"><strong>${RequestDetails.titleHtml(r)}</strong><span class="role-request-status">${esc(r.status)}</span></div><p>${esc(r.reason)}</p>${RequestDetails.detailsHtml(r)}<details class="role-history"><summary>Request history (${(r.history || []).length})</summary><ol>${(r.history || []).map(h => `<li>${esc(h.status)} · ${esc(new Date(h.at).toLocaleString())} · ${esc(h.actorId)}${h.remarks ? ` — ${esc(h.remarks)}` : ''}</li>`).join('')}</ol></details>${r.status === 'pending' ? `<div class="role-request-actions"><button type="button" class="withdraw" onclick="withdrawCoordinatorRequest('${esc(r.id)}')">Withdraw</button></div>` : ''}</article>`).join('') || '<div class="role-empty">No matching requests. Right-click a Professor or Student to send one.</div>';
+    host.innerHTML = list.map(applicationCard).join('') || '<div class="role-empty">No matching requests. Right-click a Professor or Student to send one.</div>';
   }
   function mountAllRequestsTab() {
     const page = document.getElementById('applicationsSection'), tabs = page?.querySelector('.application-tabs'); if (!tabs || tabs.querySelector('[data-application-tab="all"]')) return;
@@ -277,7 +304,7 @@ const RequestActions = (() => {
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
     mountAllRequestsTab();
   }
-  return { mount, openMenu, rolesDialog, classesDialog, renderAllRequests };
+  return { mount, openMenu, rolesDialog, classesDialog, renderAllRequests, applicationCard };
 })();
 if (typeof window !== 'undefined') {
   window.RequestDetails = RequestDetails; window.RequestActions = RequestActions;

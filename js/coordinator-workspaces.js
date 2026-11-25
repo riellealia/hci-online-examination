@@ -92,7 +92,7 @@ const CoordinatorWorkspaces = (() => {
     const box = document.querySelector('#applicationsSection .cw-stats'); if (!box) return;
     const all = requests(), chosen = document.getElementById('coordinatorRequestStatus')?.value || '';
     const of = (status, type) => all.filter(r => (status === 'withdrawn' ? ['withdrawn', 'cancelled'].includes(r.status) : r.status === status) && (!type || r.type === type)).length;
-    box.innerHTML = STATUS.map(([key, label, sub]) => `<button type="button" class="cw-stat${chosen === key ? ' active' : ''}" data-cw-status="${key}" data-tone="${key}" aria-pressed="${chosen === key}"><span>${label}</span><strong>${of(key)}</strong><small>${of(key, 'role-assignment')} role · ${of(key, 'professor-assignment') + of(key, 'student-enrollment')} subject · ${of(key, 'student-overload') + of(key, 'professor-overload')} load</small><em>${sub}</em></button>`).join('');
+    box.innerHTML = STATUS.map(([key, label, sub]) => `<button type="button" class="cw-stat${chosen === key ? ' active' : ''}" data-cw-status="${key}" data-tone="${key}" aria-pressed="${chosen === key}"><span>${label}</span><strong>${of(key)}</strong><em>${sub}</em></button>`).join('');
   }
 
   /* ---------- Subject Schedule ---------- */

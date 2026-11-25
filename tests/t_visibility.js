@@ -52,7 +52,7 @@ const essay=r.d.querySelector('.short-ans-input'); essay.value='x'; essay.dispat
 r.w.reviewAnswers();
 await r.w.submitExamAnswers();
 const result=r.d.getElementById('examResultSection').textContent;
-ok(/hidden scores/.test(result),'immediate result hides score when disabled');
+ok(/Awaiting review/.test(result)&&!/Your score:|Auto-marked score:/.test(result),'submission awaiting review shows no numeric score');
 ok(/Answer review/.test(result),'immediate answer review can remain independently enabled');
 r.w.close();
 
@@ -69,6 +69,11 @@ ok(!r.w.resultVisibility(futureExam,submission).showScore,'after-deadline remain
 ok(r.w.resultReleaseAllowed('after-grading',oldExam,submission),'after-grading releases a fully marked submission');
 const pending={...submission,answers:[{needsManualGrading:true,awarded:null}]};
 ok(!r.w.resultReleaseAllowed('after-grading',oldExam,pending),'after-grading waits for manual marks');
+const assert = require('node:assert/strict');
+const mixed = {...submission, answers: [...submission.answers, {needsManualGrading:true, awarded:null}]};
+assert.equal(r.w.resultVisibility({scoreRelease:'immediate'},mixed).showScore,false);
+assert.equal(r.w.resultVisibility({scoreRelease:'immediate'},mixed).awaitingReview,true);
+assert.equal(r.w.resultVisibility({scoreRelease:'immediate'},{...mixed,answers:[...submission.answers,{needsManualGrading:true,awarded:0}]}).showScore,true);
 ok(r.w.releaseDateReached('2020-01-01T00:00'),'chosen past date releases');
 ok(!r.w.releaseDateReached('2999-01-01T00:00'),'chosen future date remains hidden');
 r.w.close();

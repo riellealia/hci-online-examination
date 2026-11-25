@@ -46,6 +46,7 @@ const ADMIN_GOVERNANCE=fs.readFileSync(DIR+'../js/admin-governance.js','utf8');
 const ADMIN_PAGES=fs.readFileSync(DIR+'../js/admin-pages.js','utf8');
 const DEAN_PAGES=fs.readFileSync(DIR+'../js/dean-pages.js','utf8');
 const DEAN_PERSONNEL=fs.readFileSync(DIR+'../js/dean-personnel.js','utf8');
+const REQUEST_ACTIONS=fs.readFileSync(DIR+'../js/request-actions.js','utf8');
 const SECTION_MANAGEMENT=fs.readFileSync(DIR+'../js/section-management.js','utf8');
 const PROFESSOR_MANAGEMENT=fs.readFileSync(DIR+'../js/professor-management.js','utf8');
 const SUBJECT_SCHEDULE=fs.readFileSync(DIR+'../js/subject-schedule.js','utf8');
@@ -91,6 +92,7 @@ function load(page, seed, opts={}){
     .replace('<script src="../js/admin-workspaces.js"></script>', `<script>${ADMIN_WORKSPACES}</script>`)
     .replace(/<script src="\.\.\/js\/admin-governance\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${ADMIN_GOVERNANCE}</script>`)
     .replace(/<script src="\.\.\/js\/dean-personnel\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${DEAN_PERSONNEL}</script>`)
+    .replace(/<script src="\.\.\/js\/request-actions\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${REQUEST_ACTIONS}</script>`)
     .replace(/<script src="\.\.\/js\/dean-pages\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${DEAN_PAGES}</script>`)
     .replace(/<script src="\.\.\/js\/admin-pages\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${ADMIN_PAGES}</script>`)
     .replace('<script src="../js/section-management.js"></script>', `<script>${SECTION_MANAGEMENT}</script>`)
@@ -110,7 +112,7 @@ function load(page, seed, opts={}){
   html=html.replace('<script src="../js/question-types.js"></script>', `<script>${QUESTION_TYPES}</script>`);
   html=html.replace('<script src="../js/question-catalog.js"></script>', `<script>${QUESTION_CATALOG}</script>`);
   html=html.replace('<script src="../js/question-reports.js"></script>', `<script>${QUESTION_REPORTS}</script>`);
-  html=html.replace('<script src="../js/result-visibility.js"></script>', `<script>${RESULT_VISIBILITY}</script>`);
+  html=html.replace(/<script src="\.\.\/js\/result-visibility\.js(?:\?[^"]*)?"><\/script>/, `<script>${RESULT_VISIBILITY}</script>`);
   html=html.replace('<script src="../js/exam-publish.js"></script>', `<script>${EXAM_PUBLISH}</script>`);
 
   const mem={}; Object.entries(seed).forEach(([k,v])=>mem[k]=JSON.stringify(v));

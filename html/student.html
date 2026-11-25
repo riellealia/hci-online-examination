@@ -446,7 +446,7 @@
 <script src="../js/attempt.js"></script>
 <script src="../js/question-media.js"></script>
 <script src="../js/question-reports.js"></script>
-<script src="../js/result-visibility.js"></script>
+<script src="../js/result-visibility.js?v=20261126-review"></script>
 </head>
 <body data-role="student">
 
@@ -787,7 +787,7 @@ function answerReviewMarkup(answers, questionSet, showCorrect = true, showFeedba
   return (answers || []).map(answer => {
     const question = questionSet.find(q => q.id === answer.questionId);
     if (!question) return '<article class="review-question-card is-pending"><h4>Question removed</h4></article>';
-    const pending = answer.needsManualGrading && answer.awarded === null;
+    const pending = answer.needsManualGrading && answer.awarded == null;
     const correctState = !pending && (answer.isCorrect === true || Number(answer.awarded) >= Number(answer.points || question.points || 0));
     const stateClass = pending ? 'is-pending' : correctState ? 'is-correct' : 'is-wrong';
     const stateLabel = pending ? 'Pending' : correctState ? 'Correct' : 'Wrong';
@@ -832,7 +832,7 @@ function loadResults() {
     const ex = exams.find(e => e.id === s.examId);
     const subj = ex ? subjects.find(x => x.code === ex.subjectCode) : null;
     const answers = s.answers || [];
-    const pending = answers.filter(a => a.needsManualGrading && a.awarded === null);
+    const pending = answers.filter(a => a.needsManualGrading && a.awarded == null);
     const awarded = answers.reduce((t, a) => t + (a.awarded || 0), 0);
     const fullyGraded = pending.length === 0;
     const visibility = resultVisibility(ex, s);
@@ -847,7 +847,7 @@ function loadResults() {
       <td>${ex ? ex.title : '(exam removed)'}</td>
       <td>${subj ? `${subj.code} — ${subj.name}` : (ex ? ex.subjectCode : '—')}</td>
       <td>${new Date(s.submittedAt).toLocaleString()}</td>
-      <td>${showScore ? `<strong>${awarded}</strong> / ${s.total}${fullyGraded ? '' : ' <em>(so far)</em>'}` : '<span class="result-hidden">Hidden by instructor</span>'}</td>
+      <td>${showScore ? `<strong>${awarded}</strong> / ${s.total}${fullyGraded ? '' : ' <em>(so far)</em>'}` : `<span class="result-hidden">${visibility.awaitingReview ? 'Awaiting review' : 'Hidden by instructor'}</span>`}</td>
       <td>${g ? `<strong>${g.percentText}%</strong>` : '<span style="color:#999;">—</span>'}</td>
       <td>
         ${g
@@ -893,15 +893,20 @@ function loadResults() {
 
 function renderResultsAnalytics(mine) {
   const seenExams=new Set(),latestPerExam=(mine||[]).filter(submission=>{if(seenExams.has(submission.examId))return false;seenExams.add(submission.examId);return true});
-  const scored=latestPerExam.map(submission=>{const exam=exams.find(item=>item.id===submission.examId),answers=submission.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded===null),visible=resultVisibility(exam,submission).showScore,awarded=answers.reduce((total,answer)=>total+Number(answer.awarded||0),0),total=Number(submission.total||0);return{submission,exam,pending,visible,awarded,total,grade:!pending&&visible&&total?gradeFor(awarded,total):null}}).filter(item=>item.visible);
-  const earned=scored.reduce((total,item)=>total+item.awarded,0),available=scored.reduce((total,item)=>total+item.total,0),accuracy=available?Math.round(earned/available*100):0,ratings=scored.filter(item=>item.grade).map(item=>Number(item.grade.rating)),gwa=ratings.length?ratings.reduce((total,value)=>total+value,0)/ratings.length:null;
+  const scored=latestPerExam.map(submission=>{const exam=exams.find(item=>item.id===submission.examId),answers=submission.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded==null),visible=resultVisibility(exam,submission).showScore,awarded=answers.reduce((total,answer)=>total+Number(answer.awarded||0),0),total=Number(submission.total||0);return{submission,exam,pending,visible,awarded,total,grade:!pending&&visible&&total?gradeFor(awarded,total):null}}).filter(item=>item.visible);
+  const earned=scored.reduce((total,item)=>total+item.awarded,0),available=scored.reduce((total,item)=>total+item.total,0),accuracy=available?Math.round(earned/available*100):0;
+  const ratings = scored.filter(item => item.grade).map(item => Number(item.grade.rating));
+  const missedExams = exams.filter(exam => exam.status !== 'draft' && studentCanTakeExam(exam) && examFilterState(exam) === 'missed');
+  const missedRating = Number(gradeFor(0, 1).rating);
+  missedExams.forEach(() => ratings.push(missedRating));
+  const gwa = ratings.length ? ratings.reduce((total, value) => total + value, 0) / ratings.length : null;
   document.getElementById('resultAccuracy').textContent=`${accuracy}%`;document.getElementById('resultTotalPoints').textContent=Number.isInteger(earned)?earned:earned.toFixed(1);document.getElementById('resultGwa').textContent=gwa===null?'—':gwa.toFixed(2);
   document.getElementById('resultAccuracyRing').style.setProperty('--progress',accuracy);document.getElementById('resultPointsRing').style.setProperty('--progress',available?Math.round(earned/available*100):0);document.getElementById('resultGwaRing').style.setProperty('--progress',gwa===null?0:Math.max(0,Math.round((5-gwa)/4*100)));
   renderResultsScoreChart(scored);
 }
 
 function showGwaNotice() {
-  notify('This GWA is an examination-based estimate and may not match your official final grade. Class standing, attendance, participation, performance tasks, projects, and your instructor’s grading weights may also affect the final result.', 'info');
+  notify('This examination-based estimate averages released final exam ratings and counts missed exams as 5.00. Exams still open or awaiting review do not add a rating. Your official grade may also include other coursework.', 'info');
 }
 
 function observeStudentChartWidth(host,render){
@@ -938,14 +943,14 @@ function renderResultSubjectCards(mine) {
   });
   // Which attempt counts for each exam (highest or last, per the exam's rule).
   const countsForGrade = new Set();
-  [...new Set(mine.map(item => item.examId))].forEach(examId => { const exam = exams.find(item => item.id === examId), list = mine.filter(item => item.examId === examId); if (list.length < 2) return; const pick = typeof countedSubmission === 'function' ? countedSubmission(exam, list) : null; if (pick) countsForGrade.add(pick.id); });
+  [...new Set(mine.map(item => item.examId))].forEach(examId => { const exam = exams.find(item => item.id === examId), list = mine.filter(item => item.examId === examId); if (list.length < 2) return; const pick = typeof countedSubmission === 'function' ? countedSubmission(exam, list) : null; if (pick && resultVisibility(exam,pick).showScore) countsForGrade.add(pick.id); });
 
   container.innerHTML = Array.from(grouped.entries()).map(([code, entries]) => {
     const subject = subjects.find(item => item.code === code);
     let subjectAwarded = 0, subjectTotal = 0, gradedCount = 0;
     const rows = entries.map(({ submission, exam }) => {
       const answers = submission.answers || [];
-      const pending = answers.filter(answer => answer.needsManualGrading && answer.awarded === null);
+      const pending = answers.filter(answer => answer.needsManualGrading && answer.awarded == null);
       const awarded = answers.reduce((total, answer) => total + (answer.awarded || 0), 0);
       const fullyGraded = pending.length === 0;
       const visibility = resultVisibility(exam, submission);
@@ -955,14 +960,14 @@ function renderResultSubjectCards(mine) {
       const schedule = exam?.date ? `${exam.date} · ${exam.start || '09:00'}–${exam.end || '23:59'}` : 'Always open';
       return `<details class="result-exam-disclosure" data-submission="${submission.id}"><summary class="subject-exam-row result-exam-row">
         <div><div class="subject-exam-name">${escapeQuestionMedia(exam?.title || 'Removed examination')}${countsForGrade.has(submission.id) ? `<span class="counts-pill" title="${exam?.scoreRule === 'highest' ? 'Highest score' : 'Last attempt'} counts toward the grade">Counts</span>` : ''}</div><div class="subject-exam-meta">${new Date(submission.submittedAt).toLocaleString()}</div></div>
-        <div class="subject-exam-meta">${visibility.showScore ? `<strong>${awarded}</strong> / ${submission.total}${fullyGraded ? '' : ' (so far)'}` : 'Score hidden by instructor'}</div>
+        <div class="subject-exam-meta">${visibility.showScore ? `<strong>${awarded}</strong> / ${submission.total}${fullyGraded ? '' : ' (so far)'}` : (visibility.awaitingReview ? 'Awaiting review' : 'Score hidden by instructor')}</div>
         <div>${grade ? `<strong>${grade.percentText}%</strong>` : '—'}</div>
         <div><span class="status-pill ${fullyGraded ? 'pill-graded' : 'pill-pending'}">${fullyGraded ? (visibility.showScore ? 'Final' : 'Submitted') : `${pending.length} pending`}</span></div>
         <div class="subject-exam-meta">${visibility.showFeedback && submission.remarks ? 'Feedback available' : ''}</div>
       </summary><div class="result-detail-body"><div class="result-detail-grid"><div><span>Schedule</span><strong>${escapeQuestionMedia(schedule)}</strong></div><div><span>Time limit</span><strong>${exam?.durationMinutes || 'No'} minutes</strong></div><div><span>Passing grade</span><strong>${exam?.passingPercent || 75}%</strong></div><div><span>Attempt</span><strong>Submitted ${new Date(submission.submittedAt).toLocaleString()}</strong></div></div>${visibility.showFeedback&&submission.remarks?`<div class="remark-box"><strong>Professor feedback</strong><p>${escapeQuestionMedia(submission.remarks)}</p></div>`:''}<div class="result-review-actions"><button type="button" class="btn-take-exam result-review-btn" ${reviewAllowed?'':'disabled'} onclick="openResultReviewPage('${submission.id}')" title="${reviewAllowed?'Review your answers':'Review is disabled by your professor'}">&#128065; Review</button></div><div id="resultReview_${submission.id}" class="inline-answer-review">${reviewAllowed?(reviewQuestions||'<div class="subject-empty">No saved answers are available.</div>'):'<div class="subject-empty">Review is disabled by your professor.</div>'}</div></div></details>`;
     }).join('');
     const latestByExam=new Map();[...new Set(entries.map(entry=>entry.submission.examId))].forEach(examId=>{const group=entries.filter(entry=>entry.submission.examId===examId),pick=typeof countedSubmission==='function'?countedSubmission(group[0].exam,group.map(entry=>entry.submission)):null;latestByExam.set(examId,pick?group.find(entry=>entry.submission===pick):group.sort((a,b)=>new Date(b.submission.submittedAt)-new Date(a.submission.submittedAt))[0])});
-    [...latestByExam.values()].forEach(({submission,exam})=>{const answers=submission.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded===null),visibility=resultVisibility(exam,submission);if(!pending&&visibility.showScore){subjectAwarded+=answers.reduce((total,answer)=>total+Number(answer.awarded||0),0);subjectTotal+=Number(submission.total||0);gradedCount+=1}});
+    [...latestByExam.values()].forEach(({submission,exam})=>{const answers=submission.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded==null),visibility=resultVisibility(exam,submission);if(!pending&&visibility.showScore){subjectAwarded+=answers.reduce((total,answer)=>total+Number(answer.awarded||0),0);subjectTotal+=Number(submission.total||0);gradedCount+=1}});
     const combined = gradedCount && subjectTotal ? gradeFor(subjectAwarded, subjectTotal) : null;
     const rating = combined
       ? `<span class="grade-chip ${combined.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${combined.rating}</span><span class="grade-sub">${combined.passed ? 'Passed' : 'Failed'}</span></span>`
@@ -990,7 +995,7 @@ function openResultReviewPage(submissionId) {
   const source = document.getElementById(`resultReview_${submissionId}`);
   if (!submission || !exam || !source) return;
   const visibility = resultVisibility(exam, submission);
-  const pending = (submission.answers || []).filter(answer => answer.needsManualGrading && answer.awarded === null);
+  const pending = (submission.answers || []).filter(answer => answer.needsManualGrading && answer.awarded == null);
   const awarded = (submission.answers || []).reduce((total, answer) => total + (answer.awarded || 0), 0);
   const grade = pending.length === 0 && visibility.showScore ? gradeFor(awarded, submission.total) : null;
   const scorePercent = submission.total ? Math.round(awarded / submission.total * 100) : 0;
@@ -998,11 +1003,11 @@ function openResultReviewPage(submissionId) {
   document.getElementById('studentReviewTitle').textContent = exam.title || 'Exam review';
   document.getElementById('studentReviewMeta').textContent = `${exam.subjectCode} · Submitted ${new Date(submission.submittedAt).toLocaleString()}`;
   document.getElementById('studentReviewFeedback').innerHTML = `
-    <section class="review-score-layout" aria-label="Reviewed examination score"><div class="review-score-copy"><span class="exam-result-kicker">Exam review</span><h3>${pending.length ? 'Current result' : 'Final result'}</h3><p>${pending.length ? `${pending.length} answer${pending.length === 1 ? '' : 's'} still awaiting marking.` : 'All available answers have been graded.'}</p>${visibility.showScore ? `<p><strong>Your score:</strong> ${awarded} &nbsp;/&nbsp; <strong>Total score:</strong> ${submission.total}</p>` : '<p>Score hidden by your professor.</p>'}${grade ? `<span class="grade-chip ${grade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${grade.rating}</span><span class="grade-sub">${grade.percentText}% &middot; ${grade.remark}</span></span>` : ''}</div><div class="exam-score-pie" style="--score-angle:${visibility.showScore ? scorePercent * 3.6 : 0}deg" role="img" aria-label="${visibility.showScore ? `${awarded} out of ${submission.total} points, ${scorePercent} percent` : 'Score hidden'}"><span>${visibility.showScore ? `<strong>${awarded}/${submission.total}</strong>${scorePercent}%` : '<strong>&mdash;</strong>Hidden'}</span></div></section>
+    <section class="review-score-layout" aria-label="Reviewed examination score"><div class="review-score-copy"><span class="exam-result-kicker">Exam review</span><h3>${pending.length ? 'Current result' : 'Final result'}</h3><p>${pending.length ? `${pending.length} answer${pending.length === 1 ? '' : 's'} still awaiting marking.` : 'All available answers have been graded.'}</p>${visibility.showScore ? `<p><strong>Your score:</strong> ${awarded} &nbsp;/&nbsp; <strong>Total score:</strong> ${submission.total}</p>` : (visibility.awaitingReview ? '<p>Awaiting review.</p>' : '<p>Score hidden by your professor.</p>')}${grade ? `<span class="grade-chip ${grade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${grade.rating}</span><span class="grade-sub">${grade.percentText}% &middot; ${grade.remark}</span></span>` : ''}</div><div class="exam-score-pie" style="--score-angle:${visibility.showScore ? scorePercent * 3.6 : 0}deg" role="img" aria-label="${visibility.showScore ? `${awarded} out of ${submission.total} points, ${scorePercent} percent` : visibility.awaitingReview ? 'Awaiting review' : 'Score hidden'}"><span>${visibility.showScore ? `<strong>${awarded}/${submission.total}</strong>${scorePercent}%` : `<strong>&mdash;</strong>${visibility.awaitingReview ? 'Awaiting review' : 'Hidden'}`}</span></div></section>
     <div class="review-result-summary">
       <div class="review-result-status"><span class="review-result-check" aria-hidden="true">✓</span><div><strong>Submission recorded</strong><small>${pending.length ? `${pending.length} answer${pending.length === 1 ? '' : 's'} awaiting marking` : 'Final result available'}</small></div></div>
       <div class="review-result-score">
-        ${visibility.showScore ? `<strong>${awarded} / ${submission.total}</strong>${pending.length?'<span>so far</span>':''}` : '<span>Score hidden by your professor</span>'}
+        ${visibility.showScore ? `<strong>${awarded} / ${submission.total}</strong>${pending.length?'<span>so far</span>':''}` : (visibility.awaitingReview ? '<span>Awaiting review</span>' : '<span>Score hidden by your professor</span>')}
         ${grade ? `<span class="grade-chip ${grade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${grade.rating}</span><span class="grade-sub">${grade.percentText}% · ${grade.remark}</span></span>` : ''}
       </div>
     </div>
@@ -1180,12 +1185,12 @@ function studentSubjectExamTabMarkup(subjectExams){
   if(!subjectExams.length)return'<div class="subject-empty">No examinations are available for this subject.</div>';
   return `<div class="subject-exam-progress-list"><div class="subject-exam-progress-head" aria-hidden="true"><span>Examination</span><span>Due date</span><span>Date finished</span><span>Grade</span><span>Score</span></div>${subjectExams.map(exam=>{
     const submission=submissions.filter(item=>item.studentId===currentStudent.id&&item.examId===exam.id).sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt))[0];
-    const answers=submission?.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded===null),earned=answers.reduce((sum,answer)=>sum+Number(answer.awarded||0),0),total=Number(submission?.total||questions.filter(question=>question.examId===exam.id).reduce((sum,question)=>sum+Number(question.points||5),0));
-    const percent=submission&&total?Math.max(0,Math.min(100,Math.round(earned/total*100))):0;
+    const answers=submission?.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded==null),earned=answers.reduce((sum,answer)=>sum+Number(answer.awarded||0),0),total=Number(submission?.total||questions.filter(question=>question.examId===exam.id).reduce((sum,question)=>sum+Number(question.points||5),0));
+    const visible=!!submission&&resultVisibility(exam,submission).showScore,percent=visible&&total?Math.max(0,Math.min(100,Math.round(earned/total*100))):0;
     const due=exam.date?`${new Date(`${exam.date}T00:00:00`).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}${exam.end?` · ${formatScheduleTime(exam.end)}`:''}`:'Always open';
     const finished=submission?new Date(submission.submittedAt).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):'Not finished';
-    const gradeLabel=!submission?'Not graded':pending?'In progress':`${percent}%`;
-    return `<button type="button" class="subject-exam-progress-row" data-open-exam="${escapeQuestionMedia(exam.id)}" onclick="openExamDetails('${escapeQuestionMedia(exam.id)}')"><span class="subject-exam-progress-name"><strong>${escapeQuestionMedia(exam.title||'Examination')}</strong><small>${escapeQuestionMedia(exam.subjectCode)} · ${questions.filter(question=>question.examId===exam.id).length} items</small></span><span class="subject-exam-progress-date" data-label="Due date">${escapeQuestionMedia(due)}</span><span class="subject-exam-progress-date" data-label="Date finished">${escapeQuestionMedia(finished)}</span><span class="subject-exam-grade" data-label="Grade"><span><strong>${gradeLabel}</strong><i style="--exam-grade:${percent}%"><b></b></i></span></span><span class="subject-exam-score" data-label="Score"><strong>${submission?`${earned} / ${total}`:'—'}</strong><small>${pending?'Awaiting marking':submission?'Recorded':'No attempt'}</small></span></button>`;
+    const gradeLabel=!submission?'Not graded':pending?'Awaiting review':!visible?'Score hidden':`${percent}%`;
+    return `<button type="button" class="subject-exam-progress-row" data-open-exam="${escapeQuestionMedia(exam.id)}" onclick="openExamDetails('${escapeQuestionMedia(exam.id)}')"><span class="subject-exam-progress-name"><strong>${escapeQuestionMedia(exam.title||'Examination')}</strong><small>${escapeQuestionMedia(exam.subjectCode)} · ${questions.filter(question=>question.examId===exam.id).length} items</small></span><span class="subject-exam-progress-date" data-label="Due date">${escapeQuestionMedia(due)}</span><span class="subject-exam-progress-date" data-label="Date finished">${escapeQuestionMedia(finished)}</span><span class="subject-exam-grade" data-label="Grade"><span><strong>${gradeLabel}</strong><i style="--exam-grade:${percent}%"><b></b></i></span></span><span class="subject-exam-score" data-label="Score"><strong>${visible?`${earned} / ${total}`:'—'}</strong><small>${pending?'Awaiting marking':visible?'Recorded':submission?'Score hidden':'No attempt'}</small></span></button>`;
   }).join('')}</div>`;
 }
 function focusStudentSubjectWeek(week, options={}) {
@@ -1342,7 +1347,7 @@ function examWindow(ex) {
   const start = ex.datetime
     ? new Date(ex.datetime)
     : (ex.date ? new Date(`${ex.date}T${ex.start || '09:00'}:00`) : null);
-  const end = ex.date ? new Date(`${ex.date}T${ex.end || '23:59'}:00`) : null;
+  const end = ex.date ? new Date(`${ex.endDate || ex.date}T${ex.end || '23:59'}:00`) : null;
   const now = new Date();
 
   if (!start || isNaN(start)) return { state: 'open', start, end };
@@ -1495,10 +1500,10 @@ function renderStudentExamList(list) {
     if (submission) {
       const visibility = resultVisibility(exam, submission);
       hasFeedback = visibility.showFeedback && Boolean(submission.remarks || (submission.answers || []).some(answer => answer.remark)) && !feedbackWasViewed(exam.id);
-      const pending = (submission.answers || []).filter(answer => answer.needsManualGrading && answer.awarded === null);
+      const pending = (submission.answers || []).filter(answer => answer.needsManualGrading && answer.awarded == null);
       const awarded = (submission.answers || []).reduce((total, answer) => total + (answer.awarded || 0), 0);
       const grade = pending.length === 0 && visibility.showScore ? gradeFor(awarded, submission.total) : null;
-      score = visibility.showScore ? (grade ? `${awarded}/${submission.total} · ${grade.percentText}%` : `${awarded}/${submission.total} so far`) : 'Score hidden';
+      score = visibility.showScore ? (grade ? `${awarded}/${submission.total} · ${grade.percentText}%` : `${awarded}/${submission.total} so far`) : visibility.awaitingReview ? 'Awaiting review' : 'Score hidden';
     }
     let status = '<span class="status-active">Open</span>';
     let button = `<button class="btn-take-exam" onclick="event.stopPropagation();openExamDetails('${exam.id}')">Take exam</button>`;
@@ -1701,7 +1706,7 @@ function openExamDetails(examId) {
       ${row('Time limit once started', b.durationText)}
       ${row('Attempts', `${b.attemptsUsed} of ${b.attemptsAllowed} used`)}
       ${savedAttempt ? row('Draft', `${savedAnswerCount} of ${b.questionCount} answered · not submitted`) : ''}
-      ${completedSubmission ? row('Latest score', completedVisibility.showScore ? `${completedAwarded} / ${completedSubmission.total}` : 'Hidden by instructor') : ''}
+      ${completedSubmission ? row('Latest score', completedVisibility.showScore ? `${completedAwarded} / ${completedSubmission.total}` : completedVisibility.awaitingReview ? 'Awaiting review' : 'Hidden by instructor') : ''}
       ${row('Navigation', b.navigationPolicy)}
       ${row('Results', b.reviewPolicy)}
     </dl>
@@ -2452,16 +2457,16 @@ async function submitExamAnswers(opts = {}) {
     <section class="exam-result-layout" aria-label="Examination result">
       <div class="exam-result-copy"><span class="exam-result-kicker">Submission complete</span><h3>Examination submitted successfully</h3><p>Your answers were recorded and the available result is shown below.</p>
         <div class="exam-result-metrics"><span>${currentExamQuestions.length} questions</span><span>${pendingPoints ? `${pendingPoints} points awaiting review` : 'Grading complete'}</span></div>
-        ${showScore ? `<p><strong>Your score:</strong> ${earnedPoints} &nbsp;/&nbsp; <strong>Total score:</strong> ${totalPoints}</p>` : '<p>Your instructor has hidden scores for this examination.</p>'}
+        ${showScore ? `<p><strong>Your score:</strong> ${earnedPoints} &nbsp;/&nbsp; <strong>Total score:</strong> ${totalPoints}</p>` : visibility.awaitingReview ? '<p>Your score will be available after your instructor reviews your answers.</p>' : '<p>Your instructor has hidden scores for this examination.</p>'}
         ${finalGrade && showScore ? `<span class="grade-chip ${finalGrade.passed ? 'grade-pass' : 'grade-fail'}"><span class="grade-rating">${finalGrade.rating}</span><span class="grade-sub">${finalGrade.percentText}% &middot; ${finalGrade.remark}</span></span>` : ''}
       </div>
-      <div class="exam-score-pie" style="--score-angle:${showScore ? scorePercent * 3.6 : 0}deg" role="img" aria-label="${showScore ? `${earnedPoints} out of ${totalPoints} points, ${scorePercent} percent` : 'Score hidden'}"><span>${showScore ? `<strong>${earnedPoints}/${totalPoints}</strong>${scorePercent}%` : '<strong>&mdash;</strong>Hidden'}</span></div>
+      <div class="exam-score-pie" style="--score-angle:${showScore ? scorePercent * 3.6 : 0}deg" role="img" aria-label="${showScore ? `${earnedPoints} out of ${totalPoints} points, ${scorePercent} percent` : visibility.awaitingReview ? 'Awaiting review' : 'Score hidden'}"><span>${showScore ? `<strong>${earnedPoints}/${totalPoints}</strong>${scorePercent}%` : `<strong>&mdash;</strong>${visibility.awaitingReview ? 'Awaiting review' : 'Hidden'}`}</span></div>
     </section>
     <div class="score-box">
       🎉 Examination Submitted Successfully!<br>
       <span style="font-size:15px; font-weight:normal; color:#444; margin-top:8px; display:block;">
         Your submission has been recorded.<br>
-        ${showScore ? `Auto-marked score: ${earnedPoints} / ${totalPoints - pendingPoints}` : 'Your instructor has hidden scores for this exam.'}
+        ${showScore ? `Auto-marked score: ${earnedPoints} / ${totalPoints - pendingPoints}` : visibility.awaitingReview ? 'Awaiting review' : 'Your instructor has hidden scores for this exam.'}
         ${pendingPoints > 0
           ? `<br><em style="color:var(--warn-ink);">${pendingPoints} point(s) from written answers await manual grading by your instructor.</em>`
           : ''}
@@ -2660,7 +2665,7 @@ function loadNextUp() {
 
   const awaiting = submissions.filter(s =>
     s.studentId === currentStudent.id &&
-    (s.answers || []).some(a => a.needsManualGrading && a.awarded === null)).length;
+    (s.answers || []).some(a => a.needsManualGrading && a.awarded == null)).length;
 
   const rows = [];
   if (open.length) {
@@ -2748,7 +2753,7 @@ function loadNextUpEnhanced() {
     rows.push(`<div class="nextup-date">${new Date(date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div>`);
     items.forEach(({exam,start}) => rows.push(`<div class="nextup-row upcoming-row"><button class="nextup-exam-link" data-open-exam="${escapeQuestionMedia(exam.id)}">${escapeQuestionMedia(exam.title)}</button><span class="countdown" data-time="${start.toISOString()}">Calculating...</span></div>`));
   });
-  const awaiting = submissions.filter(item => item.studentId === currentStudent.id && (item.answers || []).some(answer => answer.needsManualGrading && answer.awarded === null)).length;
+  const awaiting = submissions.filter(item => item.studentId === currentStudent.id && (item.answers || []).some(answer => answer.needsManualGrading && answer.awarded == null)).length;
   if (awaiting) rows.push(`<div class="nextup-row"><span class="nextup-tag soon">Awaiting marking</span><span>${awaiting} submission(s) still being marked</span></div>`);
   box.innerHTML = rows.join('') || '<div class="nextup-row"><span>Nothing needs your attention right now.</span></div>';
 }
@@ -2834,7 +2839,7 @@ function formatScheduleTime(value){const parts=String(value||'').split(':').map(
 function examAgendaMarkup(key) {
   const examsForDay=relevantExams.filter(exam=>(exam.date||'')===key).sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
   if(!examsForDay.length)return'<div class="agenda-empty">No examinations scheduled for this day.</div>';
-  return examsForDay.map(exam=>{const status=studentExamStatus(exam),statusLabel=status==='todo'?'To do':status[0].toUpperCase()+status.slice(1),subject=subjects.find(item=>item.code===exam.subjectCode);return`<article class="agenda-event ${status}"><div class="agenda-time">${escapeQuestionMedia(formatScheduleTime(exam.start||'Any time'))}<br>${exam.end?escapeQuestionMedia(formatScheduleTime(exam.end)):''}</div><div><strong>${escapeQuestionMedia(exam.title||'Examination')}</strong><small>${escapeQuestionMedia(exam.subjectCode||'')} ${subject?`· ${escapeQuestionMedia(subject.name)}`:''} · ${statusLabel}</small><button type="button" data-open-exam="${escapeQuestionMedia(exam.id)}">${status==='todo'?'View examination':'View details'} →</button></div></article>`}).join('');
+  return examsForDay.map(exam=>{const status=studentExamStatus(exam),statusLabel=status==='todo'?'To do':status[0].toUpperCase()+status.slice(1),subject=subjects.find(item=>item.code===exam.subjectCode);return`<article class="agenda-event ${status}"><div class="agenda-time">${escapeQuestionMedia(formatScheduleTime(exam.start||'Any time'))}<br>${exam.end?escapeQuestionMedia(`${formatScheduleTime(exam.end)}${exam.endDate && exam.endDate !== exam.date ? ` · ${exam.endDate}` : ''}`):''}</div><div><strong>${escapeQuestionMedia(exam.title||'Examination')}</strong><small>${escapeQuestionMedia(exam.subjectCode||'')} ${subject?`· ${escapeQuestionMedia(subject.name)}`:''} · ${statusLabel}</small><button type="button" data-open-exam="${escapeQuestionMedia(exam.id)}">${status==='todo'?'View examination':'View details'} →</button></div></article>`}).join('');
 }
 function classAgendaMarkup(key) {
   const meetings=recurringMeetingsForDate(new Date(`${key}T00:00:00`)).sort((a,b)=>a.start.localeCompare(b.start));

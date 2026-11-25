@@ -27,13 +27,13 @@ const DeanPersonnel=(()=>{
   function row(person){
     const pct=Math.min(100,person.load/NORMAL_LOAD*100),tone=person.load>NORMAL_LOAD?'over':person.load>=NORMAL_LOAD*.9?'high':'';
     const coordinator=person.displayRole==='Faculty Coordinator';
-    return`<tr data-id="${esc(person.id)}" data-kind="${coordinator&&person.load===null?'coordinator':'faculty'}" tabindex="0"><td><span class="ck-person"><span class="ck-avatar">${esc(initials(person.first,person.last))}</span><span>${esc(`${person.last||''}, ${person.first||''}`)}</span></span></td><td>${esc(person.id)}</td><td><span class="dp-pill${coordinator?' gold':''}">${esc(person.displayRole)}</span></td><td>${esc(person.program||'CICS')}</td><td>${person.load===null?'<span class="dp-muted">No teaching load</span>':`<span class="dp-load">${person.load}/${NORMAL_LOAD} units</span><i class="ck-mini"><b class="${tone}" style="width:${pct}%"></b></i>`}</td><td>${coordinator?'<span class="dp-muted">Active appointment</span>':`<button type="button" class="dp-row-action" data-appoint="${esc(person.id)}">Appoint coordinator</button>`}</td></tr>`;
+    return`<tr data-id="${esc(person.id)}" data-kind="${coordinator&&person.load===null?'coordinator':'faculty'}" data-coordinator="${coordinator}" tabindex="0"><td><span class="ck-person"><span class="ck-avatar">${esc(initials(person.first,person.last))}</span><span>${esc(`${person.last||''}, ${person.first||''}`)}</span></span></td><td>${esc(person.id)}</td><td><span class="dp-pill${coordinator?' gold':''}">${esc(person.displayRole)}</span></td><td>${esc(person.program||'CICS')}</td><td class="dp-load-column">${person.load===null?'<span class="dp-muted">No teaching load</span>':`<span class="dp-load-meter"><span class="dp-load">${person.load}/${NORMAL_LOAD} units</span><i class="ck-mini"><b class="${tone}" style="width:${pct}%"></b></i></span>`}</td></tr>`;
   }
 
   /* ---------- Members tabs: College members · Students · Archived · Role assignments ---------- */
   let tab='members';
   const tabsNav=()=>{const n=(typeof RoleAccess!=='undefined'?RoleAccess.assignments().length:0),tabs=[['members','College members',null],['students','Students',read('students').length],['archived','Archived',read('archivedPeople').length],['roles','Role assignments',n]];return`<nav class="dp-tabs" role="tablist" aria-label="Members">${tabs.map(([id,label,count])=>`<button type="button" role="tab" data-dp-tab="${id}" class="${tab===id?'active':''}" aria-selected="${tab===id}">${label}${count===null?'':`<span>${count}</span>`}</button>`).join('')}</nav>`;};
-  const HINT='<span class="dp-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm5 2v7h8V7a3 3 0 0 0-3-3h-5Z"/></svg>Right-click a row to add a role or archive</span>';
+  const HINT='<span class="dp-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm5 2v7h8V7a3 3 0 0 0-3-3h-5Z"/></svg>Right-click a row for member actions</span>';
 
   /* Students: everyone currently on the roster (archived Students are not here). */
   function renderStudents(host){
@@ -85,14 +85,14 @@ const DeanPersonnel=(()=>{
     if(tab==='students')return renderStudents(host);
     if(tab==='archived')return renderArchived(host);
     const rows=people();
-    host.innerHTML=`${typeof RoleAccess!=='undefined'?tabsNav():''}${charts(rows)}<section class="dp-table-card"><header class="dp-table-head"><div><h3>College members</h3><p>${rows.filter(p=>p.displayRole==='Professor').length} Professors · ${rows.filter(p=>p.displayRole!=='Professor').length} Faculty Coordinators · ${HINT}</p></div><div class="dp-tools" id="deanPersonnelTools"></div></header><div class="dp-table-scroll"><table class="dp-table" id="deanPersonnelTable"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Program</th><th>Load</th><th>Action</th></tr></thead><tbody>${rows.map(row).join('')||'<tr><td colspan="6" class="dp-muted">No personnel yet.</td></tr>'}</tbody></table></div></section><div id="deanPersonnelForm"></div>`;
+    host.innerHTML=`${typeof RoleAccess!=='undefined'?tabsNav():''}${charts(rows)}<section class="dp-table-card"><header class="dp-table-head"><div><h3>College members</h3><p>${rows.filter(p=>p.displayRole==='Professor').length} Professors · ${rows.filter(p=>p.displayRole!=='Professor').length} Faculty Coordinators · ${HINT}</p></div><div class="dp-tools" id="deanPersonnelTools"></div></header><div class="dp-table-scroll"><table class="dp-table" id="deanPersonnelTable"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Program</th><th class="dp-load-column" scope="col">Load</th></tr></thead><tbody>${rows.map(row).join('')||'<tr><td colspan="5" class="dp-muted">No personnel yet.</td></tr>'}</tbody></table></div></section><div id="deanPersonnelForm"></div>`;
     if(typeof AdminTableTools!=='undefined')AdminTableTools.mount('dean-members',document.getElementById('deanPersonnelTable'),document.getElementById('deanPersonnelTools'),{exportName:'college-members',add:{label:'Add Professor',onClick:showHire}});
-    host.querySelectorAll('[data-appoint]').forEach(button=>button.onclick=event=>{event.stopPropagation();showAppointment(button.dataset.appoint);});
     bindTabs(host);
   }
 
   /* ---------- right-click menu on Students, College members, Archived ---------- */
   const ICON={
+    appoint:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8ZM2 20v-2a7 7 0 0 1 12-5v7H2Zm17-8v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2Z"/></svg>',
     role:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm1 6v3h3v2h-3v3h-2v-3H8v-2h3V8h2Z"/></svg>',
     archive:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v5H3V3Zm1 6h16v12H4V9Zm5 3v2h6v-2H9Z"/></svg>',
     restore:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3Zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12Z"/></svg>',
@@ -108,9 +108,12 @@ const DeanPersonnel=(()=>{
     closeMenu();
     const id=row.dataset.id,kind=row.dataset.kind,name=personName(id,kind);
     const item=(action,label,note,extra='')=>`<button type="button" role="menuitem" data-dp-menu="${action}"${extra}>${ICON[action]}<span>${label}${note?`<small>${note}</small>`:''}</span></button>`;
+    const appointment=kind==='faculty'&&row.dataset.coordinator==='false'
+      ?item('appoint','Appoint coordinator…','',' data-appoint')
+      :'';
     const items=kind==='archived'
       ?item('restore','Restore','Back to every list')
-      :item('role','Add role…','Choose one or more roles')+(kind==='coordinator'
+      :item('role','Add role…','Choose one or more roles')+appointment+(kind==='coordinator'
         ?item('archive','Archive…','Only Students and Professors',' disabled')
         :item('archive','Archive…',kind==='student'?'Remove from every Student list':'Remove from every Professor list',' class="danger"'));
     const menu=document.createElement('div');menu.id='dpMenu';menu.className='ra-menu dp-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label',`Actions for ${name}`);
@@ -119,7 +122,7 @@ const DeanPersonnel=(()=>{
     const r=menu.getBoundingClientRect();menu.style.left=`${Math.max(8,Math.min(x,innerWidth-r.width-8))}px`;menu.style.top=`${Math.max(8,Math.min(y,innerHeight-r.height-8))}px`;
     menu.querySelector('button:not([disabled])')?.focus();
     menu.addEventListener('keydown',e=>{const all=[...menu.querySelectorAll('button:not([disabled])')],i=all.indexOf(document.activeElement);if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();all[(i+(e.key==='ArrowDown'?1:all.length-1))%all.length]?.focus();}if(e.key==='Escape'){closeMenu();row.focus();}});
-    menu.onclick=e=>{const b=e.target.closest('[data-dp-menu]');if(!b||b.disabled)return;closeMenu();({role:()=>showAddRole(id),archive:()=>showArchive(id,kind),restore:()=>restorePerson(id)})[b.dataset.dpMenu]();};
+    menu.onclick=e=>{const b=e.target.closest('[data-dp-menu]');if(!b||b.disabled)return;closeMenu();({role:()=>showAddRole(id),appoint:()=>showAppointment(id),archive:()=>showArchive(id,kind),restore:()=>restorePerson(id)})[b.dataset.dpMenu]();};
   }
   function bindMenu(host){
     if(host.dataset.dpMenu)return;host.dataset.dpMenu='1';
@@ -127,6 +130,13 @@ const DeanPersonnel=(()=>{
     host.addEventListener('contextmenu',e=>{const row=rowOf(e.target);if(!row)return;e.preventDefault();
       // Keyboard (menu key / Shift+F10) has no pointer position: open beside the row.
       const r=row.getBoundingClientRect();openMenu(row,e.clientX||r.left+24,e.clientY||r.bottom);});
+    host.addEventListener('keydown',e=>{
+      if(e.key!=='ContextMenu'&&!(e.shiftKey&&e.key==='F10'))return;
+      const row=rowOf(e.target);if(!row)return;
+      e.preventDefault();
+      const bounds=row.getBoundingClientRect();
+      openMenu(row,bounds.left+24,bounds.bottom);
+    });
     document.addEventListener('click',e=>{if(!e.target.closest('#dpMenu'))closeMenu();});
     document.addEventListener('scroll',closeMenu,true);
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});

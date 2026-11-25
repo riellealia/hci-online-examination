@@ -56,7 +56,7 @@ function gradeFor(score, total) {
 /* A submission is only final once every written answer has been marked. */
 function isFullyMarked(submission) {
   return (submission.answers || [])
-    .every(a => !a.needsManualGrading || a.awarded !== null);
+    .every(a => !a.needsManualGrading || a.awarded != null);
 }
 
 /* Marks actually awarded so far across auto-marked and hand-marked answers. */

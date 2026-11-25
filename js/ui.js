@@ -626,6 +626,10 @@ function mountProfileMenu({ name, role, id, container }) {
     const openCount = reports.filter(report => report.status === 'open').length;
     if (reports.length) inboxItems.push({kind:'System status',title:'Question reports',text:`${openCount} pending · ${reports.length} total`,at:new Date().toISOString(),pending:openCount>0});
   }
+  if (typeof DB !== 'undefined' && id) {
+    inboxItems.push(...DB.read('notifications', []).filter(item => item.userId === id && item.title && item.requestId)
+      .map(item => ({kind:'Dean decision',title:item.title,text:item.message,at:item.createdAt,pending:item.read!==true,decisionId:item.id})));
+  }
   inboxItems.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
   const inboxOwner=`${role}:${id||'anonymous'}`;
   const inboxReceipts=typeof DB!=='undefined'?DB.read('inboxReadReceipts',[]):[];
@@ -634,6 +638,7 @@ function mountProfileMenu({ name, role, id, container }) {
     if(item.kind.startsWith('Report ·')){const record=reports.find(report=>report.details===item.text&&report.category===item.title);source='report';sourceId=record?.id||index;}
     else if(item.kind==='Student mail'){const record=emails.find(email=>email.message===item.text&&email.subject===item.title);source='student-mail';sourceId=record?.id||index;senderId=record?.studentId||null;relatedReportId=record?.reportId||reports.find(report=>report.studentId===senderId&&item.title.includes(exams.find(exam=>exam.id===report.examId)?.subjectCode||'__no_subject__'))?.id||null;}
     else if(item.kind==='Report update'||item.kind==='Faculty mail'){const record=reportNotices.find(notice=>notice.message===item.text);const report=reports.find(report=>report.id===record?.reportId),exam=exams.find(exam=>exam.id===report?.examId);source='student-notice';sourceId=record?.id||index;senderId=record?.facultyId||exam?.facultyId||null;relatedReportId=record?.reportId||null;}
+    else if(item.decisionId){source='approval-decision';sourceId=item.decisionId;}
     else if(item.kind==='System status'){source='system';sourceId='question-reports';}
     else {const record=announcements.find(announcement=>announcement.message===item.text&&announcement.title===item.title);sourceId=record?.id||index;}
     item.key=`${source}:${sourceId}`;item.source=source;item.sourceId=sourceId;item.senderId=senderId;item.relatedReportId=relatedReportId;

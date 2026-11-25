@@ -24,3 +24,16 @@ ok(!!page.d.querySelector('#results-panel .student-page-heading'),'Results follo
 page.d.querySelector('.result-gwa-button').click();
 ok(/examination-based estimate/.test([...page.d.querySelectorAll('.toast-body')].at(-1)?.textContent||''),'clicking GWA explains why it may differ from the official final grade');
 page.w.close();
+const missed = load('student.html', {
+  ...seed,
+  exams: [...seed.exams,
+    {...seed.exams[0], id:'MISSED', date:'2020-01-01'},
+    {...seed.exams[0], id:'OPEN', date:''},
+    {...seed.exams[0], id:'FUTURE', date:'2999-01-01'},
+    {...seed.exams[0], id:'DRAFT', date:'2020-01-01', status:'draft'},
+    {...seed.exams[0], id:'OTHER-SECTION', date:'2020-01-01', sections:['OTHER']}
+  ],
+  currentUser:{username:'S1',role:'student'}
+});
+ok(missed.d.getElementById('resultGwa').textContent==='3.38','GWA includes a missed eligible exam as 5.00 and excludes unassigned, draft, open, and upcoming exams');
+missed.w.close();

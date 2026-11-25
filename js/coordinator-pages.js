@@ -28,7 +28,7 @@ const CoordinatorPages = (() => {
   /* ---------- per page ---------- */
   const PAGES = {
     sectionManagementSection: {
-      table: '#coordinatorSectionTable', summary: '.section-summary', head: '.section-workspace-head', toolsAt: '.section-table-tools', search: '#sectionSearch', key: 'coordinator-sections', exportName: 'sections', add: 'Add section', addButton: '.section-add',
+      table: '#coordinatorSectionTable', summary: '.section-summary', head: '.section-workspace-head', toolsAt: '.section-table-tools', search: '#sectionSearch', key: 'coordinator-sections', exportName: 'sections', add: () => document.querySelector('#sectionManagementSection .section-add')?.textContent.replace(/[＋+]/g, '').trim() || 'Add section', addButton: '.section-add',
       charts(rows) {
         const byProgram = new Map(), byYear = new Map();
         rows.forEach(r => { const p = cell(r, 2), y = cell(r, 1), [n, cap] = ratio(cell(r, 4)) || [0, 0]; const e = byProgram.get(p) || { n: 0, cap: 0, count: 0 }; e.n += n; e.cap += cap; e.count++; byProgram.set(p, e); byYear.set(y, (byYear.get(y) || 0) + 1); });
@@ -84,7 +84,7 @@ const CoordinatorPages = (() => {
     if (page.key && toolsAt && !toolsAt.querySelector('.ck-tools') && typeof AdminTableTools !== 'undefined') {
       toolsAt.insertAdjacentHTML('beforeend', '<div class="ck-tools role-table-tools"></div>');
       const tools = toolsAt.querySelector('.ck-tools');
-      AdminTableTools.mount(page.key, table, tools, { exportName: page.exportName || page.key, add: page.add ? { label: page.add, onClick: () => host.querySelector(page.addButton)?.click() } : null });
+      AdminTableTools.mount(page.key, table, tools, { exportName: page.exportName || page.key, add: page.add ? { label: typeof page.add === 'function' ? page.add() : page.add, onClick: () => host.querySelector(page.addButton)?.click() } : null });
       // Re-apply the page's own search/filter after sorting or grouping.
       const refilter = () => setTimeout(() => toolsAt.querySelector('input[type="search"],input:not([type])')?.dispatchEvent(new Event('input')), 0);
       tools.addEventListener('click', refilter); tools.addEventListener('change', refilter);

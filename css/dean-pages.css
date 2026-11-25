@@ -29,6 +29,9 @@ body[data-role="dean"] .dp-table .table-group-row td:not(#dp){background:var(--p
 :root[data-theme="dark"] .dp-pill.good{color:#8fd3c9}
 :root[data-theme="dark"] .dp-pill.bad{color:#f0a49c}
 .dp-load{font-variant-numeric:tabular-nums}
+body[data-role="dean"] #deanPersonnelTable .dp-load-column{min-width:180px;padding-right:32px!important;text-align:left}
+#deanPersonnelTable .dp-load-meter{display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+#deanPersonnelTable .dp-load-meter .ck-mini{flex:none;margin-left:0}
 body[data-role="dean"] .dp-row-action:not(#dp):not(#dp2){height:30px!important;min-height:30px!important;padding:0 12px;border:1px solid var(--pr-line);border-radius:9px;background:transparent;color:var(--pr-accent);font:600 11px var(--pr-font);white-space:nowrap;cursor:pointer;box-shadow:none}
 body[data-role="dean"] .dp-row-action:not(#dp):hover{border-color:var(--pr-accent);background:color-mix(in srgb,var(--pr-accent) 8%,transparent)}
 
@@ -120,7 +123,7 @@ body .dp-menu button:not(#dp):hover,body .dp-menu button:not(#dp):focus-visible{
 .dp-menu button svg{flex:none;width:16px;height:16px;margin-top:1px;fill:currentColor;opacity:.8}
 body .dp-menu button.danger:not(#dp){color:#b5534b!important}
 body .dp-menu button[disabled]:not(#dp){opacity:.45;cursor:not-allowed}
-.dp-role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:0;padding:0;border:0;min-width:0}
+.dp-role-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0;padding:0;border:0;min-width:0}
 .dp-role-grid legend{grid-column:1/-1;margin:0 0 6px;padding:0;color:var(--pr-ink);font:700 12px/1.4 var(--pr-font)}
 .dp-role-grid legend small{margin-left:6px;color:var(--pr-muted);font-weight:500}
 .dp-role-card{position:relative;display:flex!important;align-items:flex-start;gap:10px;margin:0!important;padding:12px!important;border:1px solid var(--pr-line);border-radius:12px;background:var(--pr-surface,transparent);cursor:pointer;transition:border-color .15s,background .15s}
@@ -147,3 +150,114 @@ body .dp-menu button[disabled]:not(#dp){opacity:.45;cursor:not-allowed}
 .confirm-box .dp-form-grid .dp-role-card .dp-cap,.confirm-box .dp-form-grid .dp-role-card .dp-role-ends{display:flex!important}
 .confirm-box .dp-form-grid .dp-role-card:not(.held) .dp-role-text{padding-right:0}
 body[data-role="dean"] .dp-form .confirm-ok:disabled:not(#dp){opacity:.45!important;cursor:not-allowed!important;filter:saturate(.6)}
+
+/* ==================================================================
+   Requests (Dean Approvals): underlined kind tabs + toolbar, grouped
+   list, and cards with details on the left and approve/reject on the right.
+   ================================================================== */
+body[data-role="dean"] .rq2-tabbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 14px;border-bottom:1px solid var(--pr-line)}
+body[data-role="dean"] .rq2-tabbar .cw-tools{margin:0 0 6px;flex:none}
+body[data-role="dean"] .rq2-tabs{display:flex;gap:22px;min-width:0;overflow-x:auto;scrollbar-width:none}
+body[data-role="dean"] .rq2-tab:not(#rq){position:relative;display:inline-flex;align-items:center;gap:7px;width:auto;min-height:42px;margin:0;padding:8px 1px 11px;border:0;border-radius:0;background:transparent!important;box-shadow:none;color:var(--pr-muted);font:700 13px var(--pr-font);white-space:nowrap;cursor:pointer}
+body[data-role="dean"] .rq2-tab:not(#rq)::after{content:"";position:absolute;right:0;bottom:-1px;left:0;height:2px;border-radius:2px;background:transparent}
+body[data-role="dean"] .rq2-tab:not(#rq):hover,body[data-role="dean"] .rq2-tab.active:not(#rq){color:var(--pr-accent)}
+body[data-role="dean"] .rq2-tab.active:not(#rq)::after{background:var(--pr-accent)}
+body[data-role="dean"] .rq2-tab>span{display:inline-grid;place-items:center;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,var(--pr-line) 55%,transparent);color:var(--pr-muted);font-size:11px;font-weight:800}
+body[data-role="dean"] .rq2-tab.active>span{background:color-mix(in srgb,var(--pr-accent) 14%,transparent);color:var(--pr-accent)}
+
+body[data-role="dean"] .rq2-group{display:grid;gap:10px;margin:0 0 18px}
+body[data-role="dean"] .rq2-group>h4{display:flex;align-items:center;gap:8px;margin:4px 0 0;color:var(--pr-muted);font:800 11px var(--pr-font);letter-spacing:.08em;text-transform:uppercase}
+body[data-role="dean"] .rq2-group>h4>span{color:var(--pr-ink);letter-spacing:0}
+
+/* Card: icon | details | decision, with the icon and decision centred vertically. */
+body[data-role="dean"] #deanApprovalList .rq2-card:not(#rq):not(#rq2):not(#rq3){display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;margin:0!important;padding:16px 18px!important;border:1px solid var(--pr-line)!important;border-left:3px solid var(--tone,var(--pr-line))!important;border-radius:14px!important;background:var(--pr-surface)!important}
+body[data-role="dean"] #deanApprovalList .rq2-icon{display:grid;align-self:center;width:42px;height:42px;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--tone,var(--pr-accent)) 12%,transparent);color:var(--tone,var(--pr-accent))}
+body[data-role="dean"] #deanApprovalList .rq2-icon svg{width:20px;height:20px;fill:currentColor}
+body[data-role="dean"] #deanApprovalList .rq2-main{display:grid;gap:3px;min-width:0}
+body[data-role="dean"] #deanApprovalList .rq2-name{margin:0!important;color:var(--pr-ink);font:700 15px/1.3 var(--pr-font)}
+body[data-role="dean"] #deanApprovalList .rq2-name small{margin-left:4px;color:var(--pr-muted);font-size:12px;font-weight:500}
+body[data-role="dean"] #deanApprovalList .rq2-type:not(#rq){margin:0!important;color:var(--pr-accent)!important;font:650 13px/1.4 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-reason:not(#rq){margin:4px 0 0!important;color:var(--pr-ink)!important;font:400 13px/1.5 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-decision:not(#rq){margin:2px 0 0!important;color:var(--pr-muted)!important;font-size:12px!important;font-style:italic}
+/* Details read as one quiet line of text, not pills. */
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta:not(#rq){display:block!important;margin:4px 0 0!important;padding:0!important;border:0!important;background:none!important;color:var(--pr-muted);font:400 12px/1.7 var(--pr-font)}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta>span:not(#rq){display:inline!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;color:inherit!important;font:inherit!important;white-space:normal}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta>span+span::before{content:"\00B7";margin:0 8px;color:var(--pr-muted);opacity:.6}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta>span.rq-sender{display:block!important}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta>span.rq-sender::before{content:none}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta b{margin-right:3px;color:var(--pr-ink);font-weight:600}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-review-blocked{margin:6px 0 0!important;color:#b5534b;font-size:12px}
+body[data-role="dean"] #deanApprovalList .rq2-foot{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 18px;margin-top:6px}
+body[data-role="dean"] #deanApprovalList .rq2-foot details{border:0!important}
+body[data-role="dean"] #deanApprovalList .rq2-foot summary{width:max-content;color:var(--pr-muted);font:600 12px var(--pr-font);cursor:pointer}
+body[data-role="dean"] #deanApprovalList .rq2-foot summary:hover{color:var(--pr-accent)}
+body[data-role="dean"] #deanApprovalList .rq2-foot ol{margin:6px 0 0!important;padding-left:18px;color:var(--pr-muted);font-size:12px}
+body[data-role="dean"] #deanApprovalList .rq2-note textarea{display:block;width:min(460px,100%);min-height:56px;margin-top:6px;padding:8px 10px;border:1px solid var(--pr-line);border-radius:10px;background:var(--pr-surface);color:var(--pr-ink);font:400 12px/1.5 var(--pr-font);resize:vertical}
+
+/* Approve and reject: round, outlined, clear background. */
+body[data-role="dean"] #deanApprovalList .rq2-actions{display:flex;align-self:center;gap:10px}
+body[data-role="dean"] #deanApprovalList .rq2-act:not(#rq){display:grid;width:44px;min-width:44px;height:44px;min-height:44px;place-items:center;margin:0;padding:0;border:1.5px solid currentColor!important;border-radius:50%!important;background:transparent!important;box-shadow:none!important;cursor:pointer;transition:background .15s,transform .15s}
+body[data-role="dean"] #deanApprovalList .rq2-act svg{width:22px;height:22px;fill:currentColor}
+body[data-role="dean"] #deanApprovalList .rq2-act.approve:not(#rq){color:#2f8d83!important}
+body[data-role="dean"] #deanApprovalList .rq2-act.reject:not(#rq){color:#b5534b!important}
+body[data-role="dean"] #deanApprovalList .rq2-act.approve:not(#rq):hover{background:color-mix(in srgb,#2f8d83 10%,transparent)!important;transform:scale(1.05)}
+body[data-role="dean"] #deanApprovalList .rq2-act.reject:not(#rq):hover{background:color-mix(in srgb,#b5534b 10%,transparent)!important;transform:scale(1.05)}
+body[data-role="dean"] #deanApprovalList .rq2-act:not(#rq):focus-visible{outline:2px solid currentColor;outline-offset:3px}
+body[data-role="dean"] #deanApprovalList .rq2-act:disabled:not(#rq){opacity:.35;cursor:not-allowed;transform:none}
+/* Decided requests: the outcome as quiet text with its mark. */
+body[data-role="dean"] #deanApprovalList .rq2-state{display:grid;grid-template-columns:auto auto;align-items:center;align-self:center;column-gap:6px;color:var(--pr-muted);font:700 13px var(--pr-font);text-align:right}
+body[data-role="dean"] #deanApprovalList .rq2-state svg{width:18px;height:18px;fill:currentColor}
+body[data-role="dean"] #deanApprovalList .rq2-state small{grid-column:1/-1;color:var(--pr-muted);font-size:11px;font-weight:500}
+body[data-role="dean"] #deanApprovalList .rq2-state.is-approved{color:#2f8d83}
+body[data-role="dean"] #deanApprovalList .rq2-state.is-rejected{color:#b5534b}
+:root[data-theme="dark"] body[data-role="dean"] #deanApprovalList .rq2-act.approve:not(#rq),:root[data-theme="dark"] body[data-role="dean"] #deanApprovalList .rq2-state.is-approved{color:#5cc2b6!important}
+:root[data-theme="dark"] body[data-role="dean"] #deanApprovalList .rq2-act.reject:not(#rq),:root[data-theme="dark"] body[data-role="dean"] #deanApprovalList .rq2-state.is-rejected{color:#e07a72!important}
+@media(max-width:640px){
+  body[data-role="dean"] .rq2-tabbar{flex-direction:column-reverse;align-items:stretch}
+  body[data-role="dean"] .rq2-tabbar .cw-tools{align-self:flex-end}
+  body[data-role="dean"] #deanApprovalList .rq2-card:not(#rq):not(#rq2):not(#rq3){grid-template-columns:auto minmax(0,1fr)}
+  body[data-role="dean"] #deanApprovalList :is(.rq2-actions,.rq2-state){grid-column:1/-1;justify-self:end}
+}
+body[data-role="dean"] .dp-requests .rq2-tabbar{margin:0 18px 14px}
+body[data-role="dean"] #deanApprovalList .rq2-foot :is(.role-history,.rq2-note):not(#rq):not(#rq2){margin:0!important;padding:0!important;border:0!important;background:none!important}
+body[data-role="dean"] #deanApprovalList .rq2-foot{align-items:baseline}
+
+/* Approval cells use the Faculty question-report layout: no icon, no frame,
+   name / context / request / kind pill / reason / details, cells divided by a rule. */
+body[data-role="dean"] #deanApprovalList .rq2-card:not(#rq):not(#rq2):not(#rq3):not(#rq4){grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;padding:18px 4px!important;border:0!important;border-bottom:1px solid var(--pr-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+body[data-role="dean"] #deanApprovalList .rq2-group>.rq2-card:last-child:not(#rq):not(#rq2):not(#rq3):not(#rq4),body[data-role="dean"] #deanApprovalList>.rq2-card:last-child:not(#rq):not(#rq2):not(#rq3):not(#rq4){border-bottom:0!important}
+body[data-role="dean"] #deanApprovalList .rq2-group{gap:0}
+body[data-role="dean"] #deanApprovalList .rq2-main{display:block}
+body[data-role="dean"] #deanApprovalList .rq2-head{display:grid;gap:3px}
+body[data-role="dean"] #deanApprovalList .rq2-name:not(#rq){margin:0!important;color:var(--pr-ink)!important;font:700 15px/1.3 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-context:not(#rq){color:var(--pr-muted)!important;font:400 11px/1.4 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-type:not(#rq){margin:12px 0 8px!important;color:var(--pr-ink)!important;font:700 14px/1.45 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-pill{display:inline-flex;align-items:center;width:max-content;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--pr-accent) 16%,var(--pr-surface));color:color-mix(in srgb,var(--pr-accent) 80%,#000);font:800 11px var(--pr-font)}
+body[data-role="dean"] #deanApprovalList .rq2-reason:not(#rq){margin:12px 0 0!important;color:var(--pr-ink)!important;font:400 13px/1.6 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta:not(#rq):not(#rq2){margin:10px 0 0!important;font:400 11px/1.6 var(--pr-font)!important;color:var(--pr-muted)!important}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta b{color:var(--pr-muted);font-weight:600}
+body[data-role="dean"] #deanApprovalList .rq2-decision:not(#rq){margin:6px 0 0!important}
+body[data-role="dean"] #deanApprovalList .rq2-foot{margin-top:8px}
+/* Decided cells: the outcome as plain text. */
+body[data-role="dean"] #deanApprovalList .rq2-state{display:grid;justify-items:end;gap:2px;font:800 12px var(--pr-font)}
+body[data-role="dean"] #deanApprovalList .rq2-state small{grid-column:auto}
+@media(max-width:640px){body[data-role="dean"] #deanApprovalList .rq2-card:not(#rq):not(#rq2):not(#rq3):not(#rq4){grid-template-columns:minmax(0,1fr)}body[data-role="dean"] #deanApprovalList :is(.rq2-actions,.rq2-state){grid-column:auto;justify-self:end}}
+
+/* Cells keep the report-card outline (border, radius, shadow, status edge) and a light type
+   hierarchy: only the name is bold. */
+body[data-role="dean"] #deanApprovalList .rq2-group{gap:12px}
+body[data-role="dean"] #deanApprovalList .rq2-card:not(#rq):not(#rq2):not(#rq3):not(#rq4):not(#rq5){margin:0!important;padding:18px 20px!important;border:1px solid var(--pr-line)!important;border-left:3px solid var(--tone,var(--pr-line))!important;border-radius:16px!important;background:var(--pr-surface)!important;box-shadow:0 7px 20px rgba(44,40,35,.07)!important}
+body[data-role="dean"] #deanApprovalList :is(.rq2-group>.rq2-card,>.rq2-card)+.rq2-card:not(#rq){margin-top:0!important}
+body[data-role="dean"] #deanApprovalList .rq2-card[data-status="pending"]{--tone:#d39a2c}
+body[data-role="dean"] #deanApprovalList .rq2-card[data-status="approved"]{--tone:#2f8d83}
+body[data-role="dean"] #deanApprovalList .rq2-card[data-status="rejected"]{--tone:#b5534b}
+body[data-role="dean"] #deanApprovalList .rq2-card:is([data-status="withdrawn"],[data-status="cancelled"]){--tone:#8a8f99}
+:root[data-theme="dark"] body[data-role="dean"] #deanApprovalList .rq2-card:not(#rq):not(#rq2):not(#rq3):not(#rq4):not(#rq5){box-shadow:0 8px 22px rgba(0,0,0,.22)!important}
+body[data-role="dean"] #deanApprovalList .rq2-type:not(#rq):not(#rq2){margin:10px 0 6px!important;font:600 13px/1.45 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-reason:not(#rq):not(#rq2){margin:8px 0 0!important;font:400 12.5px/1.6 var(--pr-font)!important}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta b:not(#rq){color:var(--pr-muted)!important;font-weight:400!important}
+body[data-role="dean"] #deanApprovalList .rq2-details .role-request-meta b::after{content:":"}
+body[data-role="dean"] #deanApprovalList .rq2-foot summary:not(#rq){font-weight:500!important}
+body[data-role="dean"] #deanApprovalList .rq2-state{display:grid;grid-template-columns:auto;justify-items:end;gap:2px;font:600 12px var(--pr-font)}
+body[data-role="dean"] #deanApprovalList .rq2-state small{font-weight:400}
+body[data-role="dean"] .rq2-group>h4{font-weight:700}

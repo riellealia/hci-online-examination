@@ -48,6 +48,7 @@ const SectionService = {
       if(offer.periodStatus&&offer.periodStatus!=='active')return false;
       if(context.periodId&&offer.academicPeriodId&&offer.academicPeriodId!==context.periodId)return false;
       const stored=sectionRows.find(item=>this.normaliseId(item.id)===this.normaliseId(offer.sectionId))||{},section={...this.detailsFromId(offer.sectionId),...stored},scoped=curriculum.filter(item=>item.program===section.program&&Number(item.yearLevel)===Number(section.yearLevel)&&item.status!=='archived'&&item.removed!==true);
+      if(section.status==='archived')return false;
       if(!scoped.length)return true;
       const matched=scoped.filter(item=>item.subjectCode===offer.subjectCode);
       return !matched.length||matched.some(item=>item.term===context.term);
@@ -56,7 +57,7 @@ const SectionService = {
   ensureOfferingsForSection(section, sectionSubjects, curricula) {
     const context=this.currentAcademicContext();
     const list=Array.isArray(sectionSubjects)?sectionSubjects.map(r=>({...r,assignments:[...(r.assignments||[])]})):[];
-    if(!section?.id||!context.active)return{records:list,added:0};
+    if(!section?.id||section.status==='archived'||!context.active)return{records:list,added:0};
     const info={...this.detailsFromId(section.id),...section};
     const curriculum=Array.isArray(curricula)?curricula:(typeof DB!=='undefined'?DB.read('curricula',[]):[]);
     const subjects=curriculum.filter(item=>item.program===info.program&&Number(item.yearLevel)===Number(info.yearLevel)&&item.term===context.term&&item.status!=='archived'&&item.removed!==true);

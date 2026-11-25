@@ -12,7 +12,8 @@ const ApprovalService = (() => {
     'student-enrollment': { submit: 'coordinator', review: 'dean' },
     'professor-overload': { submit: 'coordinator', review: 'dean' },
     // Faculty Coordinator → Dean: a new Section is created only once approved.
-    'section-create': { submit: 'coordinator', review: 'dean' }
+    'section-create': { submit: ['coordinator', 'faculty'], review: 'dean' },
+    'section-archive': { submit: ['coordinator', 'faculty'], review: 'dean' }
   });
   const applyHandlers = new Map();
   const now = () => new Date().toISOString();
@@ -24,9 +25,16 @@ const ApprovalService = (() => {
   function fail(message, code = 'INVALID_APPROVAL') { const error = new Error(message); error.code = code; throw error; }
   function save(records) { if (!DB.write('approvalRequests', records)) fail('Approval request could not be saved.', 'SAVE_FAILED'); }
   function notice(userId, message, requestId) {
-    if (!userId) return;
+    notices([{ userId, message }], requestId);
+  }
+  function notices(recipients, requestId) {
     const items = DB.read('notifications', []);
-    items.unshift({ id: `NTF-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, userId, requestId, message, read: false, createdAt: now() });
+    const entries = recipients.filter(item => item.userId).map(item => ({
+      id: `NTF-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      requestId, read: false, createdAt: now(), ...item
+    }));
+    if (!entries.length) return;
+    items.unshift(...entries);
     DB.write('notifications', items);
   }
   function noticeRole(roleName, message, requestId) {
@@ -80,8 +88,22 @@ const ApprovalService = (() => {
     request.reviewerRole = role(actingUser.role); request.reviewerRemarks = remarks.trim(); request.decisionAt = changedAt;
     request.history.push({ status: decision, at: changedAt, actorId: actingUser.username, actorRole: role(actingUser.role), remarks: remarks.trim() });
     save(records); audit(decision === 'approved' ? 'approve' : 'reject', request, { remarks: remarks.trim() }, actingUser);
-    notice(request.requesterId, `Your ${request.type} request was ${decision}.`, request.id);
-    if (request.type === 'faculty-student-enrollment' && request.proposedChange?.studentId) notice(request.proposedChange.studentId, `Your ${request.proposedChange.subjectCode} enrollment ${request.proposedChange.action} request was ${decision}.`, request.id);
+    const change = request.proposedChange || {};
+    const requestName = request.type.replace(/-/g, ' ');
+    const title = `Request ${decision}`;
+    const recipients = [{ userId: request.requesterId, title, message: `The Dean ${decision} your ${requestName} request.` }];
+    if (decision === 'approved') {
+      const professorId = ['professor-assignment', 'professor-overload'].includes(request.type) ? change.facultyId
+        : request.type === 'role-assignment' && DB.read('faculty', []).some(person => person.id === change.username) ? change.username : '';
+      if (professorId && professorId !== request.requesterId) recipients.push({
+        userId: professorId, title: `Approved ${requestName}`,
+        message: `The Dean approved a ${requestName} request for you${change.subjectCode && change.subjectCode !== '*' ? ` in ${change.subjectCode}` : ''}.`
+      });
+    }
+    if (request.type === 'faculty-student-enrollment' && change.studentId && change.studentId !== request.requesterId) {
+      recipients.push({ userId: change.studentId, message: `Your ${change.subjectCode} enrollment ${change.action} request was ${decision}.` });
+    }
+    notices(recipients, request.id);
     return clone(request);
   }
   function closeOwn(requestId, nextStatus, remarks = '', suppliedActor = null) {

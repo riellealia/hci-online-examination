@@ -10,7 +10,7 @@ const PermissionService = (() => {
       'approval.student-overload.review', 'approval.faculty-student-enrollment.review',
       'audit.college.view', 'statistics.college.view', 'approval.role-assignment.review', 'role.assign',
       'approval.student-enrollment.review', 'approval.professor-overload.review',
-      'approval.section-create.review'
+      'approval.section-create.review', 'approval.section-archive.review'
     ],
     coordinator: [
       'dashboard.coordinator.view', 'offering.manage', 'schedule.manage',
@@ -19,12 +19,12 @@ const PermissionService = (() => {
       'approval.student-overload.submit', 'approval.own.withdraw',
       'audit.own.view', 'approval.role-assignment.submit',
       'approval.student-enrollment.submit', 'approval.professor-overload.submit',
-      'approval.section-create.submit'
+      'approval.section-create.submit', 'approval.section-archive.submit'
     ],
     faculty: [
       'dashboard.faculty.view', 'exam.own.manage', 'grade.own.manage',
       'profile.student.assigned.view', 'approval.faculty-student-enrollment.submit',
-      'approval.own.withdraw', 'audit.own.view'
+      'approval.own.withdraw', 'audit.own.view', 'approval.section-create.submit', 'approval.section-archive.submit'
     ],
     student: [
       'dashboard.student.view', 'exam.eligible.take', 'result.own.view',
