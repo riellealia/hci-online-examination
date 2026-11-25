@@ -35,7 +35,7 @@ const DeanDashboard = (() => {
   function hero(ctx) {
     const pending = ctx.requests.filter(r => r.status === 'pending').length;
     const stats = [[ctx.faculty.length, 'Professors'], [ctx.coordinators.length, 'Coordinators'], [ctx.sections.length, 'Sections'], [ctx.students.length, 'Students']];
-    return `<header class="role-page-hero cd-hero"><div><p class="role-page-eyebrow">${esc(new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }))}</p><h1>Welcome back, Dean</h1><p class="role-page-copy">College of Information and Computer Studies. ${pending ? `<strong>${pending} request${pending === 1 ? ' is' : 's are'}</strong> waiting for your approval.` : 'No requests are waiting for your approval.'}</p></div><div class="cd-hero-stats">${stats.map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join('')}</div></header>`;
+    return `<header class="role-page-hero cd-hero"><div><p class="role-page-eyebrow">${esc(new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }))}</p><h1>Welcome back, ${esc((read('users').find(u => u.username === session.username) || {}).first || 'Dean')}</h1><p class="role-page-copy">College of Information and Computer Studies. ${pending ? `<strong>${pending} request${pending === 1 ? ' is' : 's are'}</strong> waiting for your approval.` : 'No requests are waiting for your approval.'}</p></div><div class="cd-hero-stats">${stats.map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join('')}</div></header>`;
   }
 
   function attention(ctx) {
@@ -90,7 +90,7 @@ const DeanDashboard = (() => {
 
   function approvalsCard(ctx) {
     const count = s => ctx.requests.filter(r => r.status === s).length;
-    const label = t => ({ 'professor-assignment': 'Professor assignment', 'student-overload': 'Student overload', 'faculty-student-enrollment': 'Enrollment change' }[t] || String(t || 'Request').replace(/-/g, ' '));
+    const label = t => ({ 'professor-assignment': 'Professor assignment', 'student-overload': 'Student overload', 'faculty-student-enrollment': 'Enrollment change', 'role-assignment': 'Role', 'student-enrollment': 'Student subject', 'professor-overload': 'Professor overload' }[t] || String(t || 'Request').replace(/-/g, ' '));
     const pending = ctx.requests.filter(r => r.status === 'pending').sort((a, b) => String(a.submittedAt || a.createdAt || '').localeCompare(String(b.submittedAt || b.createdAt || ''))).slice(0, 4);
     return `<section class="cd-card"><header class="cd-card-head"><div><h2>Approvals</h2><p>Requests from Faculty Coordinators and Professors</p></div><button type="button" class="cd-link" data-dd-go="approvalsSection">Review &#8250;</button></header>
       <div class="cd-req-stats"><div><strong>${count('pending')}</strong><span>Pending</span></div><div><strong>${count('approved')}</strong><span>Approved</span></div><div><strong>${count('rejected')}</strong><span>Rejected</span></div></div>

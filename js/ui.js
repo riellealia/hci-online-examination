@@ -483,7 +483,7 @@ function textareaInputDialog({ title = 'Add a note', label = 'Note', value = '',
 
 /* Three-way guard for editable forms. The caller can save, deliberately
    discard, or continue editing without relying on the browser's confirm UI. */
-function saveDiscardDialog({ title = 'Unsaved changes', message = 'What would you like to do?' } = {}) {
+function saveDiscardDialog({ title = 'Unsaved changes', message = 'What would you like to do?', continueLabel = 'Continue editing', discardLabel = 'Discard', saveLabel = 'Save' } = {}) {
   return new Promise(resolve => {
     const bg = document.createElement('div');
     bg.className = 'modal-bg confirm-bg';
@@ -494,9 +494,9 @@ function saveDiscardDialog({ title = 'Unsaved changes', message = 'What would yo
         <h3 id="saveDiscardTitle">${title}</h3>
         <p id="saveDiscardMsg" class="confirm-msg">${message}</p>
         <div class="confirm-actions save-discard-actions">
-          <button type="button" class="confirm-cancel" id="continueEditing">Continue editing</button>
-          <button type="button" class="confirm-ok is-danger" id="discardChanges">Discard</button>
-          <button type="button" class="confirm-ok" id="saveChanges">Save</button>
+          <button type="button" class="confirm-cancel" id="continueEditing">${continueLabel}</button>
+          <button type="button" class="confirm-ok is-danger" id="discardChanges">${discardLabel}</button>
+          <button type="button" class="confirm-ok" id="saveChanges">${saveLabel}</button>
         </div>
       </div>`;
     document.body.appendChild(bg);

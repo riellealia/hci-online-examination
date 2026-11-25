@@ -148,3 +148,35 @@ function questionStates(attempt, questions, currentIndex) {
     };
   });
 }
+
+
+/* Question order for one attempt. With shuffling on, each attempt gets its
+   own random order, kept in the attempt so a refresh or resume shows the same
+   order. Questions added after the attempt began are placed at random spots
+   after the ones already seen. Answers and flags are stored by question id,
+   so the order never affects grading. */
+function shuffledIds(ids) {
+  const out = ids.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    let r;
+    try { r = crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296; } catch (_) { r = Math.random(); }
+    const j = Math.floor(r * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+function orderAttemptQuestions(attempt, list, shuffle) {
+  const items = Array.isArray(list) ? list.slice() : [];
+  if (!shuffle) {
+    if (attempt) delete attempt.questionOrder;
+    return items;
+  }
+  const byId = new Map(items.map(q => [q.id, q]));
+  const kept = Array.isArray(attempt && attempt.questionOrder)
+    ? attempt.questionOrder.filter((id, i, all) => byId.has(id) && all.indexOf(id) === i) : [];
+  const added = shuffledIds(items.map(q => q.id).filter(id => !kept.includes(id)));
+  const order = kept.concat(added);
+  if (attempt) attempt.questionOrder = order;
+  return order.map(id => byId.get(id));
+}

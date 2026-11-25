@@ -11,8 +11,8 @@ seed.studentEnrollments=[{id:'E1',studentId:'S1',offeringId:'O-SUB2-A',subjectCo
 const r=load('admin.html',{...seed,currentUser:{username:'admin',role:'admin'}});
 
 r.w.openStudentEnrollmentPage(1);
-r.d.querySelector('.available-subjects').open=true;
-const subjectRow=[...r.d.querySelectorAll('.subject-only-table tr[role="button"]')].find(row=>/SUB2/.test(row.textContent));
+r.w.setStudentSubjectScope('all');
+const subjectRow=[...r.d.querySelectorAll('.se-available-row')].find(row=>/SUB2/.test(row.textContent));
 ok(/1 enrolled/.test(subjectRow.textContent)&&/1 seat available/.test(subjectRow.textContent),'student subject list summarizes enrollment and remaining availability');
 subjectRow.click();
 const choice=r.d.querySelector('#studentSectionPickerOptions .student-section-choice');

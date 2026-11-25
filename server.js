@@ -11,10 +11,11 @@ const PagePermissions = require('./js/page-permissions');
 function requirePageWrite(session,key){if(!session||session.role==='admin'||key==='pagePermissions')return;const doc=store.read('pagePermissions',{})||{},assignments=store.read('roleAssignments',[])||[];if(PagePermissions.writeDenied(doc,{role:session.role,username:session.username,assignments},key))throw Object.assign(new Error('That action is turned off for your role.'),{status:403,code:'PAGE_PERMISSION_DENIED'});}
 const { validateProtectedWrite } = require('./server/protected-write');
 const { openDatabase } = require('./server/database');
+const { createMemoryStore } = require('./server/memory-store');
 const { createSupabaseReplicatedStore } = require('./server/supabase-replica');
 const { parseCsv, stringifyCsv } = require('./server/csv');
 const { createAcademicPeriodService, initialFromSettings, normalizeOperationalWrite, validateSettingsWrite, ACTIVE_COLLECTIONS } = require('./server/academic-periods');
-const { createAccountLifecycleService, STATUS_BY_ACTION } = require('./server/account-lifecycle');
+const { createAccountLifecycleService, dropArchived, STATUS_BY_ACTION } = require('./server/account-lifecycle');
 const { createBackupRestoreService } = require('./server/backup-restore');
 const { createPersonnelService } = require('./server/personnel');
 const { createMonitor } = require('./server/monitoring');
@@ -28,21 +29,41 @@ const CSV_COLLECTIONS = new Set(['users','faculty','students','subjects','sectio
 const MIME = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon','.md':'text/markdown; charset=utf-8'};
 function readEnvFile(filename){try{return Object.fromEntries(fs.readFileSync(filename,'utf8').split(/\r?\n/).map(line=>line.trim()).filter(line=>line&&!line.startsWith('#')&&line.includes('=')).map(line=>{const index=line.indexOf('=');return[line.slice(0,index).trim(),line.slice(index+1).trim()]}));}catch{return{};}}
 const runtimeEnv = {...readEnvFile(path.join(ROOT,'.env')),...process.env};
-const localStore = openDatabase(DB_FILE);
+/* With Supabase configured, Supabase is the only database: the server keeps an
+   in-memory copy loaded from it and never opens SQLite. SQLite is only the
+   fallback for running without Supabase credentials (local work, tests). */
+const SUPABASE_PRIMARY = Boolean(runtimeEnv.SUPABASE_URL && runtimeEnv.SUPABASE_SERVICE_ROLE_KEY);
+const localStore = SUPABASE_PRIMARY ? createMemoryStore() : openDatabase(DB_FILE);
 const store = createSupabaseReplicatedStore(localStore, {
   url: runtimeEnv.SUPABASE_URL,
   serviceKey: runtimeEnv.SUPABASE_SERVICE_ROLE_KEY,
   // One Supabase table per collection (see server/supabase-tables.js). Set SUPABASE_RELATIONAL=false to use the old single JSON table.
   relational: String(runtimeEnv.SUPABASE_RELATIONAL||'true').toLowerCase()!=='false'
 });
-const monitor = createMonitor({ store, env: runtimeEnv, dbFile: DB_FILE });
+const monitor = createMonitor({ store, env: runtimeEnv, dbFile: SUPABASE_PRIMARY ? null : DB_FILE });
+/* In Supabase mode a request that changes data is answered only after Supabase
+   has stored the change. If Supabase rejects it, the affected collections are
+   reloaded from Supabase and the client is told the change was not saved. */
+function holdUntilSaved(res){
+  const writeHead=res.writeHead.bind(res),end=res.end.bind(res),before=store.failureCount();let head=null;
+  res.writeHead=(...args)=>{head=args;return res;};
+  res.end=(...args)=>{
+    store.flush().then(async()=>{
+      if(store.failureCount()===before){if(head)writeHead(...head);return end(...args);}
+      await store.revertFailed();
+      writeHead(503,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+      end(JSON.stringify({error:'The change could not be saved to the database. Please try again.',code:'DATABASE_WRITE_FAILED'}));
+    }).catch(()=>{try{writeHead(503,{'Content-Type':'application/json; charset=utf-8'});end(JSON.stringify({error:'The change could not be saved to the database.',code:'DATABASE_WRITE_FAILED'}));}catch(_){}});
+    return res;
+  };
+}
 function ensureDemoAccounts(){const existing=store.read('users',[]),env=runtimeEnv;const required=[
   {username:env.ADMIN_USERNAME||'admin',password:env.ADMIN_PASSWORD||'admin123',role:'admin',status:'active'},
   {username:env.DEAN_USERNAME||'dean.demo',password:env.DEAN_PASSWORD||'dean123',role:'dean',status:'active'},
   {username:env.FACULTY_COORDINATOR_USERNAME||'coordinator.demo',password:env.FACULTY_COORDINATOR_PASSWORD||'coord123',role:'coordinator',status:'active'},
   {username:env.PROFESSOR_USERNAME||'23-32534-345',password:env.PROFESSOR_PASSWORD||'reyes23',role:'faculty',status:'active'},
   {username:env.STUDENT_USERNAME||'2025-00002',password:env.STUDENT_PASSWORD||'santos2025',role:'student',status:'active'}
-];const users=Array.isArray(existing)?existing:[],initialCount=users.length,known=new Set(users.map(item=>item.username));required.forEach(item=>{if(!known.has(item.username))users.push(item)});if(users.length!==initialCount)store.write('users',users);const profiles=store.read('coordinators',[]);if(!Array.isArray(profiles)||!profiles.length){store.write('coordinators',required.filter(item=>item.role==='coordinator').map(({username,role})=>({id:username,username,role,first:'Demo',last:'Santos',college:'College of Information and Computer Studies',status:'active'})));}}
+];const users=Array.isArray(existing)?existing:[],initialCount=users.length,known=new Set(users.map(item=>item.username));required.forEach(item=>{if(!known.has(item.username))users.push(item)});if(users.length!==initialCount)store.write('users',users);const profiles=store.read('coordinators',[]);if(!Array.isArray(profiles)||!profiles.length){store.write('coordinators',required.filter(item=>item.role==='coordinator').map(({username,role})=>({id:username,username,role,first:'Patricia',last:'Lorenzo',college:'College of Information and Computer Studies',status:'active'})));}}
 function ensureOfficialCurricula(){const file=path.join(ROOT,'assets','philippine-curricula.json');if(!fs.existsSync(file))return;const official=JSON.parse(fs.readFileSync(file,'utf8')),current=store.read('curricula',[]),records=Array.isArray(current)?current:[],officialPrograms=new Set(official.map(item=>item.program)),bySubject=new Map(records.filter(item=>officialPrograms.has(item.program)).map(item=>[`${item.program}|${item.subjectCode}`,item])),merged=official.map(item=>({...item,...(bySubject.get(`${item.program}|${item.subjectCode}`)||{}),sourceUrl:item.sourceUrl,institution:item.institution})),custom=records.filter(item=>!officialPrograms.has(item.program)||item.institution&&item.institution!=='University of the East');store.write('curricula',[...merged,...custom]);}
 /* Site maintenance: the same systemSettings.maintenance flag the System Management page uses.
    While it is on, only Administrators can sign in or use the API; it syncs to other instances through Supabase. */
@@ -80,7 +101,7 @@ async function api(req,res,url) {
   if(url.pathname==='/api/site/control'&&req.method==='POST'){const session=auth.requireSession(req,['admin']);const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,await siteControl(String(parsed.action||''),session,parsed));}
   if(siteMaintenance().active&&!['/api/health','/api/auth/session','/api/auth/logout'].includes(url.pathname)){const session=auth.resolve(auth.tokenFrom(req));if(session&&session.role!=='admin')return send(res,503,{error:siteMaintenance().message,code:'MAINTENANCE'});}
   if(url.pathname==='/api/monitoring'&&req.method==='GET'){auth.requireSession(req,['admin']);return send(res,200,await monitor.snapshot());}
-  if(url.pathname==='/api/health'&&req.method==='GET'){const replication=store.status(),healthy=!replication.enabled||replication.healthy;return send(res,healthy?200:503,{ok:healthy,storage:replication.enabled?'sqlite+supabase':'sqlite',database:path.basename(DB_FILE),replication});}
+  if(url.pathname==='/api/health'&&req.method==='GET'){const replication=store.status(),healthy=!replication.enabled||replication.healthy;return send(res,healthy?200:503,{ok:healthy,storage:SUPABASE_PRIMARY?'supabase':'sqlite',database:SUPABASE_PRIMARY?'supabase':path.basename(DB_FILE),replication});}
   if(url.pathname==='/api/auth/login'&&req.method==='POST'){const parsed=JSON.parse(await readBody(req)||'{}');const result=auth.login(String(parsed.username||''),String(parsed.password||''),req.socket.remoteAddress||'');if(result.session.role!=='admin'&&siteMaintenance().active)return send(res,503,{error:siteMaintenance().message,code:'MAINTENANCE'});return send(res,200,result);}
   if(url.pathname==='/api/auth/refresh'&&req.method==='POST'){const renewed=auth.refresh(auth.tokenFrom(req));if(!renewed)return send(res,401,{error:'Authentication is required.',code:'AUTH_REQUIRED'});return send(res,200,renewed);}
   if(url.pathname==='/api/auth/session'&&req.method==='GET'){const session=auth.requireSession(req);return send(res,200,{session});}
@@ -99,7 +120,7 @@ async function api(req,res,url) {
   const periodAction=url.pathname.match(/^\/api\/academic-periods\/([^/]+)\/(impact|activate|close|archive)$/);
   if(periodAction){const session=auth.requireSession(req,['admin']),id=decodeURIComponent(periodAction[1]),action=periodAction[2];if(req.method==='GET'&&action==='impact')return send(res,200,academicPeriods.impact(id));if(req.method==='POST'&&action!=='impact'){const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,action==='activate'?{period:academicPeriods.activate(id,session,parsed.reason)}:academicPeriods[action](id,parsed.reason,session));}}
   const accountAction=url.pathname.match(new RegExp(`^/api/accounts/([^/]+)/(${Object.keys(STATUS_BY_ACTION).join('|')})$`));
-  if(accountAction&&req.method==='POST'){const session=auth.requireSession(req,['admin']),username=decodeURIComponent(accountAction[1]),action=accountAction[2];const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,accountLifecycle.changeStatus(username,action,parsed.reason,session));}
+  if(accountAction&&req.method==='POST'){const session=auth.requireSession(req,['admin','dean']),username=decodeURIComponent(accountAction[1]),action=accountAction[2];const parsed=JSON.parse(await readBody(req)||'{}');return send(res,200,accountLifecycle.changeStatus(username,action,parsed.reason,session));}
   if(url.pathname==='/api/storage'&&req.method==='GET'){const session=auth.requireSession(req);const all=store.all();return send(res,200,{records:visibleRecords(session,all),collections:Object.keys(all),session:{username:session.username,role:session.role,expiresAt:session.expiresAt}});}
   if(url.pathname==='/api/migrate'&&req.method==='POST'){
     auth.requireSession(req,['admin']);
@@ -121,7 +142,7 @@ async function api(req,res,url) {
   // broader collection read, replace, and delete permissions remain unchanged.
   if(url.pathname==='/api/storage/applicationAuditLog/append'&&req.method==='POST'){const session=auth.requireSession(req);const parsed=JSON.parse(await readBody(req)||'{}'),entry=parsed.entry;if(!entry||typeof entry!=='object'||Array.isArray(entry))throw Object.assign(new Error('entry is required.'),{status:400});const existing=store.read('applicationAuditLog',[]);validateProtectedWrite(store,session,'applicationAuditLog',[...existing,entry]);const value=store.append('applicationAuditLog',entry);return send(res,200,{ok:true,key:'applicationAuditLog',entry,value});}
   const storageMatch=url.pathname.match(/^\/api\/storage\/([^/]+)$/);
-  if(storageMatch){const session=auth.requireSession(req);const key=cleanKey(storageMatch[1]);if(req.method==='GET'){requireCollectionAccess(session,key,'GET');return send(res,200,{key,value:filterRecord(session,key,store.read(key,null)),session:{username:session.username,role:session.role}});}if(req.method==='PUT'){requireCollectionAccess(session,key,'PUT');requirePageWrite(session,key);const parsed=JSON.parse(await readBody(req)||'{}');if(!Object.hasOwn(parsed,'value'))throw Object.assign(new Error('value is required.'),{status:400});if(key==='applicationAuditLog'){const existing=store.read(key,[]),next=parsed.value;if(!Array.isArray(next))throw Object.assign(new Error('Audit history must be an array.'),{status:400});const before=new Map(existing.map(item=>[item.id,item])),seen=new Set();for(const item of next){if(!item?.id||seen.has(item.id))throw Object.assign(new Error('Audit records must have unique IDs.'),{status:403});seen.add(item.id);if(before.has(item.id)&&!isDeepStrictEqual(before.get(item.id),item))throw Object.assign(new Error('Existing audit records cannot be changed.'),{status:403});}const added=next.filter(item=>!before.has(item.id));if(added.length){validateProtectedWrite(store,session,key,[...existing,...added]);let value=existing;for(const entry of added)value=store.append(key,entry);return send(res,200,{ok:true,key,value,mergedLegacyAudit:true,appended:added.length});}return send(res,200,{ok:true,key,value:existing,mergedLegacyAudit:true,appended:0});}let next=normalizeOperationalWrite(store,key,parsed.value);next=ExamGuard.guardWrite(store,session,key,next);if(key==='systemSettings')validateSettingsWrite(store,next);validateProtectedWrite(store,session,key,next);store.write(key,next);return send(res,200,{ok:true,key,value:filterRecord(session,key,next)});}if(req.method==='DELETE'){requireCollectionAccess(session,key,'DELETE');if(['approvalRequests','applicationAuditLog','academicPeriods','systemSettings'].includes(key))throw Object.assign(new Error('Protected history cannot be deleted.'),{status:403,code:'PROTECTED_WRITE_FORBIDDEN'});normalizeOperationalWrite(store,key,[]);store.delete(key);return send(res,200,{ok:true,key});}}
+  if(storageMatch){const session=auth.requireSession(req);const key=cleanKey(storageMatch[1]);if(req.method==='GET'){requireCollectionAccess(session,key,'GET');return send(res,200,{key,value:filterRecord(session,key,store.read(key,null)),session:{username:session.username,role:session.role}});}if(req.method==='PUT'){requireCollectionAccess(session,key,'PUT');requirePageWrite(session,key);const parsed=JSON.parse(await readBody(req)||'{}');if(!Object.hasOwn(parsed,'value'))throw Object.assign(new Error('value is required.'),{status:400});if(key==='applicationAuditLog'){const existing=store.read(key,[]),next=parsed.value;if(!Array.isArray(next))throw Object.assign(new Error('Audit history must be an array.'),{status:400});const before=new Map(existing.map(item=>[item.id,item])),seen=new Set();for(const item of next){if(!item?.id||seen.has(item.id))throw Object.assign(new Error('Audit records must have unique IDs.'),{status:403});seen.add(item.id);if(before.has(item.id)&&!isDeepStrictEqual(before.get(item.id),item))throw Object.assign(new Error('Existing audit records cannot be changed.'),{status:403});}const added=next.filter(item=>!before.has(item.id));if(added.length){validateProtectedWrite(store,session,key,[...existing,...added]);let value=existing;for(const entry of added)value=store.append(key,entry);return send(res,200,{ok:true,key,value,mergedLegacyAudit:true,appended:added.length});}return send(res,200,{ok:true,key,value:existing,mergedLegacyAudit:true,appended:0});}let next=normalizeOperationalWrite(store,key,parsed.value);next=ExamGuard.guardWrite(store,session,key,next);next=dropArchived(store,key,next);if(key==='systemSettings')validateSettingsWrite(store,next);validateProtectedWrite(store,session,key,next);store.write(key,next);return send(res,200,{ok:true,key,value:filterRecord(session,key,next)});}if(req.method==='DELETE'){requireCollectionAccess(session,key,'DELETE');if(['approvalRequests','applicationAuditLog','academicPeriods','systemSettings'].includes(key))throw Object.assign(new Error('Protected history cannot be deleted.'),{status:403,code:'PROTECTED_WRITE_FORBIDDEN'});normalizeOperationalWrite(store,key,[]);store.delete(key);return send(res,200,{ok:true,key});}}
   const csv=collectionFromCsvPath(url.pathname);
   if(csv&&csv.action==='import'&&req.method==='POST'){auth.requireSession(req,['admin']);const rows=normalizeOperationalWrite(store,csv.key,parseCsv(await readBody(req)));store.write(csv.key,rows);store.recordImport(csv.key,rows.length);return send(res,200,{ok:true,collection:csv.key,rows:rows.length});}
   if(csv&&csv.action==='export'&&req.method==='GET'){auth.requireSession(req,['admin']);const rows=store.read(csv.key,[]);if(!Array.isArray(rows))throw Object.assign(new Error('Stored collection is not tabular.'),{status:409});const filename=`${csv.key}.csv`;return send(res,200,stringifyCsv(rows),'text/csv; charset=utf-8',{'Content-Disposition':`attachment; filename="${filename}"`});}
@@ -130,10 +151,13 @@ async function api(req,res,url) {
 
 function staticFile(req,res,url){if(url.pathname==='/'||url.pathname==='/index.html'||url.pathname==='/html/index.html'){res.writeHead(302,{Location:'/html/login.html'+(url.search||''),'Cache-Control':'no-store'});return res.end();}let pathname=url.pathname==='/'?'/html/index.html':url.pathname;let decoded;try{decoded=decodeURIComponent(pathname);}catch{return send(res,400,{error:'Invalid path.'});}if(/^\/[A-Za-z0-9_-]+\.html$/.test(decoded))decoded='/html'+decoded;const target=path.resolve(ROOT,'.'+decoded);if(target!==ROOT&&!target.startsWith(ROOT+path.sep))return send(res,403,{error:'Forbidden.'});fs.stat(target,(error,stat)=>{if(error||!stat.isFile())return send(res,404,{error:'File not found.'});fs.createReadStream(target).on('error',()=>send(res,500,{error:'Could not read file.'})).pipe((res.writeHead(200,{'Content-Type':MIME[path.extname(target).toLowerCase()]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}),res));});}
 
-const server=http.createServer(async(req,res)=>{const url=new URL(req.url,'http://localhost');try{if(url.pathname.startsWith('/api/')){if(url.pathname!=='/api/monitoring'){const started=process.hrtime.bigint();res.on('finish',()=>monitor.track(res.statusCode,Number(process.hrtime.bigint()-started)/1e6));}const handled=await api(req,res,url);if(handled!==false)return;return send(res,404,{error:'API route not found.'});}if(!['GET','HEAD'].includes(req.method))return send(res,405,{error:'Method not allowed.'});staticFile(req,res,url);}catch(error){const status=error.status||400;if(status>=500)console.error(error);send(res,status,{error:error.message||'Request failed.'});}});
+const server=http.createServer(async(req,res)=>{const url=new URL(req.url,'http://localhost');try{if(url.pathname.startsWith('/api/')){if(url.pathname!=='/api/monitoring'){const started=process.hrtime.bigint();res.on('finish',()=>monitor.track(res.statusCode,Number(process.hrtime.bigint()-started)/1e6));}if(SUPABASE_PRIMARY&&!['GET','HEAD','OPTIONS'].includes(req.method))holdUntilSaved(res);const handled=await api(req,res,url);if(handled!==false)return;return send(res,404,{error:'API route not found.'});}if(!['GET','HEAD'].includes(req.method))return send(res,405,{error:'Method not allowed.'});staticFile(req,res,url);}catch(error){const status=error.status||400;if(status>=500)console.error(error);send(res,status,{error:error.message||'Request failed.'});}});
 
 async function start() {
+  // Supabase mode: a failed load stops the server (the catch below exits), so
+  // it can never run on, or write back, an empty copy of the database.
   const hydration = await store.hydrate();
+  if (SUPABASE_PRIMARY && !hydration.hydrated) throw new Error('Supabase returned no data; refusing to start on an empty database.');
   ensureDemoAccounts();
   ensureOfficialCurricula();
   ensureAccessRoles();
@@ -150,7 +174,7 @@ async function start() {
   accountLifecycle = createAccountLifecycleService(store);
   backupRestore = createBackupRestoreService(store);
   personnel = createPersonnelService(store);
-  server.listen(PORT, '0.0.0.0', () => console.log(`NEU Examination server: http://localhost:${PORT}\nSQLite cache: ${DB_FILE}\nSupabase: ${hydration.enabled ? `enabled (${hydration.hydrated} collections hydrated)` : 'disabled'}`));
+  server.listen(PORT, '0.0.0.0', () => console.log(`NEU Examination server: http://localhost:${PORT}\nDatabase: ${SUPABASE_PRIMARY ? 'Supabase (in-memory working copy, no SQLite)' : `SQLite ${DB_FILE}`}\nSupabase: ${hydration.enabled ? `enabled (${hydration.hydrated} collections hydrated)` : 'disabled'}`));
 }
 
 let stopping = false;
@@ -165,4 +189,4 @@ async function shutdown() {
 }
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
-start().catch(error => { console.error(error); store.close(); process.exit(1); });
+start().catch(error => { console.error(error); store.close(); process.exitCode = 1; setTimeout(() => process.exit(1), 200).unref(); });

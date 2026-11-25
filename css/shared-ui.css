@@ -2051,3 +2051,343 @@ body.login-bg .login-container:not(.login-shell) :is(input,textarea)::placeholde
 
 /* A table search is active (even with the search box closed). */
 .table-tools .tool-icon.table-search-toggle.has-query{border-color:var(--accent)!important;background:var(--accent-soft)!important;color:var(--accent)!important;box-shadow:inset 0 0 0 1px var(--accent)!important}
+
+/* ------------------------------------------------------------------
+   Type floor (UI audit 2026-11-25): no text below 10px, previews 11px.
+   Targets only the elements that were 8–9.5px; :not(#tf) outranks the
+   per-page rules that set them.
+   ------------------------------------------------------------------ */
+html body :is(.status-active,.countdown,.result-subject-status,.exam-filter-count,.student-section-count,.student-mail-avatar,.role-mail-read-all,.metric-info-mark,.calendar-exam,.compact-calendar-day,.cw-heat-h,.cw-heat-d,.load-badge,.schedule-subject-chip,.role-mail-row-kind,.grade-sub,.subject-summary-label,.subject-week-corner,.subject-calendar-empty,.calendar-weekday,#donePercent,#missedPercent,#todoPercent,#examDonePercent,#examMissedPercent,#examTodoPercent):not(#tf),
+html body .status-ring>small:not(#tf),
+html body .result-subject-column-head>span:not(#tf),
+html body :is(.student-mail-row,.role-mail-row) time:not(#tf),
+html body .student-mail-row-copy>span:not(#tf),
+html body .role-mail-list>div>header span:not(#tf),
+html body .role-mail-list header>div>span:not(#tf),
+html body .cw-heat-key>span:not(#tf),
+html body .subject-week-head h4>small:not(#tf),
+html body .subject-week-times>span:not(#tf){font-size:10px!important}
+html body :is(.student-mail-row-copy>small,.role-mail-row>p):not(#tf){font-size:11px!important}
+html body .chart-label:not(#tf){font-size:10px!important}
+
+/* Phone widths (UI audit 2026-11-25): nothing may push the page sideways. */
+@media (max-width:760px){
+  /* Tab rows that also carry a toolbar wrap instead of running off the screen. */
+  html body :is(.application-tabs,.subject-schedule-tabs,.dp-tabs):not(#tf){flex-wrap:wrap;row-gap:6px}
+  html body :is(.dp-table-head,.ap-table-head):not(#tf){flex-wrap:wrap;row-gap:10px}
+  /* Wide tables scroll inside their card. */
+  html body .student-management-table-shell:not(#tf):not(#tf2){overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  /* Dean statistics: one column. */
+  html body :is(.dean-statistics,.dean-stat-grid):not(#tf){grid-template-columns:minmax(0,1fr)!important}
+}
+
+/* One page-title scale for every role (UI audit 2026-11-25): 28px/700, 24px on phones.
+   Was 25px (Coordinator, Dean, Admin), 32px (Professor) and 32–34px (Student). */
+html body :is(.role-page-hero h1,.role-mail-hero h1,.student-page-heading h1,.student-dashboard-welcome h1,.schedule-page-heading h1,#adminHero h2):not(#tf){font:700 28px/1.15 var(--pr-font,'Poppins',Arial,sans-serif)!important;letter-spacing:-.02em!important}
+@media (max-width:760px){html body :is(.role-page-hero h1,.role-mail-hero h1,.student-page-heading h1,.student-dashboard-welcome h1,.schedule-page-heading h1,#adminHero h2):not(#tf){font-size:24px!important}}
+
+/* Table headings follow the spec everywhere: 9px / 700 / capitals (Admin tables were 10–11px at 650–750). */
+html body table:is(.gv-table,#facultyTable,#studentTable,.workspace-table) th:not(#tf):not(#tf2):not(#tf3){font:700 9px/1.3 var(--pr-font,'Poppins',Arial,sans-serif)!important;letter-spacing:.06em!important;text-transform:uppercase!important}
+
+/* Sidebar navigation: same label size and corner on every role (was 11px on Coordinator/Dean/Admin, 10px corners on Student). */
+html body nav#sidebar:is(.role-app-sidebar,.student-app-sidebar) a[data-panel]:not(#tf){font-size:12px!important;border-radius:11px!important}
+
+/* ------------------------------------------------------------------
+   Contrast (UI audit 2026-11-25, measured from rendered pixels).
+   Each rule lifts a text colour to at least 4.5:1 on its real background.
+   ------------------------------------------------------------------ */
+/* Dean gold was 3.1:1 as text and under white text; a deeper gold keeps the identity (light theme only). */
+:root:not([data-theme="dark"]) body.role-shell-ready[data-role="dean"]{--role-shell-role:#8f6d2f;--pr-accent:#8f6d2f;--accent:#8f6d2f}
+/* Hero stat labels and mail hero text sit on mid-tone gradients. */
+html body .cd-hero-stats span:not(#tf),html body .role-page-hero :is(small,.fd-hero-stat span):not(#tf){color:rgba(255,255,255,.92)!important}
+html body .role-mail-hero p:not(#tf){color:rgba(255,255,255,.9)!important}
+html body .role-mail-hero span:not(#tf){color:rgba(255,255,255,.85)!important}
+/* Pale grey labels: calendars, schedule, mail dates. */
+html body :is(.compact-exam-calendar .calendar-weekday,.subject-calendar-empty,.subject-week-head h4>small,.subject-week-times>span,.role-mail-row time,.student-mail-row time):not(#tf){color:#5f6b78!important}
+:root[data-theme="dark"] body :is(.compact-exam-calendar .calendar-weekday,.subject-calendar-empty,.subject-week-head h4>small,.subject-week-times>span,.role-mail-row time,.student-mail-row time):not(#tf){color:#a9b4c2!important}
+/* Mail list header label in dark mode used the (dark) role colour. */
+:root[data-theme="dark"] body .role-mail-list header span:not(#tf){color:#c9d1db!important}
+/* Admin curriculum tabs: the active tab vanished in dark mode. */
+:root[data-theme="dark"] body #loadPolicyRoot{--cm-accent:#9cbde0}
+
+/* Last small labels from the audit: result row labels (phone) and Professor chart notes. */
+html body :is(.result-subject-points>span,.result-subject-grade>span,.fd-top-tip>small,.fx-ring-label>small):not(#tf){font-size:10px!important}
+/* Second contrast pass. */
+:root[data-theme="dark"] body #loadPolicyRoot .load-program-tabs button.active:not(#tf):not(#tf2):not(#tf3){color:#9cbde0!important}
+html body .fd-top-tip>small:not(#tf){color:rgba(255,255,255,.95)!important}
+/* Hero stat chips: a darker glass so white numbers stay readable on the light end of every role's gradient (Dean gold was 2.3:1). */
+html body .cd-hero-stats>*:not(#tf){background:rgba(0,0,0,.2)!important;border-color:rgba(255,255,255,.22)!important}
+/* Coloured course codes on light cards: same hue, deep enough for small capitals (was 3.7:1). */
+:root:not([data-theme="dark"]) body :is(.dashboard-class-code,.enrolled-subject-code,.fd-class-code):not(#tf){color:color-mix(in srgb,var(--course-color) 68%,#000)!important}
+:root:not([data-theme="dark"]) body .sub-code:not(#tf){color:color-mix(in srgb,var(--course-accent,#3576a8) 68%,#000)!important}
+/* Muted text sits on tinted panels too; one step darker keeps it above 4.5:1 there (light theme). */
+:root:not([data-theme="dark"]) body{--ink-soft:#566070;--pr-muted:#566070}
+
+/* ------------------------------------------------------------------
+   No sidebar blink on load. The sidebar is built by script after the
+   page's data loads (~2 s); until then the page painted full width and
+   jumped 76px when it appeared. Before body gets .sidebar-layout-ready
+   we reserve its column and paint a rail with the same place, corners
+   and colours (measured per role and theme), so nothing moves.
+   ------------------------------------------------------------------ */
+body[data-role]:not(.sidebar-layout-ready){padding-left:76px!important;--sb-rail:linear-gradient(#3b2d24,#211913);--sb-top:18px;--sb-radius:22px}
+body[data-role="student"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(180deg,#092d28 0%,#0b3932 58%,#082a26 100%);--sb-top:14px;--sb-radius:18px}
+body[data-role="coordinator"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#1c2135,#10121e)}
+body[data-role="dean"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#4a3524,#271c14)}
+body[data-role="admin"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#211d2c,#111019)}
+:root[data-theme="dark"] body[data-role="faculty"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#372a21,#261e17)}
+:root[data-theme="dark"] body[data-role="coordinator"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#141827,#0e111e)}
+:root[data-theme="dark"] body[data-role="dean"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#423122,#2e2318)}
+:root[data-theme="dark"] body[data-role="admin"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(#141327,#0e0e1d)}
+:root[data-theme="dark"] body[data-role="student"]:not(.sidebar-layout-ready){--sb-rail:linear-gradient(180deg,#0c2a26,#081f1c)}
+body[data-role]:not(.sidebar-layout-ready)::before{content:"";position:fixed;z-index:50;left:0;top:var(--sb-top);bottom:var(--sb-top);width:76px;border-radius:0 var(--sb-radius) var(--sb-radius) 0;background:var(--sb-rail);pointer-events:none}
+@media (max-width:760px){
+  body[data-role]:not(.sidebar-layout-ready){--sb-top:0px;--sb-radius:20px}
+  body[data-role="student"]:not(.sidebar-layout-ready){--sb-top:10px;--sb-radius:16px}
+}
+
+/* ------------------------------------------------------------------
+   Profile prompts: every tab section is one card, like the pages —
+   title and count on the left, flat tool icons on the right, the table
+   inside the same card. Stat tiles use the card scale (20px figures,
+   11px labels) and wrap instead of overflowing on narrow windows.
+   ------------------------------------------------------------------ */
+html body .pf-card:not(#tf):not(#tf2):not(#tf3){margin:14px 0 0!important;padding:0!important;overflow:visible!important;border:1px solid var(--pr-line)!important;border-radius:16px!important;background:var(--pr-surface)!important;box-shadow:none!important;font-family:var(--pr-font)}
+html body .pf-card:first-child:not(#tf):not(#tf2):not(#tf3){margin-top:0!important}
+html body .pf-card-head:not(#tf){display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0!important;padding:14px 18px!important;border-bottom:1px solid var(--pr-line)!important;background:transparent!important}
+html body .pf-card-head h4:not(#tf){margin:0!important;padding:0!important;border:0!important;color:var(--pr-ink)!important;font:650 15px/1.3 var(--pr-font)!important}
+html body .pf-card-head p:not(#tf){margin:2px 0 0!important;color:var(--pr-muted)!important;font:400 11px/1.4 var(--pr-font)!important}
+html body .pf-card>.table-scroll:not(#tf){margin:0!important;border:0!important;border-radius:0 0 16px 16px!important;box-shadow:none!important;background:transparent!important}
+html body .pf-card>.table-scroll table:not(#tf){margin:0!important;border:0!important;box-shadow:none!important;background:transparent!important}
+/* The History tools sit in the card header: no frame of their own, flat 34px icons (the page toolbar size). */
+html body .pf-card-head .student-history-toolbar:not(#tf){display:flex;align-items:center;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+html body .pf-card-head .lifecycle-tools-right:not(#tf){display:flex;align-items:center;gap:2px}
+html body .pf-card-head .lifecycle-icon:not(#tf):not(#tf2){width:34px!important;height:34px!important;min-height:0!important;border:0!important;border-radius:10px!important;background:transparent!important;box-shadow:none!important;color:var(--pr-accent)!important}
+html body .pf-card-head .lifecycle-icon:not(#tf):not(#tf2):is(:hover,:focus-visible,[aria-expanded="true"],.active){background:color-mix(in srgb,var(--pr-accent) 11%,transparent)!important}
+html body .pf-card-head .lifecycle-icon svg:not(#tf){width:17px;height:17px}
+/* Stat tiles. */
+html body .profile-stat-grid:not(#tf):not(#tf2):not(#tf3){display:grid!important;grid-template-columns:repeat(auto-fit,minmax(132px,1fr))!important;gap:12px!important;margin:0 0 14px!important}
+html body .profile-stat-grid>div:not(#tf){min-width:0;padding:14px 16px!important;border:1px solid var(--pr-line)!important;border-radius:14px!important;background:var(--pr-surface)!important;box-shadow:none!important}
+html body .profile-stat-grid strong:not(#tf){display:block;color:var(--pr-ink)!important;font:700 20px/1.2 var(--pr-font)!important;letter-spacing:-.01em;overflow-wrap:anywhere}
+html body .profile-stat-grid span:not(#tf){display:block;margin-top:4px;color:var(--pr-muted)!important;font:600 11px/1.3 var(--pr-font)!important}
+html body .profile-empty:not(#tf){padding:22px!important;border:1px dashed var(--pr-line)!important;border-radius:14px!important;background:transparent!important;color:var(--pr-muted)!important;font:400 12px/1.5 var(--pr-font)!important;text-align:center}
+/* Section links and performance bars inside profile cards use the role colour. */
+html body .pf-card .pf-link:not(#tf){display:inline;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;color:var(--pr-accent)!important;font:700 12px/1.4 var(--pr-font)!important;cursor:pointer;text-decoration:none}
+html body .pf-card .pf-link:not(#tf):hover{text-decoration:underline}
+.pf-performance td:last-child{display:flex;align-items:center;gap:10px;min-width:180px}
+.pf-bar{position:relative;flex:1;height:7px;border-radius:999px;background:color-mix(in srgb,var(--pr-muted) 18%,transparent);overflow:hidden}
+.pf-bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--pr-accent)}
+.pf-performance td:last-child b{min-width:48px;color:var(--pr-ink);font:700 12px/1 var(--pr-font);text-align:right}
+/* Assignment manager (Admin faculty / student profiles): same card shape — header, table, then "Available" as the card's footer, not a card inside a card. */
+html body .student-enrollment-manager:not(#tf):not(#tf2):not(#tf3){margin:0!important;padding:0!important;overflow:visible!important;border:1px solid var(--pr-line)!important;border-radius:16px!important;background:var(--pr-surface)!important;box-shadow:none!important}
+html body .student-enrollment-manager>header:not(#tf):not(#tf2){margin:0!important;padding:14px 18px!important;border-bottom:1px solid var(--pr-line)!important;background:transparent!important}
+html body .student-enrollment-manager>header h3:not(#tf){margin:0!important;color:var(--pr-ink)!important;font:650 15px/1.3 var(--pr-font)!important}
+html body .student-enrollment-manager>header p:not(#tf){margin:2px 0 0!important;color:var(--pr-muted)!important;font:400 11px/1.4 var(--pr-font)!important}
+html body .student-enrollment-manager>.table-scroll:not(#tf):not(#tf2){margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
+html body .student-enrollment-manager .available-subjects:not(#tf):not(#tf2){margin:0!important;border:0!important;border-top:1px solid var(--pr-line)!important;border-radius:0 0 16px 16px!important;background:transparent!important;box-shadow:none!important}
+html body .student-enrollment-manager .available-subjects>summary:not(#tf){padding:12px 18px!important}
+/* Text values (name, ID) in stat tiles: card-title size on one line. */
+html body .profile-stat-grid>.pf-id strong:not(#tf){font-size:15px!important;line-height:1.35!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+html body .student-enrollment-manager .available-subjects>summary strong:not(#tf){color:var(--pr-ink)!important;font:650 15px/1.3 var(--pr-font)!important}
+html body .student-enrollment-manager .available-subjects>summary small:not(#tf){color:var(--pr-muted)!important;font:400 11px/1.4 var(--pr-font)!important}
+/* Coordinator profile cards: same treatment for its table wrapper, and the history search + filter in the header. */
+html body .pf-card>.student-subject-table:not(#tf):not(#tf2){margin:0!important;border:0!important;border-radius:0 0 16px 16px!important;box-shadow:none!important;background:transparent!important}
+html body .pf-card-head .pf-filters:not(#tf){display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+html body .pf-card-head .pf-filters :is(input,select):not(#tf){height:36px!important;min-height:0!important;margin:0!important;padding:0 12px!important;border:1px solid var(--pr-line)!important;border-radius:10px!important;background:var(--pr-surface)!important;color:var(--pr-ink)!important;font:400 12px/1 var(--pr-font)!important}
+html body .pf-card-head .pf-filters input:not(#tf){width:220px}
+/* Profile window header buttons (⋮ and ×): same 38px frame, icon drawn dead centre. */
+html body .student-profile-head :is(.profile-close,.student-command-menu>summary):not(#tf):not(#tf2){display:grid!important;place-items:center!important;box-sizing:border-box!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:0!important;margin:0!important;padding:0!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:11px!important;background:rgba(255,255,255,.12)!important;box-shadow:none!important;color:#fff!important;font-size:0!important;line-height:0!important;list-style:none;cursor:pointer}
+html body .student-profile-head :is(.profile-close,.student-command-menu>summary):not(#tf):not(#tf2):hover{background:rgba(255,255,255,.22)!important}
+html body .student-profile-head .student-command-menu>summary::-webkit-details-marker{display:none}
+html body .student-profile-head .student-command-menu>summary::marker{content:""}
+html body .student-profile-head :is(.profile-close,.student-command-menu>summary) svg{display:block;width:18px;height:18px}
+html body .student-profile-head .profile-close svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+html body .student-profile-head .student-command-menu>summary svg{fill:currentColor}
+html body .student-profile-head .student-enrollment-head-actions:not(#tf){display:flex;align-items:center;gap:8px}
+/* Performance figures in profile windows use the same tile scale as the stat tiles (20px figure, 11px label). */
+html body .rp-performance .rp-stats strong:not(#tf):not(#tf2){font:700 20px/1.2 var(--pr-font)!important;letter-spacing:-.01em}
+html body .rp-performance .rp-stats span:not(#tf):not(#tf2){font:600 11px/1.3 var(--pr-font)!important;color:var(--pr-muted)!important}
+html body .rp-performance .rp-section-title:not(#tf){color:var(--pr-ink)!important;font:650 15px/1.3 var(--pr-font)!important}
+/* Coordinator window header buttons: the same centred 38px frames as the Admin window. */
+html body .pf-head-btn:not(#tf):not(#tf2){display:grid!important;place-items:center!important;box-sizing:border-box!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:0!important;margin:0!important;padding:0!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:11px!important;background:rgba(255,255,255,.12)!important;box-shadow:none!important;color:#fff!important;font-size:0!important;line-height:0!important;list-style:none;cursor:pointer}
+html body .pf-head-btn:not(#tf):not(#tf2):hover{background:rgba(255,255,255,.22)!important}
+html body summary.pf-head-btn::-webkit-details-marker{display:none}
+html body summary.pf-head-btn::marker{content:""}
+html body .pf-head-btn svg{display:block;width:18px;height:18px;fill:currentColor}
+html body button.pf-head-btn svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+html body .pf-card-head p:not(#tf):not(#tf2){text-transform:none!important;letter-spacing:0!important}
+
+/* ------------------------------------------------------------------
+   Admin › student window › Subjects: two columns.
+   Left: available subjects (toolbar + scrolling list). Right: enrolled
+   table, picks not saved yet, and the Save footer.
+   ------------------------------------------------------------------ */
+.se-columns{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:14px;align-items:start}
+@media (max-width:900px){.se-columns{grid-template-columns:minmax(0,1fr)}}
+html body .se-columns .se-col:not(#tf):not(#tf2):not(#tf3){margin:0!important;display:flex;flex-direction:column;min-width:0}
+.se-toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid var(--pr-line)}
+html body .se-toolbar :is(input,select,.se-auto):not(#tf):not(#tf2){height:36px!important;min-height:0!important;margin:0!important;padding:0 12px!important;border:1px solid var(--pr-line)!important;border-radius:10px!important;background:var(--pr-surface)!important;box-shadow:none!important;color:var(--pr-ink)!important;font:500 12px/1 var(--pr-font)!important}
+html body .se-toolbar input:not(#tf){flex:1 1 160px;min-width:0}
+html body .se-toolbar .se-auto:not(#tf):not(#tf2){display:inline-flex;align-items:center;gap:6px;color:var(--pr-accent)!important;font-weight:650!important;cursor:pointer}
+html body .se-toolbar .se-auto:not(#tf):not(#tf2):hover{background:color-mix(in srgb,var(--pr-accent) 9%,transparent)!important}
+.se-list{display:flex;flex-direction:column;max-height:460px;overflow-y:auto;padding:6px}
+html body .se-available-row:not(#tf):not(#tf2){display:flex;align-items:center;gap:12px;width:100%;min-height:0!important;margin:0!important;padding:10px 12px!important;border:0!important;border-radius:10px!important;background:transparent!important;box-shadow:none!important;color:var(--pr-ink)!important;text-align:left;cursor:pointer;transform:none!important}
+html body .se-available-row:not(#tf):not(#tf2):hover{background:color-mix(in srgb,var(--pr-accent) 7%,transparent)!important}
+html body .se-available-row.is-picked:not(#tf):not(#tf2){background:color-mix(in srgb,var(--pr-accent) 11%,transparent)!important}
+.se-available-row[hidden]{display:none!important}
+.se-available-row.is-full{opacity:.55}
+.se-code{flex:none;min-width:74px;padding:3px 8px;border-radius:7px;background:var(--pr-soft);color:var(--pr-ink);font:700 11px/1.4 var(--pr-font);text-align:center}
+.se-name{display:flex;flex:1;flex-direction:column;gap:2px;min-width:0;color:var(--pr-ink);font:500 12.5px/1.35 var(--pr-font)}
+.se-name small{color:var(--pr-muted);font:400 11px/1.35 var(--pr-font)}
+.se-mark{flex:none;display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--pr-line);border-radius:8px;color:var(--pr-accent);font:700 14px/1 var(--pr-font)}
+.se-available-row.is-picked .se-mark{border-color:var(--pr-accent);background:var(--pr-accent);color:#fff}
+.se-pending{margin:0;padding:12px 14px;border-top:1px solid var(--pr-line);background:color-mix(in srgb,var(--pr-accent) 5%,transparent)}
+.se-pending-title{display:flex;justify-content:space-between;gap:8px;margin:0 0 8px;color:var(--pr-ink);font:650 12px/1.4 var(--pr-font)}
+.se-pending-title span{color:var(--pr-muted);font-weight:500}
+.se-pending ul{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.se-pending li{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px dashed color-mix(in srgb,var(--pr-accent) 45%,var(--pr-line));border-radius:10px;background:var(--pr-surface)}
+html body .se-remove:not(#tf):not(#tf2){display:grid;place-items:center;flex:none;width:28px!important;height:28px!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;color:var(--pr-muted)!important;cursor:pointer}
+html body .se-remove:not(#tf):not(#tf2):hover{background:color-mix(in srgb,#b5534b 12%,transparent)!important;color:#b5534b!important}
+.se-remove svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.se-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:1px solid var(--pr-line)}
+.se-footer>span{color:var(--pr-muted);font:500 12px/1.4 var(--pr-font)}
+html body .se-footer .save-btn:not(#tf):not(#tf2){height:40px!important;min-height:0!important;margin:0!important;padding:0 18px!important;border:0!important;border-radius:11px!important;background:var(--pr-accent)!important;color:#fff!important;font:600 12px/1 var(--pr-font)!important}
+html body .se-footer .save-btn:not(#tf):not(#tf2):disabled{opacity:.45;cursor:not-allowed}
+/* The two columns are cards themselves: no extra frame around them (profile-uniform styles every direct child of the window body as a card). */
+html body .student-profile-page>main>.se-columns:not(#tf):not(#tf2):not(#tf3){padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+/* Enrolled table fits its column: professor names wrap instead of being cut off. */
+html body .se-col .table-scroll:not(#tf){overflow-x:auto}
+html body .se-col .student-enrolled-table:not(#tf):not(#tf2){width:100%!important;min-width:0!important;table-layout:auto}
+html body .se-col .student-enrolled-table :is(th,td):not(#tf):not(#tf2){padding-left:12px!important;padding-right:12px!important;white-space:normal!important}
+html body .se-col .student-enrolled-table td:last-child>*{max-width:100%}
+html body .se-toolbar select:not(#tf){flex:0 1 auto;max-width:150px}
+/* Subjects toolbar: year toggle on the left, search and Auto-pick on the right. */
+html body .se-toolbar:not(#tf){align-items:center;justify-content:space-between;gap:10px}
+.se-tools{display:flex;align-items:center;gap:8px;flex:1 1 220px;justify-content:flex-end;min-width:0}
+html body .se-tools input:not(#tf){flex:1 1 140px;max-width:220px}
+.se-toggle{display:inline-flex;align-items:center;gap:8px;margin:0;color:var(--pr-ink);font:600 12px/1.2 var(--pr-font);cursor:pointer;user-select:none;white-space:nowrap}
+.se-toggle input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.se-switch{position:relative;flex:none;width:34px;height:20px;border-radius:999px;background:color-mix(in srgb,var(--pr-muted) 35%,transparent);transition:background .15s}
+.se-switch::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.se-toggle input:checked+.se-switch{background:var(--pr-accent)}
+.se-toggle input:checked+.se-switch::after{transform:translateX(14px)}
+.se-toggle input:focus-visible+.se-switch{outline:2px solid var(--pr-accent);outline-offset:2px}
+/* Rows keep their height in the scrolling list (they were shrinking and overlapping). */
+html body .se-list>.se-available-row:not(#tf):not(#tf2){flex:none!important}
+/* One toolbar row: toggle left; search + icon-only Auto-pick right. */
+html body .se-toolbar:not(#tf){flex-wrap:nowrap}
+.se-tools{flex:1 1 auto}
+html body .se-tools input:not(#tf){flex:1 1 90px;min-width:90px;max-width:200px}
+html body .se-toolbar .se-auto:not(#tf):not(#tf2){flex:none;justify-content:center;width:36px!important;padding:0!important;font-size:14px!important}
+.se-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ------------------------------------------------------------------
+   One look for every action menu (⋮ menus, right-click menus, row and
+   export menus): panel 12px corners, 6px inset, theme surface; items
+   38px tall, Poppins 12.5px/500, 8px corners, role-coloured icons and
+   hover. Settings and profile menus keep their own layouts.
+   ------------------------------------------------------------------ */
+html body .student-command-menu{position:relative}
+html body .student-command-menu>nav:not(#tm):not(#tm2){position:absolute;right:0;top:calc(100% + 8px);z-index:20;display:flex!important;flex-direction:column}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu):not(#tm):not(#tm2){gap:2px;min-width:220px;padding:6px!important;border:1px solid var(--pr-line)!important;border-radius:12px!important;background:var(--pr-surface)!important;box-shadow:0 14px 34px rgba(0,0,0,.18)!important;color:var(--pr-ink)!important;font-family:var(--pr-font)!important}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]):not(.tool-icon):not(#tm):not(#tm2):not(#tm3){display:flex!important;align-items:center;gap:10px;width:100%!important;height:auto!important;min-height:38px!important;margin:0!important;padding:8px 11px!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;color:var(--pr-ink)!important;font:500 12.5px/1.3 var(--pr-font)!important;letter-spacing:0!important;text-align:left;text-decoration:none!important;text-transform:none!important;cursor:pointer;transform:none!important}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]):not(.tool-icon):not(#tm):not(#tm2):not(#tm3):is(:hover,:focus-visible){background:color-mix(in srgb,var(--pr-accent) 9%,transparent)!important;color:var(--pr-ink)!important;outline:none}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]):not(#tm):not(#tm2):not(#tm3):is([disabled],[aria-disabled="true"]){opacity:.45;cursor:not-allowed}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]) small{color:var(--pr-muted)!important;font:400 11px/1.3 var(--pr-font)!important}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]) svg:not(#tm){flex:none;width:16px!important;height:16px!important;fill:var(--pr-accent)!important}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"])>span[aria-hidden="true"]:first-child{display:grid;place-items:center;flex:none;width:18px;color:var(--pr-accent)}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]).danger:not(#tm):not(#tm2):not(#tm3){color:#b5534b!important}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) :is(button,a,[role="menuitem"]).danger svg{fill:#b5534b!important}
+html body :is(.ra-menu,.student-command-menu>nav,.student-row-menu,.section-command-menu,.section-action-menu,.professor-assignment-menu,.curriculum-context-menu,.week-action-menu,.week-cell-menu,.workspace-action-menu,.question-more-menu,.exam-export-menu,.table-export-menu,.announcement-actions-menu) hr{margin:4px 6px;border:0;border-top:1px solid var(--pr-line)}
+/* Subjects tab: Enrolled on the left, Available on the right (order only; the wider column stays with the enrolled table). */
+.se-columns{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.se-columns>.se-col:first-child{order:2}
+@media (max-width:900px){.se-columns{grid-template-columns:minmax(0,1fr)}}
+/* Notifications (errors, confirmations) always sit in front: above every window, backdrop and menu. */
+html body #toastHost.toast-host:not(#tf){position:fixed!important;z-index:2147483000!important}
+/* Enrolled subjects: seats pill, load against the limit, clickable rows, details window. */
+.se-seats{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--pr-soft);color:var(--pr-ink);font:600 11px/1.5 var(--pr-font);white-space:nowrap}
+.se-seats.is-full{background:color-mix(in srgb,#b5534b 14%,transparent);color:#8f3b34}
+:root[data-theme="dark"] .se-seats.is-full{color:#f0a8a1}
+.se-load{color:var(--pr-ink);font-weight:700}
+.se-load.is-over{color:#a5612a}
+html body .se-col .pf-card-head:not(#tf):not(#tf2){flex-wrap:nowrap}
+.se-loadbar{position:relative;flex:0 0 120px;height:8px;border-radius:999px;background:color-mix(in srgb,var(--pr-muted) 18%,transparent)}
+.se-loadbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--pr-accent)}
+.se-loadbar b{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--pr-ink);opacity:.5}
+html body .se-enrolled-row{cursor:pointer}
+html body .se-enrolled-row:hover td{background:color-mix(in srgb,var(--pr-accent) 5%,transparent)}
+html body .se-details .se-details-box:not(#tf):not(#tf2){width:min(760px,calc(100vw - 32px))!important;max-width:none!important;max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+.se-details-body{display:flex;flex-direction:column;gap:12px;padding:16px 24px 0;overflow:auto}
+html body .se-details .profile-stat-grid:not(#tf):not(#tf2):not(#tf3){margin:0!important}
+.se-sched{margin:0;color:var(--pr-ink);font:400 12.5px/1.5 var(--pr-font)}
+.se-sched b{margin-right:8px;color:var(--pr-muted);font:700 10px/1 var(--pr-font);letter-spacing:.06em;text-transform:uppercase}
+html body .se-details tr.is-mine td{background:color-mix(in srgb,var(--pr-accent) 8%,transparent)!important}
+.se-here{margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--pr-accent);color:#fff;font:600 10px/1.5 var(--pr-font)}
+html body .se-col .student-enrolled-table :is(.pe-section,.se-seats):not(#tf){white-space:nowrap!important}
+html body .se-col .student-enrolled-table td:nth-child(2):not(#tf),html body .se-col .student-enrolled-table td:nth-child(3):not(#tf){white-space:nowrap!important;width:1%}
+
+/* Search boxes: the browser's own clear (×) was a ~4px target, so clicks on it usually missed.
+   A full 18px theme-coloured × that clears the box (and the filter) wherever it is clicked. */
+html body input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;flex:none;width:18px;height:18px;margin:0 0 0 6px;border-radius:50%;cursor:pointer;
+  background:color-mix(in srgb,var(--pr-accent,#3a7d78) 14%,transparent) no-repeat center/10px 10px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6l12 12M18 6 6 18' fill='none' stroke='%23556070' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E")}
+html body input[type="search"]::-webkit-search-cancel-button:hover{background-color:color-mix(in srgb,var(--pr-accent,#3a7d78) 26%,transparent)}
+:root[data-theme="dark"] body input[type="search"]::-webkit-search-cancel-button{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6l12 12M18 6 6 18' fill='none' stroke='%23d5dce4' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E")}
+
+/* Edit status window: deactivate is a switch row; fields hidden until needed really stay hidden. */
+html body .account-status-box .account-status-toggle:not(#tf):not(#tf2){position:relative;display:flex!important;align-items:center;justify-content:space-between;gap:16px;width:auto!important;margin:14px 24px 0!important;padding:14px 16px!important;border:1px solid var(--pr-line)!important;border-radius:12px!important;background:var(--pr-surface)!important;box-shadow:none!important;cursor:pointer}
+html body .account-status-box .account-status-toggle:has(input:checked):not(#tf):not(#tf2){border-color:color-mix(in srgb,#b5534b 45%,var(--pr-line))!important;background:color-mix(in srgb,#b5534b 6%,var(--pr-surface))!important}
+html body .account-status-box .account-status-toggle input:not(#tf):not(#tf2){position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;margin:0!important;padding:0!important;opacity:0!important;pointer-events:none}
+html body .account-status-box .account-status-toggle-copy:not(#tf){display:flex!important;flex-direction:column;gap:3px;min-width:0}
+html body .account-status-box .account-status-toggle-copy strong:not(#tf){color:var(--pr-ink)!important;font:650 13px/1.3 var(--pr-font)!important}
+html body .account-status-box .account-status-toggle-copy small:not(#tf){color:var(--pr-muted)!important;font:400 11.5px/1.4 var(--pr-font)!important}
+html body .account-status-box .account-status-toggle .se-switch{flex:none}
+html body .account-status-box .account-status-toggle input:checked+.se-switch{background:#b5534b}
+html body .account-status-box .account-status-toggle input:focus-visible+.se-switch{outline:2px solid var(--pr-accent);outline-offset:2px}
+html body .account-status-box [hidden]:not(#tf){display:none!important}
+html body .account-status-box .dialog-input-label:not(#tf){margin:14px 24px 0!important}
+/* Section picker: a section that clashes with the professor's schedule. */
+html body .student-section-choice.is-clash{opacity:.6;cursor:not-allowed}
+html body .student-section-choice.is-clash small{color:#a5612a!important}
+
+/* Section pickers (Admin student and professor windows): themed prompt — banner header with a
+   centred ×, section choices, then Cancel + primary in the role colour. */
+html body .student-section-picker-modal:not(#tf):not(#tf2){display:flex!important;flex-direction:column;width:min(620px,calc(100vw - 32px))!important;max-width:none!important;max-height:calc(100vh - 48px);padding:0!important;overflow:hidden!important;border:0!important;border-radius:20px!important;background:var(--pr-surface)!important;box-shadow:0 30px 80px rgba(0,0,0,.3)!important;font-family:var(--pr-font)}
+html body .student-section-picker-modal>.sp-head:not(#tf){display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 24px;background:linear-gradient(132deg,var(--pr-hero-a),var(--pr-hero-b));color:#fff}
+html body .student-section-picker-modal>.sp-head .profile-eyebrow:not(#tf){margin:0 0 4px!important;color:rgba(255,255,255,.8)!important;font:700 10px/1.3 var(--pr-font)!important;letter-spacing:.12em;text-transform:uppercase}
+html body .student-section-picker-modal>.sp-head h3:not(#tf):not(#tf2){margin:0!important;padding:0!important;border:0!important;background:none!important;color:#fff!important;font:700 17px/1.3 var(--pr-font)!important}
+html body .student-section-picker-modal>.sp-head .student-picker-subject:not(#tf):not(#tf2){display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:6px 0 0!important;color:rgba(255,255,255,.9)!important;font:400 12px/1.4 var(--pr-font)!important}
+html body .student-section-picker-modal>.sp-head .student-picker-subject strong{color:#fff;font-weight:700}
+html body .student-section-picker-modal>.sp-head .student-picker-subject small{flex-basis:100%;color:rgba(255,255,255,.85)}
+html body .student-section-picker-modal .student-section-options:not(#tf){display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:0!important;padding:18px 24px!important;overflow:auto}
+html body .student-section-picker-modal .student-section-choice:not(#tf):not(#tf2){display:flex!important;align-items:flex-start;gap:10px;margin:0!important;padding:12px 14px!important;border:1px solid var(--pr-line)!important;border-radius:12px!important;background:var(--pr-surface)!important;box-shadow:none!important;color:var(--pr-ink)!important;text-align:left;cursor:pointer}
+html body .student-section-picker-modal .student-section-choice.selected:not(#tf):not(#tf2),html body .student-section-picker-modal .student-section-choice:has(input:checked):not(#tf):not(#tf2){border-color:var(--pr-accent)!important;background:color-mix(in srgb,var(--pr-accent) 8%,var(--pr-surface))!important}
+html body .student-section-picker-modal .student-section-choice strong{display:block;color:var(--pr-ink);font:700 13px/1.3 var(--pr-font)}
+html body .student-section-picker-modal .student-section-choice small{display:block;margin-top:2px;color:var(--pr-muted);font:400 11.5px/1.4 var(--pr-font)}
+html body .student-section-picker-modal .student-section-choice input{accent-color:var(--pr-accent);margin-top:2px}
+html body .student-section-picker-modal .student-picker-actions:not(#tf){display:flex;justify-content:flex-end;gap:10px;margin:0!important;padding:14px 24px 20px!important;border-top:1px solid var(--pr-line)}
+html body .student-section-picker-modal .student-picker-actions button:not(#tf):not(#tf2){height:40px!important;min-height:0!important;margin:0!important;padding:0 18px!important;border-radius:11px!important;font:600 12px/1 var(--pr-font)!important;box-shadow:none!important}
+html body .student-section-picker-modal .student-picker-actions .cancel:not(#tf):not(#tf2){border:1px solid var(--pr-line)!important;background:var(--pr-surface)!important;color:var(--pr-ink)!important}
+html body .student-section-picker-modal .student-picker-actions .save-btn:not(#tf):not(#tf2){border:0!important;background:var(--pr-accent)!important;color:#fff!important}
+html body .student-section-picker-modal .student-picker-actions .save-btn:not(#tf):not(#tf2):disabled{opacity:.45;cursor:not-allowed}
+html body .modal-bg>.modal.student-section-picker-modal:not(#tf):not(#tf2):not(#tf3){width:min(620px,calc(100vw - 32px))!important;max-width:none!important;padding:0!important;flex-direction:column!important;flex-wrap:nowrap!important}
+html body .modal-bg>.modal.student-section-picker-modal>*:not(#tf):not(#tf2):not(#tf3){flex:0 0 auto!important;width:auto!important;max-width:none!important;margin:0!important}
+html body .modal-bg>.modal.student-section-picker-modal>.student-section-options:not(#tf):not(#tf2):not(#tf3){flex:1 1 auto!important;min-height:0}
+html body .modal-bg>.modal.student-section-picker-modal:not(#tf):not(#tf2):not(#tf3){align-items:stretch!important;text-align:left!important}
+/* Header buttons hide text only when they carry a drawn icon; a text glyph (⋮ ×) otherwise stays visible. */
+html body .student-profile-head :is(.profile-close,.student-command-menu>summary):not(:has(svg)):not(#tf):not(#tf2){font-size:18px!important;line-height:1!important}
+
+/* Professor workspace prompts (Preview which section, Edit subject, …): themed banner header with a
+   centred ×, padded body. The generic prompt rules were collapsing the header and body together. */
+html body .modal-bg>.modal.workspace-dialog:not(#tf):not(#tf2):not(#tf3){display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;width:min(560px,calc(100vw - 32px))!important;max-width:none!important;max-height:calc(100vh - 48px);padding:0!important;overflow:hidden!important;border:0!important;border-radius:20px!important;background:var(--pr-surface)!important;box-shadow:0 30px 80px rgba(0,0,0,.3)!important;text-align:left!important}
+html body .modal-bg>.modal.workspace-dialog>*:not(#tf):not(#tf2):not(#tf3){flex:0 0 auto!important;width:auto!important;max-width:none!important;margin:0!important}
+html body .modal-bg>.modal.workspace-dialog>header:not(#tf):not(#tf2):not(#tf3){display:flex!important;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 24px!important;border:0!important;background:linear-gradient(132deg,var(--pr-hero-a),var(--pr-hero-b))!important;color:#fff!important}
+html body .modal.workspace-dialog>header h3:not(#tf):not(#tf2){margin:0!important;padding:0!important;color:#fff!important;font:700 17px/1.3 var(--pr-font)!important}
+html body .modal.workspace-dialog>header p:not(#tf):not(#tf2){margin:6px 0 0!important;color:rgba(255,255,255,.88)!important;font:400 12px/1.5 var(--pr-font)!important}
+html body .modal-bg>.modal.workspace-dialog>.subject-dialog-body:not(#tf):not(#tf2):not(#tf3){display:flex;flex-direction:column;gap:8px;flex:1 1 auto!important;min-height:0;padding:18px 24px 22px!important;overflow:auto}
+html body .modal.workspace-dialog .subject-dialog-option:not(#tf):not(#tf2){display:flex!important;align-items:center;gap:12px;width:100%!important;min-height:0!important;margin:0!important;padding:12px 14px!important;border:1px solid var(--pr-line)!important;border-radius:12px!important;background:var(--pr-surface)!important;box-shadow:none!important;color:var(--pr-ink)!important;text-align:left;cursor:pointer;transform:none!important}
+html body .modal.workspace-dialog .subject-dialog-option:not(#tf):not(#tf2):is(:hover,:focus-visible){border-color:var(--pr-accent)!important;background:color-mix(in srgb,var(--pr-accent) 7%,var(--pr-surface))!important;outline:none}
+html body .modal.workspace-dialog .subject-dialog-option svg{flex:none;width:18px;height:18px;fill:var(--pr-accent)}
+html body .modal.workspace-dialog .subject-dialog-option>span{display:flex;flex-direction:column;gap:2px}
+html body .modal.workspace-dialog .subject-dialog-option strong{color:var(--pr-ink);font:650 13px/1.3 var(--pr-font)}
+html body .modal.workspace-dialog .subject-dialog-option small{color:var(--pr-muted);font:400 11.5px/1.4 var(--pr-font)}

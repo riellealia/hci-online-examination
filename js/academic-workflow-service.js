@@ -216,13 +216,95 @@ const AcademicWorkflowService = (() => {
     if (typeof AuditLog !== 'undefined') AuditLog.record('apply-approved-overload', 'student-enrollment', enrollment.id,
       { requestId: request.id, studentId: change.studentId }, actor, { category: 'assignment/enrollment', previousValue: null, newValue: copy(enrollment), result: 'success', academicPeriod: request.academicPeriod });
   }
+  /* ---------- Professor load (same policy and defaults as Professor Management) ---------- */
+  function professorPolicy() {
+    const saved = (DB.read('systemSettings', {}) || {}).professorLoadPolicy || {};
+    return { normal: Number(saved.normal) || 18, maximum: Number(saved.maximum) || 24 };
+  }
+  const subjectUnits = code => unitRecord(code)?.units || Number(DB.read('subjects', []).find(item => item.code === code)?.units) || 3;
+  function professorLoad(facultyId) {
+    return DB.read('sectionSubjects', []).flatMap(record => record.assignments || []).filter(item => item.facultyId === facultyId).reduce((sum, item) => sum + subjectUnits(item.subjectCode), 0);
+  }
+  // Review for both Professor request types: load before/after, limits, clashes, and what blocks approval.
+  function reviewProfessorLoad(input) {
+    const change = input?.proposedChange || input || {}, located = offeringById(DB.read('sectionSubjects', []), change.offeringId), policy = professorPolicy();
+    const currentUnits = professorLoad(change.facultyId), units = located ? subjectUnits(located.assignment.subjectCode) : Number(change.subjectUnits) || 0, proposedUnits = currentUnits + units;
+    const conflicts = located ? professorScheduleConflicts(change.facultyId, change.offeringId) : [], problems = [];
+    if (!located) problems.push('The subject offering no longer exists.');
+    else if ((located.assignment.facultyId || '') !== (change.expectedFacultyId || '')) problems.push('Another Professor was assigned to this class after the request was sent.');
+    if (!activeAccount(change.facultyId, 'faculty')) problems.push('The Professor is no longer active.');
+    if (conflicts.length) problems.push(`Schedule conflict with ${conflicts.map(item => `${item.subjectCode} in ${item.sectionId} (${item.days.join('/')} ${item.time})`).join(', ')}.`);
+    if (input?.type === 'professor-overload' || change.overload) {
+      if (!(proposedUnits > policy.normal)) problems.push('The class now fits the normal load; no overload is needed.');
+      if (proposedUnits > policy.maximum) problems.push(`The load would exceed the maximum of ${policy.maximum} units.`);
+    }
+    return { currentUnits, subjectUnits: units, proposedUnits, policy, conflicts, problems, canApprove: problems.length === 0, subjectCode: located?.assignment.subjectCode || change.subjectCode, sectionId: located?.section.sectionId || change.sectionId };
+  }
+  function requestProfessorOverload({ offeringId, facultyId, reason, academicPeriod = '' }, actor = null) {
+    const located = offeringById(DB.read('sectionSubjects', []), offeringId);
+    if (!located) fail('The selected subject offering does not exist.', 'NOT_FOUND');
+    if (!activeOfferingExists(DB.read('sectionSubjects', []), offeringId)) fail('The selected subject is not offered in the active academic period and semester.', 'INACTIVE_SEMESTER');
+    if (located.assignment.facultyId) fail('That class already has a Professor.');
+    const review = reviewProfessorLoad({ type: 'professor-overload', proposedChange: { offeringId, facultyId, expectedFacultyId: '' } });
+    if (!review.canApprove) fail(review.problems.join(' '), review.conflicts.length ? 'SCHEDULE_CONFLICT' : 'WORKFLOW_VALIDATION_FAILED');
+    return ApprovalService.submit({
+      type: 'professor-overload', targetType: 'subject-offering', targetId: offeringId,
+      proposedChange: { offeringId, facultyId, expectedFacultyId: '', subjectCode: located.assignment.subjectCode, sectionId: located.section.sectionId, currentUnits: review.currentUnits, subjectUnits: review.subjectUnits, proposedUnits: review.proposedUnits, normalLimit: review.policy.normal, maximumLimit: review.policy.maximum },
+      reason, academicPeriod
+    }, actor);
+  }
+  function applyProfessorOverload(change, request, actor) {
+    const review = reviewProfessorLoad(request);
+    if (!review.canApprove) fail(review.problems.join(' '), review.conflicts.length ? 'SCHEDULE_CONFLICT' : 'STALE_TARGET');
+    const records = DB.read('sectionSubjects', []), located = offeringById(records, change.offeringId);
+    located.assignment.facultyId = change.facultyId;
+    if (!DB.write('sectionSubjects', records)) fail('The approved overload could not be saved.', 'SAVE_FAILED');
+    if (typeof AuditLog !== 'undefined') AuditLog.record('apply-approved-professor-overload', 'subject-offering', change.offeringId, { requestId: request.id }, actor, { category: 'assignment/enrollment', previousValue: { facultyId: '' }, newValue: { facultyId: change.facultyId }, result: 'success', academicPeriod: request.academicPeriod });
+  }
+
+  /* ---------- Faculty Coordinator → Dean: enroll a Student within the normal load ---------- */
+  function reviewStudentEnrollment(input) {
+    const change = input?.proposedChange || input || {}, records = DB.read('sectionSubjects', []), located = offeringById(records, change.offeringId), enrollments = DB.read('studentEnrollments', []);
+    const policy = loadPolicyForStudent(change.studentId), load = located ? proposedStudentLoad(change.studentId, located.assignment.subjectCode) : null;
+    const conflicts = located ? studentScheduleConflicts(change.studentId, change.offeringId) : [], problems = [];
+    const section = located ? DB.read('sections', []).find(item => item.id === located.section.sectionId) : null;
+    const occupied = located ? new Set(enrollments.filter(item => item.sectionId === located.section.sectionId).map(item => item.studentId)).size : 0;
+    if (!located || !activeOfferingExists(records, change.offeringId)) problems.push('The subject offering is no longer active.');
+    if (!activeAccount(change.studentId, 'student') || !DB.read('students', []).some(item => item.id === change.studentId)) problems.push('The Student is no longer active.');
+    if (located && enrollments.some(item => item.studentId === change.studentId && (item.offeringId === change.offeringId || item.subjectCode === located.assignment.subjectCode))) problems.push('The Student is already enrolled in this subject.');
+    if (section && Number(section.capacity) > 0 && occupied >= Number(section.capacity)) problems.push('The Section is full.');
+    if (conflicts.length) problems.push(`Schedule conflict with ${conflicts.map(item => `${item.subjectCode || item.offeringId} (${item.days.join('/')} ${item.time})`).join(', ')}.`);
+    if (load && load.proposedUnits > policy.normalLimit) problems.push(`The load would reach ${load.proposedUnits} units, above the normal ${policy.normalLimit}; this needs an overload request.`);
+    return { currentUnits: load?.currentUnits ?? studentLoad(change.studentId), subjectUnits: load?.subjectUnits ?? null, proposedUnits: load?.proposedUnits ?? null, policy, conflicts, occupied, capacity: Number(section?.capacity) || null, problems, canApprove: problems.length === 0, subjectCode: located?.assignment.subjectCode || change.subjectCode, sectionId: located?.section.sectionId || change.sectionId };
+  }
+  function requestStudentEnrollment({ studentId, offeringId, reason, academicPeriod = '' }, actor = null) {
+    const review = reviewStudentEnrollment({ studentId, offeringId });
+    if (!review.canApprove) fail(review.problems.join(' '), review.conflicts.length ? 'SCHEDULE_CONFLICT' : 'WORKFLOW_VALIDATION_FAILED');
+    return ApprovalService.submit({
+      type: 'student-enrollment', targetType: 'student-enrollment', targetId: `${studentId}:${offeringId}`,
+      proposedChange: { studentId, offeringId, subjectCode: review.subjectCode, sectionId: review.sectionId, currentUnits: review.currentUnits, subjectUnits: review.subjectUnits, proposedUnits: review.proposedUnits, normalLimit: review.policy.normalLimit },
+      reason, academicPeriod
+    }, actor);
+  }
+  function applyStudentEnrollment(change, request, actor) {
+    const review = reviewStudentEnrollment(change);
+    if (!review.canApprove) fail(review.problems.join(' '), review.conflicts.length ? 'SCHEDULE_CONFLICT' : 'STALE_TARGET');
+    const enrollments = DB.read('studentEnrollments', []);
+    const enrollment = { id: `ENR-${change.studentId}-${Date.now()}`, studentId: change.studentId, offeringId: change.offeringId, subjectCode: review.subjectCode, sectionId: review.sectionId, coordinatorEnrollmentApprovalId: request.id };
+    enrollments.push(enrollment);
+    if (!DB.write('studentEnrollments', enrollments)) fail('The approved enrollment could not be saved.', 'SAVE_FAILED');
+    if (typeof AuditLog !== 'undefined') AuditLog.record('apply-approved-coordinator-enrollment', 'student-enrollment', enrollment.id, { requestId: request.id, studentId: change.studentId }, actor, { category: 'assignment/enrollment', previousValue: null, newValue: copy(enrollment), result: 'success', academicPeriod: request.academicPeriod });
+  }
+
   function install() {
     ApprovalService.registerApplyHandler('professor-assignment', applyProfessorAssignment);
     ApprovalService.registerApplyHandler('student-overload', applyStudentOverload);
     ApprovalService.registerApplyHandler('faculty-student-enrollment', applyFacultyStudentEnrollment);
+    ApprovalService.registerApplyHandler('student-enrollment', applyStudentEnrollment);
+    ApprovalService.registerApplyHandler('professor-overload', applyProfessorOverload);
     return true;
   }
-  return { install, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, reviewFacultyStudentEnrollment, reviewAdminEnrollmentBatch, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
+  return { install, professorPolicy, professorLoad, subjectUnits, scheduleSlots, reviewProfessorLoad, requestProfessorOverload, applyProfessorOverload, reviewStudentEnrollment, requestStudentEnrollment, applyStudentEnrollment, unitRecord, studentLoad, proposedStudentLoad, loadPolicyForStudent, studentScheduleConflicts, professorScheduleConflicts, reviewStudentOverload, reviewFacultyStudentEnrollment, reviewAdminEnrollmentBatch, requestProfessorAssignment, requestStudentOverload, requestFacultyStudentEnrollment, applyProfessorAssignment, applyStudentOverload, applyFacultyStudentEnrollment };
 })();
 
 AcademicWorkflowService.install();

@@ -27,12 +27,37 @@ const DeanPersonnel=(()=>{
   function row(person){
     const pct=Math.min(100,person.load/NORMAL_LOAD*100),tone=person.load>NORMAL_LOAD?'over':person.load>=NORMAL_LOAD*.9?'high':'';
     const coordinator=person.displayRole==='Faculty Coordinator';
-    return`<tr data-id="${esc(person.id)}"><td><span class="ck-person"><span class="ck-avatar">${esc(initials(person.first,person.last))}</span><span>${esc(`${person.last||''}, ${person.first||''}`)}</span></span></td><td>${esc(person.id)}</td><td><span class="dp-pill${coordinator?' gold':''}">${esc(person.displayRole)}</span></td><td>${esc(person.program||'CICS')}</td><td>${person.load===null?'<span class="dp-muted">No teaching load</span>':`<span class="dp-load">${person.load}/${NORMAL_LOAD} units</span><i class="ck-mini"><b class="${tone}" style="width:${pct}%"></b></i>`}</td><td>${coordinator?'<span class="dp-muted">Active appointment</span>':`<button type="button" class="dp-row-action" data-appoint="${esc(person.id)}">Appoint coordinator</button>`}</td></tr>`;
+    return`<tr data-id="${esc(person.id)}" data-kind="${coordinator&&person.load===null?'coordinator':'faculty'}" tabindex="0"><td><span class="ck-person"><span class="ck-avatar">${esc(initials(person.first,person.last))}</span><span>${esc(`${person.last||''}, ${person.first||''}`)}</span></span></td><td>${esc(person.id)}</td><td><span class="dp-pill${coordinator?' gold':''}">${esc(person.displayRole)}</span></td><td>${esc(person.program||'CICS')}</td><td>${person.load===null?'<span class="dp-muted">No teaching load</span>':`<span class="dp-load">${person.load}/${NORMAL_LOAD} units</span><i class="ck-mini"><b class="${tone}" style="width:${pct}%"></b></i>`}</td><td>${coordinator?'<span class="dp-muted">Active appointment</span>':`<button type="button" class="dp-row-action" data-appoint="${esc(person.id)}">Appoint coordinator</button>`}</td></tr>`;
   }
 
-  /* ---------- Members tabs: College members · Role assignments ---------- */
+  /* ---------- Members tabs: College members · Students · Archived · Role assignments ---------- */
   let tab='members';
-  const tabsNav=()=>{const n=(typeof RoleAccess!=='undefined'?RoleAccess.assignments().length:0);return`<nav class="dp-tabs" role="tablist" aria-label="Members"><button type="button" role="tab" data-dp-tab="members" class="${tab==='members'?'active':''}" aria-selected="${tab==='members'}">College members</button><button type="button" role="tab" data-dp-tab="roles" class="${tab==='roles'?'active':''}" aria-selected="${tab==='roles'}">Role assignments<span>${n}</span></button></nav>`;};
+  const tabsNav=()=>{const n=(typeof RoleAccess!=='undefined'?RoleAccess.assignments().length:0),tabs=[['members','College members',null],['students','Students',read('students').length],['archived','Archived',read('archivedPeople').length],['roles','Role assignments',n]];return`<nav class="dp-tabs" role="tablist" aria-label="Members">${tabs.map(([id,label,count])=>`<button type="button" role="tab" data-dp-tab="${id}" class="${tab===id?'active':''}" aria-selected="${tab===id}">${label}${count===null?'':`<span>${count}</span>`}</button>`).join('')}</nav>`;};
+  const HINT='<span class="dp-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm5 2v7h8V7a3 3 0 0 0-3-3h-5Z"/></svg>Right-click a row to add a role or archive</span>';
+
+  /* Students: everyone currently on the roster (archived Students are not here). */
+  function renderStudents(host){
+    const sections=new Map(read('sections').map(s=>[s.id,s])),enrolled=new Map();
+    read('studentEnrollments').forEach(e=>enrolled.set(e.studentId,(enrolled.get(e.studentId)||0)+1));
+    const students=read('students').slice().sort((a,b)=>`${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`));
+    const yearName=y=>['','1st year','2nd year','3rd year','4th year'][y]||'—';
+    const rows=students.map(s=>{const sec=sections.get((s.sections||[])[0]),name=`${s.last||''}, ${s.first||''}${s.middle?` ${s.middle}.`:''}`;return`<tr data-id="${esc(s.id)}" data-kind="student" tabindex="0"><td><span class="ck-person"><span class="ck-avatar">${esc(initials(s.first,s.last))}</span><span>${esc(name)}</span></span></td><td>${esc(s.id)}</td><td>${esc(sec?.program||'—')}</td><td>${esc(yearName(Number(sec?.yearLevel)))}</td><td>${esc(sec?.id||'No section')}</td><td>${enrolled.get(s.id)||0}</td></tr>`;}).join('');
+    host.innerHTML=`${tabsNav()}<section class="dp-table-card"><header class="dp-table-head"><div><h3>Students</h3><p>${students.length} enrolled Students · ${HINT}</p></div><div class="dp-tools" id="deanStudentTools"></div></header><div class="dp-table-scroll"><table class="dp-table" id="deanStudentTable"><thead><tr><th>Name</th><th>ID</th><th>Program</th><th>Year</th><th>Section</th><th>Subjects</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="dp-muted">No Students yet.</td></tr>'}</tbody></table></div></section><div id="deanPersonnelForm"></div>`;
+    bindTabs(host);
+    if(typeof AdminTableTools!=='undefined')AdminTableTools.mount('dean-students',document.getElementById('deanStudentTable'),document.getElementById('deanStudentTools'),{exportName:'students'});
+  }
+
+  /* Archived: Students and Professors taken off every list, by the Dean or the Administrator. */
+  function archivedName(entry){const r=entry.record||{};return r.first||r.last?`${r.last||''}, ${r.first||''}`:(typeof RoleAccess!=='undefined'?RoleAccess.nameOf(entry.username):entry.username);}
+  function renderArchived(host){
+    const list=read('archivedPeople').slice().sort((a,b)=>String(b.archivedAt).localeCompare(String(a.archivedAt)));
+    const kind={student:'Student',faculty:'Professor'},by={admin:'Administrator',dean:'Dean'};
+    const rows=list.map(a=>{const name=archivedName(a);return`<tr data-id="${esc(a.id)}" data-kind="archived" tabindex="0"><td><span class="ck-person"><span class="ck-avatar">${esc(initials(a.record?.first,a.record?.last)||'?')}</span><span>${esc(name)}</span></span></td><td>${esc(a.id)}</td><td><span class="dp-pill${a.kind==='faculty'?' gold':''}">${esc(kind[a.kind]||a.kind)}</span></td><td>${esc(new Date(a.archivedAt).toLocaleDateString())}</td><td>${esc(`${a.archivedBy}${by[a.archivedByRole]?` · ${by[a.archivedByRole]}`:''}`)}</td><td class="dp-reason">${esc(a.reason||'—')}</td><td><button type="button" class="dp-row-action" data-restore="${esc(a.id)}">Restore</button></td></tr>`;}).join('');
+    host.innerHTML=`${tabsNav()}<section class="dp-table-card"><header class="dp-table-head"><div><h3>Archived</h3><p>Removed from every list until restored. Restoring brings back their enrollments or classes.</p></div><div class="dp-tools" id="deanArchiveTools"></div></header><div class="dp-table-scroll"><table class="dp-table" id="deanArchiveTable"><thead><tr><th>Name</th><th>ID</th><th>Type</th><th>Archived</th><th>By</th><th>Reason</th><th>Action</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="dp-muted">Nobody is archived.</td></tr>'}</tbody></table></div></section><div id="deanPersonnelForm"></div>`;
+    bindTabs(host);
+    if(typeof AdminTableTools!=='undefined')AdminTableTools.mount('dean-archive',document.getElementById('deanArchiveTable'),document.getElementById('deanArchiveTools'),{exportName:'archived'});
+    host.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>restorePerson(b.dataset.restore));
+  }
   function bindTabs(host){host.querySelectorAll('[data-dp-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.dpTab;render();});}
   function renderRoles(host){
     const RA=RoleAccess,list=RA.assignments().slice().sort((a,b)=>String(b.assignedAt).localeCompare(String(a.assignedAt)));
@@ -55,12 +80,94 @@ const DeanPersonnel=(()=>{
   function render(){
     const host=document.getElementById('deanPersonnelRoot');if(!host)return;
     host.closest('section')?.classList.add('dp-page');
+    bindMenu(host);
     if(tab==='roles'&&typeof RoleAccess!=='undefined')return renderRoles(host);
+    if(tab==='students')return renderStudents(host);
+    if(tab==='archived')return renderArchived(host);
     const rows=people();
-    host.innerHTML=`${typeof RoleAccess!=='undefined'?tabsNav():''}${charts(rows)}<section class="dp-table-card"><header class="dp-table-head"><div><h3>College members</h3><p>${rows.filter(p=>p.displayRole==='Professor').length} Professors · ${rows.filter(p=>p.displayRole!=='Professor').length} Faculty Coordinators</p></div><div class="dp-tools" id="deanPersonnelTools"></div></header><div class="dp-table-scroll"><table class="dp-table" id="deanPersonnelTable"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Program</th><th>Load</th><th>Action</th></tr></thead><tbody>${rows.map(row).join('')||'<tr><td colspan="6" class="dp-muted">No personnel yet.</td></tr>'}</tbody></table></div></section><div id="deanPersonnelForm"></div>`;
+    host.innerHTML=`${typeof RoleAccess!=='undefined'?tabsNav():''}${charts(rows)}<section class="dp-table-card"><header class="dp-table-head"><div><h3>College members</h3><p>${rows.filter(p=>p.displayRole==='Professor').length} Professors · ${rows.filter(p=>p.displayRole!=='Professor').length} Faculty Coordinators · ${HINT}</p></div><div class="dp-tools" id="deanPersonnelTools"></div></header><div class="dp-table-scroll"><table class="dp-table" id="deanPersonnelTable"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Program</th><th>Load</th><th>Action</th></tr></thead><tbody>${rows.map(row).join('')||'<tr><td colspan="6" class="dp-muted">No personnel yet.</td></tr>'}</tbody></table></div></section><div id="deanPersonnelForm"></div>`;
     if(typeof AdminTableTools!=='undefined')AdminTableTools.mount('dean-members',document.getElementById('deanPersonnelTable'),document.getElementById('deanPersonnelTools'),{exportName:'college-members',add:{label:'Add Professor',onClick:showHire}});
     host.querySelectorAll('[data-appoint]').forEach(button=>button.onclick=event=>{event.stopPropagation();showAppointment(button.dataset.appoint);});
     bindTabs(host);
+  }
+
+  /* ---------- right-click menu on Students, College members, Archived ---------- */
+  const ICON={
+    role:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm1 6v3h3v2h-3v3h-2v-3H8v-2h3V8h2Z"/></svg>',
+    archive:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v5H3V3Zm1 6h16v12H4V9Zm5 3v2h6v-2H9Z"/></svg>',
+    restore:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3Zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12Z"/></svg>',
+    'exam.manage':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25ZM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/></svg>',
+    'workspace.view':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>'
+  };
+  const closeMenu=()=>document.getElementById('dpMenu')?.remove();
+  function personName(id,kind){
+    if(kind==='archived'){const a=read('archivedPeople').find(x=>x.id===id);return a?archivedName(a).replace(/^(.*), (.*)$/,'$2 $1'):id;}
+    return typeof RoleAccess!=='undefined'?RoleAccess.nameOf(id):id;
+  }
+  function openMenu(row,x,y){
+    closeMenu();
+    const id=row.dataset.id,kind=row.dataset.kind,name=personName(id,kind);
+    const item=(action,label,note,extra='')=>`<button type="button" role="menuitem" data-dp-menu="${action}"${extra}>${ICON[action]}<span>${label}${note?`<small>${note}</small>`:''}</span></button>`;
+    const items=kind==='archived'
+      ?item('restore','Restore','Back to every list')
+      :item('role','Add role…','Choose one or more roles')+(kind==='coordinator'
+        ?item('archive','Archive…','Only Students and Professors',' disabled')
+        :item('archive','Archive…',kind==='student'?'Remove from every Student list':'Remove from every Professor list',' class="danger"'));
+    const menu=document.createElement('div');menu.id='dpMenu';menu.className='ra-menu dp-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label',`Actions for ${name}`);
+    menu.innerHTML=`<p class="dp-menu-head"><strong>${esc(name)}</strong><small>${esc(id)}</small></p>${items}`;
+    document.body.appendChild(menu);
+    const r=menu.getBoundingClientRect();menu.style.left=`${Math.max(8,Math.min(x,innerWidth-r.width-8))}px`;menu.style.top=`${Math.max(8,Math.min(y,innerHeight-r.height-8))}px`;
+    menu.querySelector('button:not([disabled])')?.focus();
+    menu.addEventListener('keydown',e=>{const all=[...menu.querySelectorAll('button:not([disabled])')],i=all.indexOf(document.activeElement);if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();all[(i+(e.key==='ArrowDown'?1:all.length-1))%all.length]?.focus();}if(e.key==='Escape'){closeMenu();row.focus();}});
+    menu.onclick=e=>{const b=e.target.closest('[data-dp-menu]');if(!b||b.disabled)return;closeMenu();({role:()=>showAddRole(id),archive:()=>showArchive(id,kind),restore:()=>restorePerson(id)})[b.dataset.dpMenu]();};
+  }
+  function bindMenu(host){
+    if(host.dataset.dpMenu)return;host.dataset.dpMenu='1';
+    const rowOf=t=>t.closest('#deanPersonnelTable tbody tr[data-id], #deanStudentTable tbody tr[data-id], #deanArchiveTable tbody tr[data-id]');
+    host.addEventListener('contextmenu',e=>{const row=rowOf(e.target);if(!row)return;e.preventDefault();
+      // Keyboard (menu key / Shift+F10) has no pointer position: open beside the row.
+      const r=row.getBoundingClientRect();openMenu(row,e.clientX||r.left+24,e.clientY||r.bottom);});
+    document.addEventListener('click',e=>{if(!e.target.closest('#dpMenu'))closeMenu();});
+    document.addEventListener('scroll',closeMenu,true);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+  }
+
+  /* Add role: only roles the Administrator created (accessRoles), pick one or many. */
+  const adminRoles=()=>{const r=DB.read('accessRoles',[]);return Array.isArray(r)?r.filter(x=>x&&x.id&&x.name):[];};
+  function showAddRole(username){
+    const RA=RoleAccess,roles=adminRoles(),name=RA.nameOf(username),subjects=read('subjects');
+    if(!roles.length){notify('The Administrator has not created any roles yet.','info');return;}
+    const caps=r=>Object.keys(r.grants||{}).filter(k=>r.grants[k]).map(k=>`<span class="dp-cap">${ICON[k]||''}${esc(RA.CAPS[k]?.label||k)}</span>`).join('')||'<span class="dp-cap">No permissions yet</span>';
+    const cards=roles.map(r=>`<label class="dp-role-card" style="--c:${esc(r.color||'#888')}"><input type="checkbox" name="roleId" value="${esc(r.id)}"><span class="dp-role-dot" aria-hidden="true"></span><span class="dp-role-text"><strong>${esc(r.name)}</strong>${caps(r)}<small class="dp-role-ends">${esc(RA.roleExpiryLabel?RA.roleExpiryLabel(r):'')}</small></span><em class="dp-role-held" hidden>Already has it</em></label>`).join('');
+    dialog(`Add role · ${name}`,`<fieldset class="dp-wide dp-role-grid"><legend>Roles <small>Created by the Administrator · choose one or more</small></legend>${cards}</fieldset><label>Subject<select name="subjectCode"><option value="*">All subjects</option>${subjects.map(s=>`<option value="${esc(s.code)}">${esc(s.code)} — ${esc(s.name)}</option>`).join('')}</select></label><label>Until<select name="until"><option value="">Each role's own end date</option><option value="none">No end date</option></select></label>`,'Each role applies only in the chosen subject, or in every subject.','Add roles',async values=>{
+      const form=document.querySelector('#deanPersonnelForm form'),chosen=[...form.querySelectorAll('input[name=roleId]:checked:not(:disabled)')].map(i=>i.value);
+      if(!chosen.length)throw new Error('Choose at least one role.');
+      const added=[];for(const roleId of chosen){RA.assign({username,roleId,subjectCode:values.subjectCode,until:values.until});added.push(RA.roleById(roleId)?.name||roleId);}
+      document.getElementById('deanPersonnelForm').innerHTML='';
+      notify(`${name} now has ${added.join(', ')}${values.subjectCode==='*'?'':` in ${values.subjectCode}`}.`,'success');render();
+    });
+    // Roles the person already holds for the chosen subject are ticked and locked.
+    const form=document.querySelector('#deanPersonnelForm form');if(!form)return;
+    const subject=form.querySelector('[name=subjectCode]'),submit=form.querySelector('.confirm-ok');
+    const sync=()=>{form.querySelectorAll('.dp-role-card').forEach(card=>{const box=card.querySelector('input'),held=RA.live().some(a=>a.username===username&&a.roleId===box.value&&(a.subjectCode==='*'||a.subjectCode===subject.value));card.classList.toggle('held',held);box.disabled=held;if(held)box.checked=true;else if(box.dataset.wasHeld)box.checked=false;box.dataset.wasHeld=held?'1':'';card.querySelector('.dp-role-held').hidden=!held;});const n=form.querySelectorAll('input[name=roleId]:checked:not(:disabled)').length;submit.textContent=n>1?`Add ${n} roles`:n?'Add role':'Add roles';submit.disabled=!n;};
+    subject.addEventListener('change',sync);form.addEventListener('change',e=>{if(e.target.name==='roleId')sync();});sync();
+    form.querySelector('input[name=roleId]:not(:disabled)')?.focus();
+  }
+
+  /* Archive and restore go through the server, the same as the Administrator's. */
+  function showArchive(id,kind){
+    const name=personName(id,kind),student=kind==='student';
+    dialog(`Archive ${name}?`,`<label class="dp-wide">Reason<textarea name="reason" required placeholder="${student?'e.g. Leave of absence for the semester':'e.g. On sabbatical this academic year'}"></textarea></label>`,student?'They leave every Student list and their enrollments are set aside; they cannot sign in. Restore them from the Archived tab to bring everything back.':'They leave every Professor list and their classes become unassigned; they cannot sign in. Restore them from the Archived tab to get them back.','Archive',async values=>{
+      await api(`/api/accounts/${encodeURIComponent(id)}/archive`,{reason:values.reason});
+      document.getElementById('deanPersonnelForm').innerHTML='';await refresh(`${name} was archived.`);
+    });
+    document.querySelector('#deanPersonnelForm .confirm-ok')?.classList.add('is-danger');
+    document.querySelector('#deanPersonnelForm textarea')?.focus();
+  }
+  async function restorePerson(id){
+    const name=personName(id,'archived');
+    if(typeof confirmDialog==='function'&&!await confirmDialog({title:`Restore ${name}?`,message:'They return to every list and can sign in again. Enrollments or classes that still exist are given back.',confirmLabel:'Restore'}))return;
+    try{await api(`/api/accounts/${encodeURIComponent(id)}/restore`,{});await refresh(`${name} was restored.`);}catch(error){notify(error.message,'error');}
   }
 
   /* ---------- dialogs (themed prompt look) ---------- */

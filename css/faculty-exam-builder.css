@@ -1,29 +1,37 @@
 /* ==================================================================
-   Create / Edit Exam — Student exam-page look, Professor theme.
-   Large centered sheet, banner header, numbered section cards,
-   two/three-column field rows, sticky action bar.
+   Exam workspace — Professor theme.
+   Left: the exam's question list. Right: the exam settings column
+   (#examModal), shown and hidden with the gear. Creating an exam opens
+   the same workspace with an empty list and the settings expanded.
    ================================================================== */
-body[data-role="faculty"] .exam-builder-bg{padding:24px;background:rgba(32,24,18,.5);backdrop-filter:blur(5px)}
-body[data-role="faculty"] .exam-builder-bg.active{display:flex;align-items:center;justify-content:center}
-body[data-role="faculty"] #examModal .modal.exam-builder{display:flex;flex-direction:column;width:min(920px,100%)!important;max-width:none!important;max-height:calc(100dvh - 48px)!important;margin:0;padding:0!important;overflow:hidden;border:0;border-radius:22px;background:color-mix(in srgb,var(--role-shell-surface,#fbf9f6) 55%,var(--role-shell-surface-soft,#e9ded0))!important;box-shadow:0 30px 80px rgba(32,24,18,.32);font-family:'Poppins',Arial,sans-serif}
+body[data-role="faculty"] .exam-workspace-shell{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+body[data-role="faculty"] .exam-workspace-shell>#examModal{display:none}
+body[data-role="faculty"] .exam-workspace-shell:has(>#examsView .question-workspace):has(>#examModal.active){grid-template-columns:minmax(0,1fr) minmax(330px,410px)}
+body[data-role="faculty"] .exam-workspace-shell:has(>#examsView .question-workspace)>#examModal.active{display:flex}
+body[data-role="faculty"] .exam-workspace-shell>#examsView{min-width:0}
+
+/* The settings column: a sticky card that scrolls on its own. */
+body[data-role="faculty"] #examModal.exam-settings-panel{position:sticky;top:16px;flex-direction:column;max-height:calc(100dvh - 32px);min-width:0;overflow:hidden;border:1px solid var(--role-shell-line,#d8cabc);border-radius:20px;background:color-mix(in srgb,var(--role-shell-surface,#fbf9f6) 55%,var(--role-shell-surface-soft,#e9ded0));box-shadow:0 14px 36px rgba(44,40,35,.12);font-family:'Poppins',Arial,sans-serif;animation:exam-settings-in .18s ease}
+body[data-role="faculty"] #examModal .exam-builder{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+@keyframes exam-settings-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
 
 /* Banner. */
-body[data-role="faculty"] .exam-builder-hero{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:26px 30px;overflow:hidden;background:linear-gradient(132deg,var(--role-shell-navy,#3e3025),var(--role-shell-role,#865b45) 72%);color:#fff}
-body[data-role="faculty"] .exam-builder-hero::after{content:"";position:absolute;right:60px;bottom:-140px;width:260px;height:260px;border:30px solid rgba(255,255,255,.07);border-radius:50%;pointer-events:none}
+body[data-role="faculty"] .exam-builder-hero{position:relative;display:flex;flex:0 0 auto;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;overflow:hidden;background:linear-gradient(132deg,var(--role-shell-navy,#3e3025),var(--role-shell-role,#865b45) 72%);color:#fff}
+body[data-role="faculty"] .exam-builder-hero::after{content:"";position:absolute;right:30px;bottom:-120px;width:200px;height:200px;border:26px solid rgba(255,255,255,.07);border-radius:50%;pointer-events:none}
 body[data-role="faculty"] .exam-builder-eyebrow{margin:0;color:var(--role-shell-yellow,#c89571);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
-body[data-role="faculty"] #examModal .exam-builder-hero h3{margin:6px 0 0;color:#fff!important;font-size:clamp(22px,2.2vw,28px);font-weight:700;letter-spacing:-.03em}
-body[data-role="faculty"] .exam-builder-copy{max-width:560px;margin:8px 0 0;color:rgba(255,255,255,.76);font-size:12px;line-height:1.6}
-body[data-role="faculty"] .exam-builder-close{position:relative;z-index:1;display:grid;flex:0 0 auto;width:36px;height:36px;place-items:center;padding:0;border:1px solid rgba(255,255,255,.26);border-radius:11px;background:rgba(255,255,255,.12);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+body[data-role="faculty"] #examModal .exam-builder-hero h3{margin:4px 0 0;color:#fff!important;font-size:19px;font-weight:700;letter-spacing:-.02em}
+body[data-role="faculty"] .exam-builder-copy{margin:6px 0 0;color:rgba(255,255,255,.76);font-size:11px;line-height:1.55}
+body[data-role="faculty"] .exam-builder-close{position:relative;z-index:1;display:grid;flex:0 0 auto;width:32px;height:32px;place-items:center;padding:0;border:1px solid rgba(255,255,255,.26);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:18px;line-height:1;cursor:pointer}
 body[data-role="faculty"] .exam-builder-close:hover{background:rgba(255,255,255,.22)}
 
 /* Section cards. */
-body[data-role="faculty"] .exam-builder-body{display:grid;gap:14px;padding:22px 30px;overflow-y:auto}
-body[data-role="faculty"] .exam-form-card{display:grid;gap:12px;padding:20px 22px;border:1px solid var(--role-shell-line,#d8cabc);border-radius:16px;background:var(--role-shell-surface,#fbf9f6);box-shadow:0 7px 20px rgba(44,40,35,.06)}
-body[data-role="faculty"] .exam-form-card>header{display:flex;align-items:flex-start;gap:12px;margin-bottom:2px}
-body[data-role="faculty"] .exam-form-card>header>span{display:grid;flex:0 0 28px;width:28px;height:28px;place-items:center;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:700}
-body[data-role="faculty"] .exam-form-card h4{margin:2px 0 0;color:var(--ink);font-size:15px;font-weight:650}
+body[data-role="faculty"] .exam-builder-body{display:grid;flex:1 1 auto;gap:12px;min-height:0;padding:16px;overflow-y:auto}
+body[data-role="faculty"] .exam-form-card{display:grid;gap:12px;padding:16px;border:1px solid var(--role-shell-line,#d8cabc);border-radius:14px;background:var(--role-shell-surface,#fbf9f6);box-shadow:0 5px 14px rgba(44,40,35,.05)}
+body[data-role="faculty"] .exam-form-card>header{display:flex;align-items:flex-start;gap:10px;margin-bottom:2px}
+body[data-role="faculty"] .exam-form-card>header>span{display:grid;flex:0 0 26px;width:26px;height:26px;place-items:center;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700}
+body[data-role="faculty"] .exam-form-card h4{margin:2px 0 0;color:var(--ink);font-size:14px;font-weight:650}
 body[data-role="faculty"] .exam-form-card>header p{margin:3px 0 0;color:var(--ink-soft);font-size:11px;line-height:1.5}
-body[data-role="faculty"] .exam-form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+body[data-role="faculty"] .exam-form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
 
 /* Fields. */
 body[data-role="faculty"] #examModal .form-group{margin:0}
@@ -46,22 +54,131 @@ body[data-role="faculty"] #examModal .checkbox-stack{display:grid;gap:8px}
 body[data-role="faculty"] #examModal .checkbox-stack label{display:flex;align-items:center;gap:9px;color:var(--ink);font-size:12px;font-weight:500}
 body[data-role="faculty"] #examModal .checkbox-stack input{width:16px;height:16px;accent-color:var(--accent)}
 
-/* Action bar. */
-body[data-role="faculty"] #examModal .exam-builder-actions{display:flex;justify-content:flex-end;gap:10px;margin:0;padding:14px 30px;border-top:1px solid var(--role-shell-line,#d8cabc);background:var(--role-shell-surface,#fbf9f6)}
-body[data-role="faculty"] #examModal .exam-builder-actions button{width:auto;min-width:110px;height:40px;margin:0;padding:0 20px;border-radius:11px;font:inherit;font-size:12px;font-weight:650;cursor:pointer}
+/* Action bar: Save comes first in the markup; Cancel is shown on the left. */
+body[data-role="faculty"] #examModal .exam-builder-actions{display:flex;flex:0 0 auto;flex-direction:row-reverse;justify-content:flex-start;gap:10px;margin:0;padding:12px 16px;border-top:1px solid var(--role-shell-line,#d8cabc);background:var(--role-shell-surface,#fbf9f6)}
+body[data-role="faculty"] #examModal .exam-builder-actions button{flex:0 0 auto!important;width:auto!important;min-width:100px;height:40px;margin:0;padding:0 18px;border-radius:11px;font:inherit;font-size:12px;font-weight:650;cursor:pointer}
 body[data-role="faculty"] #examModal .exam-builder-actions .cancel-btn{border:1px solid var(--role-shell-line,#d8cabc);background:transparent;color:var(--ink)}
 body[data-role="faculty"] #examModal .exam-builder-actions .cancel-btn:hover{background:var(--accent-soft)}
 body[data-role="faculty"] #examModal .exam-builder-actions .save-btn{border:0;background:var(--accent);color:#fff}
 body[data-role="faculty"] #examModal .exam-builder-actions .save-btn:hover{background:var(--accent-dark)}
 :root[data-theme="dark"] body[data-role="faculty"] #examModal .exam-builder-actions .save-btn{color:#241a14}
 
+/* Gear shows its pressed state while the settings column is open. */
+body[data-role="faculty"] .catalog-icon-btn.exam-settings-btn.is-active{border-color:var(--accent);background:var(--accent);color:#fff}
+:root[data-theme="dark"] body[data-role="faculty"] .catalog-icon-btn.exam-settings-btn.is-active{color:#241a14}
+
+/* Empty question list. */
+body[data-role="faculty"] .question-workspace-empty{box-sizing:border-box;width:100%;max-width:none;margin:0;display:grid;gap:6px;justify-items:center;padding:42px 20px;border:1.5px dashed var(--line-strong,#cbb9a6);border-radius:14px;text-align:center}
+body[data-role="faculty"] .question-workspace-empty strong{color:var(--ink);font-size:15px}
+body[data-role="faculty"] .question-workspace-empty span{max-width:420px;color:var(--ink-soft);font-size:12px;line-height:1.6}
+body[data-role="faculty"] .new-exam-total{margin:16px 0;color:var(--ink-soft);font-size:13px}
+
+/* Question rows open the question prompt. */
+body[data-role="faculty"] .question-workspace .question-item[role="button"]{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+body[data-role="faculty"] .question-workspace .question-item[role="button"]:hover{box-shadow:0 6px 18px rgba(44,40,35,.09)}
+body[data-role="faculty"] .question-workspace .question-item[role="button"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* "+" : a small menu of question types. */
+body[data-role="faculty"] .question-add-menu{position:relative}
+body[data-role="faculty"] .question-add-menu>summary{list-style:none}
+body[data-role="faculty"] .question-add-menu>summary::-webkit-details-marker{display:none}
+body[data-role="faculty"] .question-add-menu[open]>summary{border-color:var(--accent);background:var(--accent);color:#fff}
+body[data-role="faculty"] .question-type-nav{position:absolute;z-index:30;top:48px;right:0;display:grid;gap:2px;width:280px;max-height:min(460px,calc(100dvh - 160px));padding:8px;overflow-y:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 18px 40px rgba(32,24,18,.18);animation:exam-settings-in .14s ease}
+body[data-role="faculty"] .question-type-nav>p{margin:4px 8px 6px;color:var(--accent);font-size:10px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+body[data-role="faculty"] .question-type-nav button{display:flex;align-items:center;gap:11px;width:100%;min-height:48px;padding:7px 8px;border:0;border-radius:9px;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+body[data-role="faculty"] .question-type-nav button:hover,body[data-role="faculty"] .question-type-nav button:focus-visible{background:var(--accent-soft);outline:none}
+body[data-role="faculty"] .question-type-nav .qt-icon{display:grid;flex:0 0 34px;width:34px;height:34px;place-items:center;border-radius:9px;background:var(--surface-soft);color:var(--accent);font-size:14px;font-weight:700}
+body[data-role="faculty"] .question-type-nav button strong{display:block;font-size:13px;font-weight:650}
+body[data-role="faculty"] .question-type-nav button small{display:block;margin-top:1px;color:var(--ink-soft);font-size:11px}
+
+/* ------------------------------------------------------------------
+   Question prompt: a centered dialog. Question on the left, settings
+   on the right, student preview below both.
+   ------------------------------------------------------------------ */
+body[data-role="faculty"] #questionModal.authoring-bg{padding:24px!important;align-items:center!important;justify-content:center;background:rgba(32,24,18,.5);backdrop-filter:blur(5px)}
+body[data-role="faculty"] #questionModal .authoring-workspace{width:min(1180px,100%)!important;max-width:none!important;height:min(900px,calc(100dvh - 48px));max-height:calc(100dvh - 48px)!important;border-radius:22px!important;box-shadow:0 30px 80px rgba(32,24,18,.32)}
+body[data-role="faculty"] #questionModal .authoring-head{min-height:62px;padding:10px 14px 10px 22px}
+body[data-role="faculty"] #questionModal .question-settings-toggle{display:none}
+body[data-role="faculty"] #questionModal .authoring-body{grid-template-columns:minmax(0,1fr) minmax(300px,360px);grid-template-rows:auto auto;align-content:start;align-items:start;gap:18px;padding:20px;overflow-y:auto}
+body[data-role="faculty"] #questionModal .question-canvas{width:auto;margin:0;padding:24px;overflow:visible;border:1px solid var(--line);border-radius:16px;box-shadow:none}
+body[data-role="faculty"] #questionModal .question-canvas #questionText{min-height:130px}
+body[data-role="faculty"] #questionModal .question-inspector{padding:18px;overflow:visible;opacity:1;visibility:visible;border:1px solid var(--line);border-radius:16px}
+body[data-role="faculty"] #questionModal .inspector-head .icon-action{display:none}
+body[data-role="faculty"] #questionModal .inspector-head{margin-bottom:14px}
+body[data-role="faculty"] #questionModal .question-inline-preview{grid-column:1/-1;margin:0;border-radius:16px}
+
+/* Type picker (from "Save and add another"): a compact prompt. */
+body[data-role="faculty"] #questionModal.choosing-type .authoring-workspace{width:min(760px,100%)!important;height:auto}
+body[data-role="faculty"] #questionModal.choosing-type .authoring-head{display:none}
+body[data-role="faculty"] #questionModal .question-type-picker{position:relative;width:100%;margin:0;box-sizing:border-box}
+body[data-role="faculty"] #questionModal .type-picker-close{position:absolute;top:14px;right:14px}
+
+@media(max-width:980px){
+  body[data-role="faculty"] .exam-workspace-shell:has(>#examsView .question-workspace):has(>#examModal.active){grid-template-columns:minmax(0,1fr)}
+  /* Narrow screens: the settings column slides over the list. */
+  body[data-role="faculty"] #examModal.exam-settings-panel{position:fixed;z-index:120;top:0;right:0;bottom:0;width:min(440px,100vw);max-height:none;border-radius:0;box-shadow:-18px 0 40px rgba(32,24,18,.22)}
+}
+@media(max-width:860px){
+  body[data-role="faculty"] #questionModal .authoring-body{grid-template-columns:minmax(0,1fr)}
+}
 @media(max-width:700px){
-  body[data-role="faculty"] .exam-builder-bg{padding:8px}
-  body[data-role="faculty"] :is(.exam-builder-hero,.exam-builder-body,#examModal .exam-builder-actions){padding-left:16px;padding-right:16px}
+  body[data-role="faculty"] #questionModal.authoring-bg{padding:0!important}
+  body[data-role="faculty"] #questionModal .authoring-workspace{height:100dvh;max-height:100dvh!important;border-radius:0!important}
+  body[data-role="faculty"] #questionModal .authoring-body{display:block;padding:12px 12px 92px}
+  body[data-role="faculty"] #questionModal .question-canvas{height:auto;margin-bottom:12px;padding:18px 14px;border-radius:14px}
+  body[data-role="faculty"] #questionModal .question-inspector{position:fixed;inset:0 0 64px;z-index:6;padding:20px 16px;overflow-y:auto;border:0;border-radius:0;transform:translateX(100%)}
+  body[data-role="faculty"] #questionModal.inspector-open .question-inspector{transform:translateX(0)}
+  body[data-role="faculty"] #questionModal .inspector-head .icon-action{display:inline-flex}
+  body[data-role="faculty"] #questionModal.choosing-type .authoring-workspace{height:100dvh}
 }
 
-/* Banner keeps its full height; buttons stay compact on the right. */
-body[data-role="faculty"] #examModal .exam-builder-hero{flex:0 0 auto}
-body[data-role="faculty"] #examModal .exam-builder-body{flex:1 1 auto;min-height:0}
-body[data-role="faculty"] #examModal .exam-builder-actions{flex:0 0 auto}
-body[data-role="faculty"] #examModal .exam-builder-actions button{flex:0 0 auto!important;width:auto!important}
+/* Visually hidden labels (defined only on the admin page before). */
+body[data-role="faculty"] .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+/* Header Save keeps comfortable padding. */
+body[data-role="faculty"] #questionModal .authoring-head-actions .save-btn{width:auto;min-height:40px;margin:0;padding:0 18px;border-radius:11px;white-space:nowrap}
+
+/* ------------------------------------------------------------------
+   Question list: outlined cells, drag-to-reorder, shuffle switch.
+   ------------------------------------------------------------------ */
+body[data-role="faculty"] .question-workspace .question-item{margin:0 0 12px;border:1px solid var(--line,#d8cabc);border-left:4px solid var(--accent);border-radius:14px;background:var(--surface);box-shadow:0 2px 8px rgba(44,40,35,.04)}
+body[data-role="faculty"] .question-workspace .question-item[role="button"]:hover{border-color:var(--accent-line,var(--accent));border-left-color:var(--accent)}
+body[data-role="faculty"] .question-list:not(.is-shuffled) .question-item{padding-left:52px}
+body[data-role="faculty"] .question-number{color:var(--accent)}
+
+body[data-role="faculty"] .question-drag-handle{position:absolute;top:14px;left:10px;display:grid;width:32px;min-width:32px;height:38px;min-height:38px;place-items:center;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ink-soft);font-size:18px;line-height:1;cursor:grab;touch-action:none}
+body[data-role="faculty"] .question-drag-handle:hover,body[data-role="faculty"] .question-drag-handle:focus-visible{border-color:var(--line);background:var(--accent-soft);color:var(--accent);outline:none}
+body[data-role="faculty"] .question-list.is-sorting{user-select:none;-webkit-user-select:none}
+body[data-role="faculty"] .question-list.is-sorting .question-item{transition:none}
+body[data-role="faculty"] .question-item.is-dragging{border-color:var(--accent);box-shadow:0 16px 36px rgba(32,24,18,.18);opacity:.95;transform:scale(1.01)}
+body[data-role="faculty"] .question-item.is-dragging .question-drag-handle{cursor:grabbing;background:var(--accent);color:#fff}
+
+body[data-role="faculty"] .question-order-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 14px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);color:var(--ink-soft);font-size:12px}
+body[data-role="faculty"] .question-order-bar.is-shuffled{border-color:var(--accent-line,var(--accent));background:var(--accent-soft)}
+body[data-role="faculty"] .question-order-note strong{color:var(--ink)}
+body[data-role="faculty"] .question-shuffle-toggle{display:flex;flex:none;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:12px;font-weight:650;cursor:pointer}
+body[data-role="faculty"] .question-shuffle-toggle input[role="switch"]{position:relative;width:40px;min-width:40px;height:22px;margin:0;border:1px solid var(--line-strong,#cbb9a6);border-radius:999px;background:var(--surface);cursor:pointer;appearance:none;-webkit-appearance:none}
+body[data-role="faculty"] .question-shuffle-toggle input[role="switch"]::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--ink-soft);transition:transform .18s ease,background .18s ease}
+body[data-role="faculty"] .question-shuffle-toggle input[role="switch"]:checked{border-color:var(--accent);background:var(--accent-soft)}
+body[data-role="faculty"] .question-shuffle-toggle input[role="switch"]:checked::after{transform:translateX(18px);background:var(--accent)}
+body[data-role="faculty"] .question-shuffle-toggle input[role="switch"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:560px){body[data-role="faculty"] .question-order-bar{flex-direction:column;align-items:flex-start}}
+
+/* ------------------------------------------------------------------
+   Question prompt: theme surfaces and comfortable fields
+   (replaces the legacy grey #f5f5f5 answer box and unpadded inputs).
+   ------------------------------------------------------------------ */
+body[data-role="faculty"] #questionModal .authoring-body{background:color-mix(in srgb,var(--role-shell-surface,#fbf9f6) 55%,var(--role-shell-surface-soft,#e9ded0))}
+body[data-role="faculty"] #questionModal :is(.question-canvas,.question-inspector,.question-inline-preview){border-color:var(--role-shell-line,#d8cabc);background:var(--role-shell-surface,#fbf9f6)}
+/* Answer boxes (choices, true/false, number, written, matching): white card, theme border. */
+body[data-role="faculty"] #questionModal :is(.options-list,.answer-configuration>div){margin:20px 0 0;padding:18px;border:1px solid var(--role-shell-line,#d8cabc);border-radius:14px;background:var(--surface,#fff);box-shadow:none}
+body[data-role="faculty"] #questionModal .options-list>label{margin-bottom:12px;color:var(--ink);font-size:13px;font-weight:700}
+body[data-role="faculty"] #questionModal .option-input-group{gap:10px;margin-bottom:10px}
+/* Text fields everywhere in the prompt get padding and theme borders. */
+body[data-role="faculty"] #questionModal :is(input[type=text],input[type=number],input[type=url],input:not([type]),select,textarea){box-sizing:border-box;min-height:42px;padding:10px 14px;border:1px solid var(--role-shell-line,#d8cabc);border-radius:10px;background:var(--surface,#fff);color:var(--ink);font:inherit;font-size:13px}
+body[data-role="faculty"] #questionModal textarea{line-height:1.55}
+body[data-role="faculty"] #questionModal :is(input,select,textarea):focus{border-color:var(--accent);outline:2px solid var(--accent-soft);outline-offset:0}
+body[data-role="faculty"] #questionModal input[type=radio],body[data-role="faculty"] #questionModal input[type=checkbox]:not([role=switch]){accent-color:var(--accent)}
+body[data-role="faculty"] #questionModal .option-input-group input[type=radio]{width:20px;min-width:20px;height:20px;margin:0}
+body[data-role="faculty"] #questionModal :is(.options-list,.answer-configuration) .icon-action{min-width:40px;min-height:40px;border-color:var(--role-shell-line,#d8cabc);border-radius:10px;color:var(--accent)}
+body[data-role="faculty"] #questionModal .question-inspector :is(.inspector-group,.question-toggle-list .toggle-row){border-color:var(--role-shell-line,#d8cabc)}
+:root[data-theme="dark"] body[data-role="faculty"] #questionModal :is(.options-list,.answer-configuration>div,input[type=text],input[type=number],input[type=url],input:not([type]),select,textarea){background:var(--surface)!important;border-color:var(--line-strong)}

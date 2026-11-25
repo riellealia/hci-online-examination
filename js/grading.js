@@ -63,3 +63,21 @@ function isFullyMarked(submission) {
 function marksAwarded(submission) {
   return (submission.answers || []).reduce((t, a) => t + (a.awarded || 0), 0);
 }
+
+/* Which attempt counts when an exam allows more than one.
+   exam.scoreRule === 'highest' → the best fully-marked attempt (an attempt still being marked can't be
+   compared fairly; if none is fully marked yet, the latest one). Anything else → the latest attempt. */
+function submissionPercent(submission) {
+  const total = Number(submission?.total) || 0;
+  return total ? marksAwarded(submission) / total : 0;
+}
+function countedSubmission(exam, attempts) {
+  const list = (attempts || []).slice().sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+  if (!list.length) return null;
+  if (exam?.scoreRule === 'highest') {
+    const marked = list.filter(isFullyMarked), pool = marked.length ? marked : list;
+    return pool.reduce((best, item) => (submissionPercent(item) > submissionPercent(best) ? item : best), pool[0]);
+  }
+  return list[0];
+}
+if (typeof window !== 'undefined') { window.countedSubmission = countedSubmission; window.submissionPercent = submissionPercent; }

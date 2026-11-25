@@ -206,3 +206,21 @@ body.role-shell-ready[data-role="faculty"] .roster-donut-card .roster-insight-se
 body.role-shell-ready[data-role="faculty"] .roster-donut-legend{grid-template-columns:1fr!important;min-width:0}
 body.role-shell-ready[data-role="faculty"] .roster-donut-legend li{min-width:0}
 body.role-shell-ready[data-role="faculty"] .roster-donut-legend b{padding-right:4px}
+
+/* My Subjects toolbar: search, sort and export in the page heading (top right), white on the
+   brown banner — the same placement and look as the Student Subjects page. */
+body[data-role="faculty"] #subjects-tab.faculty-subjects-page{position:relative}
+body[data-role="faculty"] #subjects-tab .compat-table{display:none!important}
+html body[data-role="faculty"] #subjects-tab>#facultySubjectTools:not(#tf){position:absolute;top:24px;right:28px;z-index:2;margin:0}
+html body[data-role="faculty"] #subjects-tab>#facultySubjectTools .tool-icon.tool-icon:not(#tt):not(#tt2){color:#fff!important}
+html body[data-role="faculty"] #subjects-tab>#facultySubjectTools .tool-icon.tool-icon:not(#tt):not(#tt2):is(:hover,.active,.has-query){background:rgba(255,255,255,.18)!important}
+/* Phones: the heading wraps, so the toolbar sits in the flow under it instead. */
+@media (max-width:760px){html body[data-role="faculty"] #subjects-tab>.role-page-hero:not(#tf){padding-bottom:62px!important}html body[data-role="faculty"] #subjects-tab>#facultySubjectTools:not(#tf){position:relative;top:auto;right:auto;display:flex;justify-content:flex-end;margin:-56px 14px 22px}}
+
+/* My Students: subject / section chips. The rows were small scroll boxes, so chips that wrapped
+   onto a second line were hidden and the row could be scrolled; now every chip is always visible. */
+html body[data-role="faculty"] #students-tab .student-section-tabs:not(#tf):not(#tf2){height:auto!important;max-height:none!important;overflow:visible!important;flex-wrap:wrap!important;row-gap:8px}
+/* The table search sits inside the toolbar instead of dropping down over the chips (it was swallowing clicks on them). */
+html body[data-role="faculty"] #students-tab .table-tools:not(#tf){display:flex;align-items:center}
+html body[data-role="faculty"] #students-tab .table-tools .table-search-box:not(#tf):not(#tf2):not(#tf3){position:static!important;order:-1;width:200px;margin:0 6px 0 0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+html body[data-role="faculty"] #students-tab .table-tools .table-search-box input:not(#tf):not(#tf2){height:34px!important;width:100%!important}

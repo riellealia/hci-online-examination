@@ -1,0 +1,87 @@
+/* Coordinator → Dean requests: right-click menu, Add roles / subjects / load prompts,
+   and the request cards shared by the Coordinator's Applications and the Dean's Approvals. */
+
+/* ---------- menu ---------- */
+.rq-menu{min-width:250px;font-family:var(--pr-font,inherit)}
+.rq-menu .rq-menu-head{display:flex;flex-direction:column;gap:1px;margin:0 0 4px;padding:6px 11px 9px;border-bottom:1px solid var(--pr-line,#e5e5e5)}
+.rq-menu .rq-menu-head strong{color:var(--pr-ink,#1d2730);font:700 13px/1.3 var(--pr-font,inherit)}
+.rq-menu .rq-menu-head small{color:var(--pr-muted,#6b7280);font:500 11px/1.3 var(--pr-font,inherit)}
+.rq-menu .rq-menu-group{margin:4px 11px 2px;color:var(--pr-muted,#6b7280);font:700 10px/1.4 var(--pr-font,inherit);letter-spacing:.06em;text-transform:uppercase}
+.rq-menu hr{margin:5px 6px;border:0;border-top:1px solid var(--pr-line,#e5e5e5)}
+body .rq-menu button:not(#rq){display:flex!important;align-items:flex-start!important;gap:10px;width:100%;height:auto!important;min-height:0!important;margin:0!important;padding:8px 11px!important;border:0!important;border-radius:8px!important;box-shadow:none!important;background:transparent!important;color:var(--pr-ink,#1d2730)!important;text-align:left;transform:none!important;cursor:pointer}
+body .rq-menu button:not(#rq):hover,body .rq-menu button:not(#rq):focus-visible{background:var(--pr-soft,#f3f3f3)!important;outline:none}
+.rq-menu button>span{display:flex;flex-direction:column;gap:2px;font:600 12.5px/1.3 var(--pr-font,inherit)}
+.rq-menu button small{color:var(--pr-muted,#6b7280);font:400 11px/1.3 var(--pr-font,inherit)}
+.rq-menu button svg{flex:none;width:16px;height:16px;margin-top:1px;fill:var(--pr-accent,currentColor)}
+
+/* ---------- prompt ---------- */
+.rq-dialog .rq-form{width:min(560px,calc(100vw - 32px))!important;max-width:none!important;max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+.rq-dialog .rq-form.wide{width:min(720px,calc(100vw - 32px))!important}
+.rq-dialog .rq-sub{margin:0;padding:14px 24px 0;color:var(--pr-muted);font:400 12.5px/1.5 var(--pr-font,inherit)}
+.rq-dialog .rq-body{display:flex;flex-direction:column;gap:14px;padding:14px 24px 0;min-height:0;overflow:auto}
+.rq-dialog .rq-reason{display:flex;flex-direction:column;gap:6px;margin:14px 24px 0!important;color:var(--pr-muted)!important;font:600 12px/1.3 var(--pr-font,inherit)!important}
+.rq-dialog .rq-reason textarea{min-height:70px;resize:vertical;width:100%!important}
+.rq-dialog .rq-field{display:flex;flex-direction:column;gap:6px;color:var(--pr-muted);font:600 12px/1.3 var(--pr-font,inherit)}
+.rq-dialog .rq-field select{height:40px;width:100%}
+.rq-dialog .confirm-ok:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.6)}
+
+/* tick boxes shared by role cards and class rows */
+/* The tick is an SVG background so page-wide span/label rules cannot distort it. */
+body .rq-dialog .rq-check{display:block!important;flex:none!important;box-sizing:border-box!important;width:18px!important;height:18px!important;min-width:18px;margin:1px 0 0!important;padding:0!important;border:2px solid var(--c,var(--pr-accent))!important;border-radius:6px!important;background:transparent no-repeat center/12px 12px!important}
+body .rq-dialog :is(.rq-role,.rq-class):has(input:checked) .rq-check{background-color:var(--c,var(--pr-accent))!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")!important}
+body .rq-dialog .rq-check::before,body .rq-dialog .rq-check::after{content:none!important}
+:is(.rq-role,.rq-class) input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+:is(.rq-role,.rq-class):has(input:focus-visible){outline:2px solid var(--c,var(--pr-accent));outline-offset:2px}
+
+/* roles */
+.rq-roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:0;padding:0;border:0;min-width:0}
+.rq-roles legend{margin:0 0 6px;padding:0;color:var(--pr-ink);font:700 12px/1.4 var(--pr-font,inherit)}
+.rq-roles legend small{margin-left:6px;color:var(--pr-muted);font-weight:500}
+.rq-role{position:relative;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--pr-line);border-radius:12px;background:var(--pr-surface,transparent);cursor:pointer;transition:border-color .15s,background .15s}
+.rq-role:hover{border-color:color-mix(in srgb,var(--c) 55%,var(--pr-line))}
+.rq-role:has(input:checked){border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,transparent)}
+.rq-role-text{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;padding-right:70px}
+.rq-role-text strong{color:var(--pr-ink);font:700 13px/1.3 var(--pr-font,inherit)}
+.rq-cap{display:inline-flex;align-items:center;gap:5px;color:var(--pr-muted);font:500 11px/1.35 var(--pr-font,inherit)}
+.rq-cap svg{flex:none;width:12px;height:12px;fill:var(--c)}
+.rq-badge{position:absolute;top:9px;right:10px;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--pr-ink);font:600 10px/1.4 var(--pr-font,inherit);font-style:normal}
+.rq-role.locked,.rq-class.locked{cursor:not-allowed;opacity:.6}
+
+/* classes */
+.rq-meter{padding:12px 14px;border:1px solid var(--pr-line);border-radius:12px;background:var(--pr-soft,transparent)}
+.rq-meter-row{display:flex;justify-content:space-between;gap:8px;color:var(--pr-muted);font:600 12px/1.4 var(--pr-font,inherit)}
+.rq-meter-row strong{color:var(--pr-ink);font-weight:700}
+.rq-meter-row.small{font-size:10.5px;font-weight:500}
+.rq-bar{position:relative;height:9px;margin:8px 0 6px;border-radius:999px;background:color-mix(in srgb,var(--pr-muted) 18%,transparent);overflow:hidden}
+.rq-bar i{position:absolute;top:0;bottom:0;left:0;border-radius:999px}
+.rq-bar i.now{background:var(--pr-accent)}
+.rq-bar i.add{background:color-mix(in srgb,var(--pr-accent) 45%,transparent);transition:width .2s}
+.rq-bar i.add.over{background:#d39a3a}
+.rq-bar b{position:absolute;top:-2px;bottom:-2px;left:var(--n);width:2px;background:var(--pr-ink);opacity:.55}
+.rq-search{height:38px;width:100%!important;padding:0 12px!important}
+.rq-classes{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto;padding:2px}
+.rq-group{margin:6px 2px 0;color:var(--pr-muted);font:700 10px/1.4 var(--pr-font,inherit);letter-spacing:.06em;text-transform:uppercase}
+.rq-group:first-child{margin-top:0}
+.rq-class{position:relative;display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--pr-line);border-radius:10px;background:var(--pr-surface,transparent);cursor:pointer}
+.rq-class:has(input:checked){border-color:var(--pr-accent);background:color-mix(in srgb,var(--pr-accent) 8%,transparent)}
+.rq-class[hidden],.rq-group[hidden]{display:none}
+.rq-class-text{display:flex;flex:1;flex-direction:column;gap:3px;min-width:0}
+.rq-class-text strong{color:var(--pr-ink);font:700 12.5px/1.35 var(--pr-font,inherit)}
+.rq-class-text strong span{color:var(--pr-muted);font-weight:500}
+.rq-class-text small{display:flex;flex-wrap:wrap;align-items:center;gap:4px;color:var(--pr-muted);font:400 11px/1.4 var(--pr-font,inherit)}
+.rq-when{display:inline-flex;align-items:center;gap:4px}
+.rq-when svg{width:11px;height:11px;fill:currentColor;opacity:.7}
+.rq-why{color:#b5534b;font:600 10.5px/1.3 var(--pr-font,inherit);font-style:normal}
+.rq-units{flex:none;padding:2px 8px;border-radius:999px;background:var(--pr-soft);color:var(--pr-ink);font:700 11px/1.5 var(--pr-font,inherit)}
+.rq-empty,.rq-skipped{margin:0;color:var(--pr-muted);font:400 12px/1.5 var(--pr-font,inherit)}
+.rq-empty{padding:18px;border:1px dashed var(--pr-line);border-radius:10px;text-align:center}
+
+/* ---------- request cards (Coordinator Applications, Dean Approvals) ---------- */
+.rq-title{display:inline-flex;align-items:center;gap:8px}
+.rq-icon{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:color-mix(in srgb,var(--pr-accent) 14%,transparent)}
+.rq-icon svg{width:15px;height:15px;fill:var(--pr-accent)}
+.rq-icon.rq-role{background:color-mix(in srgb,#7c6bd6 16%,transparent)}.rq-icon.rq-role svg{fill:#7c6bd6}
+.rq-icon.rq-load{background:color-mix(in srgb,#d39a3a 18%,transparent)}.rq-icon.rq-load svg{fill:#b07b22}
+.rq-meta span b{margin-right:4px;color:var(--pr-ink);font-weight:700}
+.rq-pane-note{margin:0 0 12px;color:var(--pr-muted);font:400 12.5px/1.5 var(--pr-font,inherit)}
+@media (max-width:640px){.rq-roles{grid-template-columns:1fr}.rq-role-text{padding-right:0}.rq-badge{position:static;margin-left:auto}}

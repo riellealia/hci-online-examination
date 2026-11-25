@@ -22,7 +22,8 @@ const LessonViewer = (() => {
   function renderContent(item) {
     if (!item) return '';
     const title = esc(item.title || 'Lesson'), text = String(item.body || '');
-    const paras = text.split(/\n{2,}/).map(part => part.trim()).filter(Boolean).map(part => `<p>${esc(part).replace(/\n/g, '<br>')}</p>`).join('');
+    const rich = item.bodyHtml && typeof RichText !== 'undefined' ? RichText.sanitize(item.bodyHtml) : '';
+    const paras = rich || text.split(/\n{2,}/).map(part => part.trim()).filter(Boolean).map(part => `<p>${esc(part).replace(/\n/g, '<br>')}</p>`).join('');
     if (item.type === 'link') {
       const id = item.videoId || VIDEO_IDS[item.subjectCode] || '';
       if (!id) return `<a href="${esc(item.url || '#')}" target="_blank" rel="noopener">&#9654; ${title}</a>${paras}`;
@@ -33,7 +34,7 @@ const LessonViewer = (() => {
       return `<figure class="learning-visual">${item.imageUrl ? `<img src="${item.imageUrl}" alt="${esc(item.imageAlt || item.title)}">` : ''}<figcaption>${esc(text)}</figcaption></figure><section class="visual-lesson-notes"><strong>How to use this visual</strong><ol><li><b>Define:</b> State what ${topic} means in your own words.</li><li><b>Connect:</b> Identify how its key terms relate to one another.</li><li><b>Apply:</b> Use the guided example, then create one new case and explain the result.</li></ol></section>`;
     }
     if (item.type === 'file') return `<a class="lv-file" href="${item.dataUrl || '#'}" download="${esc(item.fileName || item.title)}">&#128206; ${esc(item.title || item.fileName || 'Download')}</a>${paras}`;
-    return markdown(text);
+    return rich || markdown(text);
   }
   /* Simple formatting professors can type: # / ## / ### headings, **bold**, - lists. */
   function markdown(text) {
@@ -116,7 +117,7 @@ const LessonViewer = (() => {
     }).join('');
     let body;
     if (slide.lockedReason) body = `<div class="lv-locked"><span aria-hidden="true">&#128274;</span><strong>This page is not available yet</strong><p>${esc(slide.lockedReason)}</p></div>`;
-    else if (slide.quiz) body = `<div class="lv-quiz"><span class="lv-quiz-icon" aria-hidden="true">&#9998;</span><div><strong>${esc(slide.title)}</strong>${slide.quiz.meta ? `<p>${esc(slide.quiz.meta)}</p>` : ''}</div><button type="button" class="lv-primary" data-lv-quiz>${esc(slide.quiz.label || 'Open quiz')} &#8594;</button></div>`;
+    else if (slide.quiz) body = `${slide.html ? `<div class="lv-content lv-quiz-desc">${slide.html}</div>` : ''}<div class="lv-quiz"><span class="lv-quiz-icon" aria-hidden="true">&#9998;</span><div><strong>${esc(slide.title)}</strong>${slide.quiz.meta ? `<p>${esc(slide.quiz.meta)}</p>` : ''}</div><button type="button" class="lv-primary" data-lv-quiz>${esc(slide.quiz.label || 'Open quiz')} &#8594;</button></div>`;
     else body = `<div class="lv-content">${slide.html || '<p class="lv-muted">This page has no content yet.</p>'}</div>`;
     const next = slides[index + 1], nextLabel = !next ? 'Finish week' : `Next: ${next.title}`;
     host.innerHTML = `<article class="lv-sheet">

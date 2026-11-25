@@ -40,6 +40,12 @@ function visibleRecords(session, records) {
   const visible = Object.fromEntries(Object.entries(records).filter(([key]) => permitted(session, key, 'GET')).map(([key, value]) => [key, filterRecord(session, key, value)]));
   // requireRole() verifies that the signed-in account still exists. Students
   // must receive that one record without gaining access to the user directory.
+  // Load limits are needed to check load and overload requests, so every role
+  // gets the policy part of the settings (and nothing else from them).
+  if (!visible.systemSettings && records.systemSettings && typeof records.systemSettings === 'object') {
+    const { semester, schoolYear, currentAcademicPeriodId, loadPolicies, professorLoadPolicy } = records.systemSettings;
+    visible.systemSettings = Object.fromEntries(Object.entries({ semester, schoolYear, currentAcademicPeriodId, loadPolicies, professorLoadPolicy }).filter(([, v]) => v !== undefined));
+  }
   if (session?.role === 'student' && Array.isArray(records.users)) {
     visible.users = records.users.filter(item => item.username === session.username);
   }

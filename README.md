@@ -19,7 +19,7 @@ The prototype currently includes:
 - SQLite-backed server login with opaque expiring sessions, logout revocation, active-account checks, and sign-in rate limiting;
 - subject, section, enrollment, examination, submission, grading, reporting, and audit data;
 - light and dark interface themes;
-- SQLite as the local primary data source, with optional Supabase durability for Render; and
+- Supabase as the database (SQLite only as a fallback when no Supabase credentials are set); and
 - CSV as an import/export format rather than the application database.
 
 Dean and Faculty Coordinator workspaces now use the shared role-dashboard design system while preserving their distinct academic responsibilities. Remaining role-specific work and ownership are tracked in [`.plans/new`](.plans/new).
@@ -33,10 +33,16 @@ No production dependencies need to be installed. The server uses Node's built-in
 
 ## Deploy with Supabase and Render
 
-The repository includes a `render.yaml` Blueprint and a server-only Supabase
-replication layer. The existing synchronous application services continue to use
-a local SQLite cache, while Supabase stores every collection off-device and
-hydrates the cache before Render accepts traffic.
+The repository includes a `render.yaml` Blueprint. When `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` are set, Supabase is the only database: the server
+loads every collection from Supabase into memory at start (and refuses to start
+if that fails), never opens SQLite, and answers a request that changes data only
+after Supabase has stored it. If Supabase rejects a change, the affected
+collections are reloaded from Supabase and the request returns HTTP 503.
+
+Run `node scripts/verify-supabase.js` to check that every table exists, that no
+collection is missing from Supabase, and that writes and the `sync_versions`
+triggers work.
 
 1. Create a Supabase project and run both files in `supabase/migrations/`
    (`202611170001_app_collections.sql`, then
@@ -85,7 +91,7 @@ Several instances can serve the app at once:
 
 Render's free plan runs one instance; raise `numInstances` in `render.yaml` on a
 paid plan. Supabase credentials are optional locally; without them, `npm start`
-continues to use SQLite only. Copy `.env.example` to `.env` for local cloud
+uses SQLite only (as the test suite does). Copy `.env.example` to `.env` for local cloud
 testing and keep `.env` untracked.
 
 ## Run the project

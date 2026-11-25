@@ -9,7 +9,7 @@
    ================================================================== */
 const StudentLessons = (() => {
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-  const ordered = code => DB.read('subjectWorkspaceContent', []).filter(item => item.subjectCode === code).sort((a, b) => a.week - b.week);
+  const ordered = code => typeof studentCourseContent === 'function' ? studentCourseContent(code) : DB.read('subjectWorkspaceContent', []).filter(item => item.subjectCode === code).sort((a, b) => a.week - b.week || (a.order ?? 1e9) - (b.order ?? 1e9));
 
   function body(item) {
     // Same renderer as the Professor side, so both show identical pages.
@@ -29,7 +29,7 @@ const StudentLessons = (() => {
         requiresPrevious: !!item.requiresPrevious,
         // Hard locks (locked/scheduled), or a sequential lock that depends on an earlier week.
         lockedReason: state.locked && (!sequentialLock || firstOfWeek) ? state.label : '',
-        html: item.type === 'exam' ? '' : body(item),
+        html: item.type === 'exam' ? (item.bodyHtml || item.body ? body({ ...item, type: 'text' }) : '') : body(item),
         quiz: item.type === 'exam' ? { examId: item.examId, label: 'Open quiz', meta: exam ? `${exam.date ? `Due ${exam.date}` : 'Always open'}${exam.durationMinutes ? ` · ${exam.durationMinutes} min` : ''}` : '' } : null
       };
     });

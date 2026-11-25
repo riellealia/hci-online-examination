@@ -67,7 +67,7 @@ function load(page, seed, opts={}){
     .replace(/<script src="\.\.\/js\/role-access\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${ROLE_ACCESS}</script>`)
     .replace(/<script src="\.\.\/js\/page-permissions\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${PAGE_PERMS}</script>`)
     .replace(/<script src="\.\.\/js\/approval-service\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${APPROVAL_SERVICE}</script>`)
-    .replace('<script src="../js/academic-workflow-service.js"></script>', `<script>${ACADEMIC_WORKFLOW_SERVICE}</script>`)
+    .replace(/<script src="\.\.\/js\/academic-workflow-service\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${ACADEMIC_WORKFLOW_SERVICE}</script>`)
     .replace(/<script src="\.\.\/js\/admin-table-tools\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${ADMIN_TABLE_TOOLS}</script>`)
     .replace(/<script src="\.\.\/js\/admin-monitoring\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${ADMIN_MONITORING}</script>`)
     .replace('<script src="../js/demo-data.js"></script>', `<script>${DEMO_DATA}</script>`)
@@ -103,7 +103,7 @@ function load(page, seed, opts={}){
     .replace(/<script src="\.\.\/js\/coordinator-workspaces\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${COORDINATOR_WORKSPACES}</script>`)
     .replace('<script src="../js/dates.js"></script>', `<script>${DATES}</script>`)
     .replace('<script src="../js/exam-timing.js"></script>', `<script>${TIMING}</script>`)
-    .replace('<script src="../js/grading.js"></script>', `<script>${GRADING}</script>`);
+    .replace(/<script src="\.\.\/js\/grading\.js(?:\?[^"]*)?"><\/script>/, () => `<script>${GRADING}</script>`);
   html=html.replace('<script src="../js/attempt.js"></script>', `<script>${ATTEMPT}</script>`);
   html=html.replace('<script src="../js/question-draft.js"></script>', `<script>${QUESTION_DRAFT}</script>`);
   html=html.replace('<script src="../js/question-media.js"></script>', `<script>${QUESTION_MEDIA}</script>`);

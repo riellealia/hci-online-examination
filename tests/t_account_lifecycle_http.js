@@ -38,8 +38,37 @@ async function login(username, password) {
     assert.ok(healthy, 'server must start');
     const admin = await login('admin', 'admin123'), dean = await login('dean.demo', 'dean123');
 
-    let result = await request('/api/accounts/2025-00002/archive', dean, 'POST', { reason:'Should be blocked' });
-    assert.equal(result.status, 403, 'only an Administrator can change account status');
+    let result = await request('/api/accounts/2025-00002/deactivate', dean, 'POST', {});
+    assert.equal(result.status, 403, 'the Dean cannot deactivate accounts');
+    result = await request('/api/accounts/coordinator.demo/archive', dean, 'POST', { reason:'Should be blocked' });
+    assert.equal(result.status, 403, 'the Dean can archive only Student and Professor accounts');
+
+    // Seed a tiny roster: one Professor teaching O1, two Students enrolled in it.
+    for (const [key, value] of Object.entries({
+      students: [{ id:'2025-00002', first:'Bianca', last:'Santos', sections:['S1'] }, { id:'2025-00003', first:'Ana', last:'Cruz', sections:['S1'] }],
+      faculty: [{ id:'23-32534-345', first:'Maria', last:'Reyes' }],
+      sectionSubjects: [{ sectionId:'S1', assignments:[{ id:'O1', subjectCode:'CS1', facultyId:'23-32534-345' }] }],
+      subjectAssignments: [{ subjectCode:'CS1', facultyIds:['23-32534-345'] }],
+      studentEnrollments: [{ id:'E1', studentId:'2025-00002', offeringId:'O1', subjectCode:'CS1', sectionId:'S1' }, { id:'E2', studentId:'2025-00003', offeringId:'O1', subjectCode:'CS1', sectionId:'S1' }]
+    })) assert.equal((await request(`/api/storage/${key}`, admin, 'PUT', { value })).status, 200, key);
+    const read = async key => (await request(`/api/storage/${key}`, admin)).body.value || [];
+
+    // The Dean archives a Professor: gone from the lists, classes unassigned, kept in the archive.
+    result = await request('/api/accounts/23-32534-345/archive', dean, 'POST', { reason:'On sabbatical' });
+    assert.equal(result.status, 200, JSON.stringify(result.body));
+    assert.ok(!(await read('faculty')).some(p => p.id === '23-32534-345'), 'archived Professor leaves the faculty list');
+    assert.equal((await read('sectionSubjects'))[0].assignments[0].facultyId, '', 'their classes become unassigned');
+    assert.deepEqual((await read('subjectAssignments'))[0].facultyIds, []);
+    let archive = await read('archivedPeople');
+    assert.equal(archive.length, 1); assert.equal(archive[0].kind, 'faculty'); assert.equal(archive[0].archivedBy, 'dean.demo'); assert.equal(archive[0].offerings[0].offeringId, 'O1');
+    // A stale copy of the faculty list cannot bring them back.
+    await request('/api/storage/faculty', admin, 'PUT', { value: [{ id:'23-32534-345', first:'Maria', last:'Reyes' }] });
+    assert.equal((await read('faculty')).length, 0, 'archived people are dropped from saved lists');
+    result = await request('/api/accounts/23-32534-345/restore', dean, 'POST', {});
+    assert.equal(result.status, 200, JSON.stringify(result.body));
+    assert.ok((await read('faculty')).some(p => p.id === '23-32534-345'), 'restore puts the Professor back');
+    assert.equal((await read('sectionSubjects'))[0].assignments[0].facultyId, '23-32534-345', 'and gives back classes nobody took');
+    assert.equal((await read('archivedPeople')).length, 0);
 
     result = await request('/api/accounts/2025-00002/archive', admin, 'POST', {});
     assert.equal(result.status, 400, 'archive requires a reason');
@@ -61,6 +90,10 @@ async function login(username, password) {
     assert.equal(result.status, 200, JSON.stringify(result.body));
     assert.equal(result.body.account.lifecycleStatus, 'Archived');
     assert.equal(result.body.account.lifecycleHistory.length, 2);
+    assert.deepEqual((await read('students')).map(s => s.id), ['2025-00003'], 'an Administrator archive removes the Student from the lists too');
+    assert.deepEqual((await read('studentEnrollments')).map(e => e.id), ['E2'], 'with their enrollments');
+    archive = await read('archivedPeople');
+    assert.equal(archive[0].kind, 'student'); assert.equal(archive[0].enrollments[0].id, 'E1'); assert.equal(archive[0].reason, 'Long-term leave of absence');
 
     result = await request('/api/accounts/2025-00002/reactivate', admin, 'POST', {});
     assert.equal(result.status, 409, 'an archived account cannot be reactivated directly');
@@ -69,6 +102,8 @@ async function login(username, password) {
     assert.equal(result.status, 200, JSON.stringify(result.body));
     assert.equal(result.body.account.lifecycleStatus, 'Active');
     assert.equal(result.body.account.disabled, false);
+    assert.ok((await read('students')).some(s => s.id === '2025-00002'), 'restore returns the Student to the lists');
+    assert.ok((await read('studentEnrollments')).some(e => e.id === 'E1'), 'with their enrollments');
 
     result = await request('/api/accounts/2025-00002/graduate', admin, 'POST', { reason:'Completed the program' });
     assert.equal(result.status, 200, JSON.stringify(result.body));

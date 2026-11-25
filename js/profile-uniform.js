@@ -18,6 +18,8 @@ const ProfileUniform = (() => {
         const row = e.target.closest('tbody tr'); if (!row || ignore(e.target) || row.classList.contains('table-group-row')) return;
         const open = [...row.querySelectorAll('[onclick]')].find(b => /open(Faculty|Student)Profile\(/.test(b.getAttribute('onclick')));
         if (open) { open.click(); return; }
+        // Rows that open their own window (Admin students → Student administration) must not open a second one.
+        if (row.hasAttribute('onclick')) return;
         const id = row.cells[0]?.textContent.trim();
         if (table.id === 'facultyTable' && typeof openFacultyProfile === 'function' && typeof faculty !== 'undefined') { const i = faculty.findIndex(f => f.id === id); if (i >= 0) openFacultyProfile(i); }
         if (table.id === 'studentTable' && typeof openStudentProfile === 'function' && typeof students !== 'undefined') { const i = students.findIndex(s => s.id === id); if (i >= 0) openStudentProfile(i); }

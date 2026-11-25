@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
   <title>Online Examination</title>
-  <link rel="stylesheet" href="../css/style.css?v=20261120-export" />
-  <link rel="stylesheet" href="../css/shared-ui.css?v=20261118-keep-search" />
+  <link rel="stylesheet" href="../css/style.css?v=20261125-audit" />
+  <link rel="stylesheet" href="../css/shared-ui.css?v=20261125-wsdialog" />
   <script src="../js/storage.js?v=20261119-keep"></script>
   <script src="../js/audit-service.js"></script>
   <script src="../js/weekly-learning.js"></script>
@@ -47,10 +47,10 @@
           <div id="savedAccountsMenu" class="saved-accounts-menu" hidden>
             <p>Saved demo credentials</p>
             <button type="button" data-demo-account="admin"><span class="saved-avatar">AD</span><span><strong>System Administrator</strong><small>Admin demonstration account</small></span></button>
-            <button type="button" data-demo-account="dean"><span class="saved-avatar">DN</span><span><strong>College Dean</strong><small>Dean account · workspace planned</small></span></button>
-            <button type="button" data-demo-account="coordinator"><span class="saved-avatar">FC</span><span><strong>Faculty Coordinator</strong><small>Coordinator account · workspace planned</small></span></button>
+            <button type="button" data-demo-account="dean"><span class="saved-avatar">RS</span><span><strong>Ricardo Salcedo</strong><small>Dean account · workspace planned</small></span></button>
+            <button type="button" data-demo-account="coordinator"><span class="saved-avatar">PL</span><span><strong>Patricia Lorenzo</strong><small>Coordinator account · workspace planned</small></span></button>
             <button type="button" data-demo-account="professor"><span class="saved-avatar">MR</span><span><strong>Maria Reyes</strong><small>Professor demonstration account</small></span></button>
-            <button type="button" data-demo-account="student"><span class="saved-avatar">MS</span><span><strong>Maria Santos</strong><small>Student demonstration account</small></span></button>
+            <button type="button" data-demo-account="student"><span class="saved-avatar">BS</span><span><strong>Bianca Santos</strong><small>Student demonstration account</small></span></button>
             <small class="saved-account-note">Choose an account to fill its username and password.</small>
           </div>
         </div>
@@ -133,12 +133,16 @@
     studentEnrollments = DB.read('studentEnrollments', studentEnrollments);
   }
 
+  // Served by the app server (Supabase / SQLite), the real data lives on the server and is loaded at
+  // sign-in. The legacy seeding below is only for the old offline mode; running it here read collections
+  // that are kept in memory (too big for localStorage) as empty and crashed the page.
+  const serverBacked = typeof DB !== 'undefined' && typeof DB.backend === 'function' && DB.backend() === 'sqlite';
   if (!users.find(u => u.username === "admin")) {
     users.push({ username: "admin", password: "admin123", role: "admin" });
   }
 
   // Seed sample faculty if none
-  if (faculty.length === 0) {
+  if (!serverBacked && faculty.length === 0) {
     faculty = [
       { id: "12-34567-890", last: "Reyes", first: "Maria" },
       { id: "20-76543-210", last: "Santos", first: "Jose" },
@@ -156,7 +160,7 @@
   }
 
   // Seed sample students if none
-  if (students.length === 0) {
+  if (!serverBacked && students.length === 0) {
     students = [
       { id: "2024-00001", last: "Dela Cruz", first: "Juan", sections: ["BSCS-3A","BSCS-3B"] },
       { id: "2024-00002", last: "Santos", first: "Maria", sections: ["BSCS-3A"] },
@@ -178,7 +182,7 @@
   }
 
   // Seed sample subjects if none
-  if (subjects.length === 0) {
+  if (!serverBacked && subjects.length === 0) {
     subjects = [
       { code: "CCS313-18", name: "Human Computer Interaction" },
       { code: "CSL313-18", name: "Human Computer Interaction (Lab)" },
@@ -192,11 +196,11 @@
     localStorage.setItem("subjects", JSON.stringify(subjects));
   }
 
-  if (sections.length === 0) {
+  if (!serverBacked && sections.length === 0) {
     sections=[{id:"BSCS-2A",name:"BS Computer Science 2A"},{id:"BSCS-2B",name:"BS Computer Science 2B"},{id:"BSCS-3A",name:"BS Computer Science 3A"},{id:"BSCS-3B",name:"BS Computer Science 3B"},{id:"BSIT-3A",name:"BS Information Technology 3A"}];
     localStorage.setItem("sections",JSON.stringify(sections));
   }
-  if (sectionSubjects.length === 0) {
+  if (!serverBacked && sectionSubjects.length === 0) {
     sectionSubjects=[
       {sectionId:"BSCS-2A",assignments:[{id:"OFR-001",subjectCode:"CCS311-18",facultyId:"20-76543-210"},{id:"OFR-002",subjectCode:"CCS312-18",facultyId:"17-67890-123"},{id:"OFR-003",subjectCode:"CCS315-18",facultyId:"15-89012-345"}]},
       {sectionId:"BSCS-2B",assignments:[{id:"OFR-004",subjectCode:"CCS311-18",facultyId:"20-76543-210"},{id:"OFR-005",subjectCode:"CCS312-18",facultyId:"17-67890-123"},{id:"OFR-006",subjectCode:"CCS316-18",facultyId:"23-45678-901"}]},
@@ -205,14 +209,14 @@
       {sectionId:"BSIT-3A",assignments:[{id:"OFR-015",subjectCode:"CCS313-18",facultyId:"17-67890-123"},{id:"OFR-016",subjectCode:"CCS315-18",facultyId:"15-89012-345"},{id:"OFR-017",subjectCode:"CCS316-18",facultyId:"23-45678-901"}]}
     ]; localStorage.setItem("sectionSubjects",JSON.stringify(sectionSubjects));
   }
-  if (studentEnrollments.length === 0) {
+  if (!serverBacked && studentEnrollments.length === 0) {
     const picks={"2024-00001":["OFR-007","OFR-008","OFR-011","OFR-013"],"2024-00002":["OFR-007","OFR-008","OFR-009","OFR-010"],"2024-00003":["OFR-011","OFR-012","OFR-013","OFR-014"],"2024-00004":["OFR-001","OFR-002","OFR-003"],"2024-00005":["OFR-004","OFR-005","OFR-007","OFR-009","OFR-010"],"2024-00006":["OFR-015","OFR-016","OFR-017"],"2024-00007":["OFR-001","OFR-003","OFR-004","OFR-006"],"2024-00008":["OFR-012","OFR-014","OFR-015","OFR-016","OFR-017"]};
     const offers=sectionSubjects.flatMap(record=>record.assignments.map(item=>({...item,sectionId:record.sectionId})));
-    studentEnrollments=Object.entries(picks).flatMap(([studentId,ids])=>ids.map((id,index)=>{const offer=offers.find(item=>item.id===id);return{id:`ENR-${studentId.slice(-3)}-${index+1}`,studentId,subjectCode:offer.subjectCode,sectionId:offer.sectionId,offeringId:id};})); localStorage.setItem("studentEnrollments",JSON.stringify(studentEnrollments));
+    studentEnrollments=Object.entries(picks).flatMap(([studentId,ids])=>ids.filter(id=>offers.some(item=>item.id===id)).map((id,index)=>{const offer=offers.find(item=>item.id===id);return{id:`ENR-${studentId.slice(-3)}-${index+1}`,studentId,subjectCode:offer.subjectCode,sectionId:offer.sectionId,offeringId:id};})); localStorage.setItem("studentEnrollments",JSON.stringify(studentEnrollments));
   }
 
   // Seed faculty-subject assignments
-  if (subjectAssignments.length === 0) {
+  if (!serverBacked && subjectAssignments.length === 0) {
     subjectAssignments = [
       { subjectCode: "CCS311-18", facultyIds: ["20-76543-210"] },
       { subjectCode: "CCS312-18", facultyIds: ["17-67890-123"] },
@@ -227,7 +231,7 @@
   }
 
   // Seed student allotments
-  if (allotments.length === 0) {
+  if (!serverBacked && allotments.length === 0) {
     allotments = [
       { studentId: "2024-00001", subjectCode: "CCS313-18", facultyId: "12-34567-890" },
       { studentId: "2024-00002", subjectCode: "CCS313-18", facultyId: "12-34567-890" },
@@ -237,7 +241,7 @@
   }
 
   // Seed sample exams
-  if (exams.length === 0) {
+  if (!serverBacked && exams.length === 0) {
     const today = new Date().toISOString().split('T')[0];
     exams = [
       {
@@ -320,7 +324,7 @@
     writeLoginRecords('faculty', faculty);
   }
   if (!students.some(person => person.id === '2025-00002')) {
-    students.push({ id: '2025-00002', last: 'Santos', first: 'Maria', sections: ['2BSCS-1'] });
+    students.push({ id: '2025-00002', last: 'Santos', first: 'Bianca', sections: ['2BSCS-1'] });
     writeLoginRecords('students', students);
   }
   const coordinatorAccounts = [
@@ -408,10 +412,13 @@
   const savedAccountsMenu = document.getElementById('savedAccountsMenu');
   usernameInput.setAttribute('aria-controls', 'savedAccountsMenu');
   usernameInput.setAttribute('aria-haspopup', 'listbox');
-  usernameInput.addEventListener('focus', () => {
+  // Opens on focus and on click (the box is often focused already when the page loads, so focus alone missed it).
+  const openSavedAccounts = () => {
     savedAccountsMenu.hidden = false;
     usernameInput.setAttribute('aria-expanded', 'true');
-  });
+  };
+  usernameInput.addEventListener('focus', openSavedAccounts);
+  usernameInput.addEventListener('click', openSavedAccounts);
   document.addEventListener('pointerdown', event => {
     if (!event.target.closest('.login-credential-field')) {
       savedAccountsMenu.hidden = true;

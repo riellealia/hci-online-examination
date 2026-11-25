@@ -103,3 +103,47 @@ body[data-role="dean"] .dp-tabs button.active:not(#dp):not(#dp2){border-bottom-c
 .dp-form-grid .dp-wide{grid-column:1/-1}
 .dp-until{color:var(--pr-muted,#6b7280);font-size:12px}
 .dp-until.ended{color:#c2463e;font-weight:600}
+
+/* ---------- Members: right-click hint, row menu, Add role and Archive prompts ---------- */
+.dp-hint{display:inline-flex;align-items:center;gap:5px;color:var(--pr-muted);font-style:normal}
+.dp-hint svg{width:12px;height:12px;fill:currentColor;opacity:.75}
+body[data-role="dean"] .dp-table tbody tr[data-id]:focus-visible td:not(#dp){background:color-mix(in srgb,var(--pr-accent) 10%,transparent)!important;outline:none}
+.dp-reason{max-width:260px;white-space:normal;color:var(--pr-muted)}
+.dp-menu{min-width:240px;font-family:var(--pr-font,inherit)}
+.dp-menu .dp-menu-head{display:flex;flex-direction:column;gap:1px;margin:0 0 4px;padding:6px 11px 9px;border-bottom:1px solid var(--pr-line,#e5e5e5)}
+.dp-menu .dp-menu-head strong{color:var(--pr-ink,#1d2730);font:700 13px/1.3 var(--pr-font,inherit)}
+.dp-menu .dp-menu-head small{color:var(--pr-muted,#6b7280);font:500 11px/1.3 var(--pr-font,inherit)}
+body .dp-menu button:not(#dp){align-items:flex-start!important;height:auto!important;min-height:0!important;margin:0!important;padding:9px 11px!important;border:0!important;box-shadow:none!important;background:transparent!important;color:var(--pr-ink,#1d2730)!important;transform:none!important}
+body .dp-menu button:not(#dp):hover,body .dp-menu button:not(#dp):focus-visible{background:var(--pr-soft,#f3f3f3)!important;outline:none}
+.dp-menu button>span{display:flex;flex-direction:column;gap:2px;font:600 12.5px/1.3 var(--pr-font,inherit)}
+.dp-menu button small{color:var(--pr-muted,#6b7280);font:400 11px/1.3 var(--pr-font,inherit)}
+.dp-menu button svg{flex:none;width:16px;height:16px;margin-top:1px;fill:currentColor;opacity:.8}
+body .dp-menu button.danger:not(#dp){color:#b5534b!important}
+body .dp-menu button[disabled]:not(#dp){opacity:.45;cursor:not-allowed}
+.dp-role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:0;padding:0;border:0;min-width:0}
+.dp-role-grid legend{grid-column:1/-1;margin:0 0 6px;padding:0;color:var(--pr-ink);font:700 12px/1.4 var(--pr-font)}
+.dp-role-grid legend small{margin-left:6px;color:var(--pr-muted);font-weight:500}
+.dp-role-card{position:relative;display:flex!important;align-items:flex-start;gap:10px;margin:0!important;padding:12px!important;border:1px solid var(--pr-line);border-radius:12px;background:var(--pr-surface,transparent);cursor:pointer;transition:border-color .15s,background .15s}
+.dp-role-card:hover{border-color:color-mix(in srgb,var(--c) 55%,var(--pr-line))}
+.dp-role-card:has(input:checked){border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,transparent)}
+.dp-role-card:has(input:focus-visible){outline:2px solid var(--c);outline-offset:2px}
+.dp-role-card input{position:absolute;opacity:0;pointer-events:none}
+.dp-role-dot{flex:none;width:18px;height:18px;margin-top:1px;border:2px solid var(--c);border-radius:6px;background:transparent;display:grid;place-items:center}
+.dp-role-card:has(input:checked) .dp-role-dot{background:var(--c)}
+.dp-role-card:has(input:checked) .dp-role-dot::after{content:"";width:5px;height:9px;margin-top:-2px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.dp-role-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+.dp-role-text strong{color:var(--pr-ink);font:700 13px/1.3 var(--pr-font)}
+.dp-cap{display:inline-flex;align-items:center;gap:5px;color:var(--pr-muted);font:500 11px/1.35 var(--pr-font)}
+.dp-cap svg{flex:none;width:12px;height:12px;fill:var(--c)}
+.dp-role-ends{color:var(--pr-muted);font:400 10.5px/1.3 var(--pr-font);opacity:.85}
+.dp-role-held{position:absolute;top:8px;right:10px;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--pr-ink);font:600 10px/1.4 var(--pr-font);font-style:normal}
+.dp-role-card.held{cursor:default;opacity:.8}
+.dp-form textarea{min-height:84px;resize:vertical}
+/* The dialog's generic label rules (.dp-form-grid label) must not flatten the role cards. */
+.confirm-box .dp-form-grid label.dp-role-card{display:flex!important;align-items:flex-start;gap:10px;padding:12px 14px!important;color:var(--pr-ink)!important;font:400 12px/1.35 var(--pr-font)!important}
+.confirm-box .dp-form-grid .dp-role-card input{position:absolute!important;width:1px!important;height:1px!important;opacity:0;pointer-events:none}
+.confirm-box .dp-form-grid .dp-role-card .dp-role-text{display:flex!important;flex-direction:column!important;align-items:flex-start;gap:5px;padding-right:58px}
+.confirm-box .dp-form-grid .dp-role-card .dp-role-dot{display:grid!important;width:18px!important;height:18px!important;padding:0!important}
+.confirm-box .dp-form-grid .dp-role-card .dp-cap,.confirm-box .dp-form-grid .dp-role-card .dp-role-ends{display:flex!important}
+.confirm-box .dp-form-grid .dp-role-card:not(.held) .dp-role-text{padding-right:0}
+body[data-role="dean"] .dp-form .confirm-ok:disabled:not(#dp){opacity:.45!important;cursor:not-allowed!important;filter:saturate(.6)}

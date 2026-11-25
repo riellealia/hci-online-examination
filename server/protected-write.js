@@ -10,6 +10,7 @@ function validateAudit(existing, next, session) {
   });
 }
 
+const APPROVAL_TYPES = ['professor-assignment', 'student-overload', 'faculty-student-enrollment', 'role-assignment', 'student-enrollment', 'professor-overload'];
 const APPROVAL_MUTABLE_FIELDS = new Set(['status', 'reviewerId', 'reviewerRole', 'reviewerRemarks', 'decisionAt', 'history']);
 function sameApprovalPayload(prior, item) {
   const before = Object.fromEntries(Object.entries(prior).filter(([key]) => !APPROVAL_MUTABLE_FIELDS.has(key)));
@@ -26,7 +27,7 @@ function validHistoryTransition(prior, item, session, status) {
 function validNewRequest(item, session) {
   const history = Array.isArray(item.history) ? item.history : [];
   const submitRole = item.type === 'faculty-student-enrollment' ? 'faculty' : item.type === 'student-overload' && session.role === 'admin' ? 'admin' : 'coordinator';
-  return item?.id && ['professor-assignment', 'student-overload', 'faculty-student-enrollment', 'role-assignment'].includes(item.type)
+  return item?.id && APPROVAL_TYPES.includes(item.type)
     && item.requesterId === session.username && item.requesterRole === submitRole && session.role === submitRole
     && item.status === 'pending' && item.targetType && item.targetId && item.reason
     && item.proposedChange && typeof item.proposedChange === 'object' && !Array.isArray(item.proposedChange)
@@ -54,7 +55,7 @@ function validateApprovals(existing, next, session) {
   if (session.role === 'dean') {
     if (added.length || changed.length !== 1) forbidden('A Dean may decide one existing request at a time.');
     const prior = before.get(changed[0].id), item = changed[0];
-    if (!['professor-assignment','student-overload','faculty-student-enrollment','role-assignment'].includes(prior.type) || prior.status !== 'pending' || !['approved','rejected'].includes(item.status)
+    if (!APPROVAL_TYPES.includes(prior.type) || prior.status !== 'pending' || !['approved','rejected'].includes(item.status)
       || item.reviewerId !== session.username || item.reviewerRole !== 'dean' || !item.decisionAt
       || item.status === 'rejected' && !String(item.reviewerRemarks || '').trim()
       || !sameApprovalPayload(prior, item) || !validHistoryTransition(prior, item, session, item.status)) forbidden('Dean decisions are limited to pending academic applications and cannot alter the proposal.');
@@ -84,6 +85,7 @@ function validateDeanEnrollment(existing, next, session, store) {
   const pending=(store.read('approvalRequests',[])||[]).filter(item=>item.status==='pending'&&item.reviewerRole==='dean');
   const authorized=pending.some(request=>{
     const change=request.proposedChange||{};
+    if(request.type==='student-enrollment')return removed.length===0&&changed.length===0&&added.length===1&&added[0].studentId===change.studentId&&added[0].offeringId===change.offeringId&&added[0].coordinatorEnrollmentApprovalId===request.id;
     if(request.type==='student-overload')return removed.length===0&&changed.length===0&&added.length===1&&added[0].studentId===change.studentId&&added[0].offeringId===change.offeringId&&added[0].overloadApprovalId===request.id;
     if(request.type!=='faculty-student-enrollment')return false;
     if(change.action==='add')return removed.length===0&&changed.length===0&&added.length===1&&added[0].studentId===change.studentId&&added[0].offeringId===change.offeringId&&added[0].facultyEnrollmentApprovalId===request.id;

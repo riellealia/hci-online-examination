@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 <title>Online Examination</title>
 <script src="../js/storage.js?v=20261119-keep"></script>
 <script src="../js/section-service.js"></script>
@@ -10,7 +10,7 @@
 <script src="../js/permission-service.js?v=20261120-tri"></script>
 <script src="../js/approval-service.js?v=20261120-roles"></script>
 <script src="../js/academic-workflow-service.js"></script>
-<script src="../js/admin-table-tools.js?v=20261118-export2"></script>
+<script src="../js/admin-table-tools.js?v=20261125-inline"></script><script src="../js/student-card-tools.js"></script>
 <script src="../js/auth.js?v=20261119-keep"></script><script src="../js/page-permissions.js?v=20261120-exp"></script>
 <script src="../js/role-access.js?v=20261120-exp"></script>
 <script src="../js/weekly-learning.js"></script>
@@ -913,38 +913,38 @@
     .exam-settings-nav button:hover { background:var(--surface-soft); color:var(--accent); }.exam-settings-nav button svg { width:18px; height:18px; flex:none; fill:currentColor; }.exam-settings-nav button.danger { color:var(--danger); }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20261118-keep-search">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20261125-wsdialog">
 <link rel="stylesheet" href="../css/faculty-subject-workspace.css?v=20261120-export">
 <link rel="stylesheet" href="../css/report-status.css?v=20260829-1">
 <link rel="stylesheet" href="../css/faculty-dashboard.css?v=20261118-3">
-<link rel="stylesheet" href="../css/faculty-pages.css?v=20261118-13">
+<link rel="stylesheet" href="../css/faculty-pages.css?v=20261125-chips">
 <link rel="stylesheet" href="../css/faculty-profile.css?v=20261118-4">
 <link rel="stylesheet" href="../css/faculty-exams.css?v=20261118-2">
 <link rel="stylesheet" href="../css/faculty-subject-page.css?v=20261118-3">
-<link rel="stylesheet" href="../css/faculty-exam-builder.css?v=20261118-2">
+<link rel="stylesheet" href="../css/faculty-exam-builder.css?v=20261125-audit">
 <link rel="stylesheet" href="../css/faculty-subject-nav.css?v=20261118-2">
 <link rel="stylesheet" href="../css/faculty-subject-tabs.css?v=20261118-2">
 <link rel="stylesheet" href="../css/faculty-reports.css?v=20261118-3">
 <link rel="stylesheet" href="../css/lesson-viewer.css?v=20261118-toc">
 <link rel="stylesheet" href="../css/course-path.css?v=20261118-3">
 <link rel="stylesheet" href="../css/class-members.css?v=20261120-roles">
-<link rel="stylesheet" href="../css/responsive-shell.css?v=20261118-4"><link rel="stylesheet" href="../css/prompts.css?v=20261119-modal"><link rel="stylesheet" href="../css/role-access.css?v=20261120-exp"><link rel="stylesheet" href="../css/table-toolbar.css?v=20261118-4"><link rel="stylesheet" href="../css/profile-popup.css?v=20261118-3"><link rel="stylesheet" href="../css/profile-uniform.css?v=20261119-6">
+<link rel="stylesheet" href="../css/responsive-shell.css?v=20261118-4"><link rel="stylesheet" href="../css/prompts.css?v=20261125-headed"><link rel="stylesheet" href="../css/role-access.css?v=20261120-exp"><link rel="stylesheet" href="../css/table-toolbar.css?v=20261118-4"><link rel="stylesheet" href="../css/profile-popup.css?v=20261118-3"><link rel="stylesheet" href="../css/profile-uniform.css?v=20261125-menu">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
-<script src="../js/grading.js"></script>
+<script src="../js/grading.js?v=20261125-attempts"></script>
 <script src="../js/ui.js?v=20261120-mail"></script>
-<script src="../js/role-profile.js?v=20261118-overview-2"></script>
-<script src="../js/faculty-subject-workspace.js?v=20261120-people2"></script>
+<script src="../js/role-profile.js?v=20261125-preview2"></script>
+<link rel="stylesheet" href="../css/course-editor.css?v=20261125-rules2"><script src="../js/rich-text.js?v=20261125-img"></script><script src="../js/course-editor.js?v=20261125-rules2"></script><script src="../js/faculty-subject-workspace.js?v=20261125-rules"></script>
 <script src="../js/faculty-dashboard.js?v=20261118-5"></script>
 <script src="../js/faculty-roster-insights.js?v=20261118-8"></script>
 <script src="../js/faculty-exams-overview.js?v=20261118-export"></script>
 <script src="../js/faculty-subject-nav.js?v=20261118-2"></script>
 <script src="../js/faculty-reports-overview.js?v=20261118-2"></script>
-<script src="../js/lesson-viewer.js?v=20261118-toc"></script>
+<script src="../js/lesson-viewer.js?v=20261125-rules"></script>
 <script src="../js/lesson-view-mode.js?v=20261118-2"></script>
 <script src="../js/course-path.js?v=20261118-2"></script>
 <script src="../js/class-members.js?v=20261120-roles2"></script>
-<script src="../js/faculty-lessons.js?v=20261118-path"></script>
+<script src="../js/faculty-lessons.js?v=20261125-rules"></script>
 </head>
 <body data-role="faculty">
 
@@ -996,10 +996,13 @@
     </div>
 
     <!-- Subjects Tab -->
-    <div id="subjects-tab" class="tab-content">
+    <div id="subjects-tab" class="tab-content faculty-subjects-page">
+        <!-- Search, sort and export for the subject cards; the hidden table feeds the shared toolbar (same as the Student Subjects page). -->
+        <div class="role-table-tools" id="facultySubjectTools"></div>
         <div class="subjects-grid" id="subjectList">
             <!-- subject cards auto inserted here -->
         </div>
+        <div class="table-scroll compat-table"><table id="facultySubjectsTable"><thead><tr><th>Subject Code</th><th>Subject Name</th><th>Sections</th><th>Exams</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="subject-workspace-tab" class="tab-content">
@@ -1008,24 +1011,14 @@
 
     <!-- Exams Tab -->
     <div id="exams-tab" class="tab-content">
+        <div class="exam-workspace-shell">
         <div id="examsView"></div>
-    </div>
-
-    <!-- Students Tab -->
-    <div id="students-tab" class="tab-content">
-        <div id="studentsView"></div>
-    </div>
-    <div id="reports-tab" class="tab-content">
-        <div id="reportsView"></div>
-    </div>
-</div>
-
-<!-- Exam Creation/Edit Modal -->
-<div id="examModal" class="modal-bg exam-builder-bg">
-    <div class="modal exam-builder" role="dialog" aria-modal="true" aria-labelledby="examModalTitle">
+        <!-- Exam settings: the right-hand column of the exam workspace (collapses with the gear) -->
+<aside id="examModal" class="exam-settings-panel" aria-labelledby="examModalTitle">
+    <div class="exam-builder">
         <header class="exam-builder-hero">
             <div><p class="exam-builder-eyebrow" id="examModalEyebrow">Examination setup</p><h3 id="examModalTitle">Create New Exam</h3><p class="exam-builder-copy" id="examModalCopy">Set the subject, schedule, and rules. Questions are added after saving.</p></div>
-            <button type="button" class="exam-builder-close" onclick="closeExamModal()" aria-label="Close">&times;</button>
+            <button type="button" class="exam-builder-close" onclick="collapseExamSettings()" aria-label="Hide exam settings" title="Hide exam settings">&times;</button>
         </header>
         <div class="exam-builder-body">
         <section class="exam-form-card">
@@ -1079,6 +1072,18 @@
             <input type="text" id="examMaterials" placeholder="e.g. One A4 sheet of notes; no calculators">
         </div></div>
             <div class="exam-form-row"><div class="form-group">
+            <label for="examAttempts">Number of attempts:</label>
+            <input type="number" id="examAttempts" min="1" max="10" step="1" value="1" oninput="syncExamScoreRule()">
+            <small class="field-hint">How many times each student may take this exam (1–10).</small>
+        </div><div class="form-group" id="examScoreRuleField" hidden>
+            <label for="examScoreRule">Score that counts:</label>
+            <select id="examScoreRule">
+                <option value="highest">Highest score</option>
+                <option value="last">Last attempt</option>
+            </select>
+            <small class="field-hint">Which attempt goes into the grade when a student takes the exam more than once.</small>
+        </div></div>
+            <div class="exam-form-row"><div class="form-group">
             <label for="examQuestionLayout">Question presentation:</label>
             <select id="examQuestionLayout">
                 <option value="paged">One question per page</option>
@@ -1097,6 +1102,8 @@
                 Forward-only prevents returning to earlier questions.
             </small>
         </div></div>
+            <div class="checkbox-stack"><label><input type="checkbox" id="examShuffleQuestions"> Shuffle question order for each student</label>
+            <small class="field-hint">Every student gets the questions in a different random order. Numbering and drag-to-reorder are turned off in the question list.</small></div>
         </section>
         <section class="exam-form-card">
             <header><span>4</span><div><h4>After submission</h4><p>When students see their score, the correct answers, and feedback.</p></div></header>
@@ -1107,9 +1114,20 @@
         </section>
         </div>
         <div class="modal-buttons exam-builder-actions">
-            <button class="cancel-btn" onclick="closeExamModal()">Cancel</button>
             <button class="save-btn" onclick="saveExam()">Save Exam</button>
+            <button class="cancel-btn" onclick="closeExamModal()">Cancel</button>
         </div>
+    </div>
+</aside>
+        </div>
+    </div>
+
+    <!-- Students Tab -->
+    <div id="students-tab" class="tab-content">
+        <div id="studentsView"></div>
+    </div>
+    <div id="reports-tab" class="tab-content">
+        <div id="reportsView"></div>
     </div>
 </div>
 
@@ -1117,7 +1135,6 @@
 <div id="questionModal" class="question-modal-bg authoring-bg">
     <div class="question-modal authoring-workspace">
         <header class="authoring-head">
-            <button type="button" class="icon-action" onclick="closeQuestionModal()" title="Back to question list" aria-label="Back to question list">&larr;</button>
             <div class="authoring-title">
                 <h3 id="questionModalTitle">Add Question</h3>
                 <span id="questionDraftState" class="save-state is-saved" aria-live="polite">Draft ready</span>
@@ -1126,20 +1143,22 @@
                 <button type="button" class="icon-action" onclick="navigateQuestion(-1)" title="Previous question" aria-label="Previous question">&#8592;</button>
                 <button type="button" class="icon-action" onclick="navigateQuestion(1)" title="Next question" aria-label="Next question">&#8594;</button>
                 <button type="button" class="icon-action" onclick="saveQuestion(true)" title="Save and add another question" aria-label="Save and add another question">&#43;</button>
-                <button type="button" class="icon-action" onclick="toggleQuestionInspector()" title="Question settings" aria-label="Open question settings" aria-expanded="false" id="questionSettingsBtn">&#9881;</button>
+                <button type="button" class="icon-action question-settings-toggle" onclick="toggleQuestionInspector()" title="Question settings" aria-label="Open question settings" aria-expanded="false" id="questionSettingsBtn">&#9881;</button>
                 <button type="button" class="save-btn" onclick="saveQuestion()">Save Question</button>
+                <button type="button" class="icon-action question-modal-close" onclick="closeQuestionModal()" title="Close" aria-label="Close question editor">&times;</button>
             </div>
         </header>
 
         <section id="questionTypePicker" class="question-type-picker" aria-labelledby="questionTypePickerTitle">
-            <div class="type-picker-copy"><span>Step 1</span><h3 id="questionTypePickerTitle">Choose a question type</h3><p>The editor opens after you choose how students will answer.</p></div>
+            <button type="button" class="icon-action type-picker-close" onclick="closeQuestionModal()" aria-label="Close">&times;</button>
+            <div class="type-picker-copy"><span>Add a question</span><h3 id="questionTypePickerTitle">Choose a question type</h3><p>The editor opens after you choose how students will answer.</p></div>
             <div class="question-type-grid">
                 <button type="button" onclick="chooseQuestionType('mcq')"><span aria-hidden="true">&#9673;</span><strong>Multiple choice</strong></button>
                 <button type="button" onclick="chooseQuestionType('truefalse')"><span aria-hidden="true">&#10003;</span><strong>True or false</strong></button>
                 <button type="button" onclick="chooseQuestionType('number')"><span aria-hidden="true">#</span><strong>Number</strong></button>
                 <button type="button" onclick="chooseQuestionType('short')"><span aria-hidden="true">Aa</span><strong>Written</strong></button>
                 <button type="button" onclick="chooseQuestionType('essay')"><span aria-hidden="true">&#182;</span><strong>Paragraph</strong></button>
-                <button type="button" onclick="chooseQuestionType('fillblank')"><span aria-hidden="true">___</span><strong>Underline</strong></button>
+                <button type="button" onclick="chooseQuestionType('fillblank')"><span aria-hidden="true">___</span><strong>Fill in the blank</strong></button>
                 <button type="button" onclick="chooseQuestionType('matching')"><span aria-hidden="true">&#8644;</span><strong>Matching</strong></button>
                 <button type="button" onclick="chooseQuestionType('imagedrag')"><span aria-hidden="true">&#128247;</span><strong>Image placement</strong></button>
             </div>
@@ -1161,12 +1180,6 @@
 
                 <div id="answerConfiguration" class="answer-configuration" aria-label="Correct answer configuration"></div>
 
-                <section class="question-inline-preview" aria-labelledby="questionPreviewTitle">
-                    <div class="preview-label" id="questionPreviewTitle">Student preview</div>
-                    <div id="questionInlinePreview" aria-live="polite"></div>
-                </section>
-
-                <div class="canvas-hint">Question settings, points, and marking guidance are available from the settings icon.</div>
             </main>
 
             <aside id="questionInspector" class="question-inspector" aria-label="Question settings">
@@ -1265,6 +1278,11 @@
                     </div>
                 </fieldset>
             </aside>
+
+            <section class="question-inline-preview" aria-labelledby="questionPreviewTitle">
+                <div class="preview-label" id="questionPreviewTitle">Student preview</div>
+                <div id="questionInlinePreview" aria-live="polite"></div>
+            </section>
         </div>
 
         <aside id="facultyQuestionNavigator" class="exam-navigator faculty-question-navigator" style="display:none" aria-label="Question navigator">
@@ -1442,6 +1460,25 @@ let mySubjects = []; // Will store subjects assigned to this faculty
                 </div>
             `}).join("");
         }
+        mountFacultySubjectTools(mySubjects, exams, facultyId, sectionSubjects, subjectAssignments);
+    }
+
+    /* Subjects toolbar (search, sort, export) — same component as the Student Subjects page.
+       The hidden table mirrors the cards so export and the sort fields have real columns. */
+    // Kept on window: the subject list renders during start-up, before a `let` here would exist.
+    function mountFacultySubjectTools(list, exams, facultyId, sectionSubjects, subjectAssignments) {
+        const table = document.getElementById('facultySubjectsTable'), host = document.getElementById('facultySubjectTools'), grid = document.getElementById('subjectList');
+        if (!table || !host || !grid || typeof AdminTableTools === 'undefined' || typeof StudentCardTools === 'undefined') return;
+        const offerings = SectionService.offeringsForFaculty(facultyId, sectionSubjects, subjectAssignments);
+        const cell = value => `<td>${String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))}</td>`;
+        table.querySelector('tbody').innerHTML = list.map(s => `<tr>${cell(s.code)}${cell(s.name)}${cell(new Set(offerings.filter(o => o.subjectCode === s.code).map(o => o.sectionId)).size)}${cell(exams.filter(e => e.facultyId === facultyId && e.subjectCode === s.code).length)}</tr>`).join('');
+        if (!host.querySelector('.table-tools')) {
+            AdminTableTools.mount('faculty-subjects', table, host, { noExport: true });
+            host.querySelectorAll('.table-group-toggle,.group-field').forEach(control => control.remove());
+        }
+        const number = text => (String(text).match(/\d+/) || ['0'])[0].padStart(4, '0');
+        window.facultySubjectCards = window.facultySubjectCards || StudentCardTools.mount({ toolsHost: host, container: grid, cardSelector: '.sub-card', values: card => [card.dataset.subjectCode, card.querySelector('.sub-name')?.textContent || '', number(card.querySelector('.sub-meta span:nth-child(1)')?.textContent), number(card.querySelector('.sub-meta span:nth-child(2)')?.textContent)] });
+        window.facultySubjectCards?.apply();
     }
 }
 
@@ -1461,6 +1498,7 @@ function switchTab(tabName, btnEl) {
 }
 
 function onFacultySection(id) {
+    if (leaveExamWorkspace()) return;
     // Keep the nested subject highlighted only while its workspace is open.
     if (typeof FacultySubjectNav !== 'undefined' && id !== 'subject-workspace-tab') FacultySubjectNav.mark(null);
     if (id === 'dashboard-tab') FacultyDashboard.render();
@@ -1616,11 +1654,15 @@ async function notifyReportResolution(reportId) {
 let currentEditingExamId = null;
 let examFormInitial = '';
 let examFormDirty = false;
+function syncExamScoreRule() {
+    const many = Number(document.getElementById('examAttempts')?.value) > 1, field = document.getElementById('examScoreRuleField');
+    if (field) field.hidden = !many;
+}
 let examFormWired = false;
 
 function examFormSnapshot() {
     return JSON.stringify(['examSubject','examTitle','examDesc','examDate','examStart','examEnd',
-        'examDuration','examPassing','examMaterials','examQuestionLayout','examNavigationMode','examScoreRelease','examAnswerRelease','examResultReleaseAt','examShowSubmittedAnswers','examShowFeedback']
+        'examDuration','examPassing','examMaterials','examQuestionLayout','examNavigationMode','examShuffleQuestions','examAttempts','examScoreRule','examScoreRelease','examAnswerRelease','examResultReleaseAt','examShowSubmittedAnswers','examShowFeedback']
         .map(id => document.getElementById(id).type === 'checkbox' ? document.getElementById(id).checked : document.getElementById(id).value)
         .concat([...document.querySelectorAll('#examSectionChoices input:checked')].map(input => input.value).sort()));
 }
@@ -1662,15 +1704,188 @@ function beginExamFormSession() {
     examFormInitial = examFormSnapshot();
     examFormDirty = false;
     if (!examFormWired) {
-        const form = document.querySelector('#examModal .modal');
+        const form = document.querySelector('#examModal .exam-builder');
         const mark = () => { examFormDirty = examFormSnapshot() !== examFormInitial; };
         form.addEventListener('input', mark);
         form.addEventListener('change', mark);
+        form.addEventListener('input', syncProvisionalFromForm);
+        form.addEventListener('change', syncProvisionalFromForm);
         examFormWired = true;
     }
 }
 
-function openExamModal(subjectCode = null) {
+/* Exam workspace: the question list on the left, exam settings on the right.
+   Creating an exam opens the same workspace with an empty list and the
+   settings column expanded; the exam is stored the first time it is saved. */
+let examWorkspaceIsNew = false;
+let examWorkspaceDone = null;
+let examWorkspaceNavigating = false;
+/* A new exam lives only in this page until it is saved: it has a temporary
+   id, sits in the in-memory exams/questions lists, and every storage write
+   leaves it (and its questions and drafts) out. Saving validates the
+   settings and stores the exam together with its questions. */
+let provisionalExamId = null;
+
+(function keepProvisionalExamOutOfStorage() {
+    const write = DB.write;
+    DB.write = function (key, value, ...rest) {
+        const id = provisionalExamId;
+        if (id && key === 'exams' && Array.isArray(value)) value = value.filter(exam => exam?.id !== id);
+        else if (id && key === 'questions' && Array.isArray(value)) value = value.filter(question => question?.examId !== id);
+        else if (id && key === 'questionDrafts' && value && typeof value === 'object' && !Array.isArray(value)) {
+            value = Object.fromEntries(Object.entries(value).filter(([draftKey]) => !draftKey.startsWith(`${id}::`)));
+        }
+        return write.call(this, key, value, ...rest);
+    };
+})();
+
+function provisionalExam() { return provisionalExamId ? exams.find(exam => exam.id === provisionalExamId) || null : null; }
+
+function newExamHasWork() {
+    return !!provisionalExamId && (examFormDirty || questions.some(question => question.examId === provisionalExamId));
+}
+
+/* Drops the unsaved exam and its questions from memory. */
+function discardProvisionalExam() {
+    const id = provisionalExamId;
+    if (!id) return;
+    provisionalExamId = null;
+    exams = exams.filter(exam => exam.id !== id);
+    questions = questions.filter(question => question.examId !== id);
+    examWorkspaceIsNew = false;
+    examFormDirty = false;
+    currentEditingExamId = null;
+    if (currentEditingExamForQuestions === id) currentEditingExamForQuestions = null;
+    examSettingsPanel().classList.remove('active');
+}
+
+/* Leaving a new exam: Cancel (stay), Save as draft (needs the required
+   settings), or Discard. Returns true synchronously when nothing needs asking,
+   otherwise a promise that resolves to true when it is fine to leave. */
+function resolveNewExamExit() {
+    if (!provisionalExamId) return true;
+    if (!newExamHasWork()) { discardProvisionalExam(); return true; }
+    const count = questions.filter(question => question.examId === provisionalExamId).length;
+    return saveDiscardDialog({
+        title: 'Leave this new exam?',
+        message: `This exam${count ? ` and its ${count} question${count === 1 ? '' : 's'}` : ''} ${count ? 'have' : 'has'} not been saved yet. Save it as a draft, discard it, or cancel to keep working.`,
+        continueLabel: 'Cancel',
+        discardLabel: 'Discard',
+        saveLabel: 'Save as draft'
+    }).then(async choice => {
+        if (choice === 'continue') return false;
+        if (choice === 'discard') { discardProvisionalExam(); return true; }
+        const saved = await window.saveExam();
+        if (saved !== true) { openExamSettingsPanel(); return false; }
+        return true;
+    });
+}
+
+window.addEventListener('beforeunload', event => {
+    if (!newExamHasWork()) return;
+    event.preventDefault();
+    event.returnValue = '';
+});
+
+/* Keeps the in-memory new exam in step with the settings form, so the list
+   heading, preview and export reflect what has been typed. */
+function syncProvisionalFromForm() {
+    const exam = provisionalExam();
+    if (!exam) return;
+    const value = id => document.getElementById(id).value;
+    Object.assign(exam, {
+        title: value('examTitle').trim(), desc: value('examDesc').trim(), subjectCode: value('examSubject'),
+        date: value('examDate'), start: value('examStart'), end: value('examEnd'),
+        durationMinutes: Number(value('examDuration')) || 0, passingPercent: Number(value('examPassing')) || 75,
+        materials: value('examMaterials').trim(), questionLayout: value('examQuestionLayout'), navigationMode: value('examNavigationMode'),
+        shuffleQuestions: document.getElementById('examShuffleQuestions').checked
+    });
+    const heading = document.getElementById('questionWorkspaceTitle');
+    if (heading && currentEditingExamForQuestions === exam.id) heading.textContent = exam.title || 'Untitled exam';
+}
+
+/* The workspace's own navigation to My Exams must not count as leaving it. */
+function showExamsTab() {
+    if (typeof facultyNav === 'undefined' || !facultyNav) return;
+    examWorkspaceNavigating = true;
+    try { facultyNav.show('exams-tab'); } finally { examWorkspaceNavigating = false; }
+}
+
+/* Runs on every section change. Unsaved exam settings are dropped with a
+   notice, and a waiting caller (the course editor) gets control back. */
+function leaveExamWorkspace() {
+    if (examWorkspaceNavigating) return false;
+    if (provisionalExamId && newExamHasWork()) {
+        // Put the workspace back, then ask. The requested section opens only if leaving is confirmed.
+        const target = facultyNav && typeof facultyNav.current === 'function' ? facultyNav.current() : null;
+        showExamsTab();
+        manageQuestions(provisionalExamId, { keepBack: true }); // showing My Exams redraws the exam list
+        Promise.resolve(resolveNewExamExit()).then(ok => {
+            if (!ok) return;
+            finishExamWorkspace();
+            if (target && facultyNav) facultyNav.show(target);
+        });
+        return true;
+    }
+    discardProvisionalExam();
+    const panel = examSettingsPanel();
+    if (!panel || !(panel.classList.contains('active') || examWorkspaceDone || examWorkspaceIsNew)) return false;
+    if (panel.classList.contains('active') && examFormDirty) notify('Your unsaved exam settings were not kept.', 'info');
+    examFormDirty = false;
+    currentEditingExamId = null;
+    finishExamWorkspace();
+    return false;
+}
+
+function examSettingsPanel() { return document.getElementById('examModal'); }
+
+function openExamSettingsPanel() {
+    examSettingsPanel().classList.add('active');
+    syncExamSettingsToggle();
+}
+
+function syncExamSettingsToggle() {
+    const open = examSettingsPanel().classList.contains('active');
+    document.querySelectorAll('#examsView .exam-settings-btn').forEach(button => {
+        button.setAttribute('aria-expanded', String(open));
+        button.classList.toggle('is-active', open);
+    });
+}
+
+/* The gear and the panel's close button only hide the column; Cancel discards. */
+async function collapseExamSettings() {
+    if (examWorkspaceIsNew) {
+        examSettingsPanel().classList.remove('active');
+        syncExamSettingsToggle();
+        return true;
+    }
+    return closeExamModal();
+}
+
+function toggleExamSettings() {
+    if (examSettingsPanel().classList.contains('active')) return collapseExamSettings();
+    if (examWorkspaceIsNew) { openExamSettingsPanel(); return true; }
+    return editExam(currentEditingExamForQuestions);
+}
+
+function finishExamWorkspace() {
+    discardProvisionalExam();
+    const done = examWorkspaceDone;
+    examWorkspaceDone = null;
+    examWorkspaceIsNew = false;
+    examSettingsPanel().classList.remove('active');
+    if (typeof done === 'function') done();
+}
+
+function openExamModal(subjectCode = null, onDone = null) {
+    const originPanel = facultyNav && typeof facultyNav.current === 'function' ? facultyNav.current() : 'exams-tab';
+    questionBankBackAction = originPanel !== 'exams-tab' ? () => facultyNav.back('exams-tab') : () => displayAllFacultyExams();
+    showExamsTab();
+    discardProvisionalExam();
+    examWorkspaceDone = typeof onDone === 'function' ? onDone : null;
+    provisionalExamId = `exam_${Date.now()}`;
+    exams.push({ id: provisionalExamId, facultyId, subjectCode: subjectCode || '', title: '', desc: '', status: 'draft', sections: [], provisional: true });
+    examWorkspaceIsNew = true;
     currentEditingExamId = null;
     document.getElementById('examModalTitle').textContent = 'Create New Exam'; document.getElementById('examModalEyebrow').textContent='Examination setup'; document.getElementById('examModalCopy').textContent='Set the subject, schedule, and rules. Questions are added after saving.';
    
@@ -1686,6 +1901,10 @@ function openExamModal(subjectCode = null) {
     document.getElementById('examMaterials').value = '';
     document.getElementById('examQuestionLayout').value = 'paged';
     document.getElementById('examNavigationMode').value = 'free';
+    document.getElementById('examShuffleQuestions').checked = false;
+    document.getElementById('examAttempts').value = 1;
+    document.getElementById('examScoreRule').value = 'highest';
+    syncExamScoreRule();
     document.getElementById('examScoreRelease').value = 'immediate';
     document.getElementById('examAnswerRelease').value = 'never';
     document.getElementById('examResultReleaseAt').value = '';
@@ -1699,20 +1918,28 @@ function openExamModal(subjectCode = null) {
     ).join('');
     subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
     renderExamSectionChoices(subjectSelect.value);
-    document.getElementById('examModal').classList.add('active');
+    document.getElementById('examTitle').oninput = null;
+    syncProvisionalFromForm();
+    manageQuestions(provisionalExamId, { keepBack: true });
+    openExamSettingsPanel();
     beginExamFormSession();
+    return true;
 }
 
 function editExam(examId) {
     const exam = exams.find(e => e.id === examId);
     if (!required(exam, 'That record no longer exists. The list has been refreshed.')) { displayAllFacultyExams(); return; }
 
+    if (examWorkspaceIsNew || currentEditingExamForQuestions !== examId || !document.querySelector('#examsView .question-workspace')) {
+        examWorkspaceIsNew = false;
+        manageQuestions(examId);
+    }
     currentEditingExamId = examId;
     document.getElementById('examModalTitle').textContent = 'Edit Exam'; document.getElementById('examModalEyebrow').textContent='Edit examination'; document.getElementById('examModalCopy').textContent='Changes apply to this exam only. Questions are managed from the question bank.';
    
     document.getElementById('examSubject').value = exam.subjectCode;
     document.getElementById('examTitle').value = exam.title;
-    document.getElementById('examDesc').value = exam.desc;
+    document.getElementById('examDesc').value = exam.desc || '';
     document.getElementById('examDate').value = exam.date;
     document.getElementById('examStart').value = exam.start;
     document.getElementById('examEnd').value = exam.end;
@@ -1721,6 +1948,10 @@ function editExam(examId) {
     document.getElementById('examMaterials').value = exam.materials || '';
     document.getElementById('examQuestionLayout').value = exam.questionLayout || 'paged';
     document.getElementById('examNavigationMode').value = exam.navigationMode || 'free';
+    document.getElementById('examShuffleQuestions').checked = !!exam.shuffleQuestions;
+    document.getElementById('examAttempts').value = Math.max(1, Number(exam.maxAttempts) || 1);
+    document.getElementById('examScoreRule').value = exam.scoreRule === 'last' ? 'last' : 'highest';
+    syncExamScoreRule();
     document.getElementById('examScoreRelease').value = exam.scoreRelease || (exam.showScore !== false ? 'immediate' : 'never');
     document.getElementById('examAnswerRelease').value = exam.answerRelease || (exam.allowAnswerReview ? 'immediate' : 'never');
     document.getElementById('examResultReleaseAt').value = exam.resultReleaseAt || '';
@@ -1733,11 +1964,16 @@ function editExam(examId) {
     ).join('');
     subjectSelect.onchange = () => renderExamSectionChoices(subjectSelect.value);
     renderExamSectionChoices(exam.subjectCode, Array.isArray(exam.sections) && exam.sections.length ? exam.sections : null);
-    document.getElementById('examModal').classList.add('active');
+    openExamSettingsPanel();
     beginExamFormSession();
+    return true;
 }
 
 async function closeExamModal(force = false) {
+    if (examWorkspaceIsNew && provisionalExamId) {
+        if (force) discardProvisionalExam();
+        return goBackFromQuestionBank();
+    }
     if (!force && examFormDirty) {
         const choice = await saveDiscardDialog({
             message: 'Save this exam draft, discard the changes, or continue editing.'
@@ -1746,8 +1982,10 @@ async function closeExamModal(force = false) {
         if (choice === 'save') return saveExam();
     }
     document.getElementById('examModal').classList.remove('active');
+    syncExamSettingsToggle();
     currentEditingExamId = null;
     examFormDirty = false;
+    if (examWorkspaceIsNew) goBackFromQuestionBank();
     return true;
 }
 
@@ -1765,6 +2003,10 @@ async function saveExam() {
     const materials = document.getElementById('examMaterials').value.trim();
     const questionLayout = document.getElementById('examQuestionLayout').value;
     const navigationMode = document.getElementById('examNavigationMode').value;
+    const shuffleQuestions = document.getElementById('examShuffleQuestions').checked;
+    const maxAttempts = Number(document.getElementById('examAttempts').value);
+    const scoreRule = document.getElementById('examScoreRule').value === 'last' ? 'last' : 'highest';
+    if (!Number.isInteger(maxAttempts) || maxAttempts < 1 || maxAttempts > 10) { notify('Number of attempts must be a whole number from 1 to 10.', 'error'); return false; }
     const scoreRelease = document.getElementById('examScoreRelease').value;
     const answerRelease = document.getElementById('examAnswerRelease').value;
     const resultReleaseAt = document.getElementById('examResultReleaseAt').value;
@@ -1827,6 +2069,7 @@ async function saveExam() {
         ['time limit', Number(existing.durationMinutes || 0), durationMinutes],
         ['question layout', existing.questionLayout || 'paged', questionLayout],
         ['navigation policy', existing.navigationMode || 'free', navigationMode],
+        ['question order', !!existing.shuffleQuestions, shuffleQuestions],
         ['score release', existing.scoreRelease || (existing.showScore !== false ? 'immediate' : 'never'), scoreRelease],
         ['answer release', existing.answerRelease || (existing.allowAnswerReview ? 'immediate' : 'never'), answerRelease],
         ['submitted answers', existing.showSubmittedAnswers ?? existing.allowAnswerReview === true, showSubmittedAnswers],
@@ -1856,6 +2099,8 @@ async function saveExam() {
             exam.materials = materials;
             exam.questionLayout = questionLayout;
             exam.navigationMode = navigationMode;
+            exam.shuffleQuestions = shuffleQuestions;
+            exam.maxAttempts = maxAttempts; exam.scoreRule = maxAttempts > 1 ? scoreRule : 'last';
             exam.scoreRelease = scoreRelease; exam.answerRelease = answerRelease; exam.resultReleaseAt = resultReleaseAt;
             exam.showSubmittedAnswers = showSubmittedAnswers; exam.showFeedback = showFeedback;
             exam.sections = sections;
@@ -1874,26 +2119,42 @@ async function saveExam() {
             end: end,
             durationMinutes: durationMinutes,
             passingPercent: passingPercent,
+            maxAttempts: maxAttempts,
+            scoreRule: maxAttempts > 1 ? scoreRule : 'last',
             materials: materials,
             questionLayout: questionLayout,
             navigationMode: navigationMode,
+            shuffleQuestions,
             status: 'draft',
             scoreRelease, answerRelease, resultReleaseAt, showSubmittedAnswers, showFeedback, sections, offeringIds
         };
-        nextExams.push(newExam);
+        if (provisionalExamId) {
+            // Keep the temporary id so the questions written so far stay attached.
+            newExam.id = provisionalExamId;
+            const slot = nextExams.findIndex(e => e.id === provisionalExamId);
+            if (slot === -1) nextExams.push(newExam); else nextExams[slot] = newExam;
+        } else nextExams.push(newExam);
     }
 
+    const pendingId = editingId ? null : provisionalExamId;
+    if (pendingId) provisionalExamId = null; // the exam may now be stored
     if (!DB.write('exams', nextExams)) {
+        if (pendingId) provisionalExamId = pendingId;
         notify('The exam could not be saved. Your changes are still in the form.', 'error');
         return false;
     }
     exams = nextExams;
+    if (pendingId && questions.some(q => q.examId === pendingId) && !DB.write('questions', questions)) {
+        notify('The exam was saved, but its questions could not be stored. Try saving a question again.', 'error');
+    }
     AuditLog.record(editingId?'update':'create','exam',editingId||nextExams[nextExams.length-1].id,{title,subjectCode});
     examFormInitial = examFormSnapshot();
     examFormDirty = false;
+    const savedId = editingId || pendingId || nextExams[nextExams.length - 1].id;
+    examWorkspaceIsNew = false;
     await closeExamModal(true);
     notify(editingId ? `Exam updated: ${title}` : `Exam created: ${title}`, 'success');
-    displayAllFacultyExams();
+    manageQuestions(savedId, { keepBack: true });
     return true;
 }
 
@@ -2055,24 +2316,72 @@ let questionModalReturnPanel = null;
 let questionBankBackAction = null;
 
 function goBackFromQuestionBank() {
-    const restore = questionBankBackAction;
-    questionBankBackAction = null;
-    if (typeof restore === 'function') {
-        restore();
-        return;
-    }
-    displayAllFacultyExams();
-    if (facultyNav) facultyNav.show('exams-tab');
+    const exit = resolveNewExamExit();
+    if (exit === true) return completeGoBack();
+    return Promise.resolve(exit).then(ok => (ok ? completeGoBack() : false));
 }
 
-function manageQuestions(examId) {
+function completeGoBack() {
+    const restore = questionBankBackAction;
+    questionBankBackAction = null;
+    if (typeof restore === 'function') restore();
+    else {
+        displayAllFacultyExams();
+        if (facultyNav) facultyNav.show('exams-tab');
+    }
+    finishExamWorkspace();
+}
+
+function examSettingsButton() {
+    const open = examSettingsPanel().classList.contains('active');
+    return `<button class="catalog-icon-btn exam-settings-btn${open ? ' is-active' : ''}" onclick="toggleExamSettings()" aria-label="Exam settings" title="Exam settings" aria-controls="examModal" aria-expanded="${open}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.7 7.7 0 0 0-1.7-1L15 3.3h-4L10.7 6A7.7 7.7 0 0 0 9 7L6.5 6l-2 3.4L6.6 11a7.8 7.8 0 0 0 0 2l-2.1 1.6 2 3.4L9 17a7.7 7.7 0 0 0 1.7 1l.3 2.7h4l.3-2.7a7.7 7.7 0 0 0 1.7-1l2.5 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></button>`;
+}
+
+const QUESTION_TYPE_CHOICES = [
+    ['mcq', '&#9673;', 'Multiple choice', 'One correct answer from a list'],
+    ['truefalse', '&#10003;', 'True or false', 'Two-option statement'],
+    ['number', '#', 'Number', 'Numeric answer with tolerance'],
+    ['short', 'Aa', 'Written', 'One-line text answer'],
+    ['essay', '&#182;', 'Paragraph', 'Long answer, checked by hand'],
+    ['fillblank', '___', 'Fill in the blank', 'Complete the underlined text'],
+    ['matching', '&#8644;', 'Matching', 'Pair items from A to B'],
+    ['imagedrag', '&#128247;', 'Image placement', 'Drag labels onto an image']
+];
+
+/* "+" opens a small menu of question types instead of a separate page. */
+function addQuestionMenu() {
+    return `<details class="question-add-menu">
+        <summary class="catalog-icon-btn" aria-label="Add question" title="Add question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7V4Z"/></svg></summary>
+        <nav class="question-type-nav" aria-label="Choose a question type">
+            <p>Add a question</p>
+            ${QUESTION_TYPE_CHOICES.map(([type, icon, label, hint]) => `<button type="button" onclick="addQuestionOfType('${type}')"><span class="qt-icon" aria-hidden="true">${icon}</span><span><strong>${label}</strong><small>${hint}</small></span></button>`).join('')}
+        </nav>
+    </details>`;
+}
+
+async function addQuestionOfType(type) {
+    document.querySelectorAll('.question-add-menu[open]').forEach(menu => menu.removeAttribute('open'));
+    if (!currentEditingExamForQuestions) return false;
+    openQuestionModal();
+    chooseQuestionType(type);
+    return true;
+}
+
+function manageQuestions(examId, options = {}) {
     const originPanel = facultyNav && typeof facultyNav.current === 'function'
         ? facultyNav.current()
         : 'exams-tab';
-    questionBankBackAction = originPanel !== 'exams-tab'
-        ? () => facultyNav.back('exams-tab')
-        : () => displayAllFacultyExams();
-    if (typeof facultyNav !== 'undefined' && facultyNav) facultyNav.show('exams-tab');
+    const rerender = currentEditingExamForQuestions === examId && !!document.querySelector('#examsView .question-workspace');
+    if (!rerender && !options.keepBack) {
+        questionBankBackAction = originPanel !== 'exams-tab'
+            ? () => facultyNav.back('exams-tab')
+            : () => displayAllFacultyExams();
+        examWorkspaceDone = null;
+        examSettingsPanel().classList.remove('active');
+    }
+    if (provisionalExamId && examId !== provisionalExamId) discardProvisionalExam();
+    examWorkspaceIsNew = !!provisionalExamId && examId === provisionalExamId;
+    showExamsTab();
     currentEditingExamForQuestions = examId;
     const exam = exams.find(e => e.id === examId);
     if (!required(exam, 'That record no longer exists. The list has been refreshed.')) { displayAllFacultyExams(); return; }
@@ -2082,19 +2391,20 @@ function manageQuestions(examId) {
     const totals = questionCatalogueSummary(examQuestions);
     const examsView = document.getElementById('examsView');
 
+    const isNew = examWorkspaceIsNew;
     const html = `
-        <div>
+        <div class="question-workspace${isNew ? ' is-new-exam' : ''}">
             <button class="back-btn icon-only" onclick="goBackFromQuestionBank()" aria-label="Go back" title="Go back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6 1.4-1.4L7.8 13H20v-2H7.8l3.6-3.6L10 6Z"/></svg></button>
             <div class="exams-section">
                 <div class="exams-header question-catalog-head">
-                    <div class="question-catalog-title"><span>Question bank</span><h3>${exam.title}</h3></div>
+                    <div class="question-catalog-title"><span>${isNew ? 'New exam &middot; not saved yet' : 'Question bank'}</span><h3 id="questionWorkspaceTitle">${exam.title || 'Untitled exam'}</h3></div>
                     <div class="question-catalog-actions">
-                        <button class="catalog-icon-btn exam-settings-btn" onclick="editExam('${examId}')" aria-label="Exam settings" title="Exam settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.7 7.7 0 0 0-1.7-1L15 3.3h-4L10.7 6A7.7 7.7 0 0 0 9 7L6.5 6l-2 3.4L6.6 11a7.8 7.8 0 0 0 0 2l-2.1 1.6 2 3.4L9 17a7.7 7.7 0 0 0 1.7 1l.3 2.7h4l.3-2.7a7.7 7.7 0 0 0 1.7-1l2.5 1 2-3.4L19.4 13ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg></button>
-                        <button class="catalog-icon-btn" onclick="openQuestionModal()" aria-label="Add question" title="Add question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7V4Z"/></svg></button>
+                        ${examSettingsButton()}
+                        ${addQuestionMenu()}
                         <button class="catalog-icon-btn" onclick="document.getElementById('csvQuestionInput').click()" aria-label="Import questions (exam file or CSV)" title="Import questions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 15h2V8l3 3 1.4-1.4L12 4.2 6.6 9.6 8 11l3-3v7Zm-6 3h14v2H5v-2Z"/></svg></button>
                         <span class="exam-export-wrap"><button class="catalog-icon-btn" onclick="toggleExamExportMenu(event, '${examId}')" aria-label="Export examination" title="Export examination" aria-haspopup="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v8.2l2.6-2.6L17 10l-5 5-5-5 1.4-1.4 2.6 2.6V3ZM5 19v-4h2v2h10v-2h2v4H5Z"/></svg></button></span>
                         <button class="catalog-icon-btn" onclick="previewExam('${examId}')" aria-label="Preview examination" title="Preview examination"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.2 0 9.3 4.4 10 7-.7 2.6-4.8 7-10 7S2.7 14.6 2 12c.7-2.6 4.8-7 10-7Zm0 2c-3.7 0-6.9 2.9-7.8 5 .9 2.1 4.1 5 7.8 5s6.9-2.9 7.8-5C18.9 9.9 15.7 7 12 7Zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg></button>
-                        ${exam.status === 'draft' ? `<button class="catalog-icon-btn publish" id="publishExamBtn" onclick="reviewAndPublishExam('${examId}')" aria-label="Review and publish examination" title="Review and publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.2 16.2-4.4-4.4-1.4 1.4L9.2 19 21 7.2l-1.4-1.4-10.4 10.4Z"/></svg></button>` : '<span class="publish-state"><span aria-hidden="true">●</span> Published</span>'}
+                        ${isNew ? '' : exam.status === 'draft' ? `<button class="catalog-icon-btn publish" id="publishExamBtn" onclick="reviewAndPublishExam('${examId}')" aria-label="Review and publish examination" title="Review and publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.2 16.2-4.4-4.4-1.4 1.4L9.2 19 21 7.2l-1.4-1.4-10.4 10.4Z"/></svg></button>` : '<span class="publish-state"><span aria-hidden="true">●</span> Published</span>'}
                     </div>
                 </div>
                 <div class="question-catalog-toolbar">
@@ -2108,11 +2418,13 @@ function manageQuestions(examId) {
                         <option value="matching">Match A to B</option><option value="imagedrag">Image placement</option>
                     </select></label>
                 </div>
+                ${examQuestions.length > 1 ? questionOrderBar(exam) : ''}
                 ${examQuestions.length === 0 ?
-                    '<div class="no-exams">No questions added yet. Click "Add Question" to get started!</div>' :
-                    `<div>${examQuestions.map((q, qIdx) => `
-                        <div class="question-item" data-question-type="${q.type}">
-                            <div class="question-text">Q${qIdx + 1}: ${q.text}</div>
+                    `<div class="no-exams question-workspace-empty"><strong>No questions yet</strong><span>${isNew ? 'Use + to add questions now. The exam settings are only needed when you save.' : 'Use + to choose a question type and add it to this exam.'}</span></div>` :
+                    `<div class="question-list${exam.shuffleQuestions ? ' is-shuffled' : ''}" id="questionList">${examQuestions.map((q, qIdx) => `
+                        <div class="question-item" data-question-type="${q.type}" data-open-question="${q.id}" role="button" tabindex="0" aria-label="Edit question${exam.shuffleQuestions ? '' : ` ${qIdx + 1}`}">
+                            ${exam.shuffleQuestions || examQuestions.length < 2 ? '' : `<button type="button" class="question-drag-handle" aria-label="Drag to reorder question ${qIdx + 1}. Arrow keys also move it." title="Drag to reorder"><span aria-hidden="true">&#10303;</span></button>`}
+                            <div class="question-text">${exam.shuffleQuestions ? '' : `<span class="question-number">Q${qIdx + 1}:</span> `}${q.text}</div>
                             <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
                                 <strong>Type:</strong> ${questionTypeLabel(q.type)}
                                 ${isChoiceQuestion(q) ? ` | <strong>Options:</strong> ${q.options.length}` : ''}
@@ -2157,6 +2469,147 @@ function manageQuestions(examId) {
 
     examsView.innerHTML = html;
 }
+
+/* Above the list: drag hint, or the shuffle notice, plus the shuffle switch. */
+function questionOrderBar(exam) {
+    const on = !!exam.shuffleQuestions;
+    return `<div class="question-order-bar${on ? ' is-shuffled' : ''}">
+        <span class="question-order-note">${on
+            ? '<strong>Shuffled for each student.</strong> Numbering and drag-to-reorder are off.'
+            : '<strong>Fixed order.</strong> Drag &#10303; to reorder; numbers update automatically.'}</span>
+        <label class="question-shuffle-toggle"><span>Shuffle questions</span><input type="checkbox" role="switch" ${on ? 'checked' : ''} onchange="setQuestionShuffle('${exam.id}', this.checked)"></label>
+    </div>`;
+}
+
+/* Turns shuffling on or off from the list. Keeps an open settings form in step. */
+function setQuestionShuffle(examId, on) {
+    const next = exams.map(e => (e.id === examId ? { ...e, shuffleQuestions: !!on } : e));
+    if (!DB.write('exams', next)) {
+        notify('The question order setting could not be saved.', 'error');
+        manageQuestions(examId);
+        return false;
+    }
+    exams = next;
+    AuditLog.record('update', 'exam', examId, { shuffleQuestions: !!on });
+    if (examId === provisionalExamId) {
+        document.getElementById('examShuffleQuestions').checked = !!on;
+        examFormDirty = true;
+    } else if (currentEditingExamId === examId) {
+        const wasDirty = examFormDirty;
+        document.getElementById('examShuffleQuestions').checked = !!on;
+        if (!wasDirty) { examFormInitial = examFormSnapshot(); examFormDirty = false; }
+    }
+    manageQuestions(examId);
+    notify(on ? 'Questions will be shuffled for each student.' : 'Questions keep the order shown.', 'success');
+    return true;
+}
+
+/* Saves a new order for this exam's questions. Other exams keep their slots. */
+function reorderExamQuestions(orderedIds) {
+    const examId = currentEditingExamForQuestions;
+    const slots = questions.map((q, i) => (q.examId === examId ? i : -1)).filter(i => i !== -1);
+    const byId = new Map(slots.map(i => [questions[i].id, questions[i]]));
+    if (orderedIds.length !== slots.length || orderedIds.some(id => !byId.has(id))) { manageQuestions(examId); return false; }
+    const next = questions.slice();
+    slots.forEach((slot, index) => { next[slot] = byId.get(orderedIds[index]); });
+    if (!DB.write('questions', next)) {
+        notify('The new question order could not be saved.', 'error');
+        manageQuestions(examId);
+        return false;
+    }
+    questions = next;
+    manageQuestions(examId);
+    return true;
+}
+
+function renumberQuestionRows() {
+    document.querySelectorAll('#questionList .question-item').forEach((row, index) => {
+        const label = row.querySelector('.question-number');
+        if (label) label.textContent = `Q${index + 1}:`;
+    });
+}
+
+/* Drag a row by its handle (mouse, pen or touch). Rows move live, numbers
+   follow, and the order is saved on release. Arrow keys on the handle move
+   one place at a time. */
+function startQuestionDrag(event) {
+    const handle = event.target.closest?.('#questionList .question-drag-handle');
+    if (!handle || event.button > 0) return;
+    const list = handle.closest('#questionList'), row = handle.closest('.question-item');
+    const before = [...list.querySelectorAll('.question-item')].map(item => item.dataset.openQuestion).join('|');
+    const pointerId = event.pointerId;
+    event.preventDefault();
+    row.classList.add('is-dragging');
+    list.classList.add('is-sorting');
+    // Listen on the document: moving the row in the DOM drops any pointer capture on the handle.
+    const move = e => {
+        if (e.pointerId !== pointerId) return;
+        e.preventDefault();
+        const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('#questionList .question-item');
+        if (target && target !== row) {
+            const box = target.getBoundingClientRect();
+            const reference = e.clientY < box.top + box.height / 2 ? target : target.nextElementSibling;
+            if (reference !== row && reference !== row.nextElementSibling) {
+                list.insertBefore(row, reference);
+                renumberQuestionRows();
+            }
+        }
+        const edge = 60;
+        if (e.clientY < edge) window.scrollBy(0, -12); else if (e.clientY > window.innerHeight - edge) window.scrollBy(0, 12);
+    };
+    const end = e => {
+        if (e.pointerId !== pointerId) return;
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', end);
+        document.removeEventListener('pointercancel', end);
+        row.classList.remove('is-dragging');
+        list.classList.remove('is-sorting');
+        const after = [...list.querySelectorAll('.question-item')].map(item => item.dataset.openQuestion);
+        if (after.join('|') !== before) {
+            if (reorderExamQuestions(after) === true) notify('Question order saved.', 'success');
+            else manageQuestions(currentEditingExamForQuestions); // blocked or failed: show the stored order again
+        }
+    };
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', end);
+    document.addEventListener('pointercancel', end);
+}
+
+function moveQuestionWithKeys(event) {
+    const handle = event.target.closest?.('#questionList .question-drag-handle');
+    if (!handle || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const rows = [...document.querySelectorAll('#questionList .question-item')];
+    const ids = rows.map(item => item.dataset.openQuestion), from = rows.indexOf(handle.closest('.question-item'));
+    const to = from + (event.key === 'ArrowUp' ? -1 : 1);
+    if (to < 0 || to >= ids.length) return;
+    [ids[from], ids[to]] = [ids[to], ids[from]];
+    if (reorderExamQuestions(ids) === true) {
+        notify(`Moved to position ${to + 1}.`, 'success');
+        document.querySelectorAll('#questionList .question-drag-handle')[to]?.focus();
+    }
+}
+document.getElementById('examsView').addEventListener('pointerdown', startQuestionDrag);
+document.getElementById('examsView').addEventListener('keydown', moveQuestionWithKeys);
+
+/* Clicking (or Enter/Space on) a question row opens it in the question prompt.
+   Honors the "Write questions" page permission like the row's Edit action. */
+function openQuestionFromRow(event) {
+    const row = event.target.closest?.('#examsView .question-item[data-open-question]');
+    if (!row || event.target.closest('.question-more, a, button, input, select, textarea')) return;
+    if (event.type === 'keydown') {
+        if (event.target !== row || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+    }
+    if (typeof PagePermissions !== 'undefined' && typeof PagePermissions.can === 'function' && !PagePermissions.can('prof.questions.edit')) {
+        notify('Write questions is turned off for your role. Ask the Administrator if you need it.', 'error');
+        return;
+    }
+    editQuestion(row.dataset.openQuestion);
+}
+document.getElementById('examsView').addEventListener('click', openQuestionFromRow);
+document.getElementById('examsView').addEventListener('keydown', openQuestionFromRow);
 
 function filterQuestionCatalogue() {
     const query = document.getElementById('questionSearch')?.value || '';
@@ -2998,18 +3451,15 @@ async function deleteQuestion(questionId) {
     }))) return;
 
     questions = questions.filter(q => q.id !== questionId);
-    localStorage.setItem('questions', JSON.stringify(questions));
+    DB.write('questions', questions);
     notify('Question deleted.', 'success');
     manageQuestions(currentEditingExamForQuestions);
 }
 
 // Close modal when clicking outside
 window.addEventListener('click', function(e) {
-    const modal = document.getElementById('examModal');
     const qModal = document.getElementById('questionModal');
-    if (e.target === modal) {
-        closeExamModal();
-    }
+    if (!e.target.closest?.('.question-add-menu')) document.querySelectorAll('.question-add-menu[open]').forEach(menu => menu.removeAttribute('open'));
     if (e.target === qModal) {
         closeQuestionModal();
     }
@@ -3550,7 +4000,7 @@ function exportExam(examId, format = 'json') {
     const slug = (exam.subjectCode ? exam.subjectCode + '-' : '') + String(exam.title || 'exam').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const save = (text, name, type) => { const url = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
     if (format === 'json') {
-        const keep = ['title', 'desc', 'subjectCode', 'durationMinutes', 'passingPercent', 'maxAttempts', 'navigationMode', 'questionLayout', 'scoreRelease', 'answerRelease', 'resultReleaseAt', 'showFeedback', 'showSubmittedAnswers', 'materials'];
+        const keep = ['title', 'desc', 'subjectCode', 'durationMinutes', 'passingPercent', 'maxAttempts', 'scoreRule', 'navigationMode', 'questionLayout', 'scoreRelease', 'answerRelease', 'resultReleaseAt', 'showFeedback', 'showSubmittedAnswers', 'materials'];
         const payload = { format: 'neu-exam', version: 1, exportedAt: new Date().toISOString(), exam: Object.fromEntries(keep.filter(k => exam[k] !== undefined).map(k => [k, exam[k]])), questions: list.map(({ id, examId, ...rest }) => rest) };
         save(JSON.stringify(payload, null, 2), slug + '.json', 'application/json');
     } else {
@@ -3604,7 +4054,7 @@ if(facultyRouteParts[0]==='reports-tab'&&facultyRouteParts[1]==='report'&&facult
 }
 </script>
 
-<script src="../js/profile-uniform.js?v=20261119-1"></script>
+<script src="../js/profile-uniform.js?v=20261125-one"></script>
 <script src="../js/overlay-stack.js?v=20261119-1"></script>
 </body>
 </html>

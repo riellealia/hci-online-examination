@@ -172,7 +172,8 @@ const RoleAccess = (() => {
     wrap('saveExam', () => document.getElementById('examSubject')?.value || null);
     wrap('editExam', id => examSubject(id));
     wrap('deleteExam', id => examSubject(id));
-    ['saveQuestion', 'deleteQuestion', 'duplicateQuestion'].forEach(n => wrap(n, () => examSubject(editingExam())));
+    ['saveQuestion', 'deleteQuestion', 'duplicateQuestion', 'reorderExamQuestions'].forEach(n => wrap(n, () => examSubject(editingExam())));
+    wrap('setQuestionShuffle', id => examSubject(id));
     // A short note on My Exams saying where this Professor can author exams.
     const note = () => {
       const host = document.querySelector('#exams-tab .fx-page'); if (!host || host.querySelector('.ra-maker-note')) return;
@@ -232,7 +233,8 @@ const RoleAccess = (() => {
     registerApproval();
     if (internView) internBanner();
     if (/faculty\.html$/.test(location.pathname)) guardFacultyExams();
-    if (/coordinator\.html$/.test(location.pathname)) coordinatorMenu();
+    // The Coordinator's right-click menu (roles, subjects, load) lives in request-actions.js.
+    if (/coordinator\.html$/.test(location.pathname) && typeof RequestActions === 'undefined') coordinatorMenu();
     switcher(); new MutationObserver(() => switcher()).observe(document.body, { childList: true, subtree: true });
   }
   return { requestDialog, CAPS, DEFAULT_ROLES, roles, assignments, live, isLive, expiryFor, expiryLabel, roleExpiryLabel, periodEnd, configured, has, subjectsFor, assign, unassign, request, nameOf, subjectName, roleById, bootIntern, mount, registerApproval };

@@ -17,7 +17,7 @@ const DeanPages = (() => {
   const W = () => (typeof CoordinatorWorkspaces !== 'undefined' ? CoordinatorWorkspaces : null);
   const NORMAL_LOAD = 24;
   const STATUS = [['pending', 'Pending', 'Waiting for your decision'], ['approved', 'Approved', 'Applied to the records'], ['rejected', 'Rejected', 'Returned with remarks'], ['withdrawn', 'Withdrawn', 'Pulled back by the requester']];
-  const TYPE = { 'professor-assignment': 'assignment', 'student-overload': 'overload', 'faculty-student-enrollment': 'enrollment', 'role-assignment': 'role' };
+  const TYPE = { 'role-assignment': 'role', 'professor-assignment': 'subject', 'student-enrollment': 'subject', 'professor-overload': 'load', 'student-overload': 'load', 'faculty-student-enrollment': 'enrollment change' };
   function requests() { try { return ApprovalService.queryFor(session, {}) || []; } catch (_) { return read('approvalRequests'); } }
 
   /* ---------- Approvals ---------- */
@@ -35,7 +35,7 @@ const DeanPages = (() => {
     if (!host.querySelector('.dp-requests')) {
       const card = document.createElement('section'); card.className = 'dp-table-card dp-requests';
       const head = document.createElement('header'); head.className = 'dp-table-head';
-      head.innerHTML = '<div><h3>Requests</h3><p>Professor assignments, Student overloads and Faculty enrollment changes</p></div>';
+      head.innerHTML = '<div><h3>Requests</h3><p>Roles, subjects and loads for Professors and Students · Faculty enrollment changes</p></div>';
       const search = document.getElementById('deanApprovalSearch'), status = document.getElementById('deanApprovalStatus');
       const label = document.createElement('label'); label.innerHTML = '<span>Status</span>'; if (status) label.appendChild(status);
       head.appendChild(W().toolbar([{ name: 'search', label: 'Search requests', icon: W().ICONS.search, panel: [search] }, { name: 'filter', label: 'Filter by status', icon: W().ICONS.filter, panel: [label] }]));
@@ -50,7 +50,7 @@ const DeanPages = (() => {
     const box = document.querySelector('#approvalsSection .cw-stats'); if (!box) return;
     const all = requests(), chosen = document.getElementById('deanApprovalStatus')?.value || '';
     const of = status => all.filter(r => status === 'withdrawn' ? ['withdrawn', 'cancelled'].includes(r.status) : r.status === status);
-    const split = rows => Object.entries(TYPE).map(([t, l]) => `${rows.filter(r => r.type === t).length} ${l}`).join(' · ');
+    const split = rows => [...new Set(Object.values(TYPE))].map(l => `${rows.filter(r => TYPE[r.type] === l).length} ${l}`).join(' · ');
     box.innerHTML = STATUS.map(([key, label, sub]) => { const rows = of(key); return `<button type="button" class="cw-stat${chosen === key ? ' active' : ''}" data-cw-status="${key}" data-tone="${key}" aria-pressed="${chosen === key}"><span>${label}</span><strong>${rows.length}</strong><small>${split(rows)}</small><em>${sub}</em></button>`; }).join('');
   }
 

@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" /><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
     <title>Online Examination</title>
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/style.css?v=20261125-audit">
 <script src="../js/storage.js?v=20261119-keep"></script>
 <script src="../js/section-service.js"></script>
 <script src="../js/audit-service.js"></script>
 <script src="../js/permission-service.js?v=20261120-tri"></script>
 <script src="../js/weekly-learning.js"></script>
-<script src="../js/lesson-viewer.js?v=20261118-toc"></script>
+<link rel="stylesheet" href="../css/course-editor.css?v=20261125-rules2"><script src="../js/rich-text.js?v=20261125-img"></script><script src="../js/lesson-viewer.js?v=20261125-rules"></script>
 <script src="../js/lesson-view-mode.js?v=20261118-2"></script>
 <script src="../js/course-path.js?v=20261118-2"></script>
 <script src="../js/class-members.js?v=20261120-roles2"></script>
-<script src="../js/student-lessons.js?v=20261118-members"></script>
+<script src="../js/student-lessons.js?v=20261125-rules"></script>
 <script src="../js/demo-data.js"></script>
-<script src="../js/admin-table-tools.js?v=20261118-export2"></script>
+<script src="../js/admin-table-tools.js?v=20261125-inline"></script>
 <script src="../js/student-card-tools.js"></script>
 <script src="../js/auth.js?v=20261119-keep"></script><script src="../js/page-permissions.js?v=20261120-exp"></script>
 <script src="../js/role-access.js?v=20261120-exp"></script>
@@ -431,17 +431,17 @@
   .scale-grid .fail { background:rgba(179,38,30,0.09); color:#b3261e; font-weight:600; }
 </style>
 <!-- Loaded after the page styles so the shared tokens win on ties -->
-<link rel="stylesheet" href="../css/shared-ui.css?v=20261118-keep-search">
-<link rel="stylesheet" href="../css/student-dashboard-redesign.css?v=20261120-mail">
+<link rel="stylesheet" href="../css/shared-ui.css?v=20261125-wsdialog">
+<link rel="stylesheet" href="../css/student-dashboard-redesign.css?v=20261125-attempts">
 <link rel="stylesheet" href="../css/lesson-viewer.css?v=20261118-toc">
 <link rel="stylesheet" href="../css/course-path.css?v=20261118-3">
 <link rel="stylesheet" href="../css/class-members.css?v=20261120-roles">
-<link rel="stylesheet" href="../css/responsive-shell.css?v=20261118-4"><link rel="stylesheet" href="../css/prompts.css?v=20261119-modal"><link rel="stylesheet" href="../css/role-access.css?v=20261120-exp"><link rel="stylesheet" href="../css/table-toolbar.css?v=20261118-4"><link rel="stylesheet" href="../css/profile-popup.css?v=20261118-3"><link rel="stylesheet" href="../css/profile-uniform.css?v=20261119-6">
+<link rel="stylesheet" href="../css/responsive-shell.css?v=20261118-4"><link rel="stylesheet" href="../css/prompts.css?v=20261125-headed"><link rel="stylesheet" href="../css/role-access.css?v=20261120-exp"><link rel="stylesheet" href="../css/table-toolbar.css?v=20261118-4"><link rel="stylesheet" href="../css/profile-popup.css?v=20261118-3"><link rel="stylesheet" href="../css/profile-uniform.css?v=20261125-menu">
 <script src="../js/dates.js"></script>
 <script src="../js/exam-timing.js"></script>
-<script src="../js/grading.js"></script>
+<script src="../js/grading.js?v=20261125-attempts"></script>
 <script src="../js/ui.js?v=20261120-mail"></script>
-<script src="../js/role-profile.js?v=20261118-overview-2"></script>
+<script src="../js/role-profile.js?v=20261125-preview2"></script>
 <script src="../js/question-types.js"></script>
 <script src="../js/attempt.js"></script>
 <script src="../js/question-media.js"></script>
@@ -817,7 +817,9 @@ function loadResults() {
     .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
   const mine = submittedAttempts;
 
-  renderResultsAnalytics(mine);
+  const countedIds = new Set();
+  [...new Set(mine.map(s => s.examId))].forEach(examId => { const exam = exams.find(e => e.id === examId), pick = typeof countedSubmission === 'function' ? countedSubmission(exam, mine.filter(s => s.examId === examId)) : mine.find(s => s.examId === examId); if (pick) countedIds.add(pick.id); });
+  renderResultsAnalytics(mine.filter(s => countedIds.has(s.id)));
 
   if (mine.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999; padding:20px;">'
@@ -934,6 +936,9 @@ function renderResultSubjectCards(mine) {
     if (!grouped.has(code)) grouped.set(code, []);
     grouped.get(code).push({ submission, exam });
   });
+  // Which attempt counts for each exam (highest or last, per the exam's rule).
+  const countsForGrade = new Set();
+  [...new Set(mine.map(item => item.examId))].forEach(examId => { const exam = exams.find(item => item.id === examId), list = mine.filter(item => item.examId === examId); if (list.length < 2) return; const pick = typeof countedSubmission === 'function' ? countedSubmission(exam, list) : null; if (pick) countsForGrade.add(pick.id); });
 
   container.innerHTML = Array.from(grouped.entries()).map(([code, entries]) => {
     const subject = subjects.find(item => item.code === code);
@@ -949,14 +954,14 @@ function renderResultSubjectCards(mine) {
       const reviewQuestions = answerReviewMarkup(answers, questions, visibility.showCorrectAnswers, visibility.showFeedback);
       const schedule = exam?.date ? `${exam.date} · ${exam.start || '09:00'}–${exam.end || '23:59'}` : 'Always open';
       return `<details class="result-exam-disclosure" data-submission="${submission.id}"><summary class="subject-exam-row result-exam-row">
-        <div><div class="subject-exam-name">${escapeQuestionMedia(exam?.title || 'Removed examination')}</div><div class="subject-exam-meta">${new Date(submission.submittedAt).toLocaleString()}</div></div>
+        <div><div class="subject-exam-name">${escapeQuestionMedia(exam?.title || 'Removed examination')}${countsForGrade.has(submission.id) ? `<span class="counts-pill" title="${exam?.scoreRule === 'highest' ? 'Highest score' : 'Last attempt'} counts toward the grade">Counts</span>` : ''}</div><div class="subject-exam-meta">${new Date(submission.submittedAt).toLocaleString()}</div></div>
         <div class="subject-exam-meta">${visibility.showScore ? `<strong>${awarded}</strong> / ${submission.total}${fullyGraded ? '' : ' (so far)'}` : 'Score hidden by instructor'}</div>
         <div>${grade ? `<strong>${grade.percentText}%</strong>` : '—'}</div>
         <div><span class="status-pill ${fullyGraded ? 'pill-graded' : 'pill-pending'}">${fullyGraded ? (visibility.showScore ? 'Final' : 'Submitted') : `${pending.length} pending`}</span></div>
         <div class="subject-exam-meta">${visibility.showFeedback && submission.remarks ? 'Feedback available' : ''}</div>
       </summary><div class="result-detail-body"><div class="result-detail-grid"><div><span>Schedule</span><strong>${escapeQuestionMedia(schedule)}</strong></div><div><span>Time limit</span><strong>${exam?.durationMinutes || 'No'} minutes</strong></div><div><span>Passing grade</span><strong>${exam?.passingPercent || 75}%</strong></div><div><span>Attempt</span><strong>Submitted ${new Date(submission.submittedAt).toLocaleString()}</strong></div></div>${visibility.showFeedback&&submission.remarks?`<div class="remark-box"><strong>Professor feedback</strong><p>${escapeQuestionMedia(submission.remarks)}</p></div>`:''}<div class="result-review-actions"><button type="button" class="btn-take-exam result-review-btn" ${reviewAllowed?'':'disabled'} onclick="openResultReviewPage('${submission.id}')" title="${reviewAllowed?'Review your answers':'Review is disabled by your professor'}">&#128065; Review</button></div><div id="resultReview_${submission.id}" class="inline-answer-review">${reviewAllowed?(reviewQuestions||'<div class="subject-empty">No saved answers are available.</div>'):'<div class="subject-empty">Review is disabled by your professor.</div>'}</div></div></details>`;
     }).join('');
-    const latestByExam=new Map();entries.forEach(entry=>{const prior=latestByExam.get(entry.submission.examId);if(!prior||new Date(entry.submission.submittedAt)>new Date(prior.submission.submittedAt))latestByExam.set(entry.submission.examId,entry)});
+    const latestByExam=new Map();[...new Set(entries.map(entry=>entry.submission.examId))].forEach(examId=>{const group=entries.filter(entry=>entry.submission.examId===examId),pick=typeof countedSubmission==='function'?countedSubmission(group[0].exam,group.map(entry=>entry.submission)):null;latestByExam.set(examId,pick?group.find(entry=>entry.submission===pick):group.sort((a,b)=>new Date(b.submission.submittedAt)-new Date(a.submission.submittedAt))[0])});
     [...latestByExam.values()].forEach(({submission,exam})=>{const answers=submission.answers||[],pending=answers.some(answer=>answer.needsManualGrading&&answer.awarded===null),visibility=resultVisibility(exam,submission);if(!pending&&visibility.showScore){subjectAwarded+=answers.reduce((total,answer)=>total+Number(answer.awarded||0),0);subjectTotal+=Number(submission.total||0);gradedCount+=1}});
     const combined = gradedCount && subjectTotal ? gradeFor(subjectAwarded, subjectTotal) : null;
     const rating = combined
@@ -1080,8 +1085,29 @@ function learningCellState(item, index, ordered) {
     if (!isFinite(opens) || now < opens) return { locked:true, label:isFinite(opens) ? `Opens ${new Date(opens).toLocaleString()}` : 'Locked' };
     if (item.durationMinutes && now > opens + Number(item.durationMinutes) * 60000) return { locked:true, label:'Closed' };
   }
-  if (item.requiresPrevious && index > 0 && !views.some(view => view.studentId === currentStudent.id && view.blockId === ordered[index - 1].id && view.completedAt)) return { locked:true, label:'Mark the previous page done first' };
+  if (item.expiresAt) { const ends = new Date(item.expiresAt).getTime(); if (isFinite(ends) && now > ends) return { locked:true, label:`Closed ${new Date(ends).toLocaleString()}` }; }
+  const need = learningPrerequisite(item, index, ordered);
+  if (need && !need.done) return { locked:true, label:need.type === 'previous' ? 'Mark the previous page done first' : need.type === 'exam' ? `Submit the exam "${need.title}" first` : `Finish "${need.title}" first` };
   return { locked:false, label:'Open' };
+}
+/* This subject's pages for the signed-in student, in course order. Pages limited to
+   other sections are left out, so the student moves straight on to the next one. */
+function studentCourseContent(code) {
+  const section = (typeof SectionService !== 'undefined' && SectionService.enrollmentsForStudent ? SectionService.enrollmentsForStudent(currentStudent.id) : DB.read('studentEnrollments', []).filter(item => item.studentId === currentStudent.id)).find(item => item.subjectCode === code)?.sectionId || '';
+  const mine = new Set([section, ...(currentStudent.sections || [])].filter(Boolean).map(String));
+  return DB.read('subjectWorkspaceContent', []).map((item, index) => ({ item, index })).filter(({ item }) => item.subjectCode === code && (!Array.isArray(item.sectionIds) || !item.sectionIds.length || item.sectionIds.some(id => mine.has(String(id)))))
+    .sort((a, b) => a.item.week - b.item.week || (a.item.order ?? 1e9) - (b.item.order ?? 1e9) || a.index - b.index).map(entry => entry.item);
+}
+/* What a page needs first: the previous page, a chosen page, or a submitted exam. */
+function learningPrerequisite(item, index, ordered) {
+  const rule = item.prerequisite || (item.requiresPrevious ? { type:'previous' } : null);
+  if (!rule) return null;
+  const examDone = examId => DB.read('studentSubmissions', []).some(s => s.studentId === currentStudent.id && s.examId === examId);
+  const pageDone = page => page.type === 'exam' ? examDone(page.examId) : learningCellCompleted(page.id);
+  if (rule.type === 'exam') { const exam = exams.find(entry => entry.id === rule.id); if (!exam) return null; return { type:'exam', title:exam.title || 'Examination', done:examDone(exam.id), item:ordered.find(entry => entry.type === 'exam' && entry.examId === exam.id) || null }; }
+  const page = rule.type === 'page' ? ordered.find(entry => entry.id === rule.id) : index > 0 ? ordered[index - 1] : null;
+  if (!page) return null; // the page was removed or is not shown to this section
+  return { type:rule.type === 'page' ? 'page' : 'previous', title:page.title || 'Lesson page', done:pageDone(page), item:page };
 }
 function learningCellCompleted(blockId) {
   return DB.read('subjectContentViews', []).some(view => view.studentId === currentStudent.id && view.blockId === blockId && view.completedAt);
@@ -1128,11 +1154,11 @@ function learningTypeMeta(item){
   return{tone:'lesson',icon:'&#9776;',label:`Page ${item.pageNumber||''}`.trim()};
 }
 function examLearningPrerequisite(examId){
-  const ordered=DB.read('subjectWorkspaceContent',[]).filter(item=>item.subjectCode===exams.find(exam=>exam.id===examId)?.subjectCode).sort((a,b)=>a.week-b.week||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  const ordered=studentCourseContent(exams.find(exam=>exam.id===examId)?.subjectCode);
   const examIndex=ordered.findIndex(item=>item.type==='exam'&&item.examId===examId),examItem=ordered[examIndex];
-  if(!examItem?.requiresPrevious||examIndex<1)return null;
-  const prerequisite=ordered[examIndex-1];
-  if(learningCellCompleted(prerequisite.id))return null;
+  const need=examItem?learningPrerequisite(examItem,examIndex,ordered):null;
+  if(!need||need.done||!need.item)return null;
+  const prerequisite=need.item;
   return{examItem,prerequisite,title:prerequisite.title||`Week ${prerequisite.week} lesson`,description:prerequisite.body||prerequisite.weekDescription||`Complete the required Week ${prerequisite.week} learning page before starting this examination.`};
 }
 function goToExamPrerequisite(examId){
@@ -1218,7 +1244,7 @@ function openStudentSubject(code) {
   const passing = [...new Set(subjectExams.map(exam => `${exam.passingPercent || 75}%`))].join(', ') || 'Set for each examination';
   const materials = [...new Set(subjectExams.map(exam => exam.materials || 'No additional materials'))];
   const attempts = [...new Set(subjectExams.map(exam => attemptsAllowed(exam)))];
-  const learningContent = DB.read('subjectWorkspaceContent', []).filter(item => item.subjectCode === code).sort((a,b) => a.week-b.week);
+  const learningContent = studentCourseContent(code);
   const learningWeeks = [...new Set(learningContent.map(item => item.week))];
   const allStudentEnrollments = DB.read('studentEnrollments', []);
   const classmates = enrollment ? students.filter(person => person.id !== currentStudent.id && allStudentEnrollments.some(item => item.studentId === person.id && item.subjectCode === code && item.sectionId === enrollment.sectionId)).sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first)) : [];
@@ -1240,7 +1266,7 @@ function openStudentSubject(code) {
       <section class="subject-info-cell"><h3>&#128100; Professor${professors.length === 1 ? '' : 's'}</h3>${professors.length ? professors.map(person => { const handled = [...new Set([...subjectOfferings.filter(item => item.facultyId === person.id).map(item => item.sectionId), ...(offering?.facultyId === person.id && enrollment?.sectionId ? [enrollment.sectionId] : [])])]; return `<div class="professor-contact-row"><p><strong>Prof. ${escapeQuestionMedia(person.first)} ${escapeQuestionMedia(person.last)}</strong><br>${escapeQuestionMedia(person.id)}<br><span>Handles: ${escapeQuestionMedia(handled.join(', ') || 'No section listed')}</span></p><button type="button" class="icon-action professor-email" onclick="openEmailComposer('${person.id}','${code}')" aria-label="Email Prof. ${escapeQuestionMedia(person.first)} ${escapeQuestionMedia(person.last)}" title="Compose email">&#9993;</button></div>`; }).join('') : '<p>No professor has been assigned yet.</p>'}</section>
       <section class="subject-info-cell"><h3>&#128220; Examination rules</h3><ul><li>Follow the instructions and schedule shown for each examination.</li><li>Passing grade: ${escapeQuestionMedia(passing)}.</li><li>Allowed attempts: ${escapeQuestionMedia(attempts.join(', ') || 'Set per examination')}.</li><li>Materials: ${escapeQuestionMedia(materials.join('; ') || 'Set per examination')}.</li><li>Leaving, navigation, review, and result access follow the settings chosen by the professor.</li></ul></section>
       <section class="subject-info-cell"><h3>&#128197; Schedule summary</h3><p>${subjectExams.length} examination${subjectExams.length === 1 ? '' : 's'} available for this subject.</p><p>Open each examination below to see its exact date, deadline, duration, items, and attempt rules.</p></section>
-      <section class="subject-info-cell subject-detail-exams"><h3>Weekly learning</h3><div class="learning-week-stack">${learningWeeks.length ? learningWeeks.map(week => {const weekRecord=learningContent.find(item=>item.week===week);return `<details class="learning-week"><summary><strong>Week ${week} · ${escapeQuestionMedia(weekRecord?.weekTitle || `Week ${week}`)}</strong></summary>${weekRecord?.weekDescription?`<p class="learning-week-description">${escapeQuestionMedia(weekRecord.weekDescription)}</p>`:''}${learningContent.filter(item=>item.week===week).map(item=>{const index=learningContent.indexOf(item),state=learningCellState(item,index,learningContent),completed=learningCellCompleted(item.id),meta=learningTypeMeta(item);return state.locked?`<div class="learning-cell locked"><strong>${escapeQuestionMedia(item.title||'Content')}</strong><span>&#128274; ${escapeQuestionMedia(state.label)}</span></div>`:`<details class="learning-cell ${item.type==='exam'?'attached-exam-block':''}" ontoggle="recordLearningCellView('${item.id}',this)"><summary><span class="learning-row-icon ${meta.tone}" aria-hidden="true">${meta.icon}</span><span class="learning-row-copy"><strong>${escapeQuestionMedia(item.title||'Content')}</strong><small>${escapeQuestionMedia(meta.label)} · Week ${week}</small></span>${item.type==='exam'?`<button type="button" class="learning-status-button ${completed?'done':''}" onclick="event.preventDefault();event.stopPropagation();openExamDetails('${escapeQuestionMedia(item.examId)}')">${completed?'✓ Done':'Open quiz'} <span class="status-caret">▾</span></button>`:`<button type="button" class="learning-status-button ${completed?'done':''}" onclick="event.preventDefault();event.stopPropagation();toggleLearningCellDone('${item.id}')">${completed?'✓ Done':'To do'} <span class="status-caret">▾</span></button>`}</summary><div class="learning-cell-body"><div class="learning-meta-line"><span>${escapeQuestionMedia(meta.label)}</span><span>Short lesson</span></div>${item.type==='exam'?`<button type="button" class="attached-exam-link" onclick="openExamDetails('${escapeQuestionMedia(item.examId)}')"><span>&#128221;</span><span><strong>${escapeQuestionMedia(item.title||'Examination')}</strong><small>Always open · up to 99 attempts</small></span><span aria-hidden="true">&#8594;</span></button>`:item.type==='visual'?renderStudentVisualLesson(item):item.type==='file'?`<a href="${item.dataUrl||'#'}" download="${escapeQuestionMedia(item.fileName||item.title)}">&#128206; ${escapeQuestionMedia(item.title||item.fileName)}</a>`:item.type==='link'?renderStudentLearningVideo(item):`<p>${escapeQuestionMedia(item.body||'')}</p>`}</div></details>`}).join('')}</details>`}).join('') : '<div class="subject-empty">Your professor has not published weekly content yet.</div>'}</div></section>
+      <section class="subject-info-cell subject-detail-exams"><h3>Weekly learning</h3><div class="learning-week-stack">${learningWeeks.length ? learningWeeks.map(week => {const weekRecord=learningContent.find(item=>item.week===week);return `<details class="learning-week"><summary><strong>Week ${week} · ${escapeQuestionMedia(weekRecord?.weekTitle || `Week ${week}`)}</strong></summary>${weekRecord?.weekDescription?`<p class="learning-week-description">${escapeQuestionMedia(weekRecord.weekDescription)}</p>`:''}${learningContent.filter(item=>item.week===week).map(item=>{const index=learningContent.indexOf(item),state=learningCellState(item,index,learningContent),completed=learningCellCompleted(item.id),meta=learningTypeMeta(item);return state.locked?`<div class="learning-cell locked"><strong>${escapeQuestionMedia(item.title||'Content')}</strong><span>&#128274; ${escapeQuestionMedia(state.label)}</span></div>`:`<details class="learning-cell ${item.type==='exam'?'attached-exam-block':''}" ontoggle="recordLearningCellView('${item.id}',this)"><summary><span class="learning-row-icon ${meta.tone}" aria-hidden="true">${meta.icon}</span><span class="learning-row-copy"><strong>${escapeQuestionMedia(item.title||'Content')}</strong><small>${escapeQuestionMedia(meta.label)} · Week ${week}</small></span>${item.type==='exam'?`<button type="button" class="learning-status-button ${completed?'done':''}" onclick="event.preventDefault();event.stopPropagation();openExamDetails('${escapeQuestionMedia(item.examId)}')">${completed?'✓ Done':'Open quiz'} <span class="status-caret">▾</span></button>`:`<button type="button" class="learning-status-button ${completed?'done':''}" onclick="event.preventDefault();event.stopPropagation();toggleLearningCellDone('${item.id}')">${completed?'✓ Done':'To do'} <span class="status-caret">▾</span></button>`}</summary><div class="learning-cell-body"><div class="learning-meta-line"><span>${escapeQuestionMedia(meta.label)}</span><span>Short lesson</span></div>${item.type==='exam'?`${(item.bodyHtml||item.body)&&typeof LessonViewer!=='undefined'?`<div class="learning-exam-desc">${LessonViewer.renderContent({...item,type:'text'})}</div>`:''}<button type="button" class="attached-exam-link" onclick="openExamDetails('${escapeQuestionMedia(item.examId)}')"><span>&#128221;</span><span><strong>${escapeQuestionMedia(item.title||'Examination')}</strong><small>Always open · up to 99 attempts</small></span><span aria-hidden="true">&#8594;</span></button>`:item.type==='visual'?renderStudentVisualLesson(item):item.type==='file'?`<a href="${item.dataUrl||'#'}" download="${escapeQuestionMedia(item.fileName||item.title)}">&#128206; ${escapeQuestionMedia(item.title||item.fileName)}</a>`:item.type==='link'?renderStudentLearningVideo(item):`<p>${escapeQuestionMedia(item.body||'')}</p>`}</div></details>`}).join('')}</details>`}).join('') : '<div class="subject-empty">Your professor has not published weekly content yet.</div>'}</div></section>
     </div></main><aside class="student-week-rail" aria-label="Weekly lessons"><div class="student-week-rail-head"><div><span>Course path</span><strong>Weekly lessons</strong></div><div class="student-week-nav-controls"><button type="button" onclick="navigateStudentSubjectWeek(-1)" aria-label="Previous week">&#8249;</button><button type="button" onclick="navigateStudentSubjectWeek(1)" aria-label="Next week">&#8250;</button></div></div><div class="student-week-links">${learningWeeks.length?learningWeeks.map((week,index)=>{const weekItems=learningContent.filter(item=>item.week===week&&item.type!=='exam'),weekRecord=learningContent.find(item=>item.week===week);return `<button type="button" class="student-week-link ${index===0?'active':''}" data-week="${week}" onclick="focusStudentSubjectWeek(${week})"><span class="student-week-number">W${week}</span><span class="student-week-link-label"><strong>${escapeQuestionMedia(weekRecord?.weekTitle||`Week ${week}`)}</strong><small>${weekItems.length} lesson${weekItems.length===1?'':'s'}</small></span><span class="student-week-link-arrow" aria-hidden="true">&#8594;</span></button>`}).join(''):'<div class="subject-empty">No lessons yet.</div>'}</div><section class="student-week-upcoming"><div class="student-week-upcoming-head"><strong>Open quizzes</strong><span>${upcomingSubjectExams.length}</span></div><div class="student-week-exam-list">${upcomingSubjectExams.length?upcomingSubjectExams.map((exam,index)=>`<button type="button" class="student-week-exam" data-open-quiz="${escapeQuestionMedia(exam.id)}" style="--exam-tone:${['#cf6729','#27766d','#9b6a24','#6e5da8'][index%4]}" onclick="openExamDetails('${escapeQuestionMedia(exam.id)}')"><strong>${escapeQuestionMedia(exam.title||'Examination')}</strong><small>${exam.date?`Due ${escapeQuestionMedia(`${exam.date} · ${exam.end||'23:59'}`)}`:'Always open'}</small></button>`).join(''):'<div class="student-week-empty">No open quizzes for this subject.</div>'}</div></section></aside></div></div>
     <div class="student-subject-tab-panel" data-subject-tab-panel="class"><section class="subject-info-cell classmate-cell"><h3>&#128101; Classmates</h3><p class="field-hint">Limited profiles protect grades, activity, and login information.</p><div class="classmate-list">${classmates.length?classmates.map(person=>`<button type="button" class="classmate-row" onclick="RoleProfileViewer.openStudent('${person.id}',{viewerRole:'student',viewerId:'${currentStudent.id}',subjectCode:'${code}',sectionId:'${enrollment.sectionId}'})"><span class="classmate-avatar">${escapeQuestionMedia(`${person.first?.[0]||''}${person.last?.[0]||''}`.toUpperCase())}</span><span><strong>${escapeQuestionMedia(person.last)}, ${escapeQuestionMedia(person.first)}</strong><small>View limited profile</small></span><span aria-hidden="true">&#8594;</span></button>`).join(''):'<p>No classmates are listed for this offering.</p>'}</div></section></div>
     <div class="student-subject-tab-panel" data-subject-tab-panel="exams"><section class="subject-info-cell subject-exam-progress-card"><div class="subject-exam-progress-title"><span class="dashboard-eyebrow">Subject assessment</span><h3>Examination progress</h3><p>Due dates, completed attempts, grades, and recorded scores.</p></div>${studentSubjectExamTabMarkup(subjectExams)}</section></div>`;
@@ -1459,7 +1485,7 @@ function renderStudentExamList(list) {
     const itemCount = questions.filter(question => question.examId === exam.id).length;
     const mine = submissions.filter(item => item.studentId === currentStudent.id && item.examId === exam.id)
       .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-    const submission = mine[0] || null;
+    const submission = (typeof countedSubmission === 'function' ? countedSubmission(exam, mine) : mine[0]) || null;
     const used = attemptsForExam(exam.id), limit = attemptsAllowed(exam);
     const exhausted = used >= limit, win = examWindow(exam);
     const scheduled = exam.date ? `${exam.date} · ${exam.start || '09:00'}–${exam.end || '23:59'}`
@@ -1768,13 +1794,15 @@ function startExam(examId) {
   allOnOnePage = exam.questionLayout === 'all';
   navigationMode = ['free', 'sequential', 'forward'].includes(exam.navigationMode)
     ? exam.navigationMode : 'free';
+  // Shuffled exams: this attempt's own order, saved with the attempt.
+  const orderedQuestions = orderAttemptQuestions(activeAttempt, questions.filter(q => q.examId === examId), !!exam.shuffleQuestions);
   const initialSaveSucceeded = saveAttempt(activeAttempt);
   startAttemptTimer(exam);
 
   activeExamId = examId;
   const sub = subjects.find(s => s.code === exam.subjectCode);
 
-  currentExamQuestions = questions.filter(q => q.examId === examId);
+  currentExamQuestions = orderedQuestions;
   const totalPts = currentExamQuestions.reduce((sum, q) => sum + (q.points || 5), 0);
 
   document.getElementById('modalExamTitle').textContent = exam.title || 'Examination';
@@ -2920,7 +2948,7 @@ try{
   }
 }catch(_){}
 </script>
-<script src="../js/profile-uniform.js?v=20261119-1"></script>
+<script src="../js/profile-uniform.js?v=20261125-one"></script>
 <script src="../js/overlay-stack.js?v=20261119-1"></script>
 </body>
 </html>

@@ -22,20 +22,22 @@ const ProfileEnhance = (() => {
   }
   // Quick facts under the banner for a student modal.
   function facts(modal) {
-    if (modal.querySelector('.pe-facts')) return;
     const meta = modal.querySelector('.student-profile-head p:not(.profile-eyebrow)')?.textContent || '', id = (meta.match(/\d{4}-\d{5}/) || [])[0];
     const student = id && read('students').find(s => s.id === id); if (!student) return;
     const sections = read('sections'), sec = (student.sections || []).map(x => sections.find(s => s.id === x)).find(Boolean);
     const enr = read('studentEnrollments').filter(e => e.studentId === id), subs = read('subjects'), units = enr.reduce((t, e) => t + (Number(subs.find(s => s.code === e.subjectCode)?.units) || 0), 0);
     const items = [['Program', sec?.program || '—'], ['Year', sec?.yearLevel ? `Year ${sec.yearLevel}` : '—'], ['Section', (student.sections || []).join(', ') || '—'], ['Subjects', String(new Set(enr.map(e => e.subjectCode)).size)], ['Units', String(units)]];
-    modal.querySelector('.profile-tabs')?.insertAdjacentHTML('beforebegin', `<div class="pe-facts">${items.map(([k, v]) => `<div><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('')}</div>`);
+    // Rebuilt when the numbers change (e.g. after saving subjects); untouched otherwise, so observers do not loop.
+    const inner = items.map(([k, v]) => `<div><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join(''), existing = modal.querySelector('.pe-facts');
+    if (existing) { if (existing.innerHTML !== inner) existing.innerHTML = inner; return; }
+    modal.querySelector('.profile-tabs')?.insertAdjacentHTML('beforebegin', `<div class="pe-facts">${inner}</div>`);
   }
   // Subject rows: code chip, section pill, professor with initials.
   function rows(modal) {
     modal.querySelectorAll('.student-profile-page>main table tbody tr').forEach(tr => {
       if (tr.dataset.pe || tr.cells.length < 2) return; tr.dataset.pe = '1';
       const first = tr.cells[0], code = first.querySelector('strong');
-      if (code && /^[A-Z]{2,4}\d{3,4}/.test(code.textContent.trim())) code.classList.add('pe-code');
+      if (code && /^[A-Z]{2,6}\d{2,4}$/.test(code.textContent.trim())) code.classList.add('pe-code');
       [...tr.cells].forEach(td => {
         const own = [...td.childNodes].filter(n => n.nodeType === 3 || (n.nodeType === 1 && !n.matches('.section-action-wrap,.admin-row-action'))), text = own.map(n => n.textContent).join('').trim();
         if (/^\d[A-Z]{2,}[A-Z0-9]*-\d+$/.test(text)) { own.forEach(n => n.remove()); td.insertAdjacentHTML('afterbegin', `<span class="pe-section">${esc(text)}</span>`); }

@@ -6,7 +6,11 @@ const ApprovalService = (() => {
     'professor-assignment': { submit: 'coordinator', review: 'dean' },
     'student-overload': { submit: ['coordinator', 'admin'], review: 'dean' },
     'faculty-student-enrollment': { submit: 'faculty', review: 'dean' },
-    'role-assignment': { submit: ['coordinator', 'admin'], review: 'dean' }
+    'role-assignment': { submit: ['coordinator', 'admin'], review: 'dean' },
+    // Faculty Coordinator → Dean: enroll a Student within their normal load,
+    // or give a Professor a class beyond their normal load (up to the maximum).
+    'student-enrollment': { submit: 'coordinator', review: 'dean' },
+    'professor-overload': { submit: 'coordinator', review: 'dean' }
   });
   const applyHandlers = new Map();
   const now = () => new Date().toISOString();

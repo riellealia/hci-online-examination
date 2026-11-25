@@ -77,7 +77,7 @@ body[data-role="student"] #page{min-height:calc(100dvh - 28px);margin:14px auto;
 .student-mobile-menu{display:none!important}@media(max-width:760px){.student-mobile-menu{position:fixed!important;top:12px;left:12px;z-index:49;display:grid!important;width:40px;height:40px;place-items:center;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--student-card)!important;color:var(--student-forest);font-size:0;box-shadow:var(--sh-sm)}.student-mobile-menu::before{content:"☰";font-size:20px}.student-mobile-menu::after{display:none}}
 
 /* Lighter student typography and clearer elevation */
-body[data-role="student"]{--student-cream:#eeeae2;--student-card:#ffffff;--student-soft:#f4f1eb;--student-text:#1d302d;--student-muted:#687772;font-family:Inter,"Segoe UI",Arial,sans-serif;font-weight:400;background:var(--student-cream)}
+body[data-role="student"]{--student-cream:#eeeae2;--student-card:#ffffff;--student-soft:#f4f1eb;--student-text:#1d302d;--student-muted:#687772;font-family:var(--pr-font,'Poppins',Arial,sans-serif);font-weight:400;background:var(--student-cream)}
 body[data-role="student"] :is(button,input,select,textarea){font-family:inherit}body[data-role="student"] :is(h1,h2,h3,h4,strong,b){font-weight:600}body[data-role="student"] :is(.dashboard-eyebrow,.dashboard-class-code,.subject-summary-label,.student-week-rail-head span,.week-content-heading strong,.result-subject-column-head){font-weight:650}body[data-role="student"] :is(.text-link,.calendar-today-button,.dashboard-schedule-link,.learning-status-button,.student-sidebar-profile-menu button){font-weight:600}
 body[data-role="student"] .student-dashboard-card,body[data-role="student"] :is(.student-status-card,.dashboard-class-card,#exams-panel .exam-list-row,#results-panel .subject-card,.student-mail-list-card,.student-mail-reader){border-color:#d7d3cb;background:#fff;box-shadow:0 7px 20px rgba(44,55,50,.09)}
 body[data-role="student"] .student-status-card{background:#fff;border-left:4px solid var(--status-color)}body[data-role="student"] .student-status-card.status-done{background:#f8fcfa}body[data-role="student"] .student-status-card.status-missed{background:#fff9f5}body[data-role="student"] .student-status-card.status-todo{background:#fffbf4}
@@ -112,7 +112,7 @@ body[data-role="student"] #studentSubjectDetail .learning-week>summary{cursor:po
 @media(max-width:920px){.student-subject-side-column{position:static;order:-1;width:100%}.student-subject-side-column>.student-week-upcoming{order:0}.student-subject-side-column>.student-week-rail{order:1}}
 
 /* Compact Student-themed examination briefing. */
-body[data-role="student"] #takeExamModal{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--student-text)}
+body[data-role="student"] #takeExamModal{font-family:var(--pr-font,'Poppins',Arial,sans-serif);color:var(--student-text)}
 body[data-role="student"] #takeExamModal .exam-page-header{min-height:62px;padding:11px max(28px,calc((100vw - 920px)/2));border-bottom:2px solid color-mix(in srgb,var(--student-orange) 75%,transparent);background:var(--student-forest);box-shadow:0 7px 20px rgba(7,59,53,.16)}
 body[data-role="student"] #takeExamModal .exam-page-heading{display:grid;min-width:0;max-width:min(660px,calc(100vw - 250px));gap:2px}
 body[data-role="student"] #takeExamModal #modalExamTitle{margin:0;font-size:16px;font-weight:600;letter-spacing:-.015em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -270,7 +270,7 @@ body[data-role="student"] #studentSubjectDetail .learning-cell.is-focused>summar
 body[data-role="student"] .student-progress-chart{display:grid;place-items:center;overflow:hidden}
 body[data-role="student"] .student-progress-chart svg{width:100%;max-width:none;height:200px;margin-inline:0;overflow:visible}
 body[data-role="student"] .results-score-chart svg{height:210px}
-body[data-role="student"] .student-progress-chart .chart-label{font-family:Inter,"Segoe UI",Arial,sans-serif;font-weight:450;letter-spacing:0}
+body[data-role="student"] .student-progress-chart .chart-label{font-family:var(--pr-font,'Poppins',Arial,sans-serif);font-weight:450;letter-spacing:0}
 
 /* Dark mode: labels that use the deep brand green as text become a soft
    teal, readable on the dark canvas without glare. */
@@ -284,3 +284,20 @@ body[data-role="student"] .student-progress-chart .chart-label{font-family:Inter
    hovered or selected rows are tinted. */
 body[data-role="student"] .student-mail-row:not(.unread):not(.active):not(:hover):not(#sm){background:var(--student-card,#fff)!important}
 body[data-role="student"] .student-mail-row:is(:hover,.active):not(.unread):not(#sm){background:var(--student-soft)!important}
+/* The Subjects toolbar belongs in the page heading (top right). The shared shell is
+   position:relative, which made it land on top of the first row of subject cards. */
+.student-subjects-page>.role-table-shell{position:static}
+/* In the green heading the icons are white; the shared toolbar rule (table-toolbar.css) would make them dark green. */
+html body #subjects-panel .role-table-tools .tool-icon.tool-icon:not(#tt):not(#tt2){color:#fff!important}
+html body #subjects-panel .role-table-tools .tool-icon.tool-icon:not(#tt):not(#tt2):is(:hover,.active,.has-query){background:rgba(255,255,255,.18)!important}
+/* Phone: the schedule rail stacks (calendar, then the selected day) instead of squeezing the day card into a 0px column. */
+@media(max-width:760px){html body #studentCalendarRailContent:not(#tf){grid-template-columns:minmax(0,1fr)!important}}
+/* Contrast (UI audit): the "To do" legend text and dark-mode feedback text. */
+html body .legend-todo:not(#tf){color:#95600f!important}html body .legend-todo::before{background:var(--student-gold)!important}
+:root[data-theme="dark"] body .legend-todo:not(#tf){color:var(--student-gold)!important}
+:root[data-theme="dark"] body .remark-box p:not(#tf){color:#d5ddda!important}
+/* The rail toggle sat on top of the calendar's "next month" button; it now straddles the card's top edge (desktop only). */
+@media(min-width:1121px){html body .calendar-rail-toggle:not(#tf){top:-17px!important;right:18px!important;left:auto!important}}
+/* Results: the attempt that counts toward the grade when an exam allows several. */
+.counts-pill{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--student-green) 14%,transparent);color:var(--student-green);font:700 10px/1.6 var(--pr-font,'Poppins',sans-serif);vertical-align:middle;letter-spacing:.02em}
+:root[data-theme="dark"] .counts-pill{color:#9fd6c6}

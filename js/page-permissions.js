@@ -100,10 +100,10 @@
       ]],
       ['Exams', [
         ['prof.exams.create', 'Create exams', 'Start a new examination', [...any('openExamModal'), '.add-exam-btn'], ['exams']],
-        ['prof.exams.edit', 'Edit exams', 'Change exam settings', any('editExam', 'saveExam'), ['exams']],
+        ['prof.exams.edit', 'Edit exams', 'Change exam settings', [...any('editExam', 'saveExam'), '.question-workspace:not(.is-new-exam) .exam-settings-btn', '.question-shuffle-toggle'], ['exams']],
         ['prof.exams.delete', 'Delete exams', 'Remove an examination', any('deleteExam'), ['exams']],
         ['prof.exams.publish', 'Publish exams', 'Release an exam to students', any('reviewAndPublishExam'), ['exams']],
-        ['prof.questions.edit', 'Write questions', 'Add, change, move and copy questions', any('openQuestionModal', 'editQuestion', 'saveQuestion', 'duplicateQuestion', 'moveQuestion'), ['questions', 'questionDrafts']],
+        ['prof.questions.edit', 'Write questions', 'Add, change, move and copy questions', [...any('openQuestionModal', 'editQuestion', 'saveQuestion', 'duplicateQuestion', 'moveQuestion', 'addQuestionOfType'), '.question-add-menu', '.question-drag-handle'], ['questions', 'questionDrafts']],
         ['prof.questions.delete', 'Delete questions', 'Remove questions', any('deleteQuestion'), ['questions']],
         ['prof.exams.export', 'Export exams', 'Download an exam as a file or spreadsheet', ['.exam-export-wrap']],
         ['prof.questions.import', 'Import questions', 'Upload questions from a CSV file', any('confirmQuestionCSVUpload'), ['questions']]

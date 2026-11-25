@@ -81,8 +81,37 @@ const AdminTableTools = (() => {
       tools.querySelector('.table-direction').onclick=e=>{s.dir*=-1;save(key);e.currentTarget.classList.toggle('descending',s.dir===-1);e.currentTarget.setAttribute('aria-label',s.dir===1?'Sort ascending':'Sort descending');e.currentTarget.title=s.dir===1?'Ascending':'Descending';apply(key,table);};
     }
     extras(key,table,tools,options);
+    // Import sits right before Export, so file in / file out are side by side.
+    {const imp=tools.querySelector('.table-import-action'),exp=tools.querySelector('.table-export-wrap');if(imp&&exp&&imp.nextElementSibling!==exp)exp.before(imp);}
+    if(!tools.dataset.floating){tools.dataset.floating='1';tools.addEventListener('click',()=>requestAnimationFrame(()=>placePanels(tools)),true);}
     restore(key,tools);
     apply(key,table);
+  }
+  /* Toolbar pop-outs (search box, sort / group lists, export menu) float above the page so a
+     card or scrolling table can never clip them; they open upward when there is no room below. */
+  function placePanels(tools){
+    if(!tools.isConnected)return;
+    const anchor=tools.getBoundingClientRect();
+    // A page can keep its search box inline in the toolbar (e.g. My Students) — that one does not float.
+    const inlineSearch=!!tools.closest('#students-tab');
+    tools.querySelectorAll('.table-export-menu,.table-search-box,.table-tool-select').forEach(panel=>{
+      if(inlineSearch&&panel.classList.contains('table-search-box')){['position','top','right','left','bottom','z-index'].forEach(p=>panel.style.removeProperty(p));return;}
+      if(panel.hidden){['position','top','right','left','bottom','z-index'].forEach(p=>panel.style.removeProperty(p));return;}
+      const set=(p,v)=>panel.style.setProperty(p,v,'important');
+      set('position','fixed');set('left','auto');set('bottom','auto');set('z-index','2000');
+      const h=panel.offsetHeight,below=anchor.bottom+6,above=anchor.top-6-h;
+      set('top',`${below+h>innerHeight-8&&above>8?above:Math.min(below,Math.max(8,innerHeight-8-h))}px`);
+      set('right',`${Math.max(8,innerWidth-anchor.right)}px`);
+    });
+  }
+  // Keep open pop-outs attached to their toolbar while the page or a container scrolls.
+  // Applies to every toolbar that uses these pop-outs (shared table tools, Coordinator/Dean workspace
+  // toolbars, the curriculum toolbar), whichever code built it.
+  const BARS='.table-tools,.cw-tools,.curriculum-top-tools';
+  if(typeof window!=='undefined'){
+    document.addEventListener('click',e=>{const bar=e.target.closest?.(BARS);if(bar)requestAnimationFrame(()=>placePanels(bar));},true);
+    const follow=()=>document.querySelectorAll(BARS).forEach(t=>{if(t.querySelector('.table-export-menu:not([hidden]),.table-search-box:not([hidden]),.table-tool-select:not([hidden])'))placePanels(t);});
+    window.addEventListener('scroll',follow,true);window.addEventListener('resize',follow);
   }
   return { mount, apply, exportTable };
 })();

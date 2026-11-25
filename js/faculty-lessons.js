@@ -8,7 +8,7 @@ const FacultyLessons = (() => {
   const TONES = ['var(--accent)', '#c76125', '#367b86', '#7460a8'];
   let currentCode = null;
 
-  const records = code => DB.read('subjectWorkspaceContent', []).filter(item => item.subjectCode === code).sort((a, b) => a.week - b.week || new Date(a.createdAt) - new Date(b.createdAt));
+  const records = code => DB.read('subjectWorkspaceContent', []).filter(item => item.subjectCode === code).sort((a, b) => a.week - b.week || (a.order ?? 1e9) - (b.order ?? 1e9) || new Date(a.createdAt) - new Date(b.createdAt));
   function meta(item) {
     if (item.type === 'exam') return { label: 'Quiz', icon: '&#9998;', tone: 'quiz' };
     if (item.type === 'link') return { label: 'Video resource', icon: '&#9654;', tone: 'media' };
@@ -81,7 +81,7 @@ const FacultyLessons = (() => {
       const exam = entry.type === 'exam' ? exams.find(x => x.id === entry.examId) : null;
       return {
         id: entry.id, title: entry.title || 'Lesson page', kind: m.label, icon: m.icon, done: false,
-        html: entry.type === 'exam' ? '' : LessonViewer.renderContent(entry),
+        html: entry.type === 'exam' ? (entry.bodyHtml || entry.body ? LessonViewer.renderContent({ ...entry, type: 'text' }) : '') : LessonViewer.renderContent(entry),
         quiz: entry.type === 'exam' ? { examId: entry.examId, label: 'Open questions', meta: exam ? `${exam.date ? `Due ${exam.date}` : 'Always open'}${exam.durationMinutes ? ` · ${exam.durationMinutes} min` : ''}` : '' } : null,
         lockedReason: ''
       };

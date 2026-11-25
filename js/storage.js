@@ -35,6 +35,28 @@ const SERVER_TOKEN_MIRROR = 'neu:serverSessionToken';
     }
   } catch (_) {}
 })();
+/* Browsers cap localStorage at about 5 MB. A collection the server sends that
+   does not fit is kept in memory for this page instead: it is re-fetched from
+   the server on every page load, so nothing is lost, and the rest of the data
+   still hydrates instead of the whole sync failing at the first full write. */
+const _memoryCache = new Map();
+function cacheGet(key) {
+  return _memoryCache.has(key) ? _memoryCache.get(key) : localStorage.getItem(key);
+}
+function cacheSet(key, payload) {
+  try {
+    localStorage.setItem(key, payload);
+    _memoryCache.delete(key);
+  } catch (e) {
+    if (!isQuotaError(e) || !SQLITE_BACKEND_ACTIVE) throw e;
+    try { localStorage.removeItem(key); } catch (_) {} // never leave an older copy behind
+    _memoryCache.set(key, payload);
+  }
+}
+function cacheRemove(key) {
+  _memoryCache.delete(key);
+  localStorage.removeItem(key);
+}
 function storeServerToken(token) {
   try { sessionStorage.setItem('serverSessionToken', token); localStorage.setItem(SERVER_TOKEN_MIRROR, token); } catch (_) {}
 }
@@ -122,9 +144,13 @@ function sqliteBootstrap() {
       if (!key || SQLITE_LOCAL_ONLY.has(key)) continue;
       try { local[key] = JSON.parse(localStorage.getItem(key)); } catch (_) {}
     }
-    serverCollections.forEach(key => { if (!SQLITE_LOCAL_ONLY.has(key) && !Object.hasOwn(records, key)) localStorage.removeItem(key); });
+    serverCollections.forEach(key => { if (!SQLITE_LOCAL_ONLY.has(key) && !Object.hasOwn(records, key)) cacheRemove(key); });
     if (keys.length) {
-      keys.forEach(key => { if (!SQLITE_LOCAL_ONLY.has(key)) localStorage.setItem(key, JSON.stringify(records[key])); });
+      // Free the old copies first, then store smallest first so as many
+      // collections as possible stay in localStorage; the rest go to memory.
+      const payloads = keys.filter(key => !SQLITE_LOCAL_ONLY.has(key)).map(key => [key, JSON.stringify(records[key])]);
+      payloads.forEach(([key]) => { try { localStorage.removeItem(key); } catch (_) {} });
+      payloads.sort((a, b) => a[1].length - b[1].length).forEach(([key, payload]) => cacheSet(key, payload));
     }
     const migrationRecords = keys.length
       ? Object.fromEntries(Object.entries(local).filter(([key]) => !Object.hasOwn(records, key)))
@@ -213,7 +239,7 @@ const DB = {
   read(key, fallback) {
     let raw;
     try {
-      raw = localStorage.getItem(key);
+      raw = cacheGet(key);
     } catch (e) {
       // Storage can be blocked outright (private mode, disabled cookies).
       storageNotify(
@@ -251,7 +277,7 @@ const DB = {
     try {
       const saved = writeSqliteSync('PUT', key, value);
       if (!saved) return false;
-      localStorage.setItem(key, saved === true ? payload : JSON.stringify(saved.value));
+      cacheSet(key, saved === true ? payload : JSON.stringify(saved.value));
       return true;
     } catch (e) {
       if (isQuotaError(e)) {
@@ -295,7 +321,7 @@ const DB = {
         throw new Error(reason || `SQLite returned ${request.status}.`);
       }
       const response = JSON.parse(request.responseText || '{}');
-      localStorage.setItem(key, JSON.stringify(response.value || []));
+      cacheSet(key, JSON.stringify(response.value || []));
       return true;
     } catch (error) {
       storageNotify(`SQLite could not append "${key}": ${error.message || 'the server rejected the event'}`, 'error');
@@ -307,7 +333,7 @@ const DB = {
   remove(key) {
     try {
       if (!writeSqliteSync('DELETE', key)) return false;
-      localStorage.removeItem(key);
+      cacheRemove(key);
       return true;
     } catch (e) {
       console.error('[storage] remove failed', key, e);
@@ -337,7 +363,7 @@ const DB = {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'CSV import failed.');
     const stored = await fetch(`/api/storage/${encodeURIComponent(collection)}`,{headers:{'Authorization':`Bearer ${token}`}}).then(item => item.json());
-    localStorage.setItem(collection, JSON.stringify(stored.value || []));
+    cacheSet(collection, JSON.stringify(stored.value || []));
     return result;
   },
 

@@ -117,7 +117,7 @@ const DemoData = {
     const students=[];let studentNo=1;
     const studentLast=['Abad','Alcantara','Andres','Balagtas','Cabral','David','Escobar','Francisco','Galang','Herrera','Ignacio','Javier','Katigbak','Lacsamana','Macapagal','Natividad','Ortega','Quintos','Rivera','Samson','Tolentino','Uy','Vergara','Yap'];
     const studentFirst=['Aaron','Abigail','Adrian','Alexa','Brandon','Chloe','Christian','Denise','Ethan','Frances','Gian','Hannah','Isaac','Julia','Kyle','Louise','Nathan','Olivia','Paolo','Queenie','Sean','Trisha','Vincent','Zoe'];
-    students.push({id:'2025-00002',last:'Santos',first:'Maria',sections:['2BSCS-1']});
+    students.push({id:'2025-00002',last:'Santos',first:'Bianca',sections:['2BSCS-1']});
     sections.forEach(section=>{
       const existing=students.filter(student=>student.sections.includes(section.id)).length,target=20;
       for(let index=existing;index<target;index++){
@@ -152,7 +152,7 @@ const DemoData = {
     const subjectAssignments=subjects.map(subject=>({subjectCode:subject.code,facultyIds:[...new Set(offers.filter(offer=>offer.subjectCode===subject.code).map(offer=>offer.facultyId))]}));
     const passwordName=value=>value.toLowerCase().replace(/\s+/g,'');
     const coordinators=[
-      {username:'coordinator.demo',password:'coord123',first:'Demo',last:'Santos'},
+      {username:'coordinator.demo',password:'coord123',first:'Patricia',last:'Lorenzo'},
       {username:'coord.001',password:'coord001',first:'Andrea',last:'Cruz'},
       {username:'coord.002',password:'coord002',first:'Benjamin',last:'Flores'},
       {username:'coord.003',password:'coord003',first:'Camille',last:'Garcia'},
@@ -163,7 +163,7 @@ const DemoData = {
       {username:'coord.008',password:'coord008',first:'Henry',last:'Bautista'},
       {username:'coord.009',password:'coord009',first:'Isabella',last:'Ramos'}
     ].map(item=>({...item,id:item.username,role:'coordinator',college:'College of Information and Computer Studies',status:'active'}));
-    const users=[{username:'admin',password:'admin123',role:'admin'},{username:'dean.demo',password:'dean123',role:'dean',first:'College',last:'Dean'},...coordinators.map(({username,password,role,first,last,college,status})=>({username,password,role,first,last,college,status})),...faculty.map(item=>{const firstOffer=offers.find(offer=>offer.facultyId===item.id),year=firstOffer?sections.find(section=>section.id===firstOffer.sectionId)?.yearLevel||0:0;return{username:item.id,password:item.id==='23-32534-345'?'reyes23':passwordName(item.last)+year,role:'faculty'};}),...students.map(item=>({username:item.id,password:item.id==='2025-00002'?'santos2025':passwordName(item.last)+(sections.find(section=>section.id===item.sections[0])?.yearLevel||0),role:'student'}))];
+    const users=[{username:'admin',password:'admin123',role:'admin'},{username:'dean.demo',password:'dean123',role:'dean',first:'Ricardo',last:'Salcedo'},...coordinators.map(({username,password,role,first,last,college,status})=>({username,password,role,first,last,college,status})),...faculty.map(item=>{const firstOffer=offers.find(offer=>offer.facultyId===item.id),year=firstOffer?sections.find(section=>section.id===firstOffer.sectionId)?.yearLevel||0:0;return{username:item.id,password:item.id==='23-32534-345'?'reyes23':passwordName(item.last)+year,role:'faculty'};}),...students.map(item=>({username:item.id,password:item.id==='2025-00002'?'santos2025':passwordName(item.last)+(sections.find(section=>section.id===item.sections[0])?.yearLevel||0),role:'student'}))];
     const exams=[],questions=[],studentSubmissions=[],anchor=new Date(Date.UTC(2026,7,25));
     const isoDate=offset=>{const date=new Date(anchor);date.setUTCDate(date.getUTCDate()+offset);return date.toISOString().slice(0,10);};
     const durationChoices=[30,45,60,75,90,120],assessmentNames=['Quick Quiz','Skills Check','Unit Test'],questionTypes=['mcq','truefalse','number','fillblank','matching','essay'];

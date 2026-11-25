@@ -87,7 +87,7 @@ const CoordinatorDashboard = (() => {
   function requestsCard(ctx) {
     const count = s => ctx.requests.filter(r => r.status === s).length;
     const latest = ctx.requests.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).slice(0, 4);
-    const label = t => ({ 'professor-assignment': 'Professor assignment', 'student-overload': 'Student overload', 'faculty-student-enrollment': 'Enrollment change' }[t] || String(t || 'Request').replace(/-/g, ' '));
+    const label = t => ({ 'professor-assignment': 'Professor assignment', 'student-overload': 'Student overload', 'faculty-student-enrollment': 'Enrollment change', 'role-assignment': 'Role', 'student-enrollment': 'Student subject', 'professor-overload': 'Professor overload' }[t] || String(t || 'Request').replace(/-/g, ' '));
     return `<section class="cd-card"><header class="cd-card-head"><div><h2>Dean requests</h2><p>Changes that need the Dean's approval</p></div><button type="button" class="cd-link" data-cd-go="applications">Open &#8250;</button></header>
       <div class="cd-req-stats"><div><strong>${count('pending')}</strong><span>Pending</span></div><div><strong>${count('approved')}</strong><span>Approved</span></div><div><strong>${count('rejected')}</strong><span>Rejected</span></div></div>
       ${latest.length ? `<ul class="cd-list">${latest.map(r => `<li><span><strong>${esc(label(r.type))}</strong><small>${esc(r.targetId || '')}${r.createdAt ? ` · ${esc(new Date(r.createdAt).toLocaleDateString())}` : ''}</small></span><em class="cd-status ${esc(r.status)}">${esc(r.status)}</em></li>`).join('')}</ul>` : '<p class="cd-empty">No requests yet. Professor assignments and overload applications you send will appear here.</p>'}</section>`;

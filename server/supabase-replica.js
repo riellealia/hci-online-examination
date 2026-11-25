@@ -1,5 +1,7 @@
 'use strict';
-/* SQLite stays the server's working copy; Supabase is the durable replica.
+/* Supabase is the database. The server keeps a working copy (in memory when
+   Supabase is configured, see server/memory-store.js; SQLite only when it is
+   not), loads it from Supabase at start, and sends every change back.
    Two layouts:
    - relational (options.relational = true): collections listed in
      server/supabase-tables.js live in their own tables, one row per record,
@@ -24,6 +26,11 @@ function createSupabaseReplicatedStore(localStore, options = {}) {
   // Multi-instance sync: writes in flight per collection, local write counters,
   // and the last sync_versions value this instance has applied.
   const pendingByKey = new Map(), writeSeq = new Map(), known = new Map();
+  // Every failed write is counted and its collection remembered, so a request
+  // can tell whether its own changes reached Supabase (see failureCount and
+  // revertFailed) even when a later write succeeds and clears lastError.
+  let failures = 0;
+  const failedKeys = new Set();
   const follow = { active: false, timer: null, polling: false, lastPollAt: null, reloads: 0, error: null };
 
   const headers = {
@@ -51,6 +58,8 @@ function createSupabaseReplicatedStore(localStore, options = {}) {
       lastSyncedAt = new Date().toISOString();
     }).catch(error => {
       settle();
+      failures++;
+      if (key) failedKeys.add(key);
       lastError = error;
       console.error(error.message);
     });
@@ -217,7 +226,11 @@ function createSupabaseReplicatedStore(localStore, options = {}) {
       else for (const [key, value] of Object.entries(changed)) enqueue(() => syncCollection(key, before[key], value), key);
       return result;
     },
-    recordImport: localStore.recordImport,
+    // CSV import history is a collection like any other, so it reaches Supabase.
+    recordImport(key, count) {
+      const at = new Date().toISOString();
+      return store.append('csvImportHistory', { id: `csv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, collectionKey: key, rowCount: count, importedAt: at });
+    },
     async hydrate() {
       if (!enabled) return { enabled: false, hydrated: 0 };
       // Versions first: any change made after this point is picked up by the next poll.
@@ -261,6 +274,24 @@ function createSupabaseReplicatedStore(localStore, options = {}) {
       return { synced, ok: !lastError, error: lastError ? lastError.message : null };
     },
     async flush() { await pending; return !lastError; },
+    failureCount() { return failures; },
+    /* After a failed write: put the collections that failed back to what
+       Supabase holds, so the server never serves a change Supabase rejected.
+       A collection that cannot be reloaded stays marked for a full sync. */
+    async revertFailed() {
+      await pending;
+      const keys = [...failedKeys]; failedKeys.clear();
+      const reverted = [];
+      for (const key of keys) {
+        if ((pendingByKey.get(key) || 0) > 0) continue;
+        try {
+          const value = await remoteValue(key);
+          if (value === undefined) localStore.delete(key); else localStore.write(key, value);
+          dirty.delete(key); reverted.push(key);
+        } catch (error) { failedKeys.add(key); console.error(`Could not reload ${key} from Supabase: ${error.message}`); }
+      }
+      return reverted;
+    },
     startFollowing,
     stopFollowing,
     pollOnce,
