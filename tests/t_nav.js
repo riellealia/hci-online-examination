@@ -1,7 +1,7 @@
 const {load,SEED}=require('./harness');
 const ok=(c,m)=>console.log(`  ${c?'✅':'❌'} ${m}`);
 const pages=[
-  ['admin.html',  {username:'admin',role:'admin'}, 10, 'Dashboard'],
+  ['admin.html',  {username:'admin',role:'admin'}, 11, 'Dashboard'],
   ['faculty.html',{username:'F1',role:'faculty'},   6, 'Dashboard'],
   ['student.html',{username:'S1',role:'student'},   6, 'Dashboard']
 ];
@@ -26,7 +26,7 @@ for(const [page,user,count,firstLabel] of pages){
 
 const adminNavPage=load('admin.html',{...SEED(),currentUser:{username:'admin',role:'admin'}});
 const adminLinks=[...adminNavPage.d.querySelectorAll('#sidebar a')].map(link=>link.dataset.panel);
-ok(adminLinks.slice(0,7).join(',')==='dashboardSection,systemSection,academicPeriodsSection,governanceSection,auditSection,loadPolicySection,facultySection','Admin navigation includes merged governance under system settings before school management');
+ok(adminLinks.slice(0,8).join(',')==='dashboardSection,systemSection,academicPeriodsSection,governanceSection,auditSection,loadPolicySection,sectionManagementSection,facultySection','Admin navigation includes merged governance under system settings before school management, with Section Management after Subject Management');
 ok(adminNavPage.d.querySelector('#sidebar [data-panel="loadPolicySection"]')?.textContent.includes('Subject Management'),'unified curriculum and load workspace is named Subject Management');
 ok(!adminNavPage.d.querySelector('#sidebar [data-panel="subjectSection"]'),'archived legacy Subject Management is removed from navigation');
 const adminDividers=[...adminNavPage.d.querySelectorAll('#sidebar .sidebar-divider[role="separator"]')];
@@ -41,7 +41,7 @@ ok(coordinatorNavPage.d.body.classList.contains('role-shell-ready')&&!!coordinat
 coordinatorNavPage.w.close();
 const deanSeed=SEED();deanSeed.users.push({username:'dean.demo',role:'dean',status:'active'});
 const deanNavPage=load('dean.html',{...deanSeed,currentUser:{username:'dean.demo',role:'dean'}});
-ok(deanNavPage.d.body.classList.contains('role-shell-ready')&&deanNavPage.d.querySelectorAll('#sidebar a').length===6&&!!deanNavPage.d.querySelector('.role-sidebar-profile')&&!!deanNavPage.d.getElementById('role-mail-panel'),'Dean receives the shared shell, Mail page, and bottom profile');
+ok(deanNavPage.d.body.classList.contains('role-shell-ready')&&deanNavPage.d.querySelectorAll('#sidebar a').length===7&&!!deanNavPage.d.querySelector('#sidebar [data-panel="sectionManagementSection"]')&&!!deanNavPage.d.querySelector('.role-sidebar-profile')&&!!deanNavPage.d.getElementById('role-mail-panel'),'Dean receives the shared shell, Mail page, and bottom profile');
 deanNavPage.w.close();
 adminNavPage.w.close();
 

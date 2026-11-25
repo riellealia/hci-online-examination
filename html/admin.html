@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../css/role-dashboard.css">
     <link rel="stylesheet" href="../css/governance.css">
     <link rel="stylesheet" href="../css/management-menus.css">
+    <link rel="stylesheet" href="../css/section-management.css?v=20261125-sections">
     <script src="../js/storage.js?v=20261119-keep"></script>
     <script src="../js/weekly-learning.js"></script>
     <script src="../js/demo-data.js"></script>
@@ -24,6 +25,7 @@
     <script src="../js/permission-service.js?v=20261120-tri"></script>
     <script src="../js/approval-service.js?v=20261120-roles"></script>
     <script src="../js/academic-workflow-service.js"></script>
+    <script src="../js/section-management.js"></script>
     <script src="../js/admin-table-tools.js?v=20261125-inline"></script><script src="../js/admin-monitoring.js?v=20261120-clip"></script><script src="../js/admin-student-add.js?v=20261120-12"></script><script src="../js/admin-dashboard.js?v=20261119-7"></script><script src="../js/coordinator-pages.js?v=20261118-5"></script><script src="../js/coordinator-workspaces.js?v=20261119-1"></script><script src="../js/admin-pages.js?v=20261119-15"></script>
 <script src="../js/auth.js?v=20261119-keep"></script><script src="../js/page-permissions.js?v=20261120-exp"></script>
 <script src="../js/role-access.js?v=20261120-exp"></script>
@@ -161,6 +163,9 @@
     </div>
     </div>
   </div>
+
+  <!-- Section Management: shared with the Dean and Faculty Coordinator pages (js/section-management.js). -->
+  <div id="sectionManagementSection" class="panel"><div id="coordinatorSectionsRoot"></div></div>
 
   <div id="sectionSection" class="panel" hidden aria-hidden="true" data-archived="true">
     <div class="section-management-head">
@@ -1533,6 +1538,7 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
       { id: 'auditSection',          label: 'Audit Log',                 icon: '&#9719;' },
       { divider: true, label: 'School management' },
       { id: 'loadPolicySection',     label: 'Subject Management',        icon: '&#128218;' },
+      { id: 'sectionManagementSection', label: 'Section Management',     icon: '&#9638;' },
       { id: 'facultySection',        label: 'Faculty Management',        icon: '&#128100;' },
       { id: 'studentSection',        label: 'Student Management',        icon: '&#128101;' },
       { id: 'accountLifecycleSection',label:'Account Lifecycle',         icon: '&#9817;' },
@@ -1544,11 +1550,13 @@ if(fsEl)fsEl.innerHTML = `<tr><th>Subject</th><th>Faculty</th></tr>` + fsRows;
       if (id === 'academicPeriodsSection') AdminWorkspaces.periods();
       if (id === 'accountLifecycleSection') AdminWorkspaces.accounts();
       if (id === 'governanceSection') AdminGovernance.show('accounts');
+      if (id === 'sectionManagementSection') SectionManagement.render();
     }
   });
   SystemManagement.mount();
   AdminWorkspaces.mount();
   AdminGovernance.mount();
+  SectionManagement.mount();
 
   // Close modals when clicking outside
   window.addEventListener('click',function(e){

@@ -10,7 +10,7 @@ function validateAudit(existing, next, session) {
   });
 }
 
-const APPROVAL_TYPES = ['professor-assignment', 'student-overload', 'faculty-student-enrollment', 'role-assignment', 'student-enrollment', 'professor-overload'];
+const APPROVAL_TYPES = ['professor-assignment', 'student-overload', 'faculty-student-enrollment', 'role-assignment', 'student-enrollment', 'professor-overload', 'section-create'];
 const APPROVAL_MUTABLE_FIELDS = new Set(['status', 'reviewerId', 'reviewerRole', 'reviewerRemarks', 'decisionAt', 'history']);
 function sameApprovalPayload(prior, item) {
   const before = Object.fromEntries(Object.entries(prior).filter(([key]) => !APPROVAL_MUTABLE_FIELDS.has(key)));
@@ -136,6 +136,8 @@ function validateProtectedWrite(store, session, key, next) {
   if (key === 'studentEnrollments' && session.role === 'coordinator') forbidden('Faculty Coordinators have read-only enrollment oversight. Admin manages normal enrollment.');
   if (key === 'studentEnrollments' && session.role === 'dean') validateDeanEnrollment(existing, next, session, store);
   if (key === 'exams' && session.role === 'faculty') validateFacultyExams(existing, next, session, store);
+  // New Sections from a Faculty Coordinator go through Dean approval; edits and deletes stay direct.
+  if (key === 'sections' && session.role === 'coordinator' && Array.isArray(existing) && Array.isArray(next) && next.length > existing.length) forbidden('New sections need Dean approval. Send a section request instead.');
   if (key === 'academicPeriods') forbidden('Academic periods must be changed through the protected academic-period workflow.');
 }
 module.exports = { validateProtectedWrite, validateAudit, validateApprovals, validateFacultyExams };

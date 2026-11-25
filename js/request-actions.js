@@ -13,7 +13,7 @@
 const RequestDetails = (() => {
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const read = k => DB.read(k, []) || [];
-  const LABEL = { 'role-assignment': 'Role', 'professor-assignment': 'Professor subject', 'professor-overload': 'Professor overload', 'student-enrollment': 'Student subject', 'student-overload': 'Student overload', 'faculty-student-enrollment': 'Enrollment change' };
+  const LABEL = { 'role-assignment': 'Role', 'professor-assignment': 'Professor subject', 'professor-overload': 'Professor overload', 'student-enrollment': 'Student subject', 'student-overload': 'Student overload', 'faculty-student-enrollment': 'Enrollment change', 'section-create': 'New section' };
   const ICON = {
     role: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm1 6v3h3v2h-3v3h-2v-3H8v-2h3V8h2Z"/></svg>',
     subjects: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h11a2 2 0 0 1 2 2v9h-2V4H6v16h7v2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 4h7v2H8V6Zm0 4h7v2H8v-2Zm11 6h3v2h-3v3h-2v-3h-3v-2h3v-3h2v3Z"/></svg>',
@@ -42,6 +42,12 @@ const RequestDetails = (() => {
       review = W.reviewProfessorLoad({ ...request, proposedChange: { ...c, overload: request.type === 'professor-overload' } });
       title = `${LABEL[request.type]} · ${review.subjectCode || c.offeringId}`;
       chips.push(['Class', `${review.subjectCode} ${subjectName(review.subjectCode)} · ${review.sectionId || ''}`.trim()], ['Load', `${review.currentUnits} → ${review.proposedUnits} units`], ['Limits', `${review.policy.normal} normal · ${review.policy.maximum} max`]);
+    } else if (request.type === 'section-create') {
+      const s = c.section || {};
+      who = '';
+      title = `New section · ${s.id || request.targetId}`;
+      chips.push(['Section', s.id || request.targetId], ['Curriculum', `${s.program || ''} · Year ${s.yearLevel || ''}`], ['Capacity', `${s.capacity || ''} students`]);
+      if (typeof SectionManagement !== 'undefined' && request.status === 'pending') review = SectionManagement.reviewRequest(request);
     } else if (['student-enrollment', 'student-overload'].includes(request.type) && W) {
       review = request.type === 'student-enrollment' ? W.reviewStudentEnrollment(c) : W.reviewStudentOverload(request);
       const code = c.subjectCode || review.subjectCode;
@@ -57,7 +63,7 @@ const RequestDetails = (() => {
   /* Detail block used inside the request cards on both pages. */
   function detailsHtml(request, { forDean = false } = {}) {
     const d = describe(request), blocked = forDean && request.status === 'pending' && d.review && d.review.canApprove === false;
-    const chips = [[`For`, d.who ? `${d.whoName} · ${d.who}` : '—'], ...d.chips, ['Sent by', request.requesterId], ['Sent', new Date(request.submittedAt).toLocaleString()]];
+    const chips = [...(d.who || request.type !== 'section-create' ? [[`For`, d.who ? `${d.whoName} · ${d.who}` : '—']] : []), ...d.chips, ['Sent by', request.requesterId], ['Sent', new Date(request.submittedAt).toLocaleString()]];
     if (request.reviewerRemarks) chips.push(['Dean remarks', request.reviewerRemarks]);
     return `<div class="role-request-meta rq-meta">${chips.map(([k, v]) => `<span><b>${esc(k)}</b> ${esc(v)}</span>`).join('')}</div>${blocked ? `<p class="role-review-blocked"><strong>Approval blocked:</strong> ${esc(d.review.problems.join(' '))}</p>` : ''}`;
   }

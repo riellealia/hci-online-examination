@@ -34,6 +34,7 @@
       ['Pages', [
         ['dean.page.dashboard', 'Dashboard', 'College overview and charts', [], [], 'dashboardSection'],
         ['dean.page.members', 'Members', 'College members and role assignments', [], [], 'membersSection'],
+        ['dean.page.sections', 'Section Management', 'Create sections and set their subjects', [], [], 'sectionManagementSection'],
         ['dean.page.approvals', 'Approvals', 'Requests waiting for the Dean', [], [], 'approvalsSection'],
         ['dean.page.statistics', 'Statistics', 'College statistics', [], [], 'statisticsSection'],
         ['dean.page.logs', 'Logs', 'College activity log', [], [], 'logsSection'],
