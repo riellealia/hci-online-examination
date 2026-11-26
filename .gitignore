@@ -1,5 +1,4 @@
 /tentative/
-/docs/
 .data/
 data/*.sqlite
 data/*.sqlite-shm

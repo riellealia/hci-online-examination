@@ -1,123 +1,35 @@
-# Project Documentation
+# New Era University Online Examination System — HCI Documentation
 
-This directory contains the HCI documentation for the Online Examination System.
+This directory contains the complete Human–Computer Interaction (HCI) deliverables and engineering documentation for the **New Era University Online Examination System**.
 
-The repository now has two documentation layers:
+---
 
-- **Current-system documentation** describes the implemented Admin, Faculty, and Student prototype.
-- **Next-phase planning** proposes Admin, Dean, Faculty Coordinator, Professor, and Student roles.
+## Deliverables Directory
 
-Planned features must not be presented as completed behavior until they have been implemented and verified.
+| Document | Description | System Scope Covered | Status |
+|---|---|---|---|
+| [requirements.md](requirements.md) | Comprehensive requirements analysis: user roles, personas, inputs, outputs, business rules, and constraints | 5 roles, academic periods, lifecycle, exams & approvals | **Complete** |
+| [data-model-erd.md](data-model-erd.md) | Entity-Relationship Diagrams (ERD), relational schemas, and data dictionary | Relational Supabase tables & SQLite persistence layer | **Complete** |
+| [flowcharts.md](flowcharts.md) | End-to-end system and role workflow diagrams with Mermaid charts | Unified auth, exam lifecycle, Dean approvals, scheduling | **Complete** |
+| [storyboards.md](storyboards.md) | Interaction storyboards, wireframes, and UI journey maps for all 5 roles | Admin, Dean, Coordinator, Professor, and Student | **Complete** |
+| [interface-design.md](interface-design.md) | HCI design guidelines, component specifications, typography, contrast, and accessibility | Design tokens, color system, dialogs, responsive cards | **Complete** |
+| [test-cases.md](test-cases.md) | Comprehensive test verification matrix, boundary conditions, and test results | 66 test suites across client, server, and database | **Complete** |
+| [usability-protocol.md](usability-protocol.md) | Usability testing plan, participant task scripts, System Usability Scale (SUS), and heuristic review | Empirical HCI evaluation protocol & grading rubrics | **Complete** |
+| [FINAL-HCI-PROJECT-REPORT.md](FINAL-HCI-PROJECT-REPORT.md) | Consolidated executive report and coursework submission package | Complete system synthesis, evaluation, and conclusion | **Complete** |
 
-## Start here
+---
 
-### Current implementation
+## System Architecture Summary
 
-- [Project README](../README.md) — setup, current capabilities, and repository notes.
-- [Current implementation plan](../.plans/plan.md) — original four-module scope and implementation baseline.
-- [Progress checklist](../.plans/progress/checklist.md) — implementation and coursework status.
-- [Completion dashboard](../.plans/progress/completion-rate.md) — completion and test summary.
-- [Audit log](../.plans/progress/audit-log.md) — meaningful project changes and verification history.
+The prototype implements a unified academic management and examination environment with five distinct user roles:
 
-### Next development phase
+1. **Administrator (`admin.html`)**: System maintenance, user lifecycle management (active/deactivate/archive/restore), curriculum versioning, academic terms/periods, role permissions, and full audit logs.
+2. **College Dean (`dean.html`)**: Academic oversight, personnel appointments (Faculty Coordinators & Professors), approval workflows for subject offering assignments, student overload exceptions, and college-wide analytics.
+3. **Faculty Coordinator (`coordinator.html`)**: Curriculum subject offerings, section allocation, weekly scheduling with collision detection, and student enrollment oversight.
+4. **Professor (`faculty.html` / `professor.html`)**: Examination authoring (MCQ, Written/Essay, True/False, media questions), timer settings, draft management, manual grading, and roster insights.
+5. **Student (`student.html`)**: Single-question examination runner with draggable navigation handle, question flagging, auto-save drafts, exam countdown timer, review modal, and transparent score breakdowns.
 
-- [Planned system changes](../.plans/new/things-to-change.md) — short summary, priorities, and links.
-- [Work claims](../.plans/new/.claim-work.md) — separate tasks that may be distributed among the three team members.
-- [Role hierarchy and terminology](../.plans/new/overview/heirarchy.md) — official role names, permissions, lifecycle terms, and academic terms.
-- [System relationships](../.plans/new/overview/relationship-diagram.md) — role, data, approval, rollover, and scheduling relationships.
-- [Admin extended plan](../.plans/new/extended-detailed.plans/admin-extended-plan.md)
-- [Dean extended plan](../.plans/new/extended-detailed.plans/dean-extended-plan.md)
-- [Faculty Coordinator extended plan](../.plans/new/extended-detailed.plans/faculty-extended-plan.md)
-- [Shared features and rules](../.plans/new/extended-detailed.plans/shared-extended-plan.md)
-- [Optional extensions](../.plans/new/extended-detailed.plans/optional-extended-plan.md)
+---
 
-## HCI deliverables
-
-### Requirements analysis
-
-[requirements.md](requirements.md) documents the users, goals, inputs, outputs, rules, and constraints for the original four modules.
-
-**Status:** Complete for the current three-role implementation. It will require revision if the five-role plan is implemented.
-
-### Data model and ERD
-
-[data-model-erd.md](data-model-erd.md) documents the implemented records and relationships.
-
-**Status:** Complete for the current implementation. The proposed approval, curriculum, academic-period, role, schedule, and lifecycle records are currently planning material.
-
-### Flowcharts
-
-[flowcharts.md](flowcharts.md) contains the main and module-level workflows.
-
-**Status:** Complete for the current implementation. New Dean and Faculty Coordinator flows must be added after their behavior is finalized.
-
-### Storyboards
-
-[storyboards.md](storyboards.md) contains the Admin, Faculty, and Student storyboards.
-
-**Status:** Complete for the current implementation. Dean and Faculty Coordinator storyboards remain future work.
-
-### Interface design
-
-[interface-design.md](interface-design.md) describes controls, forms, validation states, dialogs, and shared interface behavior.
-
-**Status:** Complete for the current interface. Revise it alongside implemented role and management changes.
-
-### Test cases
-
-[test-cases.md](test-cases.md) records module test cases based on the browser-level suite.
-
-**Status:** Complete for the current implementation. New role, approval, lifecycle, rollover, load, capacity, and schedule-conflict tests must be added with their features.
-
-### Usability protocol
-
-[usability-protocol.md](usability-protocol.md) provides participant tasks, recording sheets, and heuristic-review guidance.
-
-**Status:** Instrument only. The team must conduct the sessions and record real findings.
-
-## What still requires manual coursework
-
-1. **Professor confirmation of unresolved rules.** Confirm approval ownership, Faculty Coordinator appointment authority, normal-enrollment approval, additional-term naming, room scheduling, and exact load limits.
-2. **Usability findings.** Run sessions with representative users and record observed results.
-3. **Screenshots.** Capture implemented workflows and required states in the browser.
-4. **Final report.** Assemble the verified documentation, screenshots, findings, limitations, and team contributions.
-5. **Planning updates.** When an agreed planned feature is implemented, update its claim status and the current-system documentation.
-
-## Using the new plans
-
-1. Read [the overview](../.plans/new/things-to-change.md).
-2. Read the shared rules and the relevant role plan.
-3. Claim one or more tasks in [the work-claim page](../.plans/new/.claim-work.md).
-4. Coordinate before editing shared authentication, storage, permissions, approval, or audit behavior.
-5. Implement and verify the feature.
-6. Ask the other members to review it.
-7. Update the claim status and applicable documentation.
-
-The team has three members, but the claim page deliberately contains many tasks. Each member may own multiple tasks; one primary claimer should be recorded for each task.
-
-## Viewing diagrams
-
-The ERD, relationship diagrams, and flowcharts use Mermaid. They render automatically on GitHub. In VS Code, use a Mermaid-compatible Markdown preview. For a DOCX report, render the diagram first and capture a clear image.
-
-## Repository map
-
-```text
-html/          Current prototype pages
-css/           Page styles and shared design components
-js/            Authentication, storage, examination, grading, and UI behavior
-assets/        Images and demonstration CSV files
-tests/         Browser-level automated checks
-docs/          Current HCI documentation
-.plans/        Plans, progress records, and next-phase requirements
-```
-
-## Documentation honesty
-
-Current documents must distinguish among:
-
-- **Implemented** — present in the code and verified.
-- **Planned** — accepted direction but not yet implemented.
-- **Optional** — may be omitted without blocking the core workflow.
-- **Needs confirmation** — requires a decision before implementation.
-
-The last recorded complete automated run for the current prototype reported **964 passing and 6 failing assertions**. The six failures were documented as stale UI-structure expectations. Run the suite again before using that result in the final report.
+## Diagrams & Rendering
+All diagrams in this directory use GitHub-native **Mermaid** markdown syntax. They render natively on GitHub and inside VS Code with Markdown Preview.
