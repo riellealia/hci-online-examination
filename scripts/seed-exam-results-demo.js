@@ -17,6 +17,8 @@
    Usage:
      node scripts/seed-exam-results-demo.js            dry run (no writes)
      node scripts/seed-exam-results-demo.js --apply    write SQLite + Supabase
+     node scripts/seed-exam-results-demo.js --fill-existing --apply
+       Append varied demo results to Maria Reyes's existing closed exams.
 
    With Supabase configured in .env, --apply first backs up SQLite, pulls the
    latest Supabase data (as the server does on startup), then writes the new
@@ -29,6 +31,7 @@ const { createSupabaseReplicatedStore } = require('../server/supabase-replica');
 
 const ROOT = path.join(__dirname, '..');
 const APPLY = process.argv.includes('--apply');
+const FILL_EXISTING = process.argv.includes('--fill-existing');
 const EXAMS_PER_SUBJECT = 5;
 // Short prefixes keep the browser's localStorage copy of the data small.
 const EXAM_PREFIX = 'DRX-';
@@ -120,11 +123,89 @@ function newQuestions(examId, subjectName) {
   return [...mcq, ...tf];
 }
 
+function fillExistingResults(store) {
+  const faculty = store.read('faculty', []).find(person => person.id === PROFESSOR_ID);
+  if (faculty?.first !== 'Maria' || faculty?.last !== 'Reyes') throw new Error('Expected the Maria Reyes demo professor account.');
+  const period = store.read('academicPeriods', []).find(item => item.status === 'active');
+  if (!period) throw new Error('No active academic period.');
+  const inPeriod = item => (!item.academicPeriodId || item.academicPeriodId === period.id) &&
+    (!item.periodStatus || item.periodStatus === 'active');
+  const archived = new Set(store.read('sections', []).filter(section => section.status === 'archived').map(section => section.id));
+  const offers = store.read('sectionSubjects', []).filter(row => inPeriod(row) && !archived.has(row.sectionId))
+    .flatMap(row => (row.assignments || []).filter(inPeriod).map(offer => ({...offer, sectionId:row.sectionId})))
+    .filter(offer => offer.facultyId === PROFESSOR_ID);
+  const seats = store.read('studentEnrollments', []).filter(seat => seat.studentId !== (env.STUDENT_USERNAME || '2025-00002') &&
+    inPeriod(seat) && !['dropped','withdrawn','cancelled','archived'].includes(String(seat.status || '').toLowerCase()));
+  const questions = new Map();
+  for (const question of store.read('questions', [])) {
+    if (!questions.has(question.examId)) questions.set(question.examId, []);
+    questions.get(question.examId).push(question);
+  }
+  const records = store.read('studentSubmissions', []);
+  const seen = new Set(records.map(record => `${record.examId}|${record.studentId}`));
+  const additions = [], report = {};
+  const demoStudents = new Set();
+  for (const exam of store.read('exams', [])) {
+    if (exam.facultyId !== PROFESSOR_ID || !inPeriod(exam) || exam.status !== 'published' ||
+        !exam.date || String(exam.id).startsWith('DEMO-CALENDAR-')) continue;
+    const start = Date.parse(exam.datetime || `${exam.date}T${exam.start || '08:00'}:00+08:00`);
+    const end = Date.parse(`${exam.endDate || exam.date}T${exam.end || '23:59'}:00+08:00`);
+    if (!(start < end && end < Date.now())) continue;
+    const paper = questions.get(exam.id) || [];
+    if (!paper.length || paper.some(q => q.manualCheck || q.needsManualGrading ||
+        !['mcq','truefalse','number','fillblank','matching'].includes(q.type))) continue;
+    const eligible = offers.filter(offer => offer.subjectCode === exam.subjectCode &&
+      (exam.offeringIds?.length ? exam.offeringIds.includes(offer.id) : !exam.sections?.length || exam.sections.includes(offer.sectionId)));
+    if (!eligible.length) continue;
+    const roster = new Set(seats.filter(seat => seat.subjectCode === exam.subjectCode && eligible.some(offer =>
+      seat.offeringId ? seat.offeringId === offer.id : seat.sectionId === offer.sectionId)).map(seat => seat.studentId));
+    for (const studentId of roster) {
+      const key = `${exam.id}|${studentId}`;
+      if (seen.has(key)) continue;
+      const tier = hash(`participation:${studentId}`);
+      const profile = tier < .08 ? 'no-attempt' : tier < .22 ? 'rare' : tier < .46 ? 'fluctuating' : tier < .66 ? 'high' : 'steady';
+      const row = report[profile] ||= {added:0, skipped:0};
+      if (profile === 'no-attempt' || hash(`attendance:${key}`) < (profile === 'rare' ? .80 : profile === 'fluctuating' ? .16 : .04)) {
+        row.skipped++;
+        continue;
+      }
+      const swing = hash(`swing:${key}`);
+      const percent = profile === 'high' ? between(key, 92, 104) : profile === 'fluctuating' ?
+        (swing < .45 ? between(key, 22, 48) : between(key, 80, 104)) : profile === 'rare' ? between(key, 28, 70) : between(key, 55, 87);
+      const {correct,total} = pickCorrect(paper, percent, key);
+      const answers = paper.map((question, index) => answerFor(question, correct.has(index)));
+      const submittedAt = new Date(start + Math.floor((end - start) * between(`time:${key}`, .35, .9))).toISOString();
+      additions.push({id:`DRS-VARIED-${exam.id}-${studentId}`, studentId, examId:exam.id, submittedAt,
+        academicPeriodId:period.id, periodStatus:'active', status:'graded', total, answers,
+        score:answers.reduce((sum, answer) => sum + answer.awarded, 0), demoSeed:'varied-exam-results'});
+      seen.add(key); demoStudents.add(studentId); row.added++;
+    }
+  }
+  console.log(JSON.stringify({newResults:additions.length,students:demoStudents.size,
+    exams:new Set(additions.map(item => item.examId)).size,profiles:report}, null, 2));
+  return {records, additions};
+}
+
 async function main() {
   const localStore = openDatabase(DB_FILE);
-  const store = createSupabaseReplicatedStore(localStore, { url: env.SUPABASE_URL, serviceKey: env.SUPABASE_SERVICE_ROLE_KEY });
+  const store = createSupabaseReplicatedStore(localStore, { url: env.SUPABASE_URL, serviceKey: env.SUPABASE_SERVICE_ROLE_KEY,
+    relational: FILL_EXISTING && String(env.SUPABASE_RELATIONAL || 'true').toLowerCase() !== 'false' });
   const remote = store.status().enabled;
   try {
+    if (FILL_EXISTING) {
+      if (remote) await store.hydrate();
+      const {records, additions} = fillExistingResults(store);
+      if (!APPLY || !additions.length) return;
+      store.migrate({studentSubmissions:[...records,...additions]});
+      if (remote) {
+        if (!await store.flush()) throw new Error(store.status().error || 'Supabase write failed.');
+        await store.hydrate();
+      }
+      const saved = new Set(store.read('studentSubmissions', []).map(item => item.id));
+      if (additions.some(item => !saved.has(item.id))) throw new Error('Some seeded results were not found on read-back.');
+      console.log(`Verified ${additions.length} new results in ${remote ? 'Supabase' : 'SQLite'}.`);
+      return;
+    }
     if (APPLY) {
       const backupDir = path.join(ROOT, 'data', 'backups'); fs.mkdirSync(backupDir, { recursive: true });
       const backup = path.join(backupDir, `neu-examination-before-exam-results-seed-${new Date().toISOString().replace(/[:.]/g, '-')}.sqlite`);
@@ -142,7 +223,7 @@ async function main() {
     // Remove what a previous run generated; keep everything else.
     const exams = allExams.filter(exam => !String(exam.id).startsWith(EXAM_PREFIX));
     const questions = allQuestions.filter(q => !String(q.examId).startsWith(EXAM_PREFIX));
-    const submissions = allSubmissions.filter(sub => !String(sub.id).startsWith(SUBMISSION_PREFIX));
+    const submissions = allSubmissions.filter(sub => sub.demoSeed === 'varied-exam-results' || !String(sub.id).startsWith(SUBMISSION_PREFIX));
     const before = JSON.stringify({ e: allExams, q: allQuestions, s: allSubmissions }).length;
 
     const offerings = sectionSubjects.filter(inPeriod)

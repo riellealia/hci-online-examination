@@ -16,7 +16,10 @@ const schedule = [
   ['CDS1101', 'Data Structures Quiz', day, '00:05', '00:10'],
   ['CHC1101', 'Usability Principles Quiz', '2026-11-27', '10:00', '11:00'],
   ['CIM1101', 'Relational Databases Quiz', '2026-11-27', '11:30', '12:30'],
-  ['CMA1102', 'Calculus Fundamentals Quiz', '2026-11-28', '10:00', '11:00']
+  ['CMA1102', 'Calculus Fundamentals Quiz', '2026-11-28', '10:00', '11:00'],
+  ['PPE1103', 'Fitness and Training Quiz', '2026-11-25', '09:00', '10:00'],
+  ['ZGE1102', 'Globalization and Society Quiz', '2026-11-25', '13:30', '14:30'],
+  ['CCS2101', 'Counting and Relations Quiz', '2026-11-25', '16:00', '17:00']
 ];
 // Each pair contains one true statement followed by one false statement.
 const topics = [
@@ -25,7 +28,10 @@ const topics = [
   ['A stack follows last-in, first-out order.', 'A standard queue removes the newest element first.', 'Binary search requires ordered data.', 'A linked list always provides constant-time indexed access.', 'A hash collision occurs when distinct keys map to the same bucket.', 'Binary search has linear worst-case time on a sorted array.', 'Breadth-first search can use a queue.', 'A min-heap keeps its largest element at the root.', 'A tree with n vertices has n minus one edges.', 'An array must store each element at an unrelated memory location.'],
   ['Feedback helps users understand what happened after an action.', 'A usable interface should rely only on color to convey errors.', 'Consistency helps users transfer knowledge between screens.', 'Keyboard accessibility is unnecessary when a mouse is available.', 'Recognition can reduce the need to memorize commands.', 'An error message should hide how to recover.', 'Usability testing can reveal problems users encounter.', 'A larger number of clicks always guarantees better usability.', 'An undo action can support user control.', 'Screen readers interpret every decorative icon correctly without labels.'],
   ['A primary key uniquely identifies a row.', 'A foreign key must always have a different value in every row.', 'A join can combine matching rows from two tables.', 'A WHERE clause renames a table.', 'Normalization can reduce unnecessary duplication.', 'An UPDATE statement always creates a new table.', 'A transaction can group multiple changes into one unit.', 'COUNT(*) counts only columns.', 'An index can speed up some queries.', 'A SELECT statement necessarily deletes the rows it returns.'],
-  ['The derivative of x squared is 2x.', 'The derivative of a constant is the constant itself.', 'A definite integral can represent signed area.', 'The derivative of sin(x) is minus cos(x).', 'The chain rule differentiates composite functions.', 'The integral of 1 with respect to x is always zero.', 'A differentiable function is continuous at the point of differentiation.', 'Every continuous function is differentiable everywhere.', 'The derivative of e to the x is e to the x.', 'The product rule multiplies the two derivatives together.']
+  ['The derivative of x squared is 2x.', 'The derivative of a constant is the constant itself.', 'A definite integral can represent signed area.', 'The derivative of sin(x) is minus cos(x).', 'The chain rule differentiates composite functions.', 'The integral of 1 with respect to x is always zero.', 'A differentiable function is continuous at the point of differentiation.', 'Every continuous function is differentiable everywhere.', 'The derivative of e to the x is e to the x.', 'The product rule multiplies the two derivatives together.'],
+  ['A warm-up can gradually raise heart rate before exercise.', 'A cool-down requires stopping all movement immediately.', 'Aerobic exercise can improve cardiovascular endurance.', 'Hydration matters only during competitive sports.', 'Progressive overload can involve gradually increasing training demands.', 'Balance is unrelated to physical fitness.', 'Rest can support recovery after a demanding workout.', 'Good technique never matters when using a light weight.', 'Flexibility describes the range of motion available at a joint.', 'A single workout produces the same adaptations as months of training.'],
+  ['Globalization can increase connections between economies.', 'A tariff is a rule that makes all imports free.', 'Migration can affect both origin and destination communities.', 'A multinational company operates in exactly one country.', 'Supply chains can span several countries.', 'Cultural exchange always eliminates local traditions.', 'International cooperation can help address problems that cross borders.', 'Remittances are taxes imposed on imported goods.', 'Digital communication can support cross-border collaboration.', 'Globalization affects every country in exactly the same way.'],
+  ['A permutation counts an ordered arrangement.', 'A combination changes when its selected elements are reordered.', 'There are six permutations of three distinct objects.', 'A relation must always be symmetric.', 'Every equivalence relation is reflexive.', 'The Cartesian product of two nonempty sets is empty.', 'A bijection is both injective and surjective.', 'A function can map one input to two different outputs.', 'The product rule multiplies the number of choices at successive steps.', 'The number of subsets of a four-element set is eight.']
 ];
 
 async function main() {
@@ -95,7 +101,7 @@ async function main() {
     if (!results.some(item => item.id === result.id && item.score === 8) || results.some(item => item.examId === created[1].exam.id)) {
       throw new Error('Completed or missed status could not be verified.');
     }
-    console.log(`Verified six exams in ${sync ? 'SQLite and Supabase' : 'SQLite'} for ${studentId}.`);
+    console.log(`Verified ${created.length} exams in ${sync ? 'SQLite and Supabase' : 'SQLite'} for ${studentId}.`);
   } finally {
     store.close();
   }
